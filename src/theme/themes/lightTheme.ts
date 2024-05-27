@@ -5,23 +5,31 @@ const BAR_STYLE: StatusBarStyle = 'default';
 export default {
   COLORS: {
     APP: {
-      BACKGROUND_COLOR: '#000000',
-      STATUS_BAR_COLOR: '#000000',
-      PRIMARY_COLOR: '#000000',
-      SECONDARY_COLOR: '#BB85BB',
+      BACKGROUND_COLOR: '#FFF',
+      STATUS_BAR_COLOR: '#FFF',
+      PRIMARY_COLOR: '#FFF',
+      SECONDARY_COLOR: '#1A6DD2',
     },
     COMPONENTS: {
+      TAB: {
+        ACTIVE_COLOR: '#1A6DD2',
+        INACTIVE_COLOR: '#454545',
+        ACTIVE_TEXT_COLOR: '#1A6DD2',
+        INACTIVE_TEXT_COLOR: '#454545',
+        BACKGROUND_COLOR: '#F4F9FF',
+        BORDER_COLOR: '#E8F0FB',
+      },
       TEXT: {
         PRIMARY_COLOR: '#FFFFFF',
         SECONDARY_COLOR: '#A2A2A2',
       },
       INPUT: {
-        BACKGROUND_COLOR: '#171717',
-        ACTIVE_BORDER_COLOR: '#BB85BB',
-        INACTIVE_BORDER_COLOR: '#2C2C2C',
-        TEXT_COLOR: '#FFFFFF',
-        PLACEHOLDER_COLOR: '#5d5d5d',
-        LABEL_COLOR: '#A2A2A2',
+        BACKGROUND_COLOR: '#F7F7F7',
+        ACTIVE_BORDER_COLOR: '#F7F7F7',
+        INACTIVE_BORDER_COLOR: '#F7F7F7',
+        TEXT_COLOR: '#161616',
+        PLACEHOLDER_COLOR: '#949494',
+        LABEL_COLOR: '#161616',
       },
       MODAL: {
         BACKGROUND_COLOR: 'rgba(0,0,0,0.8)',
@@ -31,10 +39,10 @@ export default {
         HANDLE_COLOR: '#FFFFFF',
       },
       BUTTON: {
-        PRIMARY_COLOR: '#BB85BB',
-        SECONDARY_COLOR: '#000000',
-        TEXT_COLOR: '#FFFFFF',
-        LOADER_COLOR: '#FFFFFF',
+        PRIMARY_COLOR: '#1A6DD2',
+        SECONDARY_COLOR: '#FFF',
+        TEXT_COLOR: '#FFF',
+        LOADER_COLOR: '#FFF',
       },
       CHIP: {
         PRIMARY_COLOR: '#171717',

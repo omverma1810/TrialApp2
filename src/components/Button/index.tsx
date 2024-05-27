@@ -82,8 +82,8 @@ export default Button;
 const styles = StyleSheet.create({
   parent: {
     width: '100%',
-    borderRadius: 13,
-    height: 56,
+    borderRadius: 6,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },

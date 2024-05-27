@@ -5,4 +5,10 @@ export default {
     LBL_CANCEL: 'Cancel',
     LBL_LOADING: 'Loading',
   },
+  BOTTOM_TAB: {
+    LBL_HOME: 'Home',
+    LBL_EXPERIMENT: 'Experiment',
+    LBL_RECORD: 'Record',
+    LBL_NOTIFICATION: 'Notification',
+  },
 };

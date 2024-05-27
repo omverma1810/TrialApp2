@@ -8,7 +8,8 @@ import defaultFonts from '../../theme/fonts/inter';
 const AppAppearance = Appearance.getColorScheme();
 
 const initialState = {
-  theme: AppAppearance === 'dark' ? DarkTheme : LightTheme,
+  // theme: AppAppearance === 'dark' ? DarkTheme : LightTheme,
+  theme: LightTheme,
   fonts: defaultFonts,
 };
 

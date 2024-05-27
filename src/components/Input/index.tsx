@@ -50,7 +50,7 @@ const Input = ({
     () => [
       styles.label,
       {
-        color: COLORS.COMPONENTS.TEXT.SECONDARY_COLOR,
+        color: COLORS.COMPONENTS.INPUT.LABEL_COLOR,
         fontFamily: FONTS.REGULAR,
       },
       labelStyle,
@@ -107,21 +107,21 @@ export default Input;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 13,
+    borderRadius: 8,
   },
   input: {
     width: '100%',
-    height: 56,
+    height: 42,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 13,
-    paddingHorizontal: 18,
+    borderRadius: 8,
+    paddingHorizontal: 16,
     borderWidth: 1,
   },
   textInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     justifyContent: 'center',
   },
   label: {
