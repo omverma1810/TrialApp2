@@ -4,7 +4,7 @@ import {StyleSheet} from 'react-native';
 import {SafeAreaView, StatusBar} from '../../../components';
 import ComingSoon from '../ComingSoon';
 
-const Home = () => {
+const TakeNotes = () => {
   return (
     <SafeAreaView>
       <StatusBar />
@@ -13,6 +13,6 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default TakeNotes;
 
 const styles = StyleSheet.create({});

@@ -20,7 +20,7 @@ export default {
         BORDER_COLOR: '#E8F0FB',
       },
       TEXT: {
-        PRIMARY_COLOR: '#FFFFFF',
+        PRIMARY_COLOR: '#161616',
         SECONDARY_COLOR: '#A2A2A2',
       },
       INPUT: {
@@ -54,8 +54,8 @@ export default {
       TOAST: {
         INFO_BACKGROUND_COLOR: '#0B2E58',
         INFO_TEXT_COLOR: '#FFF',
-        SUCCESS_BACKGROUND_COLOR: '#388e3c',
-        SUCCESS_TEXT_COLOR: '#FFFFFF',
+        SUCCESS_BACKGROUND_COLOR: '#454545',
+        SUCCESS_TEXT_COLOR: '#FFF',
         WARNING_BACKGROUND_COLOR: '#f57c00',
         WARNING_TEXT_COLOR: '#000000',
         ERROR_BACKGROUND_COLOR: '#d32f2f',

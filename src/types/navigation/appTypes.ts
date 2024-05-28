@@ -17,6 +17,8 @@ export type TabBarStackParamList = {
 
 export type HomeStackParamList = {
   Home: undefined;
+  TakeNotes: undefined;
+  PlanVisit: undefined;
 };
 export type ExperimentStackParamList = {
   Experiment: undefined;

@@ -21,6 +21,11 @@ import {
   NotificationIcon,
   RecordIcon,
 } from '../../assets/icons/svgs';
+import PlanVisit from '../../screens/app-screens/PlanVisit';
+import TakeNotes from '../../screens/app-screens/TakeNotes';
+import Experiment from '../../screens/app-screens/Experiment';
+import Record from '../../screens/app-screens/Record';
+import Notification from '../../screens/app-screens/Notification';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -101,6 +106,8 @@ const HomeStackScreens = () => {
     <HomeStack.Navigator
       screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
       <HomeStack.Screen name="Home" component={Home} />
+      <HomeStack.Screen name="PlanVisit" component={PlanVisit} />
+      <HomeStack.Screen name="TakeNotes" component={TakeNotes} />
     </HomeStack.Navigator>
   );
 };
@@ -110,7 +117,7 @@ const ExperimentStackScreens = () => {
   return (
     <ExperimentStack.Navigator
       screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
-      <ExperimentStack.Screen name="Experiment" component={Home} />
+      <ExperimentStack.Screen name="Experiment" component={Experiment} />
     </ExperimentStack.Navigator>
   );
 };
@@ -120,7 +127,7 @@ const RecordStackScreens = () => {
   return (
     <RecordStack.Navigator
       screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
-      <RecordStack.Screen name="Record" component={Home} />
+      <RecordStack.Screen name="Record" component={Record} />
     </RecordStack.Navigator>
   );
 };
@@ -131,7 +138,7 @@ const NotificationStackScreens = () => {
   return (
     <NotificationStack.Navigator
       screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
-      <NotificationStack.Screen name="Notification" component={Home} />
+      <NotificationStack.Screen name="Notification" component={Notification} />
     </NotificationStack.Navigator>
   );
 };
