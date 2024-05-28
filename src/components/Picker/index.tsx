@@ -76,21 +76,21 @@ export default Picker;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 13,
+    borderRadius: 8,
   },
   picker: {
     width: '100%',
-    height: 56,
+    height: 50,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 13,
+    borderRadius: 8,
     paddingHorizontal: 16,
     borderWidth: 1,
   },
   text: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     justifyContent: 'center',
   },
   rightIcon: {},

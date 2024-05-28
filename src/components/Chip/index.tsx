@@ -61,7 +61,7 @@ const Chip = ({
           style={[
             styles.text,
             {
-              fontFamily: FONTS.REGULAR,
+              fontFamily: FONTS.SEMI_BOLD,
               color: COLORS.COMPONENTS.CHIP.TEXT_COLOR,
             },
             customLabelStyle,
@@ -84,16 +84,16 @@ export default Chip;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    borderRadius: 13,
+    borderRadius: 12,
   },
   chip: {
     width: '100%',
-    height: 56,
+    height: 50,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 13,
-    paddingHorizontal: 15,
+    borderRadius: 12,
+    paddingHorizontal: 14,
     borderWidth: 1,
   },
   text: {

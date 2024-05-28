@@ -122,14 +122,14 @@ const styles = StyleSheet.create({
   },
   toastContainer: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: 20,
+    right: 20,
   },
   messageContainer: {
     alignSelf: 'center',
-    maxWidth: '90%',
-    padding: 10,
-    borderRadius: 10,
+    width: '100%',
+    padding: 16,
+    borderRadius: 4,
   },
   message: {},
 });
