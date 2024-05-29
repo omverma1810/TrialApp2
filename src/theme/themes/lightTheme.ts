@@ -32,11 +32,12 @@ export default {
         LABEL_COLOR: '#161616',
       },
       MODAL: {
-        BACKGROUND_COLOR: 'rgba(0,0,0,0.8)',
+        BACKGROUND_COLOR: 'rgba(0,0,0,0.4)',
       },
       BOTTOMSHEET_MODAL: {
-        BACKGROUND_COLOR: '#171717',
-        HANDLE_COLOR: '#FFFFFF',
+        BACKGROUND_COLOR: '#FFF',
+        HANDLE_COLOR: '#949494',
+        BACK_DROP_COLOR: 'rgba(0, 0, 0, 0.4)',
       },
       BUTTON: {
         PRIMARY_COLOR: '#1A6DD2',

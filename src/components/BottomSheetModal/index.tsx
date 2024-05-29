@@ -1,10 +1,15 @@
-import {BackHandler, Pressable, StyleSheet, View} from 'react-native';
+import {
+  BackHandler,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   BottomSheetModal,
   BottomSheetView,
   SCREEN_HEIGHT,
-  useBottomSheetDynamicSnapPoints,
 } from '@gorhom/bottom-sheet';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -19,15 +24,19 @@ const BottomSheetModalView = ({
 }: BottomSheetModalTypes) => {
   const {COLORS} = useTheme();
   const {top, bottom} = useSafeAreaInsets();
-  const screenHeightSnapPoints = useMemo(() => [SCREEN_HEIGHT - top], []);
-  const contentHeightSnapPoints = useMemo(() => ['CONTENT_HEIGHT'], []);
+  const HEADER_HEIGHT = 0;
+  const statusBarHeight = StatusBar.currentHeight || 0;
+  const screenHeightSnapPoints = useMemo(
+    () =>
+      type === 'SCREEN_HEIGHT'
+        ? [
+            SCREEN_HEIGHT / 2,
+            SCREEN_HEIGHT - HEADER_HEIGHT - top - statusBarHeight,
+          ]
+        : [],
+    [type],
+  );
   const [isBottomSheetModalOpen, setIsBottomSheetModalOpen] = useState(false);
-  const {
-    animatedHandleHeight,
-    animatedSnapPoints,
-    animatedContentHeight,
-    handleContentLayout,
-  } = useBottomSheetDynamicSnapPoints(contentHeightSnapPoints);
 
   const closeModal = useCallback(() => {
     bottomSheetModalRef.current?.close();
@@ -37,7 +46,13 @@ const BottomSheetModalView = ({
     () => (
       <Pressable
         onPress={closeModal}
-        style={StyleSheet.absoluteFill}></Pressable>
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor:
+              COLORS.COMPONENTS.BOTTOMSHEET_MODAL.BACK_DROP_COLOR,
+          },
+        ]}></Pressable>
     ),
     [],
   );
@@ -71,45 +86,30 @@ const BottomSheetModalView = ({
     return () => backHandler.remove();
   }, [isBottomSheetModalOpen]);
 
-  if (type === 'CONTENT_HEIGHT')
-    return (
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        index={0}
-        backgroundStyle={{
-          backgroundColor: COLORS.COMPONENTS.BOTTOMSHEET_MODAL.BACKGROUND_COLOR,
-        }}
-        snapPoints={animatedSnapPoints}
-        handleHeight={animatedHandleHeight}
-        contentHeight={animatedContentHeight}
-        handleComponent={handleComponent}
-        backdropComponent={renderBackdrop}
-        onChange={(index: number) => setIsBottomSheetModalOpen(!(index < 0))}>
-        <BottomSheetView
-          onLayout={handleContentLayout}
-          style={[styles.container, {paddingBottom: bottom}, containerStyle]}>
-          {children}
-        </BottomSheetView>
-      </BottomSheetModal>
-    );
-  else
-    return (
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        index={0}
-        backgroundStyle={{
-          backgroundColor: COLORS.COMPONENTS.BOTTOMSHEET_MODAL.BACKGROUND_COLOR,
-        }}
-        snapPoints={screenHeightSnapPoints}
-        handleComponent={handleComponent}
-        backdropComponent={renderBackdrop}
-        onChange={(index: number) => setIsBottomSheetModalOpen(!(index < 0))}>
-        <BottomSheetView
-          style={[styles.container, {paddingBottom: bottom}, containerStyle]}>
-          {children}
-        </BottomSheetView>
-      </BottomSheetModal>
-    );
+  return (
+    <BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
+      enableDynamicSizing={type === 'CONTENT_HEIGHT'}
+      backgroundStyle={{
+        backgroundColor: COLORS.COMPONENTS.BOTTOMSHEET_MODAL.BACKGROUND_COLOR,
+        borderRadius: 28,
+      }}
+      snapPoints={screenHeightSnapPoints}
+      handleComponent={handleComponent}
+      backdropComponent={renderBackdrop}
+      onChange={(index: number) => setIsBottomSheetModalOpen(!(index < 0))}>
+      <BottomSheetView
+        style={[
+          styles.container,
+          {paddingBottom: bottom},
+          type === 'CONTENT_HEIGHT' && {flex: 0},
+          containerStyle,
+        ]}>
+        {children}
+      </BottomSheetView>
+    </BottomSheetModal>
+  );
 };
 
 export default BottomSheetModalView;
@@ -119,14 +119,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   handle: {
-    height: 3,
-    width: 60,
-    borderRadius: 50,
+    height: 4,
+    width: 32,
+    borderRadius: 100,
     alignSelf: 'center',
-    marginVertical: 15,
+    marginVertical: 16,
   },
   handleContainer: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
   },
 });
