@@ -9,6 +9,9 @@ import HomeIcon from './Home';
 import ExperimentIcon from './Experiment';
 import RecordIcon from './Record';
 import NotificationIcon from './Notification';
+import Search from './Search';
+import CardArrowDown from './CardArrowDown';
+import CardArrowUp from './CardArrowUp';
 
 export {
   Back,
@@ -22,4 +25,7 @@ export {
   ExperimentIcon,
   RecordIcon,
   NotificationIcon,
+  Search,
+  CardArrowDown,
+  CardArrowUp,
 };
