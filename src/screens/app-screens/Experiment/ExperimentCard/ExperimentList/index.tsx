@@ -1,13 +1,16 @@
 import {Pressable, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {useNavigation} from '@react-navigation/native';
 
 import {styles} from '../styles';
 import {CardArrowDown, CardArrowUp} from '../../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../../localization/constants';
+import {ExperimentScreenProps} from '../../../../../types/navigation/appTypes';
 
 const ExperimentList = (experiment: any) => {
   const {t} = useTranslation();
+  const {navigate} = useNavigation<ExperimentScreenProps['navigation']>();
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const experimentInfo = [
     {
@@ -66,9 +69,15 @@ const ExperimentList = (experiment: any) => {
       key: 'total_traits',
     },
   ];
+
   const onViewMoreDetailsClick = () => {
     setIsViewMoreDetails(state => !state);
   };
+
+  const onViewAllFieldsClick = () => {
+    navigate('ExperimentDetails');
+  };
+
   return (
     <View style={styles.experimentContainer} key={experiment?.id}>
       <Pressable
@@ -109,6 +118,15 @@ const ExperimentList = (experiment: any) => {
             </View>
           ))}
         </View>
+      )}
+      {isViewMoreDetails && (
+        <Pressable
+          style={styles.viewAllFieldsContainer}
+          onPress={onViewAllFieldsClick}>
+          <Text style={styles.viewAllFields}>
+            {t(LOCALES.EXPERIMENT.LBL_VIEW_ALL_FIELDS)}
+          </Text>
+        </Pressable>
       )}
     </View>
   );

@@ -26,6 +26,7 @@ import TakeNotes from '../../screens/app-screens/TakeNotes';
 import Experiment from '../../screens/app-screens/Experiment';
 import Record from '../../screens/app-screens/Record';
 import Notification from '../../screens/app-screens/Notification';
+import ExperimentDetails from '../../screens/app-screens/Experiment/ExperimentDetails';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -118,6 +119,10 @@ const ExperimentStackScreens = () => {
     <ExperimentStack.Navigator
       screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
       <ExperimentStack.Screen name="Experiment" component={Experiment} />
+      <ExperimentStack.Screen
+        name="ExperimentDetails"
+        component={ExperimentDetails}
+      />
     </ExperimentStack.Navigator>
   );
 };

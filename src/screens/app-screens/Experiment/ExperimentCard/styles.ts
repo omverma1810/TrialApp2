@@ -79,4 +79,17 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: FONTS.MEDIUM,
   },
+  viewAllFieldsContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#1A6DD2',
+  },
+  viewAllFields: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+    textAlign: 'center',
+  },
 });
