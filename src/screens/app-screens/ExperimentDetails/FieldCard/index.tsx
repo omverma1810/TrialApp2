@@ -1,6 +1,7 @@
 import {Pressable, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {useNavigation} from '@react-navigation/native';
 
 import {styles} from '../styles';
 import {
@@ -15,9 +16,12 @@ import {
   Rows,
 } from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
+import {ExperimentDetailsScreenProps} from '../../../../types/navigation/appTypes';
 
 const FieldCard = ({isFirstIndex, isLastIndex}: any) => {
   const {t} = useTranslation();
+  const {navigate} =
+    useNavigation<ExperimentDetailsScreenProps['navigation']>();
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const fieldInfo = [
     {
@@ -51,7 +55,9 @@ const FieldCard = ({isFirstIndex, isLastIndex}: any) => {
       value: '354',
       navigationAction: {
         title: t(LOCALES.EXPERIMENT.LBL_ALL_PLOTS),
-        onClick: () => {},
+        onClick: () => {
+          navigate('Plots');
+        },
       },
       key: 'plots_count',
     },

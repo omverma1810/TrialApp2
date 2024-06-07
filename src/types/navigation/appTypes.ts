@@ -23,6 +23,7 @@ export type HomeStackParamList = {
 export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: undefined;
+  Plots: undefined;
 };
 export type RecordStackParamList = {
   Record: undefined;
@@ -43,6 +44,11 @@ export type ExperimentScreenProps = CompositeScreenProps<
 
 export type ExperimentDetailsScreenProps = CompositeScreenProps<
   NativeStackScreenProps<ExperimentStackParamList, 'ExperimentDetails'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type PlotsScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<ExperimentStackParamList, 'Plots'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 

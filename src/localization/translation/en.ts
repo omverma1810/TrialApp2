@@ -39,5 +39,13 @@ export default {
     LBL_ALL_PLOTS: 'All Plots',
     LBL_ALL_TRAITS: 'All Traits',
     LBL_GO_TO_LOCATION: 'Go to Location',
+    LBL_SEARCH_PLOT: 'Search Plot',
+    LBL_ROW: 'Row',
+    LBL_COL: 'Col',
+    LBL_ACC_ID: 'Acc ID',
+    LBL_RECORDED_TRAITS: 'Recorded Traits',
+    LBL_EDIT: 'Edit',
+    LBL_NOTS: 'Notes',
+    LBL_UNRECORDED_TRAITS: 'Unrecorded Traits',
   },
 };
