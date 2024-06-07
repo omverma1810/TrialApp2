@@ -12,6 +12,13 @@ import NotificationIcon from './Notification';
 import Search from './Search';
 import CardArrowDown from './CardArrowDown';
 import CardArrowUp from './CardArrowUp';
+import LocationPin from './LocationPin';
+import Rows from './Rows';
+import Columns from './Columns';
+import Location from './Location';
+import Leaf from './Leaf';
+import Layout from './Layout';
+import Plots from './Plots';
 
 export {
   Back,
@@ -28,4 +35,11 @@ export {
   Search,
   CardArrowDown,
   CardArrowUp,
+  LocationPin,
+  Rows,
+  Columns,
+  Location,
+  Leaf,
+  Layout,
+  Plots,
 };

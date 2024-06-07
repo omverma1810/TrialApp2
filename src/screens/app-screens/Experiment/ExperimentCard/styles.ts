@@ -50,7 +50,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E8F0FB',
-    width: Dimensions.get('screen').width / 2 - 40,
+    width: Dimensions.get('screen').width / 2 - 38,
   },
   experimentDetailsKeyText: {
     fontSize: 12,

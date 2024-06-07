@@ -43,6 +43,7 @@ const Experiment = () => {
         <Input
           placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
           leftIcon={Search}
+          customLeftIconStyle={{marginRight: 10}}
         />
         <FlatList
           data={experiments}

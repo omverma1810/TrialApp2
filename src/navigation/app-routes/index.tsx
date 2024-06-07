@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
+import {Platform, StyleSheet} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {useTranslation} from 'react-i18next';
@@ -26,7 +26,7 @@ import TakeNotes from '../../screens/app-screens/TakeNotes';
 import Experiment from '../../screens/app-screens/Experiment';
 import Record from '../../screens/app-screens/Record';
 import Notification from '../../screens/app-screens/Notification';
-import ExperimentDetails from '../../screens/app-screens/Experiment/ExperimentDetails';
+import ExperimentDetails from '../../screens/app-screens/ExperimentDetails';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -152,9 +152,14 @@ export default AppRoutes;
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: 80,
-    paddingTop: 14,
-    paddingBottom: 14,
     borderTopWidth: 1,
+    ...Platform.select({
+      ios: {},
+      android: {
+        height: 80,
+        paddingTop: 14,
+        paddingBottom: 14,
+      },
+    }),
   },
 });
