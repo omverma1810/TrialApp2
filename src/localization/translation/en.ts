@@ -29,6 +29,7 @@ export default {
     LBL_FIELD: 'Field',
     LBL_NO_OF_TRAITS: 'No of traits',
     LBL_VIEW: 'View',
+    LBL_HIDE: 'Hide',
     LBL_VIEW_ALL_FIELDS: 'View All Fields',
     LBL_SEARCH_FIELD: 'Search Field',
     LBL_FIELDS: 'Fields',

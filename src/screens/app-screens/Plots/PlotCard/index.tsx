@@ -5,6 +5,8 @@ import {CardArrowDown, CardArrowUp} from '../../../../assets/icons/svgs';
 import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import RecordedTraits from '../RecordedTraits ';
+import Notes from '../Notes';
+import UnrecordedTraits from '../UnrecordedTraits';
 
 const PlotCard = ({isFirstIndex, isLastIndex}: any) => {
   const {t} = useTranslation();
@@ -53,6 +55,8 @@ const PlotCard = ({isFirstIndex, isLastIndex}: any) => {
       {isViewMoreDetails && (
         <View style={styles.plotDetailsContainer}>
           <RecordedTraits />
+          <Notes />
+          <UnrecordedTraits />
         </View>
       )}
     </View>

@@ -19,6 +19,7 @@ import Location from './Location';
 import Leaf from './Leaf';
 import Layout from './Layout';
 import Plots from './Plots';
+import Edit from './Edit';
 
 export {
   Back,
@@ -41,5 +42,6 @@ export {
   Location,
   Leaf,
   Layout,
+  Edit,
   Plots,
 };

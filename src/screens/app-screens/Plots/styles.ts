@@ -96,4 +96,108 @@ export const styles = StyleSheet.create({
     gap: 16,
     marginTop: 16,
   },
+  recordedTraitsContainer: {
+    borderWidth: 1,
+    borderColor: '#F7F7F7',
+    borderRadius: 6,
+  },
+  recordedTraitsTextContainer: {
+    padding: 8,
+    backgroundColor: '#F7F7F7',
+  },
+  recordedTraitsText: {
+    color: '#161616',
+    fontSize: 12,
+    fontFamily: FONTS.MEDIUM,
+  },
+  recordedTraitsInfoContainer: {
+    padding: 16,
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  recordedTraitsInfoKeyTextContainer: {
+    gap: 8,
+    flex: 1,
+  },
+  recordedTraitsInfoKeyText: {
+    color: '#636363',
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+  },
+  recordedTraitsInfoValueText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
+  editContainer: {
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  edit: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
+  notesContainer: {
+    padding: 8,
+  },
+  notes: {
+    color: '#161616',
+    fontSize: 12,
+    fontFamily: FONTS.MEDIUM,
+  },
+  noteInfoContainer: {
+    padding: 16,
+    gap: 8,
+    backgroundColor: '#FDF8EE',
+    borderRadius: 8,
+  },
+  notesContent: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+  },
+  notesDate: {
+    color: '#000',
+    fontSize: 12,
+    fontFamily: FONTS.REGULAR,
+    opacity: 0.4,
+  },
+  unrecordedTraitsContainer: {},
+  unrecordedTraitsContainerWithDetails: {
+    borderWidth: 1,
+    borderColor: '#F7F7F7',
+    borderRadius: 6,
+  },
+  unrecordedTraitsTitleContainerWithDetails: {
+    backgroundColor: '#F7F7F7',
+  },
+  unrecordedTraitsTitleContainer: {
+    padding: 9,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  unrecordedTraitsTitle: {
+    color: '#161616',
+    fontSize: 12,
+    fontFamily: FONTS.MEDIUM,
+    flex: 1,
+  },
+  viewContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  view: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
+  unrecordedTraitsInfoValueText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+  },
 });

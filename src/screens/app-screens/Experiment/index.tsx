@@ -32,7 +32,7 @@ const Experiment = () => {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView edges={['top']}>
       <StatusBar />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
