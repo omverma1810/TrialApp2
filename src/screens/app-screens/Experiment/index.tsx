@@ -1,5 +1,5 @@
-import React, {useMemo} from 'react';
-import {FlatList, View} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import {FlatList, Pressable, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 
 import {styles} from './styles';
@@ -8,11 +8,13 @@ import ExperimentCard from './ExperimentCard';
 import {crops, experiments, projects} from './data';
 import {Input, SafeAreaView, StatusBar, Text} from '../../../components';
 import {LOCALES} from '../../../localization/constants';
-import {Search} from '../../../assets/icons/svgs';
+import {Plus, Search} from '../../../assets/icons/svgs';
+import NewRecordOptionsModal from './NewRecordOptionsModal';
+import {ExperimentScreenProps} from '../../../types/navigation/appTypes';
 
-const Experiment = () => {
+const Experiment = ({navigation}: ExperimentScreenProps) => {
   const {t} = useTranslation();
-
+  const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
   const ListHeaderComponent = useMemo(
     () => (
       <View style={styles.filter}>
@@ -30,9 +32,20 @@ const Experiment = () => {
     ),
     [],
   );
-
+  const onNewRecordClick = () => {
+    setIsOptionModalVisible(true);
+  };
+  const onCloseOptionsModalClick = () => {
+    setIsOptionModalVisible(false);
+  };
+  const onSelectFromList = () => {
+    setIsOptionModalVisible(false);
+    navigation.navigate('NewRecord');
+  };
   return (
-    <SafeAreaView edges={['top']}>
+    <SafeAreaView
+      edges={['top']}
+      parentStyle={isOptionModalVisible && styles.modalOpen}>
       <StatusBar />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>
@@ -52,6 +65,19 @@ const Experiment = () => {
           renderItem={({item}) => <ExperimentCard data={item} />}
         />
       </View>
+      {!isOptionModalVisible && (
+        <Pressable style={styles.newRecord} onPress={onNewRecordClick}>
+          <Plus />
+          <Text style={styles.newRecordText}>
+            {t(LOCALES.EXPERIMENT.NEW_RECORD)}
+          </Text>
+        </Pressable>
+      )}
+      <NewRecordOptionsModal
+        isModalVisible={isOptionModalVisible}
+        closeModal={onCloseOptionsModalClick}
+        onSelectFromList={onSelectFromList}
+      />
     </SafeAreaView>
   );
 };

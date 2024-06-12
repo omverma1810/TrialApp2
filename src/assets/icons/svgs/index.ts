@@ -20,6 +20,10 @@ import Leaf from './Leaf';
 import Layout from './Layout';
 import Plots from './Plots';
 import Edit from './Edit';
+import Plus from './Plus';
+import EditBox from './EditBox';
+import Scan from './Scan';
+import Close from './Close';
 
 export {
   Back,
@@ -44,4 +48,8 @@ export {
   Layout,
   Edit,
   Plots,
+  Plus,
+  EditBox,
+  Scan,
+  Close,
 };

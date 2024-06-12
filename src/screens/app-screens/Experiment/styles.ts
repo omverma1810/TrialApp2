@@ -20,4 +20,54 @@ export const styles = StyleSheet.create({
     gap: 16,
     paddingVertical: 16,
   },
+  newRecord: {
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#1A6DD2',
+    borderRadius: 16,
+    bottom: 8,
+    right: 16,
+    gap: 8,
+  },
+  newRecordText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
+  optionsContainer: {
+    gap: 16,
+  },
+  optionsTextContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+  },
+  optionsText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
+  optionIcon: {
+    borderRadius: 16,
+    padding: 16,
+    height: 56,
+    width: 56,
+    backgroundColor: '#E8F0FB',
+  },
+  closeIcon: {
+    backgroundColor: '#1A6DD2',
+  },
+  optionsModal: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'transparent',
+    bottom: 88,
+    right: 16,
+  },
+  modalOpen: {
+    opacity: 0.2,
+  },
 });
