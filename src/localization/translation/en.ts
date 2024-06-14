@@ -23,6 +23,7 @@ export default {
     LBL_SEASON: 'Season',
     LBL_ENTRIES: 'Entries',
     LBL_PLOTS: 'Plots',
+    LBL_PLOT: 'Plot',
     LBL_REPLICATION: 'Replication',
     LBL_RANDOMISATION: 'Randomisation',
     LBL_LOCATION: 'Location',

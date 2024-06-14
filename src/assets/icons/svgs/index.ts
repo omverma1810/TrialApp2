@@ -24,6 +24,8 @@ import Plus from './Plus';
 import EditBox from './EditBox';
 import Scan from './Scan';
 import Close from './Close';
+import Notes from './Notes';
+import ImagePlus from './ImagePlus';
 
 export {
   Back,
@@ -52,4 +54,6 @@ export {
   EditBox,
   Scan,
   Close,
+  Notes,
+  ImagePlus,
 };
