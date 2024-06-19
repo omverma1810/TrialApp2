@@ -2,7 +2,12 @@ import React, {useState} from 'react';
 import {Pressable, View, ScrollView} from 'react-native';
 import {useTranslation} from 'react-i18next';
 
-import {SafeAreaView, StatusBar, Text} from '../../../components';
+import {
+  KeyboardAvoidingView,
+  SafeAreaView,
+  StatusBar,
+  Text,
+} from '../../../components';
 import {LOCALES} from '../../../localization/constants';
 import {styles} from './styles';
 import {Back, ImagePlus, Notes} from '../../../assets/icons/svgs';
@@ -45,48 +50,51 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
   };
   return (
     <SafeAreaView edges={['top']}>
-      <StatusBar />
-      <Pressable
-        onPress={navigation.goBack}
-        style={[styles.header, styles.row]}>
-        <Back />
-        <Text style={styles.headerTitle}>
-          {t(LOCALES.EXPERIMENT.NEW_RECORD)}
-        </Text>
-      </Pressable>
-      <ScrollView>
-        <View style={styles.container}>
-          <SelectExperiment
-            selectedExperiment={selectedExperiment}
-            handleExperimentSelect={handleExperimentSelect}
-          />
-          {selectedExperiment && (
-            <SelectField
-              selectedField={selectedField}
-              handleFieldSelect={handleFieldSelect}
+      <KeyboardAvoidingView>
+        <StatusBar />
+        <Pressable
+          onPress={navigation.goBack}
+          style={[styles.header, styles.row]}>
+          <Back />
+          <Text style={styles.headerTitle}>
+            {t(LOCALES.EXPERIMENT.NEW_RECORD)}
+          </Text>
+        </Pressable>
+
+        <ScrollView>
+          <View style={styles.container}>
+            <SelectExperiment
+              selectedExperiment={selectedExperiment}
+              handleExperimentSelect={handleExperimentSelect}
             />
-          )}
-          {selectedExperiment && selectedField && (
-            <SelectPlot
-              selectedPlot={selectedPlot}
-              handlePlotSelect={handlePlotSelect}
-            />
-          )}
-          {selectedExperiment && selectedField && selectedPlot && (
-            <>
-              <View style={styles.userInteractionContainer}>
-                {userInteractionOptions.map(item => (
-                  <View style={styles.optionContainer} key={item.id}>
-                    <item.icon />
-                    <Text style={styles.option}>{item.name}</Text>
-                  </View>
-                ))}
-              </View>
-              <UnrecordedTraits />
-            </>
-          )}
-        </View>
-      </ScrollView>
+            {selectedExperiment && (
+              <SelectField
+                selectedField={selectedField}
+                handleFieldSelect={handleFieldSelect}
+              />
+            )}
+            {selectedExperiment && selectedField && (
+              <SelectPlot
+                selectedPlot={selectedPlot}
+                handlePlotSelect={handlePlotSelect}
+              />
+            )}
+            {selectedExperiment && selectedField && selectedPlot && (
+              <>
+                <View style={styles.userInteractionContainer}>
+                  {userInteractionOptions.map(item => (
+                    <View style={styles.optionContainer} key={item.id}>
+                      <item.icon />
+                      <Text style={styles.option}>{item.name}</Text>
+                    </View>
+                  ))}
+                </View>
+                <UnrecordedTraits />
+              </>
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

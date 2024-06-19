@@ -6,6 +6,7 @@ import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import {Search} from '../../../../assets/icons/svgs';
 import UnrecordedTraitCard from './UnrecordedTraitCard';
+import {RecordProvider} from './RecordContext';
 
 const UnrecordedTraits = () => {
   const {t} = useTranslation();
@@ -13,17 +14,17 @@ const UnrecordedTraits = () => {
     {
       id: 0,
       name: 'Cob Height',
-      value: '',
+      type: 'input',
     },
     {
       id: 1,
       name: 'Seeding Vigor',
-      value: '',
+      type: 'option',
     },
     {
       id: 2,
       name: 'Date of Sowing',
-      value: '',
+      type: 'date',
     },
   ];
 
@@ -36,7 +37,11 @@ const UnrecordedTraits = () => {
         </Text>
         <Search />
       </View>
-      {unrecordedTraitList.map(UnrecordedTraitCard)}
+      {unrecordedTraitList.map(item => (
+        <RecordProvider key={item.id} item={item}>
+          <UnrecordedTraitCard />
+        </RecordProvider>
+      ))}
     </View>
   );
 };

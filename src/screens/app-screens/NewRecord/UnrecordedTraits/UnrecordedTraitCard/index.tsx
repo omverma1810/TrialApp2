@@ -1,22 +1,25 @@
-import {Text, View} from 'react-native';
 import React from 'react';
-import {useTranslation} from 'react-i18next';
 
-import {styles} from '../../styles';
-import {LOCALES} from '../../../../../localization/constants';
+import InitialValueCard from './InitialValueCard';
+import ValueInputCard from './ValueInputCard';
+import RecordedValueCard from './RecordedValueCard';
+import {useRecord} from '../RecordContext';
 
-const UnrecordedTraitCard = (item: any) => {
-  const {t} = useTranslation();
-  return (
-    <View style={[styles.traitsContainer, styles.row]} key={item.id}>
-      <Text style={styles.traitsTitle}>{item?.name}</Text>
-      <View style={styles.recordButton}>
-        <Text style={styles.recordButtonTitle}>
-          {t(LOCALES.EXPERIMENT.LBL_RECORD)}
-        </Text>
-      </View>
-    </View>
-  );
+const UnrecordedTraitCard = () => {
+  const {isRecorded, isInputActive} = useRecord();
+  const renderCard = () => {
+    if (isRecorded) {
+      return <RecordedValueCard />;
+    }
+
+    if (isInputActive) {
+      return <ValueInputCard />;
+    }
+
+    return <InitialValueCard />;
+  };
+
+  return renderCard();
 };
 
 export default UnrecordedTraitCard;

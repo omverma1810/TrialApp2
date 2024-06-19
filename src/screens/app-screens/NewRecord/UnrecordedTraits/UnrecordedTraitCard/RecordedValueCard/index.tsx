@@ -1,0 +1,27 @@
+import {Pressable, Text, View} from 'react-native';
+import React from 'react';
+import {useTranslation} from 'react-i18next';
+
+import {Edit} from '../../../../../../assets/icons/svgs';
+import {styles} from '../../../styles';
+import {LOCALES} from '../../../../../../localization/constants';
+import {useRecord} from '../../RecordContext';
+
+const RecordedValueCard = () => {
+  const {t} = useTranslation();
+  const {recordedValue, onEdit, item} = useRecord();
+  return (
+    <View style={[styles.traitsContainer, styles.row]}>
+      <View style={styles.traitsInfoContainer}>
+        <Text style={styles.traitsLabelKey}>{item.name}</Text>
+        <Text style={styles.traitsLabelValue}>{recordedValue}</Text>
+      </View>
+      <Pressable style={styles.editContainer} onPress={onEdit}>
+        <Text style={styles.edit}>{t(LOCALES.EXPERIMENT.LBL_EDIT)}</Text>
+        <Edit />
+      </Pressable>
+    </View>
+  );
+};
+
+export default RecordedValueCard;

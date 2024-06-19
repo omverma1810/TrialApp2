@@ -16,6 +16,7 @@ import RadioButton from './RadioButton';
 import Switch from './Switch';
 import Picker from './Picker';
 import OverlayLoader from './OverlayLoader';
+import OutlinedInput from './OutlinedInput';
 
 export {
   Text,
@@ -36,4 +37,5 @@ export {
   Switch,
   Picker,
   OverlayLoader,
+  OutlinedInput,
 };

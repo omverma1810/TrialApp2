@@ -160,6 +160,10 @@ export const styles = StyleSheet.create({
     padding: 16,
     gap: 8,
   },
+  traitsInputContainer: {
+    paddingHorizontal: 8,
+    paddingVertical: 16,
+  },
   traitsTitle: {
     color: '#161616',
     fontFamily: FONTS.REGULAR,
@@ -174,5 +178,36 @@ export const styles = StyleSheet.create({
     color: '#0B2E58',
     fontFamily: FONTS.MEDIUM,
     fontSize: 14,
+  },
+  traitsInputIconText: {
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+    color: '#636363',
+  },
+  traitsInfoContainer: {
+    gap: 8,
+    flex: 1,
+  },
+  traitsLabelKey: {
+    color: '#636363',
+    fontSize: 12,
+    fontFamily: FONTS.REGULAR,
+  },
+  traitsLabelValue: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
+  editContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  edit: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
   },
 });

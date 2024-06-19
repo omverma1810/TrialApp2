@@ -31,6 +31,15 @@ export default {
         PLACEHOLDER_COLOR: '#949494',
         LABEL_COLOR: '#161616',
       },
+      OUTLINED_INPUT: {
+        BACKGROUND_COLOR: '#FFF',
+        ACTIVE_BORDER_COLOR: '#E6E6E6',
+        INACTIVE_BORDER_COLOR: '#E6E6E6',
+        TEXT_COLOR: '#161616',
+        PLACEHOLDER_COLOR: '#454545',
+        LABEL_COLOR: '#454545',
+        NOTE_COLOR: '#636363',
+      },
       MODAL: {
         BACKGROUND_COLOR: 'rgba(0,0,0,0.4)',
       },
