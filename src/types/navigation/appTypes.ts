@@ -19,9 +19,12 @@ export type HomeStackParamList = {
   Home: undefined;
   TakeNotes: undefined;
   PlanVisit: undefined;
+  Profile: undefined;
+  ExperimentStackScreens: undefined;
 };
 export type ExperimentStackParamList = {
   Experiment: undefined;
+  ExpScreen1:undefined;
 };
 export type RecordStackParamList = {
   Record: undefined;
