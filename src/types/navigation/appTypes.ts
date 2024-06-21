@@ -24,7 +24,17 @@ export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: undefined;
   Plots: undefined;
-  NewRecord: undefined;
+  NewRecord:
+    | undefined
+    | {
+        traitsInfo?: {
+          imageUrl: string;
+          selectedTrait: string;
+        };
+      };
+  AddImage: {
+    imageUrl: string;
+  };
 };
 export type RecordStackParamList = {
   Record: undefined;
@@ -55,6 +65,11 @@ export type PlotsScreenProps = CompositeScreenProps<
 
 export type NewRecordScreenProps = CompositeScreenProps<
   NativeStackScreenProps<ExperimentStackParamList, 'NewRecord'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type AddImageScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<ExperimentStackParamList, 'AddImage'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 

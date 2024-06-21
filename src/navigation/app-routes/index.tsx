@@ -29,6 +29,7 @@ import Notification from '../../screens/app-screens/Notification';
 import ExperimentDetails from '../../screens/app-screens/ExperimentDetails';
 import Plots from '../../screens/app-screens/Plots';
 import NewRecord from '../../screens/app-screens/NewRecord';
+import AddImage from '../../screens/app-screens/AddImage';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -127,6 +128,7 @@ const ExperimentStackScreens = () => {
       />
       <ExperimentStack.Screen name="Plots" component={Plots} />
       <ExperimentStack.Screen name="NewRecord" component={NewRecord} />
+      <ExperimentStack.Screen name="AddImage" component={AddImage} />
     </ExperimentStack.Navigator>
   );
 };

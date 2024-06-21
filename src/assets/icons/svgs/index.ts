@@ -26,6 +26,8 @@ import Scan from './Scan';
 import Close from './Close';
 import Notes from './Notes';
 import ImagePlus from './ImagePlus';
+import Check from './Check';
+import X from './X';
 
 export {
   Back,
@@ -56,4 +58,6 @@ export {
   Close,
   Notes,
   ImagePlus,
+  Check,
+  X,
 };

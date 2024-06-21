@@ -47,7 +47,7 @@ export default {
     LBL_ACC_ID: 'Acc ID',
     LBL_RECORDED_TRAITS: 'Recorded Traits',
     LBL_EDIT: 'Edit',
-    LBL_NOTS: 'Notes',
+    LBL_NOTES: 'Notes',
     LBL_UNRECORDED_TRAITS: 'Unrecorded Traits',
     NEW_RECORD: 'New Record',
     LBL_SELECT_FROM_LIST: 'Select from List',
@@ -58,5 +58,8 @@ export default {
     LBL_ADD_NOTES: 'Add Notes',
     LBL_ADD_IMAGE: 'Add Image',
     LBL_RECORD: 'Record',
+    LBL_DISCARD: 'Discard',
+    LBL_SAVE: 'Save',
+    LBL_ASSOCIATE_TRAIT: 'Associate a Trait',
   },
 };

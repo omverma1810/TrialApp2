@@ -22,6 +22,12 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  saveRecordBtnContainer: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    bottom: 8,
+  },
   selectExperimentContainer: {
     flex: 1,
   },
@@ -209,5 +215,59 @@ export const styles = StyleSheet.create({
     color: '#1A6DD2',
     fontSize: 14,
     fontFamily: FONTS.MEDIUM,
+  },
+  notesModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notesModal: {
+    backgroundColor: '#FDF8EE',
+    borderRadius: 28,
+    padding: 24,
+    width: '90%',
+    gap: 16,
+  },
+  notesTitle: {
+    fontSize: 18,
+    fontFamily: FONTS.REGULAR,
+    color: '#161616',
+  },
+  notesInput: {
+    borderWidth: 1,
+    borderColor: '#B7B7B7',
+    borderRadius: 8,
+    padding: 16,
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+    color: '#161616',
+    height: 130,
+  },
+  notesButtonContainer: {
+    gap: 8,
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  discardBtnContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  discardBtn: {
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+    color: '#1A6DD2',
+  },
+  saveBtnContainer: {
+    backgroundColor: '#1A6DD2',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  saveBtn: {
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+    color: '#F7F7F7',
   },
 });
