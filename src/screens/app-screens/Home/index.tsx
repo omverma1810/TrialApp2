@@ -24,7 +24,7 @@ const Home: React.FC<HomeScreenProps> = ({navigation}) => {
       <StatusBar />
       <View style={styles.viewStyle}>
         <Header navigation={navigation} />
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <DashInfo navigation={navigation} />
           <View style={styles.rowStyle}>
             <Pressable onPress={goToTakeNotes} style={styles.takeNotesButton}>
