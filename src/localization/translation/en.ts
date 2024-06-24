@@ -11,6 +11,12 @@ export default {
     LBL_RECORD: 'Record',
     LBL_NOTIFICATION: 'Notification',
   },
+  LOGIN: {
+    LBL_EMAIL: 'Email',
+    LBL_PASSWORD: 'password',
+    LBL_LOGIN: 'Login',
+    LBL_FORGOT_PASSWORD: 'Forgot Password?',
+  },
   EXPERIMENT: {
     LBL_EXPERIMENT: 'Experiment',
     LBL_SEARCH_EXPERIMENT: 'Search Experiment',
