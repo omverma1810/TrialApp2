@@ -270,4 +270,39 @@ export const styles = StyleSheet.create({
     fontFamily: FONTS.MEDIUM,
     color: '#F7F7F7',
   },
+  notesContainer: {
+    backgroundColor: '#FDF8EE',
+    borderRadius: 8,
+    padding: 16,
+    gap: 12,
+  },
+  notesTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  notesLabel: {
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+    color: '#161616',
+  },
+  notesContent: {
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+    color: '#161616',
+  },
+  imageContainer: {
+    gap: 12,
+    flexDirection: 'row',
+    height: 150,
+  },
+  image: {
+    height: '100%',
+    flex: 0.5,
+  },
+  traitsLabel: {
+    fontSize: 12,
+    fontFamily: FONTS.MEDIUM,
+    color: '#161616',
+  },
 });

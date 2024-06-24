@@ -57,6 +57,7 @@ export default {
     LBL_SELECT_PLOT: 'Select Plot',
     LBL_ADD_NOTES: 'Add Notes',
     LBL_ADD_IMAGE: 'Add Image',
+    LBL_IMAGE: 'Image',
     LBL_RECORD: 'Record',
     LBL_DISCARD: 'Discard',
     LBL_SAVE: 'Save',

@@ -12,13 +12,15 @@ import {
 } from '../../../components';
 import {LOCALES} from '../../../localization/constants';
 import {styles} from './styles';
-import {Back, ImagePlus, Notes} from '../../../assets/icons/svgs';
+import {Back, ImagePlus, Notes as NotesIcon} from '../../../assets/icons/svgs';
 import SelectExperiment from './SelectExperiment';
 import SelectField from './SelectField';
 import SelectPlot from './SelectPlot';
 import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
 import UnrecordedTraits from './UnrecordedTraits';
 import NotesModal from './NotesModal';
+import Notes from './Notes';
+import TraitsImage from './TraitsImage';
 
 const NewRecord = ({navigation, route}: NewRecordScreenProps) => {
   const {t} = useTranslation();
@@ -27,13 +29,13 @@ const NewRecord = ({navigation, route}: NewRecordScreenProps) => {
     {
       id: 0,
       name: t(LOCALES.EXPERIMENT.LBL_ADD_NOTES),
-      icon: Notes,
+      icon: <NotesIcon />,
       onPress: () => setIsNotesModalVisible(true),
     },
     {
       id: 1,
       name: t(LOCALES.EXPERIMENT.LBL_ADD_IMAGE),
-      icon: ImagePlus,
+      icon: <ImagePlus />,
       onPress: () => pickImageFromCamera(),
     },
   ];
@@ -99,11 +101,13 @@ const NewRecord = ({navigation, route}: NewRecordScreenProps) => {
                       style={styles.optionContainer}
                       key={item.id}
                       onPress={item.onPress}>
-                      <item.icon />
+                      {item.icon}
                       <Text style={styles.option}>{item.name}</Text>
                     </Pressable>
                   ))}
                 </View>
+                <Notes />
+                {traitsInfo && <TraitsImage />}
                 <UnrecordedTraits />
               </>
             )}
