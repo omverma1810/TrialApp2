@@ -1,4 +1,4 @@
-import {FlatList, Pressable, Text, View} from 'react-native';
+import {Pressable, Text, View} from 'react-native';
 import React, {useMemo} from 'react';
 import {useTranslation} from 'react-i18next';
 
@@ -7,12 +7,15 @@ import {CardArrowDown, Search} from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
 import Filter from '../../Experiment/Filter';
 import {crops, projects} from '../../Experiment/data';
+import {useRecord} from '../RecordContext';
 
-const SelectExperiment = ({
-  selectedExperiment,
-  handleExperimentSelect,
-}: any) => {
+const SelectExperiment = () => {
   const {t} = useTranslation();
+  const {
+    isSelectExperimentVisible,
+    selectedExperiment,
+    handleExperimentSelect,
+  } = useRecord();
   const experimentList = [
     {
       id: 0,
@@ -55,6 +58,7 @@ const SelectExperiment = ({
       </Pressable>
     );
   };
+  if (!isSelectExperimentVisible) return null;
   return (
     <>
       {!selectedExperiment ? (

@@ -4,11 +4,11 @@ import {useTranslation} from 'react-i18next';
 
 import {styles} from '../../../styles';
 import {LOCALES} from '../../../../../../localization/constants';
-import {useRecord} from '../../RecordContext';
+import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
 
 const InitialValueCard = () => {
   const {t} = useTranslation();
-  const {onRecord, item} = useRecord();
+  const {onRecord, item} = useUnrecordedTraits();
   return (
     <View style={[styles.traitsContainer, styles.row]}>
       <Text style={styles.traitsTitle}>{item.name}</Text>

@@ -6,7 +6,7 @@ import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import {Search} from '../../../../assets/icons/svgs';
 import UnrecordedTraitCard from './UnrecordedTraitCard';
-import {RecordProvider} from './RecordContext';
+import {UnrecordedTraitsProvider} from './UnrecordedTraitsContext';
 
 const UnrecordedTraits = () => {
   const {t} = useTranslation();
@@ -38,9 +38,9 @@ const UnrecordedTraits = () => {
         <Search />
       </View>
       {unrecordedTraitList.map(item => (
-        <RecordProvider key={item.id} item={item}>
+        <UnrecordedTraitsProvider key={item.id} item={item}>
           <UnrecordedTraitCard />
-        </RecordProvider>
+        </UnrecordedTraitsProvider>
       ))}
     </View>
   );

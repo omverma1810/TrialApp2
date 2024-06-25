@@ -5,9 +5,11 @@ import {useTranslation} from 'react-i18next';
 import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import {CardArrowDown, Search} from '../../../../assets/icons/svgs';
+import {useRecord} from '../RecordContext';
 
-const SelectPlot = ({selectedPlot, handlePlotSelect}: any) => {
+const SelectPlot = () => {
   const {t} = useTranslation();
+  const {isSelectPlotVisible, selectedPlot, handlePlotSelect} = useRecord();
   const plotList = [
     {
       id: 0,
@@ -66,6 +68,7 @@ const SelectPlot = ({selectedPlot, handlePlotSelect}: any) => {
       </Pressable>
     );
   };
+  if (!isSelectPlotVisible) return null;
   return (
     <>
       {!selectedPlot ? (

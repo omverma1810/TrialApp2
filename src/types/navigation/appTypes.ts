@@ -24,14 +24,7 @@ export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: undefined;
   Plots: undefined;
-  NewRecord:
-    | undefined
-    | {
-        traitsInfo?: {
-          imageUrl: string;
-          selectedTrait: string;
-        };
-      };
+  NewRecord: undefined | {traitMediaInfo: {name: string; url: string}};
   AddImage: {
     imageUrl: string;
   };

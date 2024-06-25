@@ -9,9 +9,11 @@ import {
   LocationPin,
   Search,
 } from '../../../../assets/icons/svgs';
+import {useRecord} from '../RecordContext';
 
-const SelectField = ({selectedField, handleFieldSelect}: any) => {
+const SelectField = () => {
   const {t} = useTranslation();
+  const {isSelectFieldVisible, selectedField, handleFieldSelect} = useRecord();
   const fieldList = [
     {
       id: 0,
@@ -43,6 +45,7 @@ const SelectField = ({selectedField, handleFieldSelect}: any) => {
       </Pressable>
     );
   };
+  if (!isSelectFieldVisible) return null;
   return (
     <>
       {!selectedField ? (

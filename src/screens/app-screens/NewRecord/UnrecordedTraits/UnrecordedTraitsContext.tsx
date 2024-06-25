@@ -6,7 +6,7 @@ interface TraitItem {
   type: string;
 }
 
-interface RecordContextType {
+interface UnrecordedTraitsContextType {
   item: TraitItem;
   isInputActive: boolean;
   isRecorded: boolean;
@@ -16,9 +16,11 @@ interface RecordContextType {
   onEdit: () => void;
 }
 
-const RecordContext = createContext<RecordContextType | undefined>(undefined);
+const UnrecordedTraitsContext = createContext<
+  UnrecordedTraitsContextType | undefined
+>(undefined);
 
-export const RecordProvider = ({
+export const UnrecordedTraitsProvider = ({
   children,
   item,
 }: {
@@ -44,7 +46,7 @@ export const RecordProvider = ({
   };
 
   return (
-    <RecordContext.Provider
+    <UnrecordedTraitsContext.Provider
       value={{
         item,
         isInputActive,
@@ -55,14 +57,16 @@ export const RecordProvider = ({
         onEdit,
       }}>
       {children}
-    </RecordContext.Provider>
+    </UnrecordedTraitsContext.Provider>
   );
 };
 
-export const useRecord = () => {
-  const context = useContext(RecordContext);
+export const useUnrecordedTraits = () => {
+  const context = useContext(UnrecordedTraitsContext);
   if (!context) {
-    throw new Error('useRecord must be used within a RecordProvider');
+    throw new Error(
+      'useUnrecordedTraits must be used within a UnrecordedTraitsProvider',
+    );
   }
   return context;
 };

@@ -3,10 +3,10 @@ import React from 'react';
 import InitialValueCard from './InitialValueCard';
 import ValueInputCard from './ValueInputCard';
 import RecordedValueCard from './RecordedValueCard';
-import {useRecord} from '../RecordContext';
+import {useUnrecordedTraits} from '../UnrecordedTraitsContext';
 
 const UnrecordedTraitCard = () => {
-  const {isRecorded, isInputActive} = useRecord();
+  const {isRecorded, isInputActive} = useUnrecordedTraits();
   const renderCard = () => {
     if (isRecorded) {
       return <RecordedValueCard />;

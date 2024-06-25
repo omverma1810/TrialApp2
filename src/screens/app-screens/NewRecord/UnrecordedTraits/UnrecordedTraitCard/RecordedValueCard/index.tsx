@@ -5,11 +5,11 @@ import {useTranslation} from 'react-i18next';
 import {Edit} from '../../../../../../assets/icons/svgs';
 import {styles} from '../../../styles';
 import {LOCALES} from '../../../../../../localization/constants';
-import {useRecord} from '../../RecordContext';
+import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
 
 const RecordedValueCard = () => {
   const {t} = useTranslation();
-  const {recordedValue, onEdit, item} = useRecord();
+  const {recordedValue, onEdit, item} = useUnrecordedTraits();
   return (
     <View style={[styles.traitsContainer, styles.row]}>
       <View style={styles.traitsInfoContainer}>

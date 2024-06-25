@@ -17,13 +17,8 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   const handleTraitModalOpen = () => {
     traitModalRef.current?.present();
   };
-  const onTraitsSelect = (trait: string) => {
-    navigation.navigate('NewRecord', {
-      traitsInfo: {
-        imageUrl: imageUrl,
-        selectedTrait: trait,
-      },
-    });
+  const onTraitsSelect = (name: string) => {
+    navigation.navigate('NewRecord', {traitMediaInfo: {name, url: imageUrl}});
   };
   return (
     <SafeAreaView edges={['top']}>

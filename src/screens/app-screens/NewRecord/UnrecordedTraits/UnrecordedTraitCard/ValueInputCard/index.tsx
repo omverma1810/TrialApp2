@@ -3,10 +3,10 @@ import React, {useEffect, useState} from 'react';
 
 import {OutlinedInput, Text} from '../../../../../../components';
 import {styles} from '../../../styles';
-import {useRecord} from '../../RecordContext';
+import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
 
 const ValueInputCard = () => {
-  const {onSubmit, recordedValue, item} = useRecord();
+  const {onSubmit, recordedValue, item} = useUnrecordedTraits();
   const [value, setValue] = useState('');
   const rightIcon = <Text style={styles.traitsInputIconText}>CM</Text>;
 
