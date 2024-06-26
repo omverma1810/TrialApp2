@@ -1,10 +1,16 @@
 import DateTimePicker from 'react-native-ui-datepicker';
 import dayjs from 'dayjs';
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, TouchableOpacity, Text } from 'react-native';
-import { Edit } from '../../assets/icons/svgs';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
+import {Edit} from '../../assets/icons/svgs';
 
-export default function CalendarModal({ modalVisible, onCancel, onOk }) {
+export default function Calender({modalVisible, onCancel, onOk}: any) {
   const [date, setDate] = useState(dayjs());
   const [textInputValue, setTextInputValue] = useState('');
 
@@ -12,7 +18,7 @@ export default function CalendarModal({ modalVisible, onCancel, onOk }) {
     setTextInputValue(dayjs().format('dddd, MMMM D'));
   }, []);
 
-  const handleDateChange = (params) => {
+  const handleDateChange = (params: any) => {
     setDate(dayjs(params.date));
     setTextInputValue(dayjs(params.date).format('dddd, MMMM D'));
   };

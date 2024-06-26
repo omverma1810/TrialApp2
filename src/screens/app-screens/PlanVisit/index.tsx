@@ -8,13 +8,12 @@ import {
   ScrollView,
 } from 'react-native';
 
-import {SafeAreaView, StatusBar} from '../../../components';
+import {SafeAreaView, StatusBar, Calender} from '../../../components';
 import BottomModal from '../../../components/BottomSheetModal';
 import {DropdownArrow} from '../../../assets/icons/svgs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {experiment, field} from '../../../Data';
 import Chip from '../../../components/Chip';
-import CalendarModal from '../../../components/Calender';
 import dayjs, {Dayjs} from 'dayjs';
 import PlanVisitStyles from './PlanVisitStyles';
 
@@ -199,7 +198,7 @@ const PlanVisit = () => {
             setModalVisible(!modalVisible);
           }}>
           <View style={PlanVisitStyles.modalOverlay}>
-            <CalendarModal
+            <Calender
               modalVisible={modalVisible}
               onCancel={handleCancel}
               onOk={handleOk}

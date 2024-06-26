@@ -20,7 +20,6 @@ export type HomeStackParamList = {
   TakeNotes: undefined;
   PlanVisit: undefined;
   Profile: undefined;
-  ExperimentStackScreens: undefined;
 };
 export type ExperimentStackParamList = {
   Experiment: undefined;
@@ -36,7 +35,6 @@ export type RecordStackParamList = {
 };
 export type NotificationStackParamList = {
   Notification: undefined;
-  RecordStackScreens: undefined;
 };
 
 export type HomeScreenProps = CompositeScreenProps<

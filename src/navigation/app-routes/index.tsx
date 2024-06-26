@@ -109,12 +109,26 @@ const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const HomeStackScreens = () => {
   return (
     <HomeStack.Navigator
-      screenOptions={{animation: 'slide_from_right' , headerShadowVisible: false}}>
-      <HomeStack.Screen name="Home" component={Home}  options={{ headerShown: false }}/>
-      <HomeStack.Screen name="PlanVisit" component={PlanVisit} options={{ title: 'Plan a Visit' }} />
-      <HomeStack.Screen name="TakeNotes" component={TakeNotes} options={{ title: 'Take Notes' }}  />
+      screenOptions={{
+        animation: 'slide_from_right',
+        headerShadowVisible: false,
+      }}>
+      <HomeStack.Screen
+        name="Home"
+        component={Home}
+        options={{headerShown: false}}
+      />
+      <HomeStack.Screen
+        name="PlanVisit"
+        component={PlanVisit}
+        options={{title: 'Plan a Visit'}}
+      />
+      <HomeStack.Screen
+        name="TakeNotes"
+        component={TakeNotes}
+        options={{title: 'Take Notes'}}
+      />
       <HomeStack.Screen name="Profile" component={Profile} />
-      <HomeStack.Screen name="ExperimentStackScreens" component={ExperimentStackScreens} options={{ headerShown: false }} />
     </HomeStack.Navigator>
   );
 };
@@ -123,7 +137,10 @@ const ExperimentStack = createNativeStackNavigator<ExperimentStackParamList>();
 const ExperimentStackScreens = () => {
   return (
     <ExperimentStack.Navigator
-      screenOptions={{animation: 'slide_from_bottom' , headerShadowVisible: false ,}}>
+      screenOptions={{
+        animation: 'slide_from_right',
+        headerShown: false,
+      }}>
       <ExperimentStack.Screen name="Experiment" component={Experiment} />
       <ExperimentStack.Screen
         name="ExperimentDetails"
@@ -140,7 +157,10 @@ const RecordStack = createNativeStackNavigator<RecordStackParamList>();
 const RecordStackScreens = () => {
   return (
     <RecordStack.Navigator
-      screenOptions={{headerShadowVisible: false ,animation: 'slide_from_right'}}>
+      screenOptions={{
+        headerShadowVisible: false,
+        animation: 'slide_from_right',
+      }}>
       <RecordStack.Screen name="Record" component={Record} />
     </RecordStack.Navigator>
   );
@@ -151,9 +171,11 @@ const NotificationStack =
 const NotificationStackScreens = () => {
   return (
     <NotificationStack.Navigator
-      screenOptions={{headerShadowVisible: false, animation: 'slide_from_right'}}>
+      screenOptions={{
+        headerShadowVisible: false,
+        animation: 'slide_from_right',
+      }}>
       <NotificationStack.Screen name="Notification" component={Notification} />
-      <NotificationStack.Screen name="RecordStackScreens" component={RecordStackScreens} options={{ headerShown: false }}/>
     </NotificationStack.Navigator>
   );
 };
