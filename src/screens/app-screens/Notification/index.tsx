@@ -1,14 +1,17 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
+import {StyleSheet , View , Text} from 'react-native';
 
-import {SafeAreaView, StatusBar} from '../../../components';
-import ComingSoon from '../ComingSoon';
+import {SafeAreaView, StatusBar} from '../../../components'
+import { NotificationImg } from '../../../assets/icons/svgs';
+import NotificationStyles from './NotificationDefault/NotificationStyles';
+import NotificationScreen from './NotificationScreen';
+import { NotificationScreenProps } from '../../../types/navigation/appTypes';
 
-const Notification = () => {
+const Notification: React.FC<NotificationScreenProps> = ({navigation}) => {
   return (
     <SafeAreaView>
       <StatusBar />
-      <ComingSoon />
+      <NotificationScreen navigation={navigation}/>
     </SafeAreaView>
   );
 };

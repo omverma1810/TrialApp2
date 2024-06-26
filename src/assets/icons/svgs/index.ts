@@ -28,6 +28,24 @@ import Notes from './Notes';
 import ImagePlus from './ImagePlus';
 import Check from './Check';
 import X from './X';
+import Flask from './flask';
+import File from './file';
+import IconNotes from './iconNotes';
+import ButtonNavigation from './buttonNavigation';
+import Bell from './bell';
+import Calendar from './calendar';
+import Dots from './dots';
+import Field from './field';
+import NotificationImg from './tabNotification';
+import Trash from './Trash';
+import RightArrow from './Rightarrow';
+import LeftArrow from './Leftarrow';
+import Logo from './logo';
+import FieldSybol1 from './FieldSymbol1';
+import ProfileImg from './Profile';
+import List from './List';
+import Clock from './Clock';
+import Alert from './Alert';
 
 export {
   Back,
@@ -60,4 +78,22 @@ export {
   ImagePlus,
   Check,
   X,
+  Flask,
+  File,
+  IconNotes,
+  ButtonNavigation,
+  Bell,
+  Calendar,
+  Dots,
+  Field,
+  NotificationImg,
+  Trash,
+  RightArrow,
+  LeftArrow,
+  Logo,
+  FieldSybol1,
+  ProfileImg,
+  List,
+  Clock,
+  Alert,
 };

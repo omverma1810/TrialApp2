@@ -17,6 +17,8 @@ import Switch from './Switch';
 import Picker from './Picker';
 import OverlayLoader from './OverlayLoader';
 import OutlinedInput from './OutlinedInput';
+import DropdownComponent from './Dropdown';
+import CalendarModal from './Calender';
 
 export {
   Text,
@@ -38,4 +40,6 @@ export {
   Picker,
   OverlayLoader,
   OutlinedInput,
+  DropdownComponent,
+  CalendarModal
 };
