@@ -26,7 +26,7 @@ import TakeNotes from '../../screens/app-screens/TakeNotes';
 import Experiment from '../../screens/app-screens/Experiment';
 import Record from '../../screens/app-screens/Record';
 import Notification from '../../screens/app-screens/Notification';
-import Profile from '../../screens/app-screens/Home/Profile'
+import Profile from '../../screens/app-screens/Home/Profile';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -142,6 +142,7 @@ const NotificationStackScreens = () => {
     <NotificationStack.Navigator
       screenOptions={{headerShadowVisible: false, animation: 'slide_from_right'}}>
       <NotificationStack.Screen name="Notification" component={Notification} />
+      <NotificationStack.Screen name="RecordStackScreens" component={RecordStackScreens} options={{ headerShown: false }}/>
     </NotificationStack.Navigator>
   );
 };

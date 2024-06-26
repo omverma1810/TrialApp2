@@ -28,12 +28,18 @@ const TakeNotesStyles = StyleSheet.create({
     fontWeight: '400',
   },
   chipCropText: {
-    color: 'black',
-    width: 50,
     paddingHorizontal: 10,
+    alignItems:'center',
+    width: 58,
+    justifyContent:'center',
     paddingVertical: 5,
     borderRadius: 6,
     backgroundColor: '#EAF4E7',
+    display:'flex',
+    color: 'black'
+  },
+  chipCropText1:{
+    color: 'black',
   },
   fieldText: {
     color: 'black',

@@ -6,6 +6,7 @@ import {
   Animated,
   StyleSheet,
   Dimensions,
+  Pressable,
 } from 'react-native';
 import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -35,6 +36,7 @@ const TraitComponent = ({titles, selectedFieldsData}) => {
     <View style={styles.projectContainer}>
       {titles.map((title, index) => (
         <View key={index} style={styles.borderBottom}>
+          <Pressable onPress={() => toggleDropdown(index)}>
           <View style={styles.row}>
             <View style={styles.column}>
               <Text style={styles.title}>{title}</Text>
@@ -43,6 +45,7 @@ const TraitComponent = ({titles, selectedFieldsData}) => {
               <DropdownArrow />
             </TouchableOpacity>
           </View>
+          </Pressable>
           <ScrollView>
             <Animated.View
               style={[styles.dropdown, {height: dropdownHeights[index]}]}>

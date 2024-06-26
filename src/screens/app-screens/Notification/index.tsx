@@ -3,24 +3,15 @@ import {StyleSheet , View , Text} from 'react-native';
 
 import {SafeAreaView, StatusBar} from '../../../components'
 import { NotificationImg } from '../../../assets/icons/svgs';
-import NotificationStyles from './NotificationStyles';
+import NotificationStyles from './NotificationDefault/NotificationStyles';
+import NotificationScreen from './NotificationScreen';
+import { NotificationScreenProps } from '../../../types/navigation/appTypes';
 
-const Notification = () => {
+const Notification: React.FC<NotificationScreenProps> = ({navigation}) => {
   return (
     <SafeAreaView>
       <StatusBar />
-      <View style={NotificationStyles.container}>
-        <View style={NotificationStyles.content}>
-          <View style={NotificationStyles.innerContent}>
-            <NotificationImg />
-            <Text style={NotificationStyles.titleText}>No Notification Yet</Text>
-            <View style={NotificationStyles.messageContainer}>
-              <Text style={NotificationStyles.messageText}>Your notification will appear here</Text>
-              <Text style={NotificationStyles.messageText}>once you receive them</Text>
-            </View>
-          </View>
-        </View>
-      </View>
+      <NotificationScreen navigation={navigation}/>
     </SafeAreaView>
   );
 };

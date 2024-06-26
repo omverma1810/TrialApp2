@@ -1,7 +1,8 @@
-import React from 'react';
-import {View, Text, Pressable} from 'react-native';
-
+import React, {useState} from 'react';
+import {View, Text, Pressable, Image} from 'react-native';
+import ImagePicker from 'react-native-image-crop-picker';
 import ProfileStyles from './ProfileStyles';
+import {ProfileImg} from '../../../../assets/icons/svgs';
 
 const Profile = () => {
   const profileData = {
@@ -11,11 +12,54 @@ const Profile = () => {
     email: 'johndoe@example.com',
   };
 
+  const [imageSource, setImageSource] = useState<string | null>(null);
+  const [isDefaultImage, setIsDefaultImage] = useState<boolean>(true);
+
+  const selectImage = () => {
+    ImagePicker.openPicker({
+      width: 80,
+      height: 80,
+      cropping: true,
+      cropperCircleOverlay: true,
+      includeBase64: true,
+      compressImageQuality: 0.7,
+    })
+      .then(image => {
+        setImageSource(image.path);
+        setIsDefaultImage(false);
+      })
+      .catch(error => {
+        console.log('ImagePicker Error: ', error);
+      });
+  };
+
+  const deleteImage = () => {
+    setImageSource(null);
+    setIsDefaultImage(true);
+  };
+
+  const toggleImageAction = () => {
+    if (isDefaultImage) {
+      selectImage();
+    } else {
+      deleteImage();
+    }
+  };
+
   return (
     <View style={ProfileStyles.container}>
-      <View style={ProfileStyles.profileContainer}>
-        {/* <Image style={ProfileStyles.profileImage} source={require('../../assets/splash.png')} /> */}
-      </View>
+      <Pressable
+        style={ProfileStyles.profileContainer}
+        onPress={toggleImageAction}>
+        {isDefaultImage ? (
+          <ProfileImg width={80} height={81} />
+        ) : (
+          <Image
+            style={{width: 80, height: 80, borderRadius: 100}}
+            source={{uri: imageSource ?? undefined}}
+          />
+        )}
+      </Pressable>
       <View style={ProfileStyles.infoContainer}>
         <View style={ProfileStyles.infoItem}>
           <Text style={ProfileStyles.infoText}>Name</Text>

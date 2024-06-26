@@ -26,6 +26,10 @@ import RightArrow from './Rightarrow'
 import LeftArrow from './Leftarrow'
 import Logo from './logo'
 import FieldSybol1 from './FieldSymbol1'
+import ProfileImg from './Profile'
+import List from './List'
+import Clock from './Clock'
+import Alert from './Alert'
 
 export {
   Back,
@@ -55,5 +59,9 @@ export {
   RightArrow,
   LeftArrow,
   Logo,
-  FieldSybol1
+  FieldSybol1,
+  ProfileImg,
+  List,
+  Clock,
+  Alert,
 };

@@ -41,12 +41,19 @@ const RecordStyles = StyleSheet.create({
     fontWeight: '400',
   },
   experimentCrop: {
-    color: 'black',
-    width: 50,
     paddingHorizontal: 10,
+    alignItems:'center',
+    width: 58,
+    justifyContent:'center',
     paddingVertical: 5,
     borderRadius: 6,
     backgroundColor: '#EAF4E7',
+    display:'flex',
+    color: 'black'
+  },
+  experimentCropText:{
+    color: 'black',
+    
   },
   chip: {
     backgroundColor: 'white',

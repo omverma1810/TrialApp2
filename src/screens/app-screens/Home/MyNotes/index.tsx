@@ -8,7 +8,7 @@ import {Notes as initialNotes} from '../../../../Data';
 const MyNote = ({}) => {
   const [notes, setNotes] = useState(initialNotes);
 
-  const handleDeleteNote = id => {
+  const handleDeleteNote = (id: number) => {
     setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
   };
 

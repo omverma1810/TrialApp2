@@ -65,7 +65,7 @@ export default function CalendarModal({ modalVisible, onCancel, onOk }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5FCFF',
-    width: 330,
+    width: 350,
     borderRadius: 25,
   },
   header: {

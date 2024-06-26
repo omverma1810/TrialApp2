@@ -31,6 +31,7 @@ export type RecordStackParamList = {
 };
 export type NotificationStackParamList = {
   Notification: undefined;
+  RecordStackScreens: undefined;
 };
 
 export type HomeScreenProps = CompositeScreenProps<

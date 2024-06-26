@@ -10,6 +10,7 @@ const CheckBox = ({value = true, onChange = () => {}}: CheckBoxType) => {
       onPress={() => {
         onChange(!value);
       }}>
+        
       {value ? <CheckboxFill /> : <CheckboxBlank />}
     </Pressable>
   );
@@ -17,4 +18,3 @@ const CheckBox = ({value = true, onChange = () => {}}: CheckBoxType) => {
 
 export default CheckBox;
 
-const styles = StyleSheet.create({});

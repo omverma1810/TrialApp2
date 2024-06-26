@@ -11,12 +11,12 @@ const HeaderStyles = StyleSheet.create({
         alignItems: 'center',
         height:80,
       },
-      profileContainer: {
-        height: 50,
-        width: 50,
-        borderRadius: 50,
-        backgroundColor: 'black',
-      },
+      // profileContainer: {
+      //   height: 50,
+      //   width: 50,
+      //   borderRadius: 50,
+        
+      // },
 
 
 })

@@ -12,7 +12,6 @@ const ProfileStyle = StyleSheet.create({
         height: 80,
         width: 80,
         borderRadius: 50,
-        backgroundColor: 'black',
     },
     infoContainer: {
         gap: 15,
@@ -47,6 +46,16 @@ const ProfileStyle = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 5,
+      },
+      profileImage: {
+        width: 200,
+        height: 200,
+        borderRadius: 100, // To make it circular, assuming the image is square
+      },
+      addImageText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
       },
 
 })

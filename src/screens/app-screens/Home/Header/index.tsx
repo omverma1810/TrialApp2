@@ -1,7 +1,13 @@
 import React from 'react';
 import {View, Text, Image, TouchableOpacity, Pressable} from 'react-native';
 
-import {Flask, Leaf, File, Logo} from '../../../../assets/icons/svgs';
+import {
+  Flask,
+  Leaf,
+  File,
+  Logo,
+  ProfileImg,
+} from '../../../../assets/icons/svgs';
 import HeaderStyles from './HeaderStyles';
 import {useNavigation} from '@react-navigation/native';
 import {HomeScreenProps} from '../../../../types/navigation/appTypes';
@@ -11,7 +17,6 @@ type HeaderProps = {
 };
 
 const Header: React.FC<HeaderProps> = ({navigation}) => {
-
   const goToProfile = () => {
     navigation.navigate('Profile');
   };
@@ -20,8 +25,8 @@ const Header: React.FC<HeaderProps> = ({navigation}) => {
       <View style={HeaderStyles.container}>
         <Logo />
         <Pressable onPress={goToProfile}>
-          <View style={HeaderStyles.profileContainer}>
-            {/* <Image style={DashinfoStyles.profileImage} source={require('../../assets/splash.png')} /> */}
+          <View>
+            <ProfileImg width={50} height={50} />
           </View>
         </Pressable>
       </View>
