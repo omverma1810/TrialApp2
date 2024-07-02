@@ -1,86 +1,77 @@
 import axios, {AxiosRequestConfig} from 'axios';
-import jwt_decode, {JwtPayload} from 'jwt-decode';
+import {jwtDecode, JwtPayload} from 'jwt-decode';
 import EncryptedStorage from 'react-native-encrypted-storage';
 
-import {BASE_URL, URL, API_CONFIG} from '../constants/URLS';
+import {BASE_URL, URL} from '../constants/URLS';
 
-type tokensType = {
+type TokensType = {
   accessToken: string;
-  refreshToken: string;
 };
 
-const setTokens = async (tokens: tokensType) => {
+const TOKEN_STORAGE_KEY = 'API_TOKENS';
+
+const setTokens = async (tokens: TokensType): Promise<void> => {
   try {
-    await EncryptedStorage.setItem('API_TOKENS', JSON.stringify(tokens));
+    await EncryptedStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokens));
   } catch (error) {
-    console.log('Error while setting tokens : ', error);
+    console.log('Error while setting tokens:', error);
   }
 };
 
-const getTokens = async () => {
+const getTokens = async (): Promise<TokensType | null> => {
   try {
-    const result = await EncryptedStorage.getItem('API_TOKENS');
-    if (result) {
-      const tokens = JSON.parse(result);
-      return tokens;
-    }
+    const result = await EncryptedStorage.getItem(TOKEN_STORAGE_KEY);
+    return result ? JSON.parse(result) : null;
   } catch (error) {
-    console.log('Error while getting tokens : ', error);
+    console.log('Error while getting tokens:', error);
+    return null;
   }
 };
 
-const isTokenExpired = (token: string) => {
-  const decoded: JwtPayload = jwt_decode(token);
-  if (decoded?.exp) {
-    return decoded.exp < Date.now() / 1000;
-  } else return true;
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded: JwtPayload = jwtDecode(token);
+    return decoded?.exp ? decoded.exp < Date.now() / 1000 : true;
+  } catch (error) {
+    console.log('Error while decoding token:', error);
+    return true;
+  }
 };
 
-const getAccessTokenUsingRefreshToken = async (refreshToken: string) => {
-  const data = {
-    refreshToken: refreshToken,
-  };
+const getNewAccessToken = async (): Promise<TokensType | null> => {
   const axiosConfig: AxiosRequestConfig = {
-    url: BASE_URL + URL.REFRESH_TOKEN,
-    method: 'POST',
-    data: data,
-    headers: {
-      Accept: '*/*',
-      'Content-Type': 'multipart/form-data',
-      'x-client-id': API_CONFIG.X_CLIENT_ID,
-    },
+    url: `${BASE_URL}${URL.REFRESH_TOKEN}`,
+    method: 'GET',
   };
+
   try {
     const response = await axios(axiosConfig);
-    return {
-      accessToken: response?.data?.data?.accessToken,
-      refreshToken: response?.data?.data?.refreshToken,
-    };
+    const {access_token} = response?.data?.data;
+    return access_token ? {accessToken: access_token} : null;
   } catch (error) {
-    console.log('Error while getting access token using refresh token', error);
+    console.log('Error while getting access token:', error);
+    return null;
   }
 };
 
-const getVerifiedToken = async (tokens: tokensType) => {
-  if (tokens?.accessToken && tokens?.refreshToken) {
-    if (!isTokenExpired(tokens?.accessToken)) {
-      return tokens;
-    } else {
-      if (tokens?.refreshToken) {
-        const newTokens = await getAccessTokenUsingRefreshToken(
-          tokens?.refreshToken,
-        );
-        if (newTokens) {
-          setTokens(newTokens);
-          return newTokens;
-        } else return null;
-      } else {
-        console.log('refreshToken expired, please login...');
-        return null;
-      }
-    }
+const getVerifiedToken = async (
+  tokens: TokensType | null,
+): Promise<TokensType | null> => {
+  if (!tokens || !tokens?.accessToken) {
+    console.log('Tokens are not available, please login.');
+    return null;
+  }
+
+  if (!isTokenExpired(tokens.accessToken)) {
+    return tokens;
+  }
+
+  const newTokens = await getNewAccessToken();
+  if (newTokens) {
+    await setTokens(newTokens);
+    return newTokens;
   } else {
-    console.log('Tokens are not available, please login...');
+    console.log('Refresh token expired, please login.');
     return null;
   }
 };
