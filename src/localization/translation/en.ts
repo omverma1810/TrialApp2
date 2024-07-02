@@ -13,7 +13,8 @@ export default {
   },
   LOGIN: {
     LBL_EMAIL: 'Email',
-    LBL_PASSWORD: 'password',
+    LBL_USERNAME: 'Username',
+    LBL_PASSWORD: 'Password',
     LBL_LOGIN: 'Login',
     LBL_FORGOT_PASSWORD: 'Forgot Password?',
   },
