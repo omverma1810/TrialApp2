@@ -4,7 +4,7 @@ import {useTranslation} from 'react-i18next';
 import {CardArrowDown, CardArrowUp} from '../../../../assets/icons/svgs';
 import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
-import RecordedTraits from '../RecordedTraits ';
+import RecordedTraits from '../RecordedTraits';
 import Notes from '../Notes';
 import UnrecordedTraits from '../UnrecordedTraits';
 
