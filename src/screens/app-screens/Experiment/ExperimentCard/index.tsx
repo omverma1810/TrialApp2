@@ -7,10 +7,11 @@ import ExperimentList from './ExperimentList';
 const ExperimentCard = ({data}: any) => {
   return (
     <View style={styles.container}>
-      <View style={styles.cropContainer}>
+      {/* <View style={styles.cropContainer}>
         <Text style={styles.cropTitle}>{data?.crop_name}</Text>
       </View>
-      {data?.experiments?.map(ExperimentList)}
+      {data?.experiments?.map(ExperimentList)} */}
+      <ExperimentList experiment={data} />
     </View>
   );
 };

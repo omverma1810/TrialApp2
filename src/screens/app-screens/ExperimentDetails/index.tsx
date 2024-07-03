@@ -9,8 +9,12 @@ import {LOCALES} from '../../../localization/constants';
 import FieldCard from './FieldCard';
 import {ExperimentDetailsScreenProps} from '../../../types/navigation/appTypes';
 
-const ExperimentDetails = ({navigation}: ExperimentDetailsScreenProps) => {
+const ExperimentDetails = ({
+  navigation,
+  route,
+}: ExperimentDetailsScreenProps) => {
   const {t} = useTranslation();
+  const {id, type} = route?.params;
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
