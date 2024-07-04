@@ -9,8 +9,9 @@ import PlotCard from './PlotCard';
 import {styles} from './styles';
 import {PlotsScreenProps} from '../../../types/navigation/appTypes';
 
-const Plots = ({navigation}: PlotsScreenProps) => {
+const Plots = ({navigation, route}: PlotsScreenProps) => {
   const {t} = useTranslation();
+  const {id, type} = route.params;
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />

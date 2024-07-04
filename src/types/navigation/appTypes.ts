@@ -24,7 +24,7 @@ export type HomeStackParamList = {
 export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: {id: string; type: string};
-  Plots: undefined;
+  Plots: {id: string; type: string};
   NewRecord: undefined | {traitMediaInfo: {name: string; url: string}};
   AddImage: {
     imageUrl: string;

@@ -5,7 +5,13 @@ import {useTranslation} from 'react-i18next';
 import {styles} from './styles';
 import Filter from './Filter';
 import ExperimentCard from './ExperimentCard';
-import {Input, SafeAreaView, StatusBar, Text} from '../../../components';
+import {
+  Input,
+  Loader,
+  SafeAreaView,
+  StatusBar,
+  Text,
+} from '../../../components';
 import {LOCALES} from '../../../localization/constants';
 import {Plus, Search} from '../../../assets/icons/svgs';
 import NewRecordOptionsModal from './NewRecordOptionsModal';
@@ -61,16 +67,6 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     ),
     [cropList, projectList, selectedCrop, selectedProject],
   );
-  const ListEmptyComponent = useMemo(
-    () => (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>
-          {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
-        </Text>
-      </View>
-    ),
-    [],
-  );
 
   const onNewRecordClick = () => {
     setIsOptionModalVisible(true);
@@ -116,6 +112,21 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
   }, [experimentListData]);
+
+  const ListEmptyComponent = useMemo(
+    () => (
+      <View style={styles.emptyContainer}>
+        {isExperimentListLoading ? (
+          <Loader />
+        ) : (
+          <Text style={styles.emptyText}>
+            {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
+          </Text>
+        )}
+      </View>
+    ),
+    [isExperimentListLoading],
+  );
 
   return (
     <SafeAreaView
