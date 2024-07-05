@@ -54,6 +54,11 @@ const SignIn = () => {
           USER_DETAILS_STORAGE_KEY,
           JSON.stringify(user),
         );
+<<<<<<< Updated upstream
+=======
+        await AsyncStorage.setItem('accessToken', accessToken);
+        console.log(await AsyncStorage.getItem('username'))
+>>>>>>> Stashed changes
         await Keychain.setGenericPassword(userName, password);
         dispatch(setIsUserSignedIn(true));
       } catch (error) {
