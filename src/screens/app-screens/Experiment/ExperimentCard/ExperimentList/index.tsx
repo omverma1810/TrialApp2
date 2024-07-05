@@ -15,7 +15,7 @@ const ExperimentList = ({experiment}: any) => {
   const experimentInfo = [
     {
       id: 0,
-      title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT_ID),
+      title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT),
       key: 'experimentName',
     },
     // {
@@ -55,12 +55,12 @@ const ExperimentList = ({experiment}: any) => {
     // },
     {
       id: 8,
-      title: t(LOCALES.EXPERIMENT.LBL_LOCATION),
+      title: t(LOCALES.EXPERIMENT.LBL_LOCATION_DEPLOYED),
       key: 'noOfLocationsDeployed',
     },
     {
       id: 9,
-      title: t(LOCALES.EXPERIMENT.LBL_FIELD),
+      title: t(LOCALES.EXPERIMENT.LBL_LOCATION_REQUIRED),
       key: 'locationReq',
     },
     {

@@ -1,9 +1,20 @@
-import React, {createContext, useContext, useState, ReactNode} from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useMemo,
+} from 'react';
 
-interface TraitItem {
-  id: number;
-  name: string;
-  type: string;
+export interface TraitItem {
+  traitId: string;
+  traitName: string;
+  traitUom: string;
+  dataType: 'float';
+  observationStatus: boolean;
+  observationId: string;
+  value: string;
 }
 
 interface UnrecordedTraitsContextType {
@@ -11,6 +22,7 @@ interface UnrecordedTraitsContextType {
   isInputActive: boolean;
   isRecorded: boolean;
   recordedValue: string;
+  getFormattedRecordValue: string;
   onRecord: () => void;
   onSubmit: (value: string) => void;
   onEdit: () => void;
@@ -23,27 +35,46 @@ const UnrecordedTraitsContext = createContext<
 export const UnrecordedTraitsProvider = ({
   children,
   item,
+  updateRecordData = () => {},
 }: {
   children: ReactNode;
   item: TraitItem;
+  updateRecordData: (key: string, value: string) => void;
 }) => {
   const [isInputActive, setIsInputActive] = useState(false);
   const [isRecorded, setIsRecorded] = useState(false);
   const [recordedValue, setRecordedValue] = useState('');
 
   const onRecord = () => {
-    setIsInputActive(true);
+    if (item?.dataType === 'float') {
+      setIsInputActive(true);
+    }
   };
 
   const onSubmit = (value: string) => {
     setIsRecorded(true);
     setRecordedValue(value);
+    updateRecordData(item?.traitId, value);
   };
 
   const onEdit = () => {
     setIsRecorded(false);
     setIsInputActive(true);
   };
+
+  useEffect(() => {
+    if (!item || !item?.value) return;
+    setIsRecorded(true);
+    setRecordedValue(item.value);
+  }, [item]);
+
+  const getFormattedRecordValue = useMemo(() => {
+    if (item?.dataType === 'float') {
+      return `${recordedValue} ${item?.traitUom}`;
+    } else {
+      return String(recordedValue);
+    }
+  }, [recordedValue, item]);
 
   return (
     <UnrecordedTraitsContext.Provider
@@ -52,6 +83,7 @@ export const UnrecordedTraitsProvider = ({
         isInputActive,
         isRecorded,
         recordedValue,
+        getFormattedRecordValue,
         onRecord,
         onSubmit,
         onEdit,

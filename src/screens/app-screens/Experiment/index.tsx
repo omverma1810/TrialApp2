@@ -147,11 +147,17 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
         <FlatList
           data={experimentList}
           contentContainerStyle={
-            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 60}
+            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 80}
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
-          renderItem={({item}) => <ExperimentCard data={item} />}
+          renderItem={({item, index}) => (
+            <ExperimentCard
+              data={item}
+              isFirstIndex={index === 0}
+              isLastIndex={index === experimentList.length - 1}
+            />
+          )}
           keyExtractor={(_, index) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
         />

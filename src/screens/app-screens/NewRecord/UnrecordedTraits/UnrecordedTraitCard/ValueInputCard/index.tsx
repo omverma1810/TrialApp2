@@ -8,7 +8,9 @@ import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
 const ValueInputCard = () => {
   const {onSubmit, recordedValue, item} = useUnrecordedTraits();
   const [value, setValue] = useState('');
-  const rightIcon = <Text style={styles.traitsInputIconText}>CM</Text>;
+  const rightIcon = (
+    <Text style={styles.traitsInputIconText}>{item?.traitUom}</Text>
+  );
 
   const handleSubmit = (text: string) => {
     onSubmit(text);
@@ -24,12 +26,11 @@ const ValueInputCard = () => {
   return (
     <View style={[styles.traitsInputContainer, styles.row]}>
       <OutlinedInput
-        label={item.name}
+        label={item.traitName}
         rightIcon={rightIcon}
         onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
         value={value}
         onChangeText={setValue}
-        note="Use values separated by * to get the average."
       />
     </View>
   );
