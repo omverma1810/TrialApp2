@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
+
 import ProfileStyles from './ProfileStyles';
 import {ProfileImg} from '../../../../assets/icons/svgs';
 import {useAppDispatch, useAppSelector} from '../../../../store';
@@ -21,6 +22,7 @@ import {
 } from '../../../../store/slice/authSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
+import useCleanUp from '../../../../hooks/useCleanUp';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
@@ -36,14 +38,16 @@ const Profile = () => {
   const [isDefaultImage, setIsDefaultImage] = useState<boolean>(true);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [logoutUser] = useCleanUp();
 
   const dispatch = useAppDispatch();
   const user = useAppSelector(state => state.auth.userDetails);
 
   // fetching profile details using access token
   const [fetchProfile, profileDataResponse] = useApi({
-    url: URL.GET_PROFILE,
+    url: URL.PROFILE,
     method: 'GET',
+    isSecureEntry: true,
   });
 
   useEffect(() => {
@@ -56,26 +60,29 @@ const Profile = () => {
             phoneNumber: `${user.phone_number}`,
             email: user.email,
           });
+          await AsyncStorage.setItem(
+            'userDetails',
+            JSON.stringify(profileData),
+          );
           setIsLoading(false);
+        } else {
+          const token = await AsyncStorage.getItem('accessToken');
+          if (token) {
+            await fetchProfile({headers: {Authorization: `Bearer ${token}`}});
+            if (profileDataResponse && profileDataResponse.status === 200) {
+              const fetchedUser = profileDataResponse.data.user;
+              dispatch(setUserDetails(fetchedUser));
+              setProfileData({
+                name: `${fetchedUser.first_name} ${fetchedUser.last_name}`,
+                location: fetchedUser.location?.name || 'N/A',
+                phoneNumber: `${fetchedUser.country_code} ${fetchedUser.phone_number}`,
+                email: fetchedUser.email,
+              });
+            }
+          } else {
+            console.log('No token found');
+          }
         }
-        // } else {
-        //   const token = await AsyncStorage.getItem('accessToken');
-        //   if (token) {
-        //     await fetchProfile({headers: {Authorization: `Bearer ${token}`}});
-        //     if (profileDataResponse && profileDataResponse.status === 200) {
-        //       const fetchedUser = profileDataResponse.data.user;
-        //       dispatch(setUserDetails(fetchedUser)); 
-        //       setProfileData({
-        //         name: `${fetchedUser.first_name} ${fetchedUser.last_name}`,
-        //         location: fetchedUser.location?.name || 'N/A',
-        //         phoneNumber: `${fetchedUser.country_code} ${fetchedUser.phone_number}`,
-        //         email: fetchedUser.email,
-        //       });
-        //     }
-        //   } else {
-        //     console.log('No token found');
-        //   }
-        // }
       } catch (error: any) {
         console.log('Error retrieving token:', error);
       } finally {
@@ -86,17 +93,18 @@ const Profile = () => {
   }, [profileDataResponse]);
 
   //logout functionality
-  const [logout, logoutResponse] = useApi({
+
+  const [logout, logoutResponse, logoutError] = useApi({
     url: URL.LOGOUT,
     method: 'DELETE',
-    isSecureEntry: true,
   });
-  useEffect(()=>{
+
+  useEffect(() => {
     const handleLogout = async () => {
       try {
         if (logoutResponse && logoutResponse.status_code === 200) {
           dispatch(setIsUserSignedIn(false));
-          dispatch(setClearAuthData(profileData));
+          dispatch(setClearAuthData(false));
           await AsyncStorage.clear();
           await Keychain.resetGenericPassword();
         } else {
@@ -106,11 +114,11 @@ const Profile = () => {
         console.log('Error while logging out:', error);
       }
     };
-    handleLogout()
-  },[logoutResponse])
-  const onLogout = async() =>{
-    const accessToken = await AsyncStorage.getItem('accessToken');
+    handleLogout();
+  }, [logoutResponse]);
 
+  const onLogout = async () => {
+    const accessToken = await AsyncStorage.getItem('accessToken');
     if (!accessToken) {
       console.log('No access token found');
       return;
@@ -124,12 +132,13 @@ const Profile = () => {
         access_token: accessToken,
       },
     });
-    console.log(logoutResponse)
-  }
-  
+    logoutUser();
+  };
+  //update profile functionality
   const [updateProfile, updateProfileResponse] = useApi({
-    url: URL.UPDATE_PROFILE,
+    url: URL.PROFILE,
     method: 'PUT',
+    isSecureEntry: true,
   });
   const onUpdate = async () => {
     const token = await AsyncStorage.getItem('accessToken');
@@ -138,40 +147,52 @@ const Profile = () => {
       return;
     }
 
-    const headers = { 
+    const headers = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
       'x-auth-token': token,
-    };  
-    let numericStr = profileData.phoneNumber.replace(/\s/, '')
+    };
+    // const filename = imageSource.path?.split('/').pop();
+    // const match = /\.(\w+)$/.exec(filename ?? '');
+    // const type = match ? `image/${match[1]}` : 'image/jpeg';
+    // const uri = imageSource?.path || imageSource;
+    // const avatar_id = {
+    //   uri: uri,
+    //   name: filename,
+    //   type: type,
+    // };
+    let numericStr = profileData.phoneNumber.replace(/\s/, '');
     let payload = JSON.stringify({
-      "phone_number": parseInt(numericStr),
-      "email": profileData.email
+      phone_number: parseInt(numericStr),
+      email: profileData.email,
     });
-    await updateProfile({payload,headers});
+    await updateProfile({payload, headers});
   };
-  useEffect(() => { 
-    console.log('updateddata', updateProfileResponse);
+
+  useEffect(() => {
     const handleUpdateData = async () => {
       Alert.alert('Success', 'Profile updated successfully');
-      const user= updateProfileResponse.data.user;
-      console.log(user)
+      const user = updateProfileResponse.data.user;
+      console.log(user);
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
         USER_DETAILS_STORAGE_KEY,
         JSON.stringify(user),
       );
-      await Keychain.setGenericPassword(profileData.email, profileData.phoneNumber);
+      await Keychain.setGenericPassword(
+        profileData.email,
+        profileData.phoneNumber,
+      );
       setIsEditing(false);
     };
     if (updateProfileResponse && updateProfileResponse.status_code === 200) {
       handleUpdateData();
     }
   }, [updateProfileResponse]);
-  
+
   //image handling functionality
   const selectImage = () => {
-    ImagePicker.openPicker({ 
+    ImagePicker.openPicker({
       width: 80,
       height: 80,
       cropping: true,
