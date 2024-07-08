@@ -13,10 +13,7 @@ const TOKEN_STORAGE_KEY = 'API_TOKENS';
 const setTokens = async (tokens: TokensType): Promise<void> => {
   try {
     await EncryptedStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokens));
-<<<<<<< Updated upstream
-=======
     console.log(tokens)
->>>>>>> Stashed changes
   } catch (error) {
     console.log('Error while setting tokens:', error);
   }
@@ -24,11 +21,7 @@ const setTokens = async (tokens: TokensType): Promise<void> => {
 
 const getTokens = async (): Promise<TokensType | null> => {
   try {
-<<<<<<< Updated upstream
-    const result = await EncryptedStorage.getItem(TOKEN_STORAGE_KEY);
-=======
     const result = await EncryptedStorage.getItem(TOKEN_STORAGE_KEY); 
->>>>>>> Stashed changes
     return result ? JSON.parse(result) : null;
   } catch (error) {
     console.log('Error while getting tokens:', error);

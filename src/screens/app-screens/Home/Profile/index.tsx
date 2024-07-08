@@ -44,7 +44,6 @@ const Profile = () => {
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.GET_PROFILE,
     method: 'GET',
-    isSecureEntry: true,
   });
 
   useEffect(() => {
@@ -131,7 +130,6 @@ const Profile = () => {
   const [updateProfile, updateProfileResponse] = useApi({
     url: URL.UPDATE_PROFILE,
     method: 'PUT',
-    isSecureEntry: true,
   });
   const onUpdate = async () => {
     const token = await AsyncStorage.getItem('accessToken');

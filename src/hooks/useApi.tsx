@@ -12,12 +12,8 @@ type UseApiType = {
 };
 
 type ApiCallType = {
-<<<<<<< Updated upstream
-  payload?: Record<string, unknown>;
-=======
   // payload?: Record<string, unknown>;
   payload?: any;
->>>>>>> Stashed changes
   headers?: Record<string, string>;
   pathParams?: string;
   queryParams?: string;
@@ -107,20 +103,12 @@ export const useApi = ({
 
         setResponse(res.data);
       } catch (err: any) {
-<<<<<<< Updated upstream
-        console.log('API url:', url);
-=======
         console.log('API URL:', url);
->>>>>>> Stashed changes
         if (payload) console.log('API payload:', payload);
         if (pathParams) console.log('API pathParams:', pathParams);
         if (queryParams) console.log('API queryParams:', queryParams);
         if (headers) console.log('API headers:', headers);
-<<<<<<< Updated upstream
-        console.log('API error:', err.response || err);
-=======
         console.log('API error:', err.response.message || err);
->>>>>>> Stashed changes
 
         setError(err.response ? err.response.data : err);
         if (err?.response?.data?.statusCode === 401) {
