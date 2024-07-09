@@ -67,7 +67,10 @@ export const useApi = ({
         const tokens = await getTokens();
         const newTokens = await getVerifiedToken(tokens);
         if (newTokens) {
-          axiosConfig.headers['token'] = newTokens.accessToken;
+          axiosConfig.headers = {
+            ...axiosConfig.headers,
+            Authorization: `Bearer ${newTokens?.accessToken}`,
+          };
         } else {
           logoutUser();
         }

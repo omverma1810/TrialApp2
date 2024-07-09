@@ -63,6 +63,7 @@ export const styles = StyleSheet.create({
   },
   locationNameContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   locationName: {
     color: '#454545',
@@ -114,5 +115,20 @@ export const styles = StyleSheet.create({
   fieldDetailsTextContainer: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.SEMI_BOLD,
   },
 });

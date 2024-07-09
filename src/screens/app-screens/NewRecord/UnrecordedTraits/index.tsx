@@ -6,27 +6,11 @@ import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import {Search} from '../../../../assets/icons/svgs';
 import UnrecordedTraitCard from './UnrecordedTraitCard';
-import {UnrecordedTraitsProvider} from './UnrecordedTraitsContext';
+import {TraitItem, UnrecordedTraitsProvider} from './UnrecordedTraitsContext';
 
 const UnrecordedTraits = () => {
   const {t} = useTranslation();
-  const unrecordedTraitList = [
-    {
-      id: 0,
-      name: 'Cob Height',
-      type: 'input',
-    },
-    {
-      id: 1,
-      name: 'Seeding Vigor',
-      type: 'option',
-    },
-    {
-      id: 2,
-      name: 'Date of Sowing',
-      type: 'date',
-    },
-  ];
+  const unrecordedTraitList: TraitItem[] = [];
 
   return (
     <View style={styles.unrecordedTraitsContainer}>
@@ -38,7 +22,7 @@ const UnrecordedTraits = () => {
         <Search />
       </View>
       {unrecordedTraitList.map(item => (
-        <UnrecordedTraitsProvider key={item.id} item={item}>
+        <UnrecordedTraitsProvider key={item.traitId} item={item}>
           <UnrecordedTraitCard />
         </UnrecordedTraitsProvider>
       ))}

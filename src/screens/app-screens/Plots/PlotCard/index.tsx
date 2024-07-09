@@ -8,7 +8,7 @@ import RecordedTraits from '../RecordedTraits';
 import Notes from '../Notes';
 import UnrecordedTraits from '../UnrecordedTraits';
 
-const PlotCard = ({isFirstIndex, isLastIndex}: any) => {
+const PlotCard = ({isFirstIndex, isLastIndex, plotData}: any) => {
   const {t} = useTranslation();
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const onViewMoreDetailsClick = () => {
@@ -18,17 +18,17 @@ const PlotCard = ({isFirstIndex, isLastIndex}: any) => {
     {
       id: 0,
       name: t(LOCALES.EXPERIMENT.LBL_ROW),
-      value: '1',
+      key: 'row',
     },
     {
       id: 1,
       name: t(LOCALES.EXPERIMENT.LBL_COL),
-      value: '1',
+      key: 'column',
     },
     {
       id: 2,
       name: t(LOCALES.EXPERIMENT.LBL_ACC_ID),
-      value: 'G-42',
+      key: 'accessionId',
     },
   ];
   return (
@@ -40,12 +40,12 @@ const PlotCard = ({isFirstIndex, isLastIndex}: any) => {
       ]}>
       <Pressable onPress={onViewMoreDetailsClick} style={styles.row}>
         <View>
-          <Text style={styles.plotName}>101</Text>
+          <Text style={styles.plotName}>{plotData?.id}</Text>
           <View style={styles.plotInfoContainer}>
             {rowColInfo.map(item => (
               <View style={styles.plotKeyValueContainer} key={item.id}>
                 <Text style={styles.plotInfoKey}>{item.name}</Text>
-                <Text style={styles.plotInfoValue}>{item.value}</Text>
+                <Text style={styles.plotInfoValue}>{plotData[item.key]}</Text>
               </View>
             ))}
           </View>
@@ -54,9 +54,9 @@ const PlotCard = ({isFirstIndex, isLastIndex}: any) => {
       </Pressable>
       {isViewMoreDetails && (
         <View style={styles.plotDetailsContainer}>
-          <RecordedTraits />
-          <Notes />
-          <UnrecordedTraits />
+          <RecordedTraits data={plotData?.recordedTraitData} />
+          {/* <Notes /> */}
+          <UnrecordedTraits data={plotData?.unrecordedTraitData} />
         </View>
       )}
     </View>

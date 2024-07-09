@@ -4,6 +4,7 @@ export default {
     LBL_OK: 'OK',
     LBL_CANCEL: 'Cancel',
     LBL_LOADING: 'Loading',
+    LBL_NO_DATA_FOUND: 'No data found!',
   },
   BOTTOM_TAB: {
     LBL_HOME: 'Home',
@@ -35,6 +36,8 @@ export default {
     LBL_RANDOMISATION: 'Randomisation',
     LBL_LOCATION: 'Location',
     LBL_FIELD: 'Field',
+    LBL_LOCATION_DEPLOYED: 'Location Deployed',
+    LBL_LOCATION_REQUIRED: 'Location Required',
     LBL_NO_OF_TRAITS: 'No of traits',
     LBL_VIEW: 'View',
     LBL_HIDE: 'Hide',

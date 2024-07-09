@@ -1,8 +1,11 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import {decode} from 'base-64';
 
 import {BASE_URL, URL} from '../constants/URLS';
+
+global.atob = decode;
 
 type TokensType = {
   accessToken: string;
