@@ -1,4 +1,4 @@
-const BASE_URL = 'https://dev.piatrika.com/';
+const BASE_URL = 'https://stage.piatrika.com/';
 
 const API_CONFIG = {};
 
@@ -6,7 +6,7 @@ const API_CONFIG = {};
     LOGIN: 'auth/login/',
     REFRESH_TOKEN: 'auth/token/refresh/',
     PROFILE : 'auth/me/',
-    LOGOUT: 'auth/logout/'
+    LOGOUT: 'auth/logout/',
   };
 
 export {URL, BASE_URL, API_CONFIG};

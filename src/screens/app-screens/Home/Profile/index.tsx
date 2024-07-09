@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
-
 import ProfileStyles from './ProfileStyles';
 import {ProfileImg} from '../../../../assets/icons/svgs';
 import {useAppDispatch, useAppSelector} from '../../../../store';
@@ -46,7 +45,8 @@ const Profile = () => {
   // fetching profile details using access token
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.PROFILE,
-    method: 'GET'
+    method: 'GET',
+    isSecureEntry: true,
   });
 
   useEffect(() => {
@@ -59,18 +59,14 @@ const Profile = () => {
             phoneNumber: `${user.phone_number}`,
             email: user.email,
           });
-          await AsyncStorage.setItem(
-            'userDetails',
-            JSON.stringify(profileData),
-          );
           setIsLoading(false);
-        } else {
+        } else { 
           const token = await AsyncStorage.getItem('accessToken');
           if (token) {
             await fetchProfile({headers: {Authorization: `Bearer ${token}`}});
             if (profileDataResponse && profileDataResponse.status === 200) {
               const fetchedUser = profileDataResponse.data.user;
-              dispatch(setUserDetails(fetchedUser));
+              dispatch(setUserDetails(fetchedUser)); 
               setProfileData({
                 name: `${fetchedUser.first_name} ${fetchedUser.last_name}`,
                 location: fetchedUser.location?.name || 'N/A',
@@ -93,7 +89,11 @@ const Profile = () => {
 
   //logout functionality
 
-  const [logout, logoutResponse, logoutError] = useApi({
+  const [
+    logout,
+    logoutResponse,
+    logoutError,
+  ] = useApi({
     url: URL.LOGOUT,
     method: 'DELETE',
   });
@@ -136,7 +136,7 @@ const Profile = () => {
   //update profile functionality
   const [updateProfile, updateProfileResponse] = useApi({
     url: URL.PROFILE,
-    method: 'PUT'
+    method: 'PUT',
   });
   const onUpdate = async () => {
     const token = await AsyncStorage.getItem('accessToken');
@@ -145,7 +145,7 @@ const Profile = () => {
       return;
     }
 
-    const headers = {
+    const headers = { 
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
       'x-auth-token': token,
@@ -159,38 +159,36 @@ const Profile = () => {
     //   name: filename,
     //   type: type,
     // };
-    let numericStr = profileData.phoneNumber.replace(/\s/, '');
+    let numericStr = profileData.phoneNumber.replace(/\s/, '')
     let payload = JSON.stringify({
-      phone_number: parseInt(numericStr),
-      email: profileData.email,
+      "phone_number": parseInt(numericStr),
+      "email": profileData.email
     });
-    await updateProfile({payload, headers});
+    await updateProfile({payload,headers});
   };
 
-  useEffect(() => {
+
+  useEffect(() => { 
     const handleUpdateData = async () => {
       Alert.alert('Success', 'Profile updated successfully');
-      const user = updateProfileResponse.data.user;
-      console.log(user);
+      const user= updateProfileResponse.data.user;
+      console.log(user)
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
         USER_DETAILS_STORAGE_KEY,
         JSON.stringify(user),
       );
-      await Keychain.setGenericPassword(
-        profileData.email,
-        profileData.phoneNumber,
-      );
+      await Keychain.setGenericPassword(profileData.email, profileData.phoneNumber);
       setIsEditing(false);
     };
     if (updateProfileResponse && updateProfileResponse.status_code === 200) {
       handleUpdateData();
     }
   }, [updateProfileResponse]);
-
+  
   //image handling functionality
   const selectImage = () => {
-    ImagePicker.openPicker({
+    ImagePicker.openPicker({ 
       width: 80,
       height: 80,
       cropping: true,
@@ -271,7 +269,7 @@ const Profile = () => {
           </View>
           <Pressable onPress={() => setIsEditing(!isEditing)}>
             <Text style={ProfileStyles.editButton}>
-              {isEditing ? '' : 'Edit'}
+              {isEditing ? 'Cancel' : 'Edit'}
             </Text>
           </Pressable>
         </View>
@@ -295,7 +293,7 @@ const Profile = () => {
           </View>
           <Pressable onPress={() => setIsEditing(!isEditing)}>
             <Text style={ProfileStyles.editButton}>
-              {isEditing ? '' : 'Edit'}
+              {isEditing ? 'Cancel' : 'Edit'}
             </Text>
           </Pressable>
         </View>

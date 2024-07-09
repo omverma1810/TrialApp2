@@ -4,6 +4,7 @@ const RecordStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
   },
+  filter: {},
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
