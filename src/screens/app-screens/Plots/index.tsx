@@ -21,6 +21,11 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   const {t} = useTranslation();
   const {id, type} = route.params;
   const [plotList, setPlotList] = useState<any[]>([]);
+  const [details, setDetails] = useState({
+    cropName: '',
+    fieldExperimentId: '',
+    fieldExperimentName: '',
+  });
 
   const [getPlotList, plotListData, isPlotListLoading, plotListError] = useApi({
     url: URL.PLOT_LIST,
@@ -38,6 +43,11 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
 
     const {data} = plotListData;
     setPlotList(data?.plotData);
+    setDetails({
+      cropName: data?.cropName,
+      fieldExperimentId: data?.fieldExperimentId,
+      fieldExperimentName: data?.fieldExperimentName,
+    });
   }, [plotListData]);
 
   const ListEmptyComponent = useMemo(
@@ -55,6 +65,11 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
     [isPlotListLoading],
   );
 
+  const handleRecordedTraits = () => {
+    setPlotList([]);
+    getPlotList({pathParams: id, queryParams: `experimentType=${type}`});
+  };
+
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
@@ -66,14 +81,16 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
           <Text style={styles.fieldTitle}>
             {t(LOCALES.EXPERIMENT.LBL_FIELD)} {id}
           </Text>
-          <View style={styles.row}>
-            <Text style={styles.experimentTitle}>
-              GE-Male Line (R) development
-            </Text>
-            <View style={styles.cropTitleContainer}>
-              <Text style={styles.cropTitle}>Maize</Text>
+          {details.fieldExperimentName && details.cropName && (
+            <View style={styles.row}>
+              <Text style={styles.experimentTitle}>
+                {details?.fieldExperimentName}
+              </Text>
+              <View style={styles.cropTitleContainer}>
+                <Text style={styles.cropTitle}>{details?.cropName}</Text>
+              </View>
             </View>
-          </View>
+          )}
         </View>
         <Input
           placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_PLOT)}
@@ -94,6 +111,8 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
           renderItem={({item, index}) => (
             <PlotCard
               plotData={item}
+              details={details}
+              handleRecordedTraits={handleRecordedTraits}
               isFirstIndex={index === 0}
               isLastIndex={plotList.length - 1 === index}
             />

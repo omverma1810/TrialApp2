@@ -8,9 +8,21 @@ import RecordedTraits from '../RecordedTraits';
 import Notes from '../Notes';
 import UnrecordedTraits from '../UnrecordedTraits';
 
-const PlotCard = ({isFirstIndex, isLastIndex, plotData}: any) => {
+const PlotCard = ({
+  isFirstIndex,
+  isLastIndex,
+  plotData,
+  details,
+  handleRecordedTraits,
+}: any) => {
   const {t} = useTranslation();
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
+  const [recordedTrait, setRecordedTrait] = useState(
+    plotData?.recordedTraitData || [],
+  );
+  const [unrecordedTrait, setUnrecordedTrait] = useState(
+    plotData?.unrecordedTraitData || [],
+  );
   const onViewMoreDetailsClick = () => {
     setIsViewMoreDetails(state => !state);
   };
@@ -54,13 +66,22 @@ const PlotCard = ({isFirstIndex, isLastIndex, plotData}: any) => {
       </Pressable>
       {isViewMoreDetails && (
         <View style={styles.plotDetailsContainer}>
-          <RecordedTraits data={plotData?.recordedTraitData} />
+          <RecordedTraits
+            data={recordedTrait}
+            plotId={plotData?.id}
+            details={details}
+          />
           {/* <Notes /> */}
-          <UnrecordedTraits data={plotData?.unrecordedTraitData} />
+          <UnrecordedTraits
+            data={unrecordedTrait}
+            plotId={plotData?.id}
+            details={details}
+            handleRecordedTraits={handleRecordedTraits}
+          />
         </View>
       )}
     </View>
   );
 };
 
-export default PlotCard;
+export default React.memo(PlotCard);
