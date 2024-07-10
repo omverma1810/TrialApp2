@@ -28,6 +28,7 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
   const [experimentList, setExperimentList] = useState<any[]>([]);
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -128,6 +129,21 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     [isExperimentListLoading],
   );
 
+  const normalizeString = (str: string) => {
+    return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+  };
+
+  const filteredExperimentList = useMemo(() => {
+    if (searchQuery === '') {
+      return experimentList;
+    }
+    return experimentList.filter(experiment =>
+      normalizeString(experiment.fieldExperimentName).includes(
+        normalizeString(searchQuery),
+      ),
+    );
+  }, [experimentList, searchQuery]);
+
   return (
     <SafeAreaView
       edges={['top']}
@@ -143,11 +159,15 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
           placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
           leftIcon={Search}
           customLeftIconStyle={{marginRight: 10}}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
         <FlatList
-          data={experimentList}
+          data={filteredExperimentList}
           contentContainerStyle={
-            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 80}
+            filteredExperimentList?.length === 0
+              ? {flexGrow: 1}
+              : {paddingBottom: 80}
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
@@ -155,21 +175,21 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
             <ExperimentCard
               data={item}
               isFirstIndex={index === 0}
-              isLastIndex={index === experimentList.length - 1}
+              isLastIndex={index === filteredExperimentList.length - 1}
             />
           )}
           keyExtractor={(_, index) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
         />
       </View>
-      {!isOptionModalVisible && (
+      {/* {!isOptionModalVisible && (
         <Pressable style={styles.newRecord} onPress={onNewRecordClick}>
           <Plus />
           <Text style={styles.newRecordText}>
             {t(LOCALES.EXPERIMENT.NEW_RECORD)}
           </Text>
         </Pressable>
-      )}
+      )} */}
       <NewRecordOptionsModal
         isModalVisible={isOptionModalVisible}
         closeModal={onCloseOptionsModalClick}

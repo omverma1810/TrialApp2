@@ -21,6 +21,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   const {t} = useTranslation();
   const {id, type} = route.params;
   const [plotList, setPlotList] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [details, setDetails] = useState({
     cropName: '',
     fieldExperimentId: '',
@@ -70,6 +71,15 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
     getPlotList({pathParams: id, queryParams: `experimentType=${type}`});
   };
 
+  const filteredPlotList = useMemo(() => {
+    if (searchQuery === '') {
+      return plotList;
+    }
+    return plotList.filter(plot =>
+      plot.id.toString().toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [plotList, searchQuery]);
+
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
@@ -97,24 +107,27 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
           leftIcon={Search}
           containerStyle={styles.search}
           customLeftIconStyle={styles.searchIcon}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
         <Text style={styles.plotText}>
-          {plotList.length} <Text>{t(LOCALES.EXPERIMENT.LBL_PLOTS)}</Text>
+          {filteredPlotList.length}{' '}
+          <Text>{t(LOCALES.EXPERIMENT.LBL_PLOTS)}</Text>
         </Text>
         <FlatList
           ListEmptyComponent={ListEmptyComponent}
           contentContainerStyle={
-            plotList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 20}
+            filteredPlotList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 20}
           }
           showsVerticalScrollIndicator={false}
-          data={plotList}
+          data={filteredPlotList}
           renderItem={({item, index}) => (
             <PlotCard
               plotData={item}
               details={details}
               handleRecordedTraits={handleRecordedTraits}
               isFirstIndex={index === 0}
-              isLastIndex={plotList.length - 1 === index}
+              isLastIndex={filteredPlotList.length - 1 === index}
             />
           )}
         />

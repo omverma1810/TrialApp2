@@ -71,6 +71,6 @@ export default {
     LBL_RECORD: 'Record',
     LBL_DISCARD: 'Discard',
     LBL_SAVE: 'Save',
-    LBL_ASSOCIATE_TRAIT: 'Associate a Trait',
+    LBL_ASSOCIATE_TRAIT: 'List of Traits',
   },
 };

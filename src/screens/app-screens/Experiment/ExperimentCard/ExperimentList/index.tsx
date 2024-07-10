@@ -1,17 +1,22 @@
 import {Pressable, Text, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigation} from '@react-navigation/native';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
 import {styles} from '../styles';
 import {CardArrowDown, CardArrowUp} from '../../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../../localization/constants';
 import {ExperimentScreenProps} from '../../../../../types/navigation/appTypes';
+import TraitModal from './TraitModal';
 
 const ExperimentList = ({experiment}: any) => {
   const {t} = useTranslation();
   const {navigate} = useNavigation<ExperimentScreenProps['navigation']>();
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
+  const traitModalRef = useRef<BottomSheetModal>(null);
+  const handleTraitModalOpen = () => traitModalRef.current?.present();
+
   const experimentInfo = [
     {
       id: 0,
@@ -114,7 +119,9 @@ const ExperimentList = ({experiment}: any) => {
                 {experiment[item.key]}
               </Text>
               {item.key === 'noOfTraits' && (
-                <Pressable style={styles.viewContainer}>
+                <Pressable
+                  style={styles.viewContainer}
+                  onPress={handleTraitModalOpen}>
                   <Text style={styles.view}>
                     {t(LOCALES.EXPERIMENT.LBL_VIEW)}
                   </Text>
@@ -133,6 +140,10 @@ const ExperimentList = ({experiment}: any) => {
           </Text>
         </Pressable>
       )}
+      <TraitModal
+        bottomSheetModalRef={traitModalRef}
+        data={experiment?.traitList}
+      />
     </View>
   );
 };

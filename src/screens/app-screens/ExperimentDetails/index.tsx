@@ -24,6 +24,7 @@ const ExperimentDetails = ({
   const {t} = useTranslation();
   const {id, type} = route?.params;
   const [experimentDetails, setExperimentDetails] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [
     getExperimentDetails,
     experimentDetailsResponse,
@@ -64,15 +65,31 @@ const ExperimentDetails = ({
     [],
   );
 
+  const filteredLocationList = useMemo(() => {
+    const locationList = experimentDetails?.locationList;
+
+    if (!locationList || locationList?.length === 0) {
+      return [];
+    }
+    if (searchQuery === '') {
+      return locationList;
+    }
+    return locationList.filter((location: any) =>
+      location?.location?.villageName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
+    );
+  }, [experimentDetails, searchQuery]);
+
   const renderFieldCard = useCallback(
     ({item, index}: any) => (
       <FieldCard
         fieldData={item}
         isFirstIndex={index === 0}
-        isLastIndex={index === experimentDetails?.locationList.length - 1}
+        isLastIndex={index === filteredLocationList.length - 1}
       />
     ),
-    [experimentDetails?.locationList.length],
+    [filteredLocationList.length],
   );
 
   const renderContent = () => {
@@ -88,7 +105,7 @@ const ExperimentDetails = ({
       return ListEmptyComponent;
     }
 
-    const {name, cropName, locationList} = experimentDetails;
+    const {name, cropName} = experimentDetails;
 
     return (
       <View style={styles.container}>
@@ -103,15 +120,20 @@ const ExperimentDetails = ({
           leftIcon={Search}
           containerStyle={styles.search}
           customLeftIconStyle={styles.searchIcon}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
         <Text style={styles.fieldText}>
-          {locationList.length} <Text>{t(LOCALES.EXPERIMENT.LBL_FIELDS)}</Text>
+          {filteredLocationList.length}{' '}
+          <Text>{t(LOCALES.EXPERIMENT.LBL_FIELDS)}</Text>
         </Text>
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={locationList}
+          data={filteredLocationList}
           renderItem={renderFieldCard}
-          contentContainerStyle={locationList.length === 0 && {flexGrow: 1}}
+          contentContainerStyle={
+            filteredLocationList.length === 0 && {flexGrow: 1}
+          }
           ListEmptyComponent={ListEmptyComponent}
         />
       </View>

@@ -1,5 +1,5 @@
 import {Pressable, Text, View} from 'react-native';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
@@ -17,6 +17,8 @@ import {
 } from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
 import {ExperimentDetailsScreenProps} from '../../../../types/navigation/appTypes';
+import TraitModal from '../../Experiment/ExperimentCard/ExperimentList/TraitModal';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
 const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
   const {t} = useTranslation();
@@ -25,6 +27,8 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
   const {
     params: {type},
   } = useRoute<ExperimentDetailsScreenProps['route']>();
+  const traitModalRef = useRef<BottomSheetModal>(null);
+  const handleTraitModalOpen = () => traitModalRef.current?.present();
   const fieldInfo = [
     {
       id: 0,
@@ -65,7 +69,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: t(LOCALES.EXPERIMENT.LBL_TRAITS_RECORDED),
       navigationAction: {
         title: t(LOCALES.EXPERIMENT.LBL_ALL_TRAITS),
-        onClick: () => {},
+        onClick: handleTraitModalOpen,
       },
       key: 'traits',
     },
@@ -140,6 +144,10 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
           {fieldInfo.map(renderFieldDetail)}
         </View>
       )}
+      <TraitModal
+        bottomSheetModalRef={traitModalRef}
+        data={fieldData?.traitList}
+      />
     </View>
   );
 };
