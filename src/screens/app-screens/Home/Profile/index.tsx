@@ -7,6 +7,8 @@ import {
   Alert,
   TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import ProfileStyles from './ProfileStyles';
@@ -227,6 +229,7 @@ const Profile = () => {
   }
 
   return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
     <View style={ProfileStyles.container}>
       <Pressable
         style={ProfileStyles.profileContainer}
@@ -307,6 +310,7 @@ const Profile = () => {
         <Text style={ProfileStyles.editButton}>Logout</Text>
       </Pressable>
     </View>
+    </KeyboardAvoidingView>
   );
 };
 

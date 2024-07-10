@@ -1,23 +1,23 @@
-import {Pressable, StyleSheet,FlatList} from 'react-native';
+import {Pressable, StyleSheet, FlatList} from 'react-native';
 import {SafeAreaView, StatusBar} from '../../../components';
 import React, {useState, useRef, useMemo} from 'react';
 import {View, Text, ScrollView, TextInput} from 'react-native';
-import Filter from './Filter';
+
 import BottomModal from '../../../components/BottomSheetModal';
 import {DropdownArrow, Search} from '../../../assets/icons/svgs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {experiment} from '../../../Data';
 import Chip from '../../../components/Chip';
 import RecordDropDown from '../../../components/RecordDropdown';
+import Filter from './Filter';
 import CheckBox from '../../../components/CheckBox';
 import TraitComponent from '../../../components/TraitComponent';
 import RecordStyles from './RecordStyles';
 import {projectData} from './Data';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import {LOCALES} from '../../../localization/constants';
-import {crops, projects,experiments} from '../Experiment/data';
 import {useTranslation} from 'react-i18next';
-import ExperimentCard from '../Experiment/ExperimentCard';
+import {crops, projects, experiments} from '../Experiment/data';
 
 interface SelectedFieldData {
   fieldName: string;
@@ -91,7 +91,7 @@ const Record = () => {
   };
   const ListHeaderComponent = useMemo(
     () => (
-      <View>
+      <View style={{gap: 15, paddingVertical: 10}}>
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_CROP)}
           options={crops}
@@ -120,6 +120,12 @@ const Record = () => {
               placeholder="Search Experiments"
             />
           </View>
+          <FlatList
+            data={experiments}
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={ListHeaderComponent}
+            renderItem={({item}) => null}
+          />
           <View style={RecordStyles.experimentContainer}>
             {selectedExperiment && (
               <View style={RecordStyles.experimentItem}>
@@ -139,15 +145,9 @@ const Record = () => {
               </View>
             )}
           </View>
-          <FlatList
-            data={experiments}
-            showsVerticalScrollIndicator={false}
-            ListHeaderComponent={ListHeaderComponent}
-            renderItem={({item}) => <ExperimentCard data={item} />}
-          />
-          {/* {!inputVisible && (
+          {!inputVisible && (
             <Chip
-              onPress={handleSecondBottomModalOpen}
+              onPress={handleRightIconClick}
               rightIcon={<DropdownArrow />}
               onRightIconClick={handleRightIconClick}
               containerStyle={RecordStyles.chip}
@@ -155,7 +155,7 @@ const Record = () => {
               title="Select an Experiment"
               isSelected={false}
             />
-          )} */}
+          )}
           {inputVisible && (
             <View style={RecordStyles.inputContainer}>
               <Pressable onPress={handleSecondBottomModalOpen}>

@@ -1,5 +1,5 @@
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 
 import {FONTS} from '../../../../theme/fonts';
 
