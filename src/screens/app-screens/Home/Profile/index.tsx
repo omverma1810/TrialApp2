@@ -47,8 +47,7 @@ const Profile = () => {
   // fetching profile details using access token
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.PROFILE,
-    method: 'GET',
-    isSecureEntry: true,
+    method: 'GET'
   });
 
   useEffect(() => {
