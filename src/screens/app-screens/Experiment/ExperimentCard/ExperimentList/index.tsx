@@ -20,8 +20,8 @@ const ExperimentList = ({experiment}: any) => {
   const experimentInfo = [
     {
       id: 0,
-      title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT),
-      key: 'experimentName',
+      title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT_TYPE),
+      key: 'experimentType',
     },
     // {
     //   id: 1,
@@ -111,7 +111,7 @@ const ExperimentList = ({experiment}: any) => {
             <View
               style={[
                 styles.experimentDetailsCard,
-                item.key === 'experimentName' && {width: '100%'},
+                item.key === 'experimentType' && {width: '100%'},
               ]}
               key={index}>
               <Text style={styles.experimentDetailsKeyText}>{item.title}</Text>

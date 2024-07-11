@@ -34,9 +34,11 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
+      const experimentList = experimentData[option][newProjectList[0]] || [];
+      const formattedExperimentList = groupByExperimentName(experimentList);
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData[option][newProjectList[0]] || []);
+      setExperimentList(formattedExperimentList);
     },
     [experimentData],
   );
@@ -44,7 +46,9 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
   const handleProjectChange = useCallback(
     (option: string) => {
       setSelectedProject(option);
-      setExperimentList(experimentData[selectedCrop][option] || []);
+      const experimentList = experimentData[selectedCrop][option] || [];
+      const formattedExperimentList = groupByExperimentName(experimentList);
+      setExperimentList(formattedExperimentList);
     },
     [experimentData, selectedCrop],
   );
@@ -94,6 +98,19 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     getExperimentList();
   }, []);
 
+  const groupByExperimentName = (array: any[]) => {
+    const groupedMap = array.reduce((acc, curr) => {
+      const key = curr.experimentName || 'N/A';
+      if (!acc.has(key)) {
+        acc.set(key, {name: key, data: []});
+      }
+      acc.get(key).data.push(curr);
+      return acc;
+    }, new Map());
+
+    return Array.from(groupedMap.values());
+  };
+
   useEffect(() => {
     if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
       return;
@@ -105,11 +122,12 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     const projectList = Object.keys(data[selectedCrop] || {});
     const selectedProject = projectList[0];
     const experimentList = data[selectedCrop][selectedProject] || [];
+    const formattedExperimentList = groupByExperimentName(experimentList);
 
     setExperimentData(data);
     setCropList(cropList);
     setProjectList(projectList);
-    setExperimentList(experimentList);
+    setExperimentList(formattedExperimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
   }, [experimentListData]);
@@ -138,9 +156,7 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
       return experimentList;
     }
     return experimentList.filter(experiment =>
-      normalizeString(experiment.fieldExperimentName).includes(
-        normalizeString(searchQuery),
-      ),
+      normalizeString(experiment.name).includes(normalizeString(searchQuery)),
     );
   }, [experimentList, searchQuery]);
 
@@ -171,13 +187,7 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
-          renderItem={({item, index}) => (
-            <ExperimentCard
-              data={item}
-              isFirstIndex={index === 0}
-              isLastIndex={index === filteredExperimentList.length - 1}
-            />
-          )}
+          renderItem={({item, index}) => <ExperimentCard item={item} />}
           keyExtractor={(_, index) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
         />

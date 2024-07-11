@@ -110,7 +110,9 @@ const ExperimentDetails = ({
     return (
       <View style={styles.container}>
         <View style={styles.experimentContainer}>
-          <Text style={styles.experimentTitle}>{name}</Text>
+          <Text style={styles.experimentTitle}>
+            {name} ({type})
+          </Text>
           <View style={styles.cropTitleContainer}>
             <Text style={styles.cropTitle}>{cropName}</Text>
           </View>

@@ -94,7 +94,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
           {details.fieldExperimentName && details.cropName && (
             <View style={styles.row}>
               <Text style={styles.experimentTitle}>
-                {details?.fieldExperimentName}
+                {details?.fieldExperimentName} ({type})
               </Text>
               <View style={styles.cropTitleContainer}>
                 <Text style={styles.cropTitle}>{details?.cropName}</Text>

@@ -26,6 +26,7 @@ export default {
     LBL_PROJECT: 'Project',
     LBL_VIEW_FIELDS: 'View Fields',
     LBL_EXPERIMENT_ID: 'Experiment ID',
+    LBL_EXPERIMENT_TYPE: 'Experiment Type',
     LBL_NO_OF_ENTRIES: 'No of Entries',
     LBL_FIELD_DESIGN: 'Field Design',
     LBL_SEASON: 'Season',
