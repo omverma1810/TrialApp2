@@ -6,95 +6,108 @@ import {styles} from '../styles';
 import {CardArrowDown, Search} from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
 import Filter from '../../Experiment/Filter';
-import {crops, projects} from '../../Experiment/data';
 import {useRecord} from '../RecordContext';
+import {useRecordApi} from '../RecordApiContext';
+import {Loader} from '../../../../components';
 
 const SelectExperiment = () => {
   const {t} = useTranslation();
+  const {isExperimentListLoading} = useRecordApi();
   const {
+    cropList,
+    projectList,
+    selectedCrop,
+    selectedProject,
+    experimentList,
     isSelectExperimentVisible,
     selectedExperiment,
     handleExperimentSelect,
+    handleCropChange,
+    handleProjectChange,
   } = useRecord();
-  const experimentList = [
-    {
-      id: 0,
-      experiment_name: 'GE-Male Line (R) development',
-      crop_name: 'Maize',
-    },
-    {
-      id: 1,
-      experiment_name: 'GE-Female Line (R) development',
-      crop_name: 'Rice',
-    },
-  ];
+
   const ListHeaderComponent = useMemo(
     () => (
       <View style={styles.filter}>
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_CROP)}
-          options={[]}
-          selectedOption=""
-          onPress={option => {}}
+          options={cropList}
+          selectedOption={selectedCrop}
+          onPress={handleCropChange}
         />
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={[]}
-          selectedOption=""
-          onPress={option => {}}
+          options={projectList}
+          selectedOption={selectedProject}
+          onPress={handleProjectChange}
         />
       </View>
     ),
-    [],
+    [cropList, selectedCrop, projectList, selectedProject],
   );
-  const renderExperiment = (item: any) => {
-    return (
-      <Pressable
-        key={item.id}
-        style={styles.experimentLabelContainer}
-        onPress={() => handleExperimentSelect(item)}>
-        <Text style={styles.experimentLabel}>{item.experiment_name}</Text>
+
+  const renderExperiment = (item: any, index: number) => (
+    <Pressable
+      key={index}
+      style={styles.experimentLabelContainer}
+      onPress={() => handleExperimentSelect(item)}>
+      <Text style={styles.experimentLabel}>{item?.fieldExperimentName}</Text>
+      <View style={styles.cropLabelContainer}>
+        <Text style={styles.cropLabel}>{item?.experimentType}</Text>
+      </View>
+    </Pressable>
+  );
+
+  const ExperimentOptionsView = () => (
+    <View style={styles.selectExperimentContainer}>
+      <View style={[styles.selectExperimentTextContainer, styles.row]}>
+        <Text style={styles.selectExperimentText}>
+          {t(LOCALES.EXPERIMENT.LBL_SELECT_EXPERIMENT)}
+        </Text>
+        <Search />
+      </View>
+      {ListHeaderComponent}
+      {experimentList.map(renderExperiment)}
+    </View>
+  );
+
+  const SelectedExperimentView = () => (
+    <Pressable
+      style={[styles.experimentInfoContainer, styles.row]}
+      onPress={() => handleExperimentSelect(null)}>
+      <View style={styles.experimentHeaderTitleContainer}>
+        <Text style={styles.experimentHeaderTitle}>
+          {t(LOCALES.EXPERIMENT.LBL_EXPERIMENT)}
+        </Text>
+        <Text style={styles.experimentName}>
+          {selectedExperiment?.fieldExperimentName}
+        </Text>
         <View style={styles.cropLabelContainer}>
-          <Text style={styles.cropLabel}>{item.crop_name}</Text>
+          <Text style={styles.cropLabel}>
+            {selectedExperiment?.experimentType}
+          </Text>
         </View>
-      </Pressable>
+      </View>
+      <CardArrowDown />
+    </Pressable>
+  );
+
+  if (!isSelectExperimentVisible) {
+    return null;
+  }
+
+  if (isExperimentListLoading) {
+    return (
+      <View style={styles.loader}>
+        <Loader />
+      </View>
     );
-  };
-  if (!isSelectExperimentVisible) return null;
-  return (
-    <>
-      {!selectedExperiment ? (
-        <View style={styles.selectExperimentContainer}>
-          <View style={[styles.selectExperimentTextContainer, styles.row]}>
-            <Text style={styles.selectExperimentText}>
-              {t(LOCALES.EXPERIMENT.LBL_SELECT_EXPERIMENT)}
-            </Text>
-            <Search />
-          </View>
-          {ListHeaderComponent}
-          {experimentList.map(renderExperiment)}
-        </View>
-      ) : (
-        <Pressable
-          style={[styles.experimentInfoContainer, styles.row]}
-          onPress={() => handleExperimentSelect(null)}>
-          <View style={styles.experimentHeaderTitleContainer}>
-            <Text style={styles.experimentHeaderTitle}>
-              {t(LOCALES.EXPERIMENT.LBL_EXPERIMENT)}
-            </Text>
-            <Text style={styles.experimentName}>
-              {selectedExperiment?.experiment_name}
-            </Text>
-            <View style={styles.cropLabelContainer}>
-              <Text style={styles.cropLabel}>
-                {selectedExperiment?.crop_name}
-              </Text>
-            </View>
-          </View>
-          <CardArrowDown />
-        </Pressable>
-      )}
-    </>
+  }
+
+  return selectedExperiment ? (
+    <SelectedExperimentView />
+  ) : (
+    <ExperimentOptionsView />
   );
 };
 

@@ -305,4 +305,9 @@ export const styles = StyleSheet.create({
     fontFamily: FONTS.MEDIUM,
     color: '#161616',
   },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

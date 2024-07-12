@@ -10,42 +10,40 @@ import {
   Search,
 } from '../../../../assets/icons/svgs';
 import {useRecord} from '../RecordContext';
+import {Loader} from '../../../../components';
+import {useRecordApi} from '../RecordApiContext';
 
 const SelectField = () => {
   const {t} = useTranslation();
-  const {isSelectFieldVisible, selectedField, handleFieldSelect} = useRecord();
-  const fieldList = [
-    {
-      id: 0,
-      field_name: 'Field 101',
-      location: 'Medchal, Hyderabad',
-    },
-    {
-      id: 1,
-      field_name: 'Field 102',
-      location: 'Medchal, Hyderabad',
-    },
-    {
-      id: 2,
-      field_name: 'Field 103',
-      location: 'Medchal, Hyderabad',
-    },
-  ];
-  const renderField = (item: any) => {
+  const {isSelectFieldVisible, selectedField, handleFieldSelect, fieldList} =
+    useRecord();
+  const {isFieldListLoading} = useRecordApi();
+
+  const renderField = (item: any, index: number) => {
     return (
       <Pressable
-        key={item.id}
+        key={index}
         style={styles.locationContainer}
         onPress={() => handleFieldSelect(item)}>
-        <Text style={styles.fieldName}>{item.field_name}</Text>
+        {/* <Text style={styles.fieldName}>{item.field_name}</Text> */}
         <View style={styles.locationNameContainer}>
           <LocationPin />
-          <Text style={styles.locationName}>{item.location}</Text>
+          <Text style={styles.locationName}>{item?.location?.villageName}</Text>
         </View>
       </Pressable>
     );
   };
+
   if (!isSelectFieldVisible) return null;
+
+  if (isFieldListLoading) {
+    return (
+      <View style={styles.loader}>
+        <Loader />
+      </View>
+    );
+  }
+
   return (
     <>
       {!selectedField ? (
@@ -66,12 +64,14 @@ const SelectField = () => {
             <Text style={styles.experimentHeaderTitle}>
               {t(LOCALES.EXPERIMENT.LBL_FIELD)}
             </Text>
-            <Text style={styles.experimentName}>
+            {/* <Text style={styles.experimentName}>
               {selectedField?.field_name}
-            </Text>
+            </Text> */}
             <View style={styles.locationNameContainer}>
               <LocationPin />
-              <Text style={styles.locationName}>{selectedField?.location}</Text>
+              <Text style={styles.locationName}>
+                {selectedField?.location?.villageName}
+              </Text>
             </View>
           </View>
           <CardArrowDown />

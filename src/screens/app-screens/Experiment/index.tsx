@@ -192,14 +192,14 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
           ListEmptyComponent={ListEmptyComponent}
         />
       </View>
-      {/* {!isOptionModalVisible && (
+      {!isOptionModalVisible && (
         <Pressable style={styles.newRecord} onPress={onNewRecordClick}>
           <Plus />
           <Text style={styles.newRecordText}>
             {t(LOCALES.EXPERIMENT.NEW_RECORD)}
           </Text>
         </Pressable>
-      )} */}
+      )}
       <NewRecordOptionsModal
         isModalVisible={isOptionModalVisible}
         closeModal={onCloseOptionsModalClick}
