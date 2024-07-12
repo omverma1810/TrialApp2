@@ -1,10 +1,11 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useMemo} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
   ScrollView,
+  FlatList,
 } from 'react-native';
 
 import {SafeAreaView, StatusBar} from '../../../components';
@@ -14,6 +15,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {experiment, field} from '../../../Data';
 import Chip from '../../../components/Chip';
 import TakeNotesStyles from './TakeNotesStyle';
+import {LOCALES} from '../../../localization/constants';
+import {crops, projects, experiments} from '../Experiment/data';
+import Filter from './Filter';
+import {useTranslation} from 'react-i18next';
 
 interface Chip {
   id: number;
@@ -25,6 +30,7 @@ interface Chip {
 }
 
 const TakeNotes = () => {
+  const {t} = useTranslation();
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
   const [modalVisible, setModalVisible] = useState(false);
@@ -78,10 +84,34 @@ const TakeNotes = () => {
     }
   };
 
+  const ListHeaderComponent = useMemo(
+    () => (
+      <View style={{gap: 15, paddingVertical: 10}}>
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_CROP)}
+          options={crops}
+          onPress={option => {}}
+        />
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
+          options={projects}
+          onPress={option => {}}
+        />
+      </View>
+    ),
+    [],
+  );
+
   return (
     <SafeAreaView>
       <StatusBar />
       <View style={TakeNotesStyles.container}>
+        <FlatList
+          data={experiments}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={ListHeaderComponent}
+          renderItem={({item}) => null}
+        />
         <View style={TakeNotesStyles.chipContainer}>
           {selectedChips.length > 0 && (
             <View style={TakeNotesStyles.chipItem}>

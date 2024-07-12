@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useMemo} from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   Text,
   Modal,
   ScrollView,
+  FlatList,
 } from 'react-native';
 
 import {SafeAreaView, StatusBar, Calender} from '../../../components';
@@ -15,6 +16,10 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {experiment, field} from '../../../Data';
 import Chip from '../../../components/Chip';
 import dayjs, {Dayjs} from 'dayjs';
+import {LOCALES} from '../../../localization/constants';
+import {crops, projects, experiments} from '../Experiment/data';
+import Filter from './Filter';
+import {useTranslation} from 'react-i18next';
 import PlanVisitStyles from './PlanVisitStyles';
 
 interface Chip {
@@ -27,6 +32,7 @@ interface Chip {
 }
 
 const PlanVisit = () => {
+  const {t} = useTranslation();
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
   const [modalVisible, setModalVisible] = useState(false);
@@ -85,10 +91,34 @@ const PlanVisit = () => {
     }
   };
 
+  const ListHeaderComponent = useMemo(
+    () => (
+      <View style={{gap: 15, paddingVertical: 10}}>
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_CROP)}
+          options={crops}
+          onPress={option => {}}
+        />
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
+          options={projects}
+          onPress={option => {}}
+        />
+      </View>
+    ),
+    [],
+  );
+
   return (
     <SafeAreaView>
       <StatusBar />
       <View style={PlanVisitStyles.container}>
+        <FlatList
+          data={experiments}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={ListHeaderComponent}
+          renderItem={({item}) => null}
+        />
         <View style={PlanVisitStyles.chipContainer}>
           {selectedChips.length > 0 && (
             <Pressable

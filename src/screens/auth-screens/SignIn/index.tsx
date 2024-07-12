@@ -55,7 +55,7 @@ const SignIn = () => {
           JSON.stringify(user),
         );
         await AsyncStorage.setItem('accessToken', accessToken);
-        console.log(await AsyncStorage.getItem('username'))
+        console.log(await AsyncStorage.getItem('username'));
         await Keychain.setGenericPassword(userName, password);
         dispatch(setIsUserSignedIn(true));
       } catch (error) {

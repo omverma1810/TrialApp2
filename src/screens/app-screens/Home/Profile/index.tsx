@@ -8,7 +8,7 @@ import {
   TextInput,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import ProfileStyles from './ProfileStyles';
@@ -47,7 +47,7 @@ const Profile = () => {
   // fetching profile details using access token
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.PROFILE,
-    method: 'GET'
+    method: 'GET',
   });
 
   useEffect(() => {
@@ -61,13 +61,13 @@ const Profile = () => {
             email: user.email,
           });
           setIsLoading(false);
-        } else { 
+        } else {
           const token = await AsyncStorage.getItem('accessToken');
           if (token) {
             await fetchProfile({headers: {Authorization: `Bearer ${token}`}});
             if (profileDataResponse && profileDataResponse.status === 200) {
               const fetchedUser = profileDataResponse.data.user;
-              dispatch(setUserDetails(fetchedUser)); 
+              dispatch(setUserDetails(fetchedUser));
               setProfileData({
                 name: `${fetchedUser.first_name} ${fetchedUser.last_name}`,
                 location: fetchedUser.location?.name || 'N/A',
@@ -90,11 +90,7 @@ const Profile = () => {
 
   //logout functionality
 
-  const [
-    logout,
-    logoutResponse,
-    logoutError,
-  ] = useApi({
+  const [logout, logoutResponse, logoutError] = useApi({
     url: URL.LOGOUT,
     method: 'DELETE',
   });
@@ -146,7 +142,7 @@ const Profile = () => {
       return;
     }
 
-    const headers = { 
+    const headers = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
       'x-auth-token': token,
@@ -160,36 +156,38 @@ const Profile = () => {
     //   name: filename,
     //   type: type,
     // };
-    let numericStr = profileData.phoneNumber.replace(/\s/, '')
+    let numericStr = profileData.phoneNumber.replace(/\s/, '');
     let payload = JSON.stringify({
-      "phone_number": parseInt(numericStr),
-      "email": profileData.email
+      phone_number: parseInt(numericStr),
+      email: profileData.email,
     });
-    await updateProfile({payload,headers});
+    await updateProfile({payload, headers});
   };
 
-
-  useEffect(() => { 
+  useEffect(() => {
     const handleUpdateData = async () => {
       Alert.alert('Success', 'Profile updated successfully');
-      const user= updateProfileResponse.data.user;
-      console.log(user)
+      const user = updateProfileResponse.data.user;
+      console.log(user);
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
         USER_DETAILS_STORAGE_KEY,
         JSON.stringify(user),
       );
-      await Keychain.setGenericPassword(profileData.email, profileData.phoneNumber);
+      await Keychain.setGenericPassword(
+        profileData.email,
+        profileData.phoneNumber,
+      );
       setIsEditing(false);
     };
     if (updateProfileResponse && updateProfileResponse.status_code === 200) {
       handleUpdateData();
     }
   }, [updateProfileResponse]);
-  
+
   //image handling functionality
   const selectImage = () => {
-    ImagePicker.openPicker({ 
+    ImagePicker.openPicker({
       width: 80,
       height: 80,
       cropping: true,
@@ -228,87 +226,90 @@ const Profile = () => {
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <View style={ProfileStyles.container}>
-      <Pressable
-        style={ProfileStyles.profileContainer}
-        onPress={toggleImageAction}>
-        {isDefaultImage ? (
-          <ProfileImg width={80} height={81} />
-        ) : (
-          <Image
-            style={{width: 80, height: 80, borderRadius: 100}}
-            source={{uri: imageSource.path ?? undefined}}
-          />
-        )}
-      </Pressable>
-      <View style={ProfileStyles.infoContainer}>
-        <View style={ProfileStyles.infoItem}>
-          <Text style={ProfileStyles.infoText}>Name</Text>
-          <Text style={ProfileStyles.infoTextBold}>{profileData.name}</Text>
-        </View>
-        <View style={ProfileStyles.infoItem}>
-          <Text style={ProfileStyles.infoText}>Location</Text>
-          <Text style={ProfileStyles.infoTextBold}>{profileData.location}</Text>
-        </View>
-        <View
-          style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-          <View style={{gap: 8}}>
-            <Text style={ProfileStyles.infoText}>Phone Number</Text>
-            {isEditing ? (
-              <TextInput
-                style={ProfileStyles.infoTextBold}
-                value={profileData.phoneNumber}
-                onChangeText={text =>
-                  setProfileData({...profileData, phoneNumber: text})
-                }
-              />
-            ) : (
-              <Text style={ProfileStyles.infoTextBold}>
-                {profileData.phoneNumber}
-              </Text>
-            )}
-          </View>
-          <Pressable onPress={() => setIsEditing(!isEditing)}>
-            <Text style={ProfileStyles.editButton}>
-              {isEditing ? 'Cancel' : 'Edit'}
-            </Text>
-          </Pressable>
-        </View>
-        <View
-          style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-          <View style={{gap: 8}}>
-            <Text style={ProfileStyles.infoText}>Email Id</Text>
-            {isEditing ? (
-              <TextInput
-                style={ProfileStyles.infoTextBold}
-                value={profileData.email}
-                onChangeText={text =>
-                  setProfileData({...profileData, email: text})
-                }
-              />
-            ) : (
-              <Text style={ProfileStyles.infoTextBold}>
-                {profileData.email}
-              </Text>
-            )}
-          </View>
-          <Pressable onPress={() => setIsEditing(!isEditing)}>
-            <Text style={ProfileStyles.editButton}>
-              {isEditing ? 'Cancel' : 'Edit'}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-      {isEditing && (
-        <Pressable onPress={onUpdate} style={ProfileStyles.updateButton}>
-          <Text style={ProfileStyles.updateButtonText}>Update Profile</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <View style={ProfileStyles.container}>
+        <Pressable
+          style={ProfileStyles.profileContainer}
+          onPress={toggleImageAction}>
+          {isDefaultImage ? (
+            <ProfileImg width={80} height={81} />
+          ) : (
+            <Image
+              style={{width: 80, height: 80, borderRadius: 100}}
+              source={{uri: imageSource.path ?? undefined}}
+            />
+          )}
         </Pressable>
-      )}
-      <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
-        <Text style={ProfileStyles.editButton}>Logout</Text>
-      </Pressable>
-    </View>
+        <View style={ProfileStyles.infoContainer}>
+          <View style={ProfileStyles.infoItem}>
+            <Text style={ProfileStyles.infoText}>Name</Text>
+            <Text style={ProfileStyles.infoTextBold}>{profileData.name}</Text>
+          </View>
+          <View style={ProfileStyles.infoItem}>
+            <Text style={ProfileStyles.infoText}>Location</Text>
+            <Text style={ProfileStyles.infoTextBold}>
+              {profileData.location}
+            </Text>
+          </View>
+          <View
+            style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
+            <View style={{gap: 8}}>
+              <Text style={ProfileStyles.infoText}>Phone Number</Text>
+              {isEditing ? (
+                <TextInput
+                  style={ProfileStyles.infoTextBold}
+                  value={profileData.phoneNumber}
+                  onChangeText={text =>
+                    setProfileData({...profileData, phoneNumber: text})
+                  }
+                />
+              ) : (
+                <Text style={ProfileStyles.infoTextBold}>
+                  {profileData.phoneNumber}
+                </Text>
+              )}
+            </View>
+            <Pressable onPress={() => setIsEditing(!isEditing)}>
+              <Text style={ProfileStyles.editButton}>
+                {isEditing ? 'Cancel' : 'Edit'}
+              </Text>
+            </Pressable>
+          </View>
+          <View
+            style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
+            <View style={{gap: 8}}>
+              <Text style={ProfileStyles.infoText}>Email Id</Text>
+              {isEditing ? (
+                <TextInput
+                  style={ProfileStyles.infoTextBold}
+                  value={profileData.email}
+                  onChangeText={text =>
+                    setProfileData({...profileData, email: text})
+                  }
+                />
+              ) : (
+                <Text style={ProfileStyles.infoTextBold}>
+                  {profileData.email}
+                </Text>
+              )}
+            </View>
+            <Pressable onPress={() => setIsEditing(!isEditing)}>
+              <Text style={ProfileStyles.editButton}>
+                {isEditing ? 'Cancel' : 'Edit'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+        {isEditing && (
+          <Pressable onPress={onUpdate} style={ProfileStyles.updateButton}>
+            <Text style={ProfileStyles.updateButtonText}>Update Profile</Text>
+          </Pressable>
+        )}
+        <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
+          <Text style={ProfileStyles.editButton}>Logout</Text>
+        </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
 };
