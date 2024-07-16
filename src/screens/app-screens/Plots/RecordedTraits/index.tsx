@@ -1,98 +1,31 @@
 import {View} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {useRoute} from '@react-navigation/native';
+import React, {useState} from 'react';
 
 import {styles} from '../styles';
 import {Button, Text} from '../../../../components';
 import {LOCALES} from '../../../../localization/constants';
+import {useTranslation} from 'react-i18next';
 import {
   TraitItem,
   UnrecordedTraitsProvider,
-  UpdateRecordDataFunction,
 } from '../../NewRecord/UnrecordedTraits/UnrecordedTraitsContext';
 import UnrecordedTraitCard from '../../NewRecord/UnrecordedTraits/UnrecordedTraitCard';
-import {useApi} from '../../../../hooks/useApi';
-import {URL} from '../../../../constants/URLS';
-import {formatDateTime} from '../../../../utilities/function';
-import Toast from '../../../../utilities/toast';
-import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
 
-type RecordData = {
-  [key: string]: {
-    observationId: number | null;
-    traitId: number;
-    observedValue: string;
-  };
-};
+interface RecordData {
+  [key: string]: string;
+}
 
-const RecordedTraits = ({
-  data = [],
-  plotId,
-  details,
-}: {
-  data: TraitItem[];
-  plotId: number;
-  details: any;
-}) => {
+const RecordedTraits = ({data = []}: {data: TraitItem[]}) => {
   const {t} = useTranslation();
-  const {
-    params: {type},
-  } = useRoute<PlotsScreenProps['route']>();
   const [recordData, setRecordData] = useState<RecordData>({});
   const buttonTitles =
     t(LOCALES.EXPERIMENT.LBL_SAVE) + ' ' + t(LOCALES.EXPERIMENT.LBL_RECORD);
 
-  const updateRecordData: UpdateRecordDataFunction = (
-    observationId,
-    traitId,
-    observedValue,
-  ) => {
-    setRecordData(prevData => ({
+  const updateRecordData = (key: string, value: string) => {
+    setRecordData((prevData: RecordData) => ({
       ...prevData,
-      [traitId]: {
-        observationId,
-        traitId,
-        observedValue: parseInt(observedValue),
-      },
+      [key]: value,
     }));
-  };
-
-  const [
-    updateTraitsRecord,
-    trraitsRecordData,
-    isTraitsRecordLoading,
-    traitsRecordError,
-  ] = useApi({
-    url: URL.RECORD_TRAITS,
-    method: 'POST',
-  });
-
-  useEffect(() => {
-    if (trraitsRecordData?.status_code !== 200) {
-      return;
-    }
-    const {message} = trraitsRecordData;
-    Toast.success({message: message});
-    setRecordData({});
-  }, [trraitsRecordData]);
-
-  const onSaveRecord = () => {
-    const data = {
-      plotId: plotId,
-      date: formatDateTime(new Date()),
-      fieldExperimentId: details?.fieldExperimentId,
-      experimentType: type,
-      phenotypes: Object.values(recordData),
-      images: [],
-      applications: null,
-      lat: '23.0225° N',
-      long: '72.5714° E',
-    };
-    const payload = {
-      jsonData: JSON.stringify(data),
-    };
-    updateTraitsRecord({payload});
   };
 
   return (
@@ -111,17 +44,11 @@ const RecordedTraits = ({
           <UnrecordedTraitCard />
         </UnrecordedTraitsProvider>
       ))}
-      {Object.values(recordData).length > 0 && (
-        <Button
-          title={buttonTitles}
-          containerStyle={styles.saveRecord}
-          onPress={onSaveRecord}
-          loading={isTraitsRecordLoading}
-          disabled={isTraitsRecordLoading}
-        />
+      {Object.keys(recordData).length > 0 && (
+        <Button title={buttonTitles} containerStyle={styles.saveRecord} />
       )}
     </View>
   );
 };
 
-export default React.memo(RecordedTraits);
+export default RecordedTraits;

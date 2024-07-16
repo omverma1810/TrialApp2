@@ -8,12 +8,12 @@ import React, {
 } from 'react';
 
 export interface TraitItem {
-  traitId: number;
+  traitId: string;
   traitName: string;
   traitUom: string;
   dataType: 'float';
   observationStatus: boolean;
-  observationId: number | null;
+  observationId: string;
   value: string;
 }
 
@@ -28,10 +28,6 @@ interface UnrecordedTraitsContextType {
   onEdit: () => void;
 }
 
-export interface UpdateRecordDataFunction {
-  (observationId: number | null, traitId: number, observedValue: string): void;
-}
-
 const UnrecordedTraitsContext = createContext<
   UnrecordedTraitsContextType | undefined
 >(undefined);
@@ -43,7 +39,7 @@ export const UnrecordedTraitsProvider = ({
 }: {
   children: ReactNode;
   item: TraitItem;
-  updateRecordData: UpdateRecordDataFunction;
+  updateRecordData: (key: string, value: string) => void;
 }) => {
   const [isInputActive, setIsInputActive] = useState(false);
   const [isRecorded, setIsRecorded] = useState(false);
@@ -58,7 +54,7 @@ export const UnrecordedTraitsProvider = ({
   const onSubmit = (value: string) => {
     setIsRecorded(true);
     setRecordedValue(value);
-    updateRecordData(item?.observationId, item?.traitId, value);
+    updateRecordData(item?.traitId, value);
   };
 
   const onEdit = () => {

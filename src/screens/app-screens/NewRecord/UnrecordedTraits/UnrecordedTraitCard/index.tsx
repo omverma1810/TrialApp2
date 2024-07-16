@@ -22,4 +22,4 @@ const UnrecordedTraitCard = () => {
   return renderCard();
 };
 
-export default React.memo(UnrecordedTraitCard);
+export default UnrecordedTraitCard;

@@ -1,4 +1,4 @@
-import React, {useState, useRef, useMemo} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -6,9 +6,10 @@ import {
   Text,
   Modal,
   ScrollView,
-  FlatList,
+  Alert,
 } from 'react-native';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import {SafeAreaView, StatusBar, Calender} from '../../../components';
 import BottomModal from '../../../components/BottomSheetModal';
 import {DropdownArrow} from '../../../assets/icons/svgs';
@@ -16,11 +17,9 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {experiment, field} from '../../../Data';
 import Chip from '../../../components/Chip';
 import dayjs, {Dayjs} from 'dayjs';
-import {LOCALES} from '../../../localization/constants';
-import {crops, projects, experiments} from '../Experiment/data';
-import Filter from './Filter';
-import {useTranslation} from 'react-i18next';
 import PlanVisitStyles from './PlanVisitStyles';
+import {useApi} from '../../../hooks/useApi';
+import {URL} from '../../../constants/URLS';
 
 interface Chip {
   id: number;
@@ -31,8 +30,7 @@ interface Chip {
   Fieldno?: string;
 }
 
-const PlanVisit = () => {
-  const {t} = useTranslation();
+const PlanVisit = ({navigation}) => {
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
   const [modalVisible, setModalVisible] = useState(false);
@@ -91,34 +89,51 @@ const PlanVisit = () => {
     }
   };
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <View style={{gap: 15, paddingVertical: 10}}>
-        <Filter
-          title={t(LOCALES.EXPERIMENT.LBL_CROP)}
-          options={crops}
-          onPress={option => {}}
-        />
-        <Filter
-          title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={projects}
-          onPress={option => {}}
-        />
-      </View>
-    ),
-    [],
-  );
+  //planning the visits
+  const [planVisit, planVisitResponse] = useApi({
+    url: URL.VISITS,
+    method: 'POST',
+  });
+  const onPlanVisit = async () => {
+    const token = await AsyncStorage.getItem('accessToken');
+    if (!token) {
+      Alert.alert('Error', 'No token found');
+      return;
+    }
 
+    if (!selectedField || !selectedChips.length || !selectedDate) {
+      Alert.alert('Error', 'Please select all fields before planning a visit');
+      return;
+    }
+
+    const payload = {
+      field_id: selectedField.id,
+      experiment_id: selectedChips[0].id,
+      date: selectedDate.format('YYYY-MM-DD'),
+      experiment_type: 'hybrid',
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      'x-auth-token': token,
+    };
+
+    planVisit({payload, headers});
+  };
+  useEffect(() => {
+    if (planVisitResponse && planVisitResponse.status_code == 201) {
+      Alert.alert('Success', 'Visit planned successfully', [
+        {text: 'OK', onPress: () => navigation.navigate('Home')},
+      ]);
+    } else {
+      Alert.alert('Error', 'Failed to plan visit');
+    }
+  }, []);
   return (
     <SafeAreaView>
       <StatusBar />
       <View style={PlanVisitStyles.container}>
-        <FlatList
-          data={experiments}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={ListHeaderComponent}
-          renderItem={({item}) => null}
-        />
         <View style={PlanVisitStyles.chipContainer}>
           {selectedChips.length > 0 && (
             <Pressable
@@ -178,15 +193,10 @@ const PlanVisit = () => {
           />
         )}
         {!chipVisible && (
-          <Pressable
-            style={PlanVisitStyles.submitButton}
-            onPress={() => {
-              console.log('Submit button pressed');
-            }}>
+          <Pressable style={PlanVisitStyles.submitButton} onPress={onPlanVisit}>
             <Text style={PlanVisitStyles.submitButtonText}>Plan a Visit</Text>
           </Pressable>
         )}
-
         <BottomModal
           bottomSheetModalRef={bottomSheetModalRef}
           type="CONTENT_HEIGHT"

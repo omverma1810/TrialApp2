@@ -7,11 +7,11 @@ const URL = {
   REFRESH_TOKEN: 'auth/token/refresh',
   PROFILE: 'auth/me/',
   LOGOUT: 'auth/logout/',
-  VISITS: 'upcoming_visits/',
   EXPERIMENT_LIST: 'app/experiment-list/',
   EXPERIMENT_DETAILS: 'app/experiment-details',
   PLOT_LIST: 'app/trial-location',
-  RECORD_TRAITS: 'app/trait-data-record/',
+  VISITS : 'upcoming_visits/',
+  NOTES : 'notes/'
 };
 
 export {URL, BASE_URL, API_CONFIG};

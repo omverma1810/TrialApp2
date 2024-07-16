@@ -20,6 +20,7 @@ export type HomeStackParamList = {
   TakeNotes: undefined;
   PlanVisit: undefined;
   Profile: undefined;
+  EditNotes: undefined;
 };
 export type ExperimentStackParamList = {
   Experiment: undefined;

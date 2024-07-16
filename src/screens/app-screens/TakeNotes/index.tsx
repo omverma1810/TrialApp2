@@ -1,11 +1,11 @@
-import React, {useState, useRef, useMemo} from 'react';
+import React, {useState, useRef,useEffect} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   TextInput,
   ScrollView,
-  FlatList,
+  Alert
 } from 'react-native';
 
 import {SafeAreaView, StatusBar} from '../../../components';
@@ -15,11 +15,9 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {experiment, field} from '../../../Data';
 import Chip from '../../../components/Chip';
 import TakeNotesStyles from './TakeNotesStyle';
-import {LOCALES} from '../../../localization/constants';
-import {crops, projects, experiments} from '../Experiment/data';
-import Filter from './Filter';
-import {useTranslation} from 'react-i18next';
-
+import { useApi } from '../../../hooks/useApi';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { URL } from '../../../constants/URLS';
 interface Chip {
   id: number;
   ExperientName: string;
@@ -29,8 +27,7 @@ interface Chip {
   Fieldno?: string;
 }
 
-const TakeNotes = () => {
-  const {t} = useTranslation();
+const TakeNotes = ({navigation}) => {
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
   const [modalVisible, setModalVisible] = useState(false);
@@ -84,34 +81,54 @@ const TakeNotes = () => {
     }
   };
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <View style={{gap: 15, paddingVertical: 10}}>
-        <Filter
-          title={t(LOCALES.EXPERIMENT.LBL_CROP)}
-          options={crops}
-          onPress={option => {}}
-        />
-        <Filter
-          title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={projects}
-          onPress={option => {}}
-        />
-      </View>
-    ),
-    [],
-  );
+  const [submitNote, submitNoteResponse] = useApi({
+    url: URL.NOTES,
+    method: 'POST',
+  });
+  const handleSubmit = async () => {
+    const token = await AsyncStorage.getItem('accessToken');
+    if (!token) {
+      Alert.alert('Error', 'No token found');
+      return;
+    }
+
+    if (!selectedField || !selectedChips.length || !text) {
+      Alert.alert('Error', 'Please select all fields and enter notes before submitting');
+      return;
+    }
+
+    const payload = {
+      field_id: selectedField.id,
+      experiment_id: selectedChips[0].id,
+      content: text,
+      experiment_type: 'trials', 
+    };
+
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      'x-auth-token': token,
+    };
+
+    submitNote({ payload, headers });
+  };
+
+  useEffect(() => {
+    if (submitNoteResponse) {
+      if (submitNoteResponse.status_code === 201) {
+        Alert.alert('Success', 'Note submitted successfully');
+        setText('');
+        navigation.navigate("Home")
+      } else {
+        Alert.alert('Error', 'Failed to submit note');
+      }
+    }
+  }, [submitNoteResponse]);
 
   return (
     <SafeAreaView>
       <StatusBar />
       <View style={TakeNotesStyles.container}>
-        <FlatList
-          data={experiments}
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={ListHeaderComponent}
-          renderItem={({item}) => null}
-        />
         <View style={TakeNotesStyles.chipContainer}>
           {selectedChips.length > 0 && (
             <View style={TakeNotesStyles.chipItem}>
@@ -172,9 +189,7 @@ const TakeNotes = () => {
             </View>
             <TouchableOpacity
               style={TakeNotesStyles.submitButton}
-              onPress={() => {
-                console.log('Submit button pressed');
-              }}>
+              onPress={handleSubmit}>
               <Text style={TakeNotesStyles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
           </View>

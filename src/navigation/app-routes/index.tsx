@@ -31,6 +31,7 @@ import Plots from '../../screens/app-screens/Plots';
 import NewRecord from '../../screens/app-screens/NewRecord';
 import AddImage from '../../screens/app-screens/AddImage';
 import Profile from '../../screens/app-screens/Home/Profile';
+import EditNotes from '../../screens/app-screens/EditNotes';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -122,6 +123,11 @@ const HomeStackScreens = () => {
         name="PlanVisit"
         component={PlanVisit}
         options={{title: 'Plan a Visit'}}
+      />
+      <HomeStack.Screen
+        name="EditNotes"
+        component={EditNotes}
+        options={{title: 'Edit Notes'}}
       />
       <HomeStack.Screen
         name="TakeNotes"
