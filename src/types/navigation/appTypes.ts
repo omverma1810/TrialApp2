@@ -25,7 +25,7 @@ export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: {id: string; type: string};
   Plots: {id: string; type: string};
-  NewRecord: undefined;
+  NewRecord: undefined | {imageUrl: string};
   AddImage: {
     imageUrl: string;
   };

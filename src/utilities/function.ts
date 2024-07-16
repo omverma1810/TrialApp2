@@ -1,3 +1,5 @@
+import RNFS from 'react-native-fs';
+
 const formatDateTime = (date: Date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -10,4 +12,16 @@ const formatDateTime = (date: Date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
-export {formatDateTime};
+const getNameFromUrl = (url: string) => url.split('/').pop();
+
+const getBase64FromUrl = async (filePath: string) => {
+  try {
+    const base64 = RNFS.readFile(filePath, 'base64');
+    return base64;
+  } catch (error) {
+    console.error('Error reading file:', error);
+    throw error;
+  }
+};
+
+export {formatDateTime, getNameFromUrl, getBase64FromUrl};

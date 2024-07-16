@@ -5,8 +5,9 @@ import {CardArrowDown, CardArrowUp} from '../../../../assets/icons/svgs';
 import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import RecordedTraits from '../RecordedTraits';
-import Notes from '../Notes';
+import Notes from '../../NewRecord/Notes';
 import UnrecordedTraits from '../UnrecordedTraits';
+import TraitsImage from '../../NewRecord/TraitsImage';
 
 const PlotCard = ({
   isFirstIndex,
@@ -71,7 +72,8 @@ const PlotCard = ({
             plotId={plotData?.id}
             details={details}
           />
-          {/* <Notes /> */}
+          {plotData?.notes && <Notes notes={plotData?.notes} />}
+          {plotData?.imageUrls && <TraitsImage images={plotData?.imageUrls} />}
           <UnrecordedTraits
             data={unrecordedTrait}
             plotId={plotData?.id}

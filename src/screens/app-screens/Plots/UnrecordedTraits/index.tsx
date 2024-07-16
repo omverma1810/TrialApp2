@@ -82,7 +82,8 @@ const UnrecordedTraits = ({
   }, [trraitsRecordData]);
 
   const onSaveRecord = () => {
-    const data = {
+    const headers = {'Content-Type': 'application/json'};
+    const payload = {
       plotId: plotId,
       date: formatDateTime(new Date()),
       fieldExperimentId: details?.fieldExperimentId,
@@ -92,11 +93,9 @@ const UnrecordedTraits = ({
       applications: null,
       lat: '23.0225° N',
       long: '72.5714° E',
+      imageData: [],
     };
-    const payload = {
-      jsonData: JSON.stringify(data),
-    };
-    createTraitsRecord({payload});
+    createTraitsRecord({payload, headers});
   };
 
   return (

@@ -11,7 +11,9 @@ import {styles} from './styles';
 const AddImage = ({navigation, route}: AddImageScreenProps) => {
   const {t} = useTranslation();
   const {imageUrl} = route?.params;
-
+  const onDone = () => {
+    navigation.navigate('NewRecord', {imageUrl});
+  };
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
@@ -28,10 +30,10 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
           <Image style={styles.image} source={{uri: imageUrl}} />
         </View>
         <View style={styles.buttonContainer}>
-          <Pressable style={styles.button}>
+          <Pressable style={styles.button} onPress={navigation.goBack}>
             <X />
           </Pressable>
-          <Pressable style={styles.button}>
+          <Pressable style={styles.button} onPress={onDone}>
             <Check />
           </Pressable>
         </View>

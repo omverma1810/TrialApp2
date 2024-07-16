@@ -25,15 +25,19 @@ import {RecordApiProvider, useRecordApi} from './RecordApiContext';
 
 const NewRecord = ({navigation}: NewRecordScreenProps) => {
   const {t} = useTranslation();
-  const buttonTitle =
-    t(LOCALES.EXPERIMENT.LBL_SAVE) + ' ' + t(LOCALES.EXPERIMENT.LBL_RECORD);
+  const buttonTitle = t(LOCALES.EXPERIMENT.LBL_SAVE);
   const {
+    notes,
+    images,
     userInteractionOptions,
     isNotesModalVisible,
     isUnrecordedTraitsVisible,
     isSaveRecordBtnVisible,
+    isNotesVisible,
+    isTraitsImageVisible,
     closeNotesModal,
     onSaveRecord,
+    onSaveNotes,
   } = useRecord();
   const {isTraitsRecordLoading} = useRecordApi();
 
@@ -70,8 +74,8 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
                     </Pressable>
                   ))}
                 </View>
-                {/* <Notes /> */}
-                {/* <TraitsImage /> */}
+                {isNotesVisible && <Notes notes={notes} />}
+                {isTraitsImageVisible && <TraitsImage images={images} />}
                 <UnrecordedTraits />
               </Fragment>
             )}
@@ -92,7 +96,7 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
         isModalVisible={isNotesModalVisible}
         closeModal={closeNotesModal}
         onDiscard={closeNotesModal}
-        onSave={closeNotesModal}
+        onSave={onSaveNotes}
       />
     </SafeAreaView>
   );

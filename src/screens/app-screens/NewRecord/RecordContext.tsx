@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import {useTranslation} from 'react-i18next';
 import ImagePicker from 'react-native-image-crop-picker';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 import {ImagePlus, Notes} from '../../../assets/icons/svgs';
 import {LOCALES} from '../../../localization/constants';
@@ -16,7 +16,11 @@ import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
 import {useRecordApi} from './RecordApiContext';
 import {UpdateRecordDataFunction} from './UnrecordedTraits/UnrecordedTraitsContext';
 import Toast from '../../../utilities/toast';
-import {formatDateTime} from '../../../utilities/function';
+import {
+  formatDateTime,
+  getBase64FromUrl,
+  getNameFromUrl,
+} from '../../../utilities/function';
 
 type RecordData = {
   [key: string]: {
@@ -46,12 +50,16 @@ interface RecordContextType {
   selectedExperiment: any;
   selectedField: any;
   selectedPlot: any;
+  images: string[];
+  notes: string;
   isNotesModalVisible: boolean;
   isSelectExperimentVisible: boolean;
   isSelectFieldVisible: boolean;
   isSelectPlotVisible: boolean;
   isUnrecordedTraitsVisible: boolean;
   isSaveRecordBtnVisible: boolean;
+  isNotesVisible: boolean;
+  isTraitsImageVisible: boolean;
   handleExperimentSelect: (item: any) => void;
   handleFieldSelect: (item: any) => void;
   handlePlotSelect: (item: any) => void;
@@ -61,6 +69,7 @@ interface RecordContextType {
   handleProjectChange: (option: string) => void;
   updateRecordData: UpdateRecordDataFunction;
   onSaveRecord: () => void;
+  onSaveNotes: (notes: string) => void;
 }
 
 const RecordContext = createContext<RecordContextType | undefined>(undefined);
@@ -77,6 +86,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     trraitsRecordData,
   } = useRecordApi();
   const navigation = useNavigation<NewRecordScreenProps['navigation']>();
+  const {params} = useRoute<NewRecordScreenProps['route']>();
   const userInteractionOptions = [
     {
       id: 0,
@@ -106,12 +116,19 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const [selectedPlot, setSelectedPlot] = useState<any>(null);
   const [isNotesModalVisible, setIsNotesModalVisible] = useState(false);
   const [recordData, setRecordData] = useState<RecordData>({});
+  const [notes, setNotes] = useState('');
+  const [images, setImages] = useState<string[]>([]);
   const isSelectExperimentVisible = true;
   const isSelectFieldVisible = !!selectedExperiment;
   const isSelectPlotVisible = !!selectedExperiment && !!selectedField;
   const isUnrecordedTraitsVisible =
     !!selectedExperiment && !!selectedField && !!selectedPlot;
-  const isSaveRecordBtnVisible = Object.keys(recordData).length > 0;
+  const isNotesVisible = notes.trim().length > 0;
+  const isTraitsImageVisible = images.length > 0;
+  const isSaveRecordBtnVisible =
+    Object.keys(recordData).length > 0 ||
+    isNotesVisible ||
+    isTraitsImageVisible;
 
   const handleExperimentSelect = (item: any) => {
     setSelectedExperiment(item);
@@ -136,6 +153,12 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const closeNotesModal = () => {
     setIsNotesModalVisible(false);
   };
+
+  useEffect(() => {
+    if (params?.imageUrl) {
+      setImages([params?.imageUrl, ...images]);
+    }
+  }, [params]);
 
   useEffect(() => {
     if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
@@ -237,22 +260,30 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     navigation.goBack();
   }, [trraitsRecordData]);
 
-  const onSaveRecord = () => {
-    const data = {
+  const onSaveRecord = async () => {
+    const headers = {'Content-Type': 'application/json'};
+    const imagesNameArr = images.map(url => getNameFromUrl(url));
+    const base64Promises = images.map(url => getBase64FromUrl(url));
+    const imagesBase64Arr = await Promise.all(base64Promises);
+    const payload = {
       plotId: selectedPlot?.id,
       date: formatDateTime(new Date()),
       fieldExperimentId: selectedExperiment?.id,
       experimentType: selectedExperiment?.experimentType,
       phenotypes: Object.values(recordData),
-      images: [],
+      images: imagesNameArr,
+      notes,
       applications: null,
+      imageData: imagesBase64Arr,
       lat: '23.0225° N',
       long: '72.5714° E',
     };
-    const payload = {
-      jsonData: JSON.stringify(data),
-    };
-    createTraitsRecord({payload});
+    createTraitsRecord({payload, headers});
+  };
+
+  const onSaveNotes = (notes: string) => {
+    setNotes(notes.trim());
+    setIsNotesModalVisible(false);
   };
 
   const value = {
@@ -268,12 +299,16 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     selectedExperiment,
     selectedField,
     selectedPlot,
+    images,
+    notes,
     isNotesModalVisible,
     isSelectExperimentVisible,
     isSelectFieldVisible,
     isSelectPlotVisible,
     isUnrecordedTraitsVisible,
     isSaveRecordBtnVisible,
+    isNotesVisible,
+    isTraitsImageVisible,
     handleExperimentSelect,
     handleFieldSelect,
     handlePlotSelect,
@@ -283,6 +318,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     handleProjectChange,
     updateRecordData,
     onSaveRecord,
+    onSaveNotes,
   };
 
   return (

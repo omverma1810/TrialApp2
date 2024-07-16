@@ -294,11 +294,10 @@ export const styles = StyleSheet.create({
   imageContainer: {
     gap: 12,
     flexDirection: 'row',
-    height: 150,
   },
   image: {
-    height: '100%',
-    flex: 0.5,
+    height: 150,
+    width: 150,
   },
   traitsLabel: {
     fontSize: 12,
