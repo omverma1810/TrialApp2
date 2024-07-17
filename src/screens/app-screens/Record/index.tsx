@@ -22,14 +22,14 @@ import {crops, projects, experiments} from '../Experiment/data';
 interface SelectedFieldData {
   fieldName: string;
   plots: any;
-}
+} 
 interface ProjectData {
   [key: string]: {
     plot: string;
     entries: {date: string; notes: string}[];
   }[];
 }
-interface Chip {
+interface Chip { 
   id: number;
   ExperientName?: string;
   CropName: string;

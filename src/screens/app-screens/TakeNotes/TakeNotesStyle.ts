@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-
+import { FONTS } from '../../../theme/fonts';
 const TakeNotesStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
@@ -115,6 +115,20 @@ const TakeNotesStyles = StyleSheet.create({
     color: '#454545',
     fontWeight: '400',
     fontSize: 13,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.SEMI_BOLD,
+  },
+  filter: {
+    gap: 16,
+    paddingVertical: 16,
   },
 });
 

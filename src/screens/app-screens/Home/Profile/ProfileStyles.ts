@@ -70,6 +70,6 @@ const ProfileStyle = StyleSheet.create({
         fontWeight: '600',
         textAlign: 'center',
       },
-    
+
 })
 export default ProfileStyle;

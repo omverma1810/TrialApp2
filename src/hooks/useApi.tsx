@@ -12,7 +12,6 @@ type UseApiType = {
 };
 
 type ApiCallType = {
-  // payload?: Record<string, unknown>;
   payload?: any;
   headers?: Record<string, string>;
   pathParams?: string;
@@ -106,7 +105,7 @@ export const useApi = ({
 
         setResponse(res.data);
       } catch (err: any) {
-        console.log('API URL:', url);
+        console.log('API url:', url);
         if (payload) console.log('API payload:', payload);
         if (pathParams) console.log('API pathParams:', pathParams);
         if (queryParams) console.log('API queryParams:', queryParams);

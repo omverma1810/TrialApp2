@@ -12,7 +12,7 @@ import Header from './Header';
 import styles from './HomeStyles';
 
 const Home: React.FC<HomeScreenProps> = ({navigation}) => {
-  const goToTakeNotes = () => { 
+  const goToTakeNotes = () => {
     navigation.navigate('TakeNotes');
   };
   const goToPlanVisit = () => {
@@ -37,8 +37,8 @@ const Home: React.FC<HomeScreenProps> = ({navigation}) => {
             </Pressable>
           </View>
           <View style={styles.container}>
-            <MyVisits navigation={navigation}/>
-            <MyNote navigation={navigation} />
+            <MyVisits/>
+            <MyNote />
           </View>
         </ScrollView>
       </View>

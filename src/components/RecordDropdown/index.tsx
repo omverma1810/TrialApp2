@@ -1,58 +1,46 @@
-import React, {useState, useRef, useEffect} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-  Modal,
-  Pressable,
-} from 'react-native';
-import {DropdownArrow, Edit, FieldSybol1} from '../../assets/icons/svgs';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Animated, StyleSheet, ScrollView, Dimensions, Modal } from 'react-native';
+import { DropdownArrow, Edit, FieldSybol1 } from '../../assets/icons/svgs';
 import Calendar from '../Calender';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-const RecordDropDown = ({selectedFields, projectData}) => {
+const RecordDropDown = ({ selectedFields, projectData }) => {
   const [dropdownStates, setDropdownStates] = useState(
     Object.fromEntries(
       Object.keys(selectedFields).flatMap(field =>
-        projectData[field].map((_, index) => [`${field}_${index}`, false]),
-      ),
-    ),
+        projectData[field].map((_, index) => [`${field}_${index}`, false])
+      )
+    )
   );
 
   const toggleDropdown = (field, index) => {
     setDropdownStates(prevState => ({
       ...prevState,
-      [`${field}_${index}`]: !prevState[`${field}_${index}`],
+      [`${field}_${index}`]: !prevState[`${field}_${index}`]
     }));
   };
 
   return (
     <ScrollView>
-      {Object.keys(selectedFields).map(
-        field =>
-          selectedFields[field] && (
-            <ProjectContainer
-              key={field}
-              title={field}
-              data={projectData[field]}
-              dropdownStates={dropdownStates}
-              toggleDropdown={index => toggleDropdown(field, index)}
-            />
-          ),
-      )}
+      {Object.keys(selectedFields).map(field => (
+        selectedFields[field] && (
+          <ProjectContainer
+            key={field}
+            title={field}
+            data={projectData[field]}
+            dropdownStates={dropdownStates}
+            toggleDropdown={(index) => toggleDropdown(field, index)}
+          />
+        )
+      ))}
     </ScrollView>
   );
 };
 
-const ProjectContainer = ({title, data, dropdownStates, toggleDropdown}) => {
+const ProjectContainer = ({ title, data, dropdownStates, toggleDropdown }) => {
   return (
     <View style={styles.paddingVertical}>
-      <View
-        style={[styles.projectContainer, styles.projectContainerBackground]}>
+      <View style={[styles.projectContainer, styles.projectContainerBackground]}>
         <View style={styles.header}>
           <Text style={styles.headerText}>{title}</Text>
           <FieldSybol1 />
@@ -73,7 +61,7 @@ const ProjectContainer = ({title, data, dropdownStates, toggleDropdown}) => {
   );
 };
 
-const ItemComponent = ({title, entries, dropdownState, toggleDropdown}) => {
+const ItemComponent = ({ title, entries, dropdownState, toggleDropdown }) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const bottomSheetModalRef = useRef(null);
@@ -102,69 +90,58 @@ const ItemComponent = ({title, entries, dropdownState, toggleDropdown}) => {
 
   return (
     <View style={styles.itemContainer}>
-      <Pressable onPress={toggleDropdown}>
-        <View style={styles.row}>
-          <View style={styles.column}>
-            <Text style={styles.title}>{title}</Text>
-          </View>
-          <TouchableOpacity onPress={toggleDropdown}>
-            <DropdownArrow />
-          </TouchableOpacity>
+      <View style={styles.row}>
+        <View style={styles.column}>
+          <Text style={styles.title}>{title}</Text>
         </View>
-      </Pressable>
+        <TouchableOpacity onPress={toggleDropdown}>
+          <DropdownArrow />
+        </TouchableOpacity>
+      </View>
 
-      <Animated.View style={[styles.dropdown, {height: dropdownHeight}]}>
-        {dropdownState &&
-          entries.map((entry, index) => (
-            <View style={styles.entryContainer} key={index}>
-              <View style={styles.projectContainer1}>
-                <View style={styles.padding}>
-                  <Text style={styles.recordedTraitsText}>
-                    Recorded Traits (Number)
-                  </Text>
-                </View>
-                <View style={styles.borderRadiusOverflow}>
-                  <View style={styles.entryRow}>
-                    <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Date of Sowing</Text>
-                      <Text style={styles.entryValue}>{entry.date}</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={handleEditPress}
-                      style={styles.editButton}>
-                      <Text style={styles.editButtonText}>Edit</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.entryRow}>
-                    <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Flowering Date</Text>
-                      <Text style={styles.entryValue}>{entry.date}</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={handleEditPress}
-                      style={styles.editButton}>
-                      <Text style={styles.editButtonText}>Edit</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
+      <Animated.View style={[styles.dropdown, { height: dropdownHeight }]}>
+        {dropdownState && entries.map((entry, index) => (
+          <View style={styles.entryContainer} key={index}>
+            <View style={styles.projectContainer1}>
+              <View style={styles.padding}>
+                <Text style={styles.recordedTraitsText}>Recorded Traits (Number)</Text>
               </View>
-              <View style={styles.notesContainer}>
-                <Text style={styles.notesTitle}>Notes</Text>
-                <View style={styles.notesContent}>
-                  <Text style={styles.notesText}>{entry.notes}</Text>
-                  <Text style={styles.notesDate}>24 sept</Text>
+              <View style={styles.borderRadiusOverflow}>
+                <View style={styles.entryRow}>
+                  <View style={styles.entryColumn}>
+                    <Text style={styles.entryLabel}>Date of Sowing</Text>
+                    <Text style={styles.entryValue}>{entry.date}</Text>
+                  </View>
+                  <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
+                    <Text style={styles.editButtonText}>Edit</Text>
+                  </TouchableOpacity>
                 </View>
-              </View>
-              <View style={styles.unrecordedTraitsRow}>
-                <Text style={styles.unrecordedTraitsText}>
-                  UnRecorded Traits
-                </Text>
-                <TouchableOpacity>
-                  <Text style={styles.viewButtonText}>View</Text>
-                </TouchableOpacity>
+                <View style={styles.entryRow}>
+                  <View style={styles.entryColumn}>
+                    <Text style={styles.entryLabel}>Flowering Date</Text>
+                    <Text style={styles.entryValue}>{entry.date}</Text>
+                  </View>
+                  <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
+                    <Text style={styles.editButtonText}>Edit</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          ))}
+            <View style={styles.notesContainer}>
+              <Text style={styles.notesTitle}>Notes</Text>
+              <View style={styles.notesContent}>
+                <Text style={styles.notesText}>{entry.notes}</Text>
+                <Text style={styles.notesDate}>24 sept</Text>
+              </View>
+            </View>
+            <View style={styles.unrecordedTraitsRow}>
+              <Text style={styles.unrecordedTraitsText}>UnRecorded Traits</Text>
+              <TouchableOpacity>
+                <Text style={styles.viewButtonText}>View</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ))}
       </Animated.View>
 
       <Modal

@@ -19,10 +19,10 @@ const Filter = ({options = [], title = '', onPress = () => {}}: FilterType) => {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.scrollView}>
-        {options.map(option => (
+        {options.map(option => ( 
           <Pressable
             onPress={() => onPress(option)}
-            style={[
+            style={[ 
               styles.filterOptions,
               option.isSelected && styles.selectedOptions,
             ]}
