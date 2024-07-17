@@ -1,36 +1,67 @@
-import React from 'react';
+import React, { useEffect,useState } from 'react';
 import {View, Text, Image, Pressable} from 'react-native';
 
 import {Flask, Leaf, File, Logo} from '../../../../assets/icons/svgs';
 import DashInfoStyles from './DashInfoStyles';
 import {DashInfoData} from './Data';
 import {HomeScreenProps} from '../../../../types/navigation/appTypes';
+import { useApi } from '../../../../hooks/useApi';
+import { URL } from '../../../../constants/URLS';
 
 type DashInfoProps = {
   navigation: HomeScreenProps['navigation'];
 };
 
-const Dashinfo: React.FC<DashInfoProps> = ({navigation}) => {
-  const {ExperimentCount, FieldCount, RecordCount} = DashInfoData[0];
+type DashInfoType = {
+  experimentCount: number;
+  fieldCount: number;
+  totalRecords: number;
+  recordedRecords : number
+};
 
-  const goToTakeExperiments = () => {
-    navigation.navigate('ExperimentStackScreens');
-  };
+
+const Dashinfo: React.FC<DashInfoProps> = ({navigation}) => {
+  const [dashInfoData, setDashInfoData] = useState<DashInfoType  | null>(null);
+
+  const [getinfo , getInfoResponse] = useApi({
+    url : URL.DASH,
+    method : 'GET'
+  })
+  useEffect(()=>{
+    getinfo()
+  },[])
+
+  useEffect(() => {
+    if (getInfoResponse && getInfoResponse.status_code === 200) {
+      const newData : DashInfoType = {
+        experimentCount: getInfoResponse.data.experimentCount,
+        fieldCount: getInfoResponse.data.fieldCount,
+        totalRecords: getInfoResponse.data.record.total,
+        recordedRecords: getInfoResponse.data.record.recorded,
+      };
+
+      setDashInfoData(newData);
+    }
+  }, [getInfoResponse]);
+
+  // const goToTakeExperiments = () => {
+  //   navigation.navigate('ExperimentStackScreens');
+  // };
   return (
     <View>
       <View style={DashInfoStyles.sectionContainer}>
         <View style={DashInfoStyles.container}>
-          <Pressable style={DashInfoStyles.card} onPress={goToTakeExperiments}>
+          <Pressable style={DashInfoStyles.card}>
             <View style={DashInfoStyles.cardContent}>
               <Text style={DashInfoStyles.cardTitle}>Experiments</Text>
-              <Text style={DashInfoStyles.cardValue}>{ExperimentCount}</Text>
+              <Text style={DashInfoStyles.cardValue}>{dashInfoData?.experimentCount}</Text>
             </View>
             <Flask />
           </Pressable>
           <View style={DashInfoStyles.card}>
             <View style={DashInfoStyles.cardContent}>
               <Text style={DashInfoStyles.cardTitle}>Fields</Text>
-              <Text style={DashInfoStyles.cardValue}>{FieldCount}</Text>
+              <Text style={DashInfoStyles.cardValue}>{dashInfoData?.fieldCount}</Text>
             </View>
             <Leaf />
           </View>
@@ -39,10 +70,10 @@ const Dashinfo: React.FC<DashInfoProps> = ({navigation}) => {
           <View style={DashInfoStyles.cardContent}>
             <Text style={DashInfoStyles.recordsTitle}>Records Collected</Text>
             <View style={DashInfoStyles.recordsCountContainer}>
-              <Text style={DashInfoStyles.recordsCount}>{RecordCount} </Text>
-              <Text style={DashInfoStyles.recordsOutOf}>out of 100</Text>
+              <Text style={DashInfoStyles.recordsCount}>{dashInfoData?.recordedRecords} </Text>
+              <Text style={DashInfoStyles.recordsOutOf}>out of {dashInfoData?.totalRecords}</Text>
             </View>
-          </View>
+          </View> 
           <File />
         </View>
       </View>

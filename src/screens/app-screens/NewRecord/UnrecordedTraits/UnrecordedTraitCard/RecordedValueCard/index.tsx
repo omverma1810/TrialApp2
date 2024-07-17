@@ -9,12 +9,12 @@ import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
 
 const RecordedValueCard = () => {
   const {t} = useTranslation();
-  const {recordedValue, onEdit, item} = useUnrecordedTraits();
+  const {getFormattedRecordValue, onEdit, item} = useUnrecordedTraits();
   return (
     <View style={[styles.traitsContainer, styles.row]}>
       <View style={styles.traitsInfoContainer}>
-        <Text style={styles.traitsLabelKey}>{item.name}</Text>
-        <Text style={styles.traitsLabelValue}>{recordedValue}</Text>
+        <Text style={styles.traitsLabelKey}>{item.traitName}</Text>
+        <Text style={styles.traitsLabelValue}>{getFormattedRecordValue}</Text>
       </View>
       <Pressable style={styles.editContainer} onPress={onEdit}>
         <Text style={styles.edit}>{t(LOCALES.EXPERIMENT.LBL_EDIT)}</Text>

@@ -200,4 +200,20 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FONTS.REGULAR,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.SEMI_BOLD,
+  },
+  saveRecord: {
+    width: '90%',
+    alignSelf: 'center',
+    height: 35,
+    marginVertical: 10,
+  },
 });

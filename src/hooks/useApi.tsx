@@ -12,7 +12,7 @@ type UseApiType = {
 };
 
 type ApiCallType = {
-  payload?: Record<string, unknown>;
+  payload?: any;
   headers?: Record<string, string>;
   pathParams?: string;
   queryParams?: string;
@@ -66,7 +66,10 @@ export const useApi = ({
         const tokens = await getTokens();
         const newTokens = await getVerifiedToken(tokens);
         if (newTokens) {
-          axiosConfig.headers['token'] = newTokens.accessToken;
+          axiosConfig.headers = {
+            ...axiosConfig.headers,
+            Authorization: `Bearer ${newTokens?.accessToken}`,
+          };
         } else {
           logoutUser();
         }
@@ -107,7 +110,7 @@ export const useApi = ({
         if (pathParams) console.log('API pathParams:', pathParams);
         if (queryParams) console.log('API queryParams:', queryParams);
         if (headers) console.log('API headers:', headers);
-        console.log('API error:', err.response || err);
+        console.log('API error:', err.response.message || err);
 
         setError(err.response ? err.response.data : err);
         if (err?.response?.data?.statusCode === 401) {

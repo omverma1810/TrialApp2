@@ -33,12 +33,14 @@ const SelectExperiment = () => {
       <View style={styles.filter}>
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_CROP)}
-          options={crops}
+          options={[]}
+          selectedOption=""
           onPress={option => {}}
         />
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={projects}
+          options={[]}
+          selectedOption=""
           onPress={option => {}}
         />
       </View>

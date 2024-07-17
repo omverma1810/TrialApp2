@@ -57,6 +57,19 @@ const ProfileStyle = StyleSheet.create({
         color: '#666',
         textAlign: 'center',
       },
+      updateButton: {
+        backgroundColor: '#1A6DD2',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        marginTop: 20,
+      },
+      updateButtonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
+        textAlign: 'center',
+      },
 
 })
 export default ProfileStyle;

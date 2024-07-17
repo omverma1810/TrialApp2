@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useMemo, useState, useEffect, useRef, useCallback} from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -6,9 +6,17 @@ import {
   Text,
   Modal,
   ScrollView,
+  FlatList,
+  Alert
 } from 'react-native';
-
-import {SafeAreaView, StatusBar, Calender} from '../../../components';
+import {ExperimentScreenProps} from '../../../types/navigation/appTypes';
+import {
+  SafeAreaView,
+  StatusBar,
+  Calender,
+  Loader,
+  Input,
+} from '../../../components';
 import BottomModal from '../../../components/BottomSheetModal';
 import {DropdownArrow} from '../../../assets/icons/svgs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -16,6 +24,15 @@ import {experiment, field} from '../../../Data';
 import Chip from '../../../components/Chip';
 import dayjs, {Dayjs} from 'dayjs';
 import PlanVisitStyles from './PlanVisitStyles';
+import Filter from './Filter';
+import {LOCALES} from '../../../localization/constants';
+import {useApi} from '../../../hooks/useApi';
+import {URL} from '../../../constants/URLS';
+import {useTranslation} from 'react-i18next';
+import ExperimentCard from './ExperimentCard';
+import {Search} from '../../../assets/icons/svgs';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { uses24HourClock } from 'react-native-localize';
 
 interface Chip {
   id: number;
@@ -26,17 +43,52 @@ interface Chip {
   Fieldno?: string;
 }
 
-const PlanVisit = () => {
+const PlanVisit = ({navigation} : any) => {
+  const {t} = useTranslation();
+  const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
-  const [selectedField, setSelectedField] = useState<Chip | null>(null);
+  const [selectedField, setSelectedField] = useState<any>(null);
   const [chipVisible, setChipVisible] = useState(true);
   const bottomSheetModalRef = useRef(null);
   const secondBottomSheetRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
+  const [experimentData, setExperimentData] = useState<any>(null);
+  const [cropList, setCropList] = useState<string[]>([]);
+  const [projectList, setProjectList] = useState<string[]>([]);
+  const [experimentList, setExperimentList] = useState<any[]>([]);
+  const [selectedCrop, setSelectedCrop] = useState('');
+  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedExperiment, setSelectedExperiment] = useState<any>();
+  const [fields,setFields] = useState([])
 
+  const handleSelectedExperiment = (experiment: any) => {
+    setSelectedExperiment(experiment);
+  };
+  const handleSelectedField = (field: any) => {
+    setSelectedField(field);
+  };
+
+  const handleCropChange = useCallback(
+    (option: string) => {
+      setSelectedCrop(option);
+      const newProjectList = Object.keys(experimentData[option] || {});
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentData[option][newProjectList[0]] || []);
+    },
+    [experimentData],
+  );
+
+  const handleProjectChange = useCallback(
+    (option: string) => {
+      setSelectedProject(option);
+      setExperimentList(experimentData[selectedCrop][option] || []);
+    },
+    [experimentData, selectedCrop],
+  );
   const handleFirstRightIconClick = () => {
     if (bottomSheetModalRef.current) {
       (bottomSheetModalRef.current as any).present();
@@ -55,7 +107,6 @@ const PlanVisit = () => {
 
   const handleExperimentSelect = (item: Chip) => {
     setSelectedChips([item]);
-    setChipTitle('Select Field');
     (bottomSheetModalRef.current as any).dismiss();
   };
 
@@ -68,7 +119,10 @@ const PlanVisit = () => {
   const handleOk = (date: Dayjs | null) => {
     setSelectedDate(dayjs(date));
     setModalVisible(false);
-    setChipVisible(false);
+    setPayload((prevPayload) => ({
+      ...prevPayload,
+      date: dayjs(date).format('YYYY-MM-DD'),
+    }));
   };
 
   const handleCancel = () => {
@@ -84,112 +138,199 @@ const PlanVisit = () => {
       handleThirdRightIconClick();
     }
   };
+  const ListHeaderComponent = useMemo(
+    () => (
+      <View style={PlanVisitStyles.filter}>
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_CROP)}
+          options={cropList}
+          selectedOption={selectedCrop}
+          onPress={handleCropChange}
+        />
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
+          options={projectList}
+          selectedOption={selectedProject}
+          onPress={handleProjectChange}
+        />
+      </View>
+    ),
+    [cropList, projectList, selectedCrop, selectedProject],
+  );
 
+  const [
+    getExperimentList,
+    experimentListData,
+    isExperimentListLoading,
+    experimentListError,
+  ] = useApi({
+    url: URL.EXPERIMENT_LIST,
+    method: 'GET',
+  });
+
+  useEffect(() => {
+    getExperimentList();
+  }, []);
+
+  useEffect(() => {
+    if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
+      return;
+    }
+
+    const {data} = experimentListData;
+    const cropList = Object.keys(data);
+    const selectedCrop = cropList[0];
+    const projectList = Object.keys(data[selectedCrop] || {});
+    const selectedProject = projectList[0];
+    const experimentList = data[selectedCrop][selectedProject] || [];
+
+    setExperimentData(data);
+    setCropList(cropList);
+    setProjectList(projectList);
+    setExperimentList(experimentList);
+    setSelectedCrop(selectedCrop);
+    setSelectedProject(selectedProject);
+  }, [experimentListData]);
+  const ListEmptyComponent = useMemo(
+    () => (
+      <View style={PlanVisitStyles.emptyContainer}>
+        {isExperimentListLoading ? (
+          <Loader />
+        ) : (
+          <Text style={PlanVisitStyles.emptyText}>
+            {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
+          </Text>
+        )}
+      </View>
+    ),
+    [isExperimentListLoading],
+  );
+
+  const [payload, setPayload] = useState({
+    field_id: '',
+    experiment_id: '',
+    date: '',
+    experiment_type: '',
+  });
+  const [planVisit, planVisitResponse] = useApi({
+    url: URL.VISITS,
+    method: 'POST',
+  });
+  const onPlanVisit = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      console.log('No token found');
+      return;
+    }
+
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      'x-auth-token': token,
+    };
+
+
+    if (!selectedDate) {
+    Alert.alert('Error', 'Please select all fields before planning a visit');
+    return;
+  }
+    const newData = {
+      field_id: selectedField?.landVillageId,
+      experiment_id: selectedExperiment?.id,
+      experiment_type: selectedExperiment?.experiment_type,
+      date : selectedDate.format('YYYY-MM-DD')
+    }
+    await planVisit({ payload : newData,headers });
+    console.log('payload',payload)
+  };
+  useEffect(() => {
+    if (planVisitResponse && planVisitResponse.status_code == 201) {
+      Alert.alert('Success', 'Visit planned successfully')
+      navigation.navigate('Home')
+    }
+  }, [planVisitResponse]);
+
+  const [getFields, getFieldsResponse] = useApi({
+    url : `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
+    method : 'GET'
+  })
+  useEffect(()=>{
+    getFields()
+  },[selectedExperiment])
+  
+  useEffect(()=>{
+    if(getFieldsResponse && getFieldsResponse.status_code == 200){ 
+      setFields(getFieldsResponse.data.locationList)
+    }
+  },[getFieldsResponse])
+  useEffect(()=>{
+    console.log('fields',fields,selectedField)
+  },[])
   return (
     <SafeAreaView>
       <StatusBar />
       <View style={PlanVisitStyles.container}>
-        <View style={PlanVisitStyles.chipContainer}>
-          {selectedChips.length > 0 && (
-            <Pressable
-              style={PlanVisitStyles.chipItem}
-              onPress={handleChipPress}>
-              <Text style={PlanVisitStyles.chipTitle}>Experiment</Text>
-              <View style={PlanVisitStyles.chipTextRow}>
-                <Text style={PlanVisitStyles.chipText}>
-                  {selectedChips[0].ExperientName}
-                </Text>
-                <DropdownArrow />
-              </View>
-              <View style={PlanVisitStyles.chipCropText}>
-                <Text style={PlanVisitStyles.chipCropText1}>
-                  {selectedChips[0].CropName}
-                </Text>
-              </View>
-            </Pressable>
-          )}
-          {selectedField && (
-            <Pressable
-              style={PlanVisitStyles.chipItem}
-              onPress={handleChipPress}>
-              <Text style={PlanVisitStyles.chipTitle}>Field</Text>
-              <View style={PlanVisitStyles.chipTextRow}>
-                <Text style={PlanVisitStyles.chipText}>
-                  {selectedField.fieldName || 'Field name not available'}
-                </Text>
-                <DropdownArrow />
-              </View>
-              <Text style={PlanVisitStyles.chipTitle}>
-                {selectedField.Location}
-              </Text>
-            </Pressable>
-          )}
+        <View style={PlanVisitStyles.container}>
+          <Input
+            placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
+            leftIcon={Search}
+            customLeftIconStyle={{marginRight: 10}}
+          />
+          <FlatList
+            data={experimentList}
+            contentContainerStyle={
+              experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
+            }
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={ListHeaderComponent}
+            renderItem={({item, index}) => null}
+            keyExtractor={(_, index) => index.toString()}
+            ListEmptyComponent={ListEmptyComponent}
+          />
         </View>
+        {
+          selectedCrop && selectedProject && (
+            <ExperimentCard
+              data={experimentList}
+              onExperimentSelect={handleSelectedExperiment}
+              name={'experiment'}
+              onFieldSelect={handleSelectedField}
+            />
+          )
+        }
+        {
+          selectedCrop && selectedProject && selectedExperiment && (
+            <ExperimentCard
+              data={fields}
+              name={'field'}
+              onExperimentSelect={handleSelectedField}
+              onFieldSelect={handleSelectedField}
+            />
+          )
+        }
+        {selectedExperiment && selectedField && (
+          <Pressable style={PlanVisitStyles.chipItem} onPress={()=>setModalVisible(true)}>
+            <View style={PlanVisitStyles.chipTextRow}>
+              <Text style={PlanVisitStyles.chipText}>Select Visit Date</Text>
+              <DropdownArrow />
+            </View>
+          </Pressable>
+        )}
         {selectedDate && (
           <View style={PlanVisitStyles.dateContainer}>
             <Text style={PlanVisitStyles.dateTitle}>Date</Text>
             <Text style={PlanVisitStyles.dateText}>
               {selectedDate.format('dddd, MMMM D, YYYY')}
             </Text>
-          </View>
+          </View> 
         )}
-        {chipVisible && (
-          <Chip
-            onPress={handleChipPress}
-            rightIcon={
-              <Pressable onPress={handleChipPress}>
-                <DropdownArrow />
-              </Pressable>
-            }
-            containerStyle={PlanVisitStyles.chip}
-            customLabelStyle={PlanVisitStyles.chipLabel}
-            title={chipTitle}
-            isSelected={false}
-          />
-        )}
-        {!chipVisible && (
+        {selectedDate && (
           <Pressable
             style={PlanVisitStyles.submitButton}
-            onPress={() => {
-              console.log('Submit button pressed');
-            }}>
+            onPress={onPlanVisit}>
             <Text style={PlanVisitStyles.submitButtonText}>Plan a Visit</Text>
           </Pressable>
         )}
-
-        <BottomModal
-          bottomSheetModalRef={bottomSheetModalRef}
-          type="CONTENT_HEIGHT"
-          containerStyle={{paddingBottom: bottom}}>
-          <View style={PlanVisitStyles.modalContainer}>
-            <Text style={PlanVisitStyles.modalTitle}>Select an Experiment</Text>
-            <ScrollView>
-              <View style={{gap: 30}}>
-                {experiment.map((item, index) => (
-                  <Pressable
-                    key={`${item.id}-${index}`}
-                    onPress={() => handleExperimentSelect(item)}
-                    style={PlanVisitStyles.modalItem}>
-                    <Text style={PlanVisitStyles.modalItemText}>
-                      {item.ExperientName}
-                    </Text>
-                    <Text
-                      style={[
-                        PlanVisitStyles.modalItemCropText,
-                        {
-                          backgroundColor:
-                            item.CropName === 'Rice' ? '#FCEBEA' : '#E8F0FB',
-                        },
-                      ]}>
-                      {item.CropName}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-        </BottomModal>
-
         <Modal
           animationType="slide"
           transparent={true}
@@ -205,45 +346,9 @@ const PlanVisit = () => {
             />
           </View>
         </Modal>
-
-        <BottomModal
-          bottomSheetModalRef={secondBottomSheetRef}
-          type="CONTENT_HEIGHT"
-          containerStyle={{paddingBottom: bottom}}>
-          <View style={PlanVisitStyles.modalContainer}>
-            <Text style={PlanVisitStyles.modalTitle}>Select Field</Text>
-            <ScrollView>
-              <View style={{gap: 30}}>
-                {field.map((item, index) => (
-                  <Pressable
-                    key={`${item.id}-${index}`}
-                    onPress={() =>
-                      handleFieldSelect({
-                        id: item.id,
-                        ExperientName: '',
-                        CropName: '',
-                        fieldName: item.Fieldno,
-                        Location: item.Location,
-                      })
-                    }
-                    style={PlanVisitStyles.fieldItem}>
-                    <Text style={PlanVisitStyles.fieldItemText}>
-                      Field:{item.Fieldno}
-                    </Text>
-                    <Text style={PlanVisitStyles.fieldLocationText}>
-                      {item.Location}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-        </BottomModal>
       </View>
     </SafeAreaView>
   );
 };
 
 export default PlanVisit;
-
-const styles = StyleSheet.create({});

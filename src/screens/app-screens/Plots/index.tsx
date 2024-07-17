@@ -1,16 +1,60 @@
-import React from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, Pressable, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 
-import {Input, SafeAreaView, StatusBar, Text} from '../../../components';
+import {
+  Input,
+  Loader,
+  SafeAreaView,
+  StatusBar,
+  Text,
+} from '../../../components';
 import {Back, Search} from '../../../assets/icons/svgs';
 import {LOCALES} from '../../../localization/constants';
 import PlotCard from './PlotCard';
 import {styles} from './styles';
 import {PlotsScreenProps} from '../../../types/navigation/appTypes';
+import {useApi} from '../../../hooks/useApi';
+import {URL} from '../../../constants/URLS';
 
-const Plots = ({navigation}: PlotsScreenProps) => {
+const Plots = ({navigation, route}: PlotsScreenProps) => {
   const {t} = useTranslation();
+  const {id, type} = route.params;
+  const [plotList, setPlotList] = useState<any[]>([]);
+
+  const [getPlotList, plotListData, isPlotListLoading, plotListError] = useApi({
+    url: URL.PLOT_LIST,
+    method: 'GET',
+  });
+
+  useEffect(() => {
+    getPlotList({pathParams: id, queryParams: `experimentType=${type}`});
+  }, []);
+
+  useEffect(() => {
+    if (plotListData?.status_code !== 200 || !plotListData?.data) {
+      return;
+    }
+
+    const {data} = plotListData;
+    setPlotList(data?.plotData);
+  }, [plotListData]);
+
+  const ListEmptyComponent = useMemo(
+    () => (
+      <View style={styles.emptyContainer}>
+        {isPlotListLoading ? (
+          <Loader />
+        ) : (
+          <Text style={styles.emptyText}>
+            {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
+          </Text>
+        )}
+      </View>
+    ),
+    [isPlotListLoading],
+  );
+
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
@@ -19,7 +63,9 @@ const Plots = ({navigation}: PlotsScreenProps) => {
       </Pressable>
       <View style={styles.container}>
         <View style={styles.plotContainer}>
-          <Text style={styles.fieldTitle}>Field 123</Text>
+          <Text style={styles.fieldTitle}>
+            {t(LOCALES.EXPERIMENT.LBL_FIELD)} {id}
+          </Text>
           <View style={styles.row}>
             <Text style={styles.experimentTitle}>
               GE-Male Line (R) development
@@ -36,13 +82,21 @@ const Plots = ({navigation}: PlotsScreenProps) => {
           customLeftIconStyle={styles.searchIcon}
         />
         <Text style={styles.plotText}>
-          354 <Text>{t(LOCALES.EXPERIMENT.LBL_PLOTS)}</Text>
+          {plotList.length} <Text>{t(LOCALES.EXPERIMENT.LBL_PLOTS)}</Text>
         </Text>
         <FlatList
+          ListEmptyComponent={ListEmptyComponent}
+          contentContainerStyle={
+            plotList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 20}
+          }
           showsVerticalScrollIndicator={false}
-          data={[{}, {}, {}]}
+          data={plotList}
           renderItem={({item, index}) => (
-            <PlotCard isFirstIndex={index === 0} isLastIndex={index === 2} />
+            <PlotCard
+              plotData={item}
+              isFirstIndex={index === 0}
+              isLastIndex={plotList.length - 1 === index}
+            />
           )}
         />
       </View>
