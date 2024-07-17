@@ -234,14 +234,13 @@ const PlanVisit = ({navigation} : any) => {
     Alert.alert('Error', 'Please select all fields before planning a visit');
     return;
   }
-    setPayload((prevPayload : any) => ({
-      ...prevPayload,
+    const newData = {
       field_id: selectedField?.landVillageId,
       experiment_id: selectedExperiment?.id,
       experiment_type: selectedExperiment?.experiment_type,
       date : selectedDate.format('YYYY-MM-DD')
-    }));
-    planVisit({ payload,headers });
+    }
+    await planVisit({ payload : newData,headers });
     console.log('payload',payload)
   };
   useEffect(() => {
@@ -280,7 +279,7 @@ const PlanVisit = ({navigation} : any) => {
           <FlatList
             data={experimentList}
             contentContainerStyle={
-              experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 80}
+              experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
             }
             showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}

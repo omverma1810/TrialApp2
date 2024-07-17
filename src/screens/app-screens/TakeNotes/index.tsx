@@ -7,7 +7,7 @@ import {
   ScrollView,
   FlatList,
   Pressable,
-  Alert
+  Alert,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {SafeAreaView, StatusBar, Loader, Input} from '../../../components';
@@ -33,7 +33,7 @@ interface Chip {
   Fieldno?: string;
 }
 
-const TakeNotes = ({navigation} : any) => {
+const TakeNotes = ({navigation}: any) => {
   const {t} = useTranslation();
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
@@ -53,7 +53,7 @@ const TakeNotes = ({navigation} : any) => {
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedExperiment, setSelectedExperiment] = useState<any>();
-  const [fields,setFields] = useState([])
+  const [fields, setFields] = useState([]);
 
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
@@ -61,7 +61,6 @@ const TakeNotes = ({navigation} : any) => {
   const handleSelectedField = (field: any) => {
     setSelectedField(field);
   };
-
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -212,45 +211,43 @@ const TakeNotes = ({navigation} : any) => {
       'x-auth-token': token,
     };
 
-
     if (!text) {
-    Alert.alert('Error', 'Please select all fields before planning a visit');
-    return;
-  }
-  const newData = {
-    field_id: selectedField?.landVillageId,
-    experiment_id: selectedExperiment?.id,
-    experiment_type: selectedExperiment?.experimentType,
-    content : text
-  }
-    setPayload(newData);
-    takeNotes({ payload,headers });
-    console.log("payload",payload)
+      Alert.alert('Error', 'Please select all fields before Taking a Note');
+      return;
+    }
+    const newData = {
+      field_id: selectedField?.landVillageId,
+      experiment_id: selectedExperiment?.id,
+      experiment_type: selectedExperiment?.experimentType,
+      content: text,
+    };
+    await takeNotes({payload: newData, headers});
+    console.log('payload', payload);
   };
 
   useEffect(() => {
     if (takeNotesResponse && takeNotesResponse.status_code == 201) {
-      Alert.alert('Success', 'Visit planned successfully')
-      navigation.navigate('Home')
+      Alert.alert('Success', 'Notes Created Sucessfully');
+      navigation.navigate('Home');
     }
   }, [takeNotesResponse]);
 
   const [getFields, getFieldsResponse] = useApi({
-    url : `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
-    method : 'GET'
-  })
-  useEffect(()=>{
-    getFields()
-  },[selectedExperiment])
-  
-  useEffect(()=>{
-    if(getFieldsResponse && getFieldsResponse.status_code == 200){ 
-      setFields(getFieldsResponse.data.locationList)
+    url: `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
+    method: 'GET',
+  });
+  useEffect(() => {
+    getFields();
+  }, [selectedExperiment]);
+
+  useEffect(() => {
+    if (getFieldsResponse && getFieldsResponse.status_code == 200) {
+      setFields(getFieldsResponse.data.locationList);
     }
-  },[getFieldsResponse])
-  useEffect(()=>{
-    console.log('fields',fields,selectedField)
-  },[])
+  }, [getFieldsResponse]);
+  useEffect(() => {
+    console.log('fields', fields, selectedField);
+  }, []);
 
   return (
     <SafeAreaView>
@@ -264,7 +261,7 @@ const TakeNotes = ({navigation} : any) => {
         <FlatList
           data={experimentList}
           contentContainerStyle={
-            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 80}
+            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
@@ -275,20 +272,18 @@ const TakeNotes = ({navigation} : any) => {
         {selectedCrop && selectedProject && (
           <ExperimentCard
             data={experimentList}
-            name='experiment'
+            name="experiment"
             onExperimentSelect={handleSelectedExperiment}
           />
         )}
-        {
-          selectedCrop && selectedProject && selectedExperiment && (
-            <ExperimentCard
-              data={fields}
-              name={'field'}
-              onExperimentSelect={handleSelectedExperiment}
-              onFieldSelect={handleSelectedField}
-            />
-          )
-        }
+        {selectedCrop && selectedProject && selectedExperiment && (
+          <ExperimentCard
+            data={fields}
+            name={'field'}
+            onExperimentSelect={handleSelectedExperiment}
+            onFieldSelect={handleSelectedField}
+          />
+        )}
 
         {selectedExperiment && (
           <View>

@@ -8,7 +8,7 @@ type FilterType = {
   options: string[];
   selectedOption: string;
   onPress: (option: string) => void;
-};
+}; 
 
 const Filter = ({
   title = '',
