@@ -1,10 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { FONTS } from '../../../theme/fonts';
+
 const RecordStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
   },
-  filter: {},
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -148,16 +147,6 @@ const RecordStyles = StyleSheet.create({
     fontSize: 16,
     color: '#454545',
     marginLeft: 10,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    color: '#161616',
-    fontSize: 14,
-    fontFamily: FONTS.SEMI_BOLD,
   },
 });
 
