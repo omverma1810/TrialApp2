@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {PortalProvider} from '@gorhom/portal';
@@ -14,6 +14,7 @@ import {Toast} from '../components';
 import {RootStackParamList} from '../types/navigation';
 import {setIsUserSignedIn, setUserDetails} from '../store/slice/authSlice';
 import useCleanUp from '../hooks/useCleanUp';
+import SplashScreen from '../screens/auth-screens/Splash';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -45,6 +46,14 @@ const RootNavigator = () => {
 
     init();
   }, [dispatch, logoutUser]);
+  const [isLoading , setIsLoading] = useState(true);
+  useEffect(() => {
+    const loadApp = async () => {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setIsLoading(false);
+    };
+    loadApp();
+  }, []);
 
   return (
     <SafeAreaProvider>
@@ -52,13 +61,17 @@ const RootNavigator = () => {
         <Toast />
         <BottomSheetModalProvider>
           <NavigationContainer>
-            <Stack.Navigator screenOptions={{headerShown: false}}>
+            {isLoading ? (
+              <SplashScreen />
+            ) : (
+              <Stack.Navigator screenOptions={{headerShown: false}}>
               {isUserSignedIn ? (
                 <Stack.Screen component={AppRoutes} name="AppRoutes" />
               ) : (
                 <Stack.Screen component={AuthRoutes} name="AuthRoutes" />
               )}
             </Stack.Navigator>
+            )}
           </NavigationContainer>
         </BottomSheetModalProvider>
       </PortalProvider>
