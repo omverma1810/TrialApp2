@@ -1,11 +1,11 @@
-import {Text, View, ScrollView, TouchableOpacity} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
-import BottomModal from '../../../../components/BottomSheetModal';
-import TakeNotesStyles from '../../TakeNotes/TakeNotesStyle';
+import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {styles} from './styles';
 import {DropdownArrow} from '../../../../assets/icons/svgs';
+import BottomModal from '../../../../components/BottomSheetModal';
 import Chip from '../../../../components/Chip';
+import TakeNotesStyles from '../../TakeNotes/TakeNotesStyle';
+import {styles} from './styles';
 
 interface Chip {
   id: number;
@@ -32,6 +32,7 @@ const ExperimentCard = ({
   const secondBottomSheetRef = useRef(null);
 
   const handleExperimentSelect = (item: any) => {
+    console.log('=============>', {item});
     if (name === 'field') {
       setChipTitle(item.location.villageName);
       onFieldSelect(item);

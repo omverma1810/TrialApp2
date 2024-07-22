@@ -1,5 +1,5 @@
-// android/app/src/main/java/com/yourapp/SplashActivity.java
-package com.yourapp;
+
+package com.TriaApp2;
 
 import android.content.Intent;
 import android.os.Bundle;

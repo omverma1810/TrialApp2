@@ -1,19 +1,31 @@
+import dayjs from 'dayjs';
 import React, {useRef} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import BottomModal from '../BottomSheetModal';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   ButtonNavigation,
-  Field,
   Calendar,
   Dots,
-  Trash,
   Edit,
+  Field,
+  Trash,
 } from '../../assets/icons/svgs';
+import BottomModal from '../../components/BottomSheetModal';
 
-const UpcomingVisits = ({visit, onDelete}) => {
+const UpcomingVisits = ({visit, onDelete, onEdit}) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
+
+  const getDayDifference = date => {
+    let saved = dayjs(date);
+    let current = dayjs();
+    let result = saved.diff(current, 'day');
+    if (result > 0) {
+      return `${result} Days left`;
+    } else {
+      return null;
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -22,8 +34,11 @@ const UpcomingVisits = ({visit, onDelete}) => {
           <View style={styles.iconRow}>
             <Field />
             <View style={styles.textColumn}>
-              <Text style={styles.fieldName}>{visit.fieldName}</Text>
-              <Text style={styles.description}>{visit.description}</Text>
+              <Text style={styles.fieldName}>{visit.experiment_name}</Text>
+              <Text
+                style={
+                  styles.description
+                }>{`Location No. ${visit.location}`}</Text>
             </View>
           </View>
           <TouchableOpacity
@@ -36,7 +51,9 @@ const UpcomingVisits = ({visit, onDelete}) => {
             <Calendar />
             <View style={styles.textColumn}>
               <Text style={styles.date}>{visit.date}</Text>
-              <Text style={styles.daysLeft}>{visit.daysLeft}</Text>
+              <Text style={styles.daysLeft}>
+                {getDayDifference(visit.date) || 'Date passed'}
+              </Text>
             </View>
           </View>
           <ButtonNavigation />
@@ -48,12 +65,20 @@ const UpcomingVisits = ({visit, onDelete}) => {
         containerStyle={[styles.bottomModalContainer, {paddingBottom: bottom}]}>
         <View style={styles.modalContent}>
           <TouchableOpacity
-            onPress={() => onDelete(visit.id)}
+            onPress={() => {
+              onDelete(visit.id);
+              bottomSheetModalRef.current?.close();
+            }}
             style={styles.modalOption}>
             <Trash />
             <Text style={styles.modalOptionText}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.modalOption}>
+          <TouchableOpacity
+            style={styles.modalOption}
+            onPress={() => {
+              onEdit(visit.id);
+              bottomSheetModalRef.current?.close();
+            }}>
             <Edit />
             <Text style={styles.modalOptionText}>Edit</Text>
           </TouchableOpacity>

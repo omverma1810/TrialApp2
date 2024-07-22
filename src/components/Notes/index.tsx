@@ -1,21 +1,24 @@
-import React, { useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, {useRef} from 'react';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {Dots, Edit, Trash} from '../../assets/icons/svgs';
 import BottomModal from '../BottomSheetModal';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dots, Trash, Edit } from '../../assets/icons/svgs';
 
-const Notes = ({ note, onDelete }) => {
+const Notes = ({note, onDelete, onEdit}) => {
   const bottomSheetModalRef = useRef(null);
-  const { bottom } = useSafeAreaInsets();
+  const {bottom} = useSafeAreaInsets();
 
   return (
     <View style={styles.container}>
       <View style={styles.noteContainer}>
         <View style={styles.noteContent}>
-          <Text style={styles.noteText}>{note.NoteText}</Text>
-          <Text style={styles.noteInfo}>Exp{note.Experimentno} - Field{note.fieldno}</Text>
+          <Text style={styles.noteText}>{note.content}</Text>
+          <Text style={styles.noteInfo}>
+            Exp{note?.experiment_id || ''} - Field{note?.location || ''}
+          </Text>
         </View>
-        <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
+        <TouchableOpacity
+          onPress={() => bottomSheetModalRef.current?.present()}>
           <Dots />
         </TouchableOpacity>
       </View>
@@ -23,14 +26,26 @@ const Notes = ({ note, onDelete }) => {
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
-        containerStyle={[styles.bottomModalContainer, { paddingBottom: bottom, height: 100 }]}
-      >
+        containerStyle={[
+          styles.bottomModalContainer,
+          {paddingBottom: bottom, height: 100},
+        ]}>
         <View style={styles.modalContent}>
-          <TouchableOpacity onPress={() => onDelete(note.id)} style={styles.modalButton}>
+          <TouchableOpacity
+            onPress={() => {
+              onDelete(note.id);
+              bottomSheetModalRef.current?.close();
+            }}
+            style={styles.modalButton}>
             <Trash />
             <Text style={styles.modalButtonText}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.modalButton}>
+          <TouchableOpacity
+            onPress={() => {
+              onEdit(note);
+              bottomSheetModalRef.current?.close();
+            }}
+            style={styles.modalButton}>
             <Edit />
             <Text style={styles.modalButtonText}>Edit</Text>
           </TouchableOpacity>
@@ -54,7 +69,7 @@ const styles = StyleSheet.create({
   noteContent: {
     justifyContent: 'space-between',
     width: '90%',
-    gap:5
+    gap: 5,
   },
   noteText: {
     fontSize: 15,

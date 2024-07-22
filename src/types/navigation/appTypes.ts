@@ -2,7 +2,7 @@ import {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from '@react-navigation/native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export type AppStackParamList = {
   TabBar: NavigatorScreenParams<TabBarStackParamList>;
@@ -21,11 +21,22 @@ export type HomeStackParamList = {
   PlanVisit: undefined;
   Profile: undefined;
 };
+export type NoteStackParamList = {
+  TakeNotes: {
+    id: number;
+    user_id: number;
+    content: string;
+    location: number;
+    trial_type: string;
+    experiment_id: number;
+    experiment_name: string;
+  };
+};
 export type ExperimentStackParamList = {
   Experiment: undefined;
-  ExperimentDetails: {id: string; type: string};
-  Plots: {id: string; type: string};
-  NewRecord: undefined | {traitMediaInfo: {name: string; url: string}};
+  ExperimentDetails: { id: string; type: string };
+  Plots: { id: string; type: string };
+  NewRecord: undefined | { traitMediaInfo: { name: string; url: string } };
   AddImage: {
     imageUrl: string;
   };
@@ -39,6 +50,11 @@ export type NotificationStackParamList = {
 
 export type HomeScreenProps = CompositeScreenProps<
   NativeStackScreenProps<HomeStackParamList, 'Home'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type NotesScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<NoteStackParamList, 'TakeNotes'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 

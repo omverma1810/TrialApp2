@@ -97,19 +97,35 @@ export const useApi = ({
         const res = await axios(axiosConfig);
 
         console.log('API url:', url);
-        if (payload) console.log('API payload:', payload);
-        if (pathParams) console.log('API pathParams:', pathParams);
-        if (queryParams) console.log('API queryParams:', queryParams);
-        if (headers) console.log('API headers:', headers);
+        if (payload) {
+          console.log('API payload:', payload);
+        }
+        if (pathParams) {
+          console.log('API pathParams:', pathParams);
+        }
+        if (queryParams) {
+          console.log('API queryParams:', queryParams);
+        }
+        if (headers) {
+          console.log('API headers:', headers);
+        }
         console.log('API response:', res.data);
 
         setResponse(res.data);
       } catch (err: any) {
         console.log('API url:', url);
-        if (payload) console.log('API payload:', payload);
-        if (pathParams) console.log('API pathParams:', pathParams);
-        if (queryParams) console.log('API queryParams:', queryParams);
-        if (headers) console.log('API headers:', headers);
+        if (payload) {
+          console.log('API payload:', payload);
+        }
+        if (pathParams) {
+          console.log('API pathParams:', pathParams);
+        }
+        if (queryParams) {
+          console.log('API queryParams:', queryParams);
+        }
+        if (headers) {
+          console.log('API headers:', headers);
+        }
         console.log('API error:', err.response.message || err);
 
         setError(err.response ? err.response.data : err);
