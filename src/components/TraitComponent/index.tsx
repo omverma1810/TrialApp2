@@ -1,20 +1,21 @@
 import React, {useState} from 'react';
 import {
-  View,
-  Text,
-  TouchableOpacity,
   Animated,
-  StyleSheet,
   Dimensions,
   Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
 import {ScrollView} from 'react-native-gesture-handler';
+import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
 
 const TraitComponent = ({titles, selectedFieldsData}) => {
   const [dropdownHeights] = useState(
     Array.from({length: titles.length}, () => new Animated.Value(0)),
   );
+  console.log({selectedFieldsData: selectedFieldsData[0].plots});
   const [isOpen, setIsOpen] = useState(
     Array.from({length: titles.length}, () => false),
   );
@@ -37,14 +38,14 @@ const TraitComponent = ({titles, selectedFieldsData}) => {
       {titles.map((title, index) => (
         <View key={index} style={styles.borderBottom}>
           <Pressable onPress={() => toggleDropdown(index)}>
-          <View style={styles.row}>
-            <View style={styles.column}>
-              <Text style={styles.title}>{title}</Text>
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <Text style={styles.title}>{title}</Text>
+              </View>
+              <TouchableOpacity onPress={() => toggleDropdown(index)}>
+                <DropdownArrow />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => toggleDropdown(index)}>
-              <DropdownArrow />
-            </TouchableOpacity>
-          </View>
           </Pressable>
           <ScrollView>
             <Animated.View
@@ -54,18 +55,19 @@ const TraitComponent = ({titles, selectedFieldsData}) => {
                   <View style={styles.fieldInnerContainer}>
                     <View style={styles.fieldHeader}>
                       <Text style={styles.fieldName}>
-                        {fieldData.fieldName}
+                        {fieldData?.fieldName}
                       </Text>
                       <FieldSybol1 />
                     </View>
-                    {fieldData.plots.map((plot, plotIndex) => (
-                      <View key={plotIndex} style={styles.plotContainer}>
-                        <View style={styles.plot}>
-                          <Text style={styles.plotText}>{plot.plot}</Text>
-                          <Text style={styles.plotUnit}>Cm</Text>
+                    {Array.isArray(fieldData?.plots) &&
+                      fieldData.plots.map((plot, plotIndex) => (
+                        <View key={plotIndex} style={styles.plotContainer}>
+                          <View style={styles.plot}>
+                            <Text style={styles.plotText}>{plot.plot}</Text>
+                            <Text style={styles.plotUnit}>Cm</Text>
+                          </View>
                         </View>
-                      </View>
-                    ))}
+                      ))}
                   </View>
                 </View>
               ))}

@@ -1,15 +1,15 @@
-import {SafeAreaView, StatusBar} from '../../../components';
-import {View, Text, ScrollView, Pressable, StyleSheet} from 'react-native';
 import React from 'react';
+import {Pressable, ScrollView, Text, View} from 'react-native';
+import {SafeAreaView, StatusBar} from '../../../components';
 
-import {HomeScreenProps} from '../../../types/navigation/appTypes';
 import {ButtonNavigation, IconNotes} from '../../../assets/icons/svgs';
+import {HomeScreenProps} from '../../../types/navigation/appTypes';
 
 import DashInfo from './DashInfo';
-import MyNote from './MyNotes';
-import MyVisits from './MyVists';
 import Header from './Header';
 import styles from './HomeStyles';
+import MyNote from './MyNotes';
+import MyVisits from './MyVists';
 
 const Home: React.FC<HomeScreenProps> = ({navigation}) => {
   const goToTakeNotes = () => {
@@ -24,7 +24,7 @@ const Home: React.FC<HomeScreenProps> = ({navigation}) => {
       <StatusBar />
       <View style={styles.viewStyle}>
         <Header navigation={navigation} />
-        <ScrollView showsVerticalScrollIndicator = {false}>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <DashInfo navigation={navigation} />
           <View style={styles.rowStyle}>
             <Pressable onPress={goToTakeNotes} style={styles.takeNotesButton}>
@@ -38,7 +38,7 @@ const Home: React.FC<HomeScreenProps> = ({navigation}) => {
           </View>
           <View style={styles.container}>
             <MyVisits />
-            <MyNote />
+            <MyNote navigation={navigation} />
           </View>
         </ScrollView>
       </View>

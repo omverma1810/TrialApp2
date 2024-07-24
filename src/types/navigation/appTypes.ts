@@ -2,7 +2,7 @@ import {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from '@react-navigation/native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export type AppStackParamList = {
   TabBar: NavigatorScreenParams<TabBarStackParamList>;
@@ -20,6 +20,17 @@ export type HomeStackParamList = {
   TakeNotes: undefined;
   PlanVisit: undefined;
   Profile: undefined;
+};
+export type NoteStackParamList = {
+  TakeNotes: {
+    id: number;
+    user_id: number;
+    content: string;
+    location: number;
+    trial_type: string;
+    experiment_id: number;
+    experiment_name: string;
+  };
 };
 export type ExperimentStackParamList = {
   Experiment: undefined;
@@ -39,6 +50,11 @@ export type NotificationStackParamList = {
 
 export type HomeScreenProps = CompositeScreenProps<
   NativeStackScreenProps<HomeStackParamList, 'Home'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type NotesScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<NoteStackParamList, 'TakeNotes'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 
