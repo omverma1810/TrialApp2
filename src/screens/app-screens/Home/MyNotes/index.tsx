@@ -1,63 +1,60 @@
-import React, {useEffect, useState} from 'react';
-import {Text, View} from 'react-native';
-
-import Note from '../../../../components/Notes';
-import {URL} from '../../../../constants/URLS';
-import {useApi} from '../../../../hooks/useApi';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Alert } from 'react-native';
+import { useApi } from '../../../../hooks/useApi';
+import { URL } from '../../../../constants/URLS';
 import MyNoteStyles from './MyNotesStyles';
+import Notes from '../../../../components/Notes';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type NoteType = {
-  id: number;
-  user_id: number;
-  content: string;
-  location: number;
-  trial_type: string | null;
-  experiment_id: number | null;
-};
-const MyNote = ({navigation}) => {
-  const [getNotes, getNotesResponse] = useApi({
+import { NavigationProp } from '@react-navigation/native';
+
+const MyNote = ({navigation}: {navigation: NavigationProp<any>}) => {
+  const [notes, setNotes] = useState<{ id: number }[]>([]);
+  const [fetchNotes, fetchNotesResponse] = useApi({ 
     url: URL.NOTES,
     method: 'GET',
   });
-  const [deleteNotes, deleteNotesResponse] = useApi({
-    url: URL.NOTES,
-    method: 'DELETE',
-  });
-  const [notes, setNotes] = useState<NoteType[]>([]);
+
   useEffect(() => {
+    const getNotes = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Error', 'No token found');
+        return;
+      }
+
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        'x-auth-token': token,
+      };
+
+      fetchNotes({ headers });
+    };
+
     getNotes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (getNotesResponse && getNotesResponse.status_code === 200) {
-      let notes_ = getNotesResponse.data.filter(i => i.experiment_name);
-      setNotes(notes_);
+    if (fetchNotesResponse && fetchNotesResponse.status_code === 200) {
+      setNotes(fetchNotesResponse.data);
+    } else if (fetchNotesResponse) {
+      Alert.alert('Error', 'Failed to fetch notes');
     }
-  }, [getNotesResponse]);
+  }, [fetchNotesResponse]);
 
-  const handleDeleteNote = (id: number) => {
-    deleteNotes({pathParams: String(id)});
+  const handleDeleteNote = (id: any) => {
     setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
   };
 
-  const handleEditNote = (note: NoteType | unknown) => {
-    console.log(note);
-    navigation.navigate('TakeNotes', {data: note});
-  };
 
   return (
-    <View style={{}}>
+    <View style={{ flex: 1, padding: 20 }}>
       {notes.length > 0 && (
         <View style={MyNoteStyles.notesContainer}>
           <Text style={MyNoteStyles.notesTitle}>My Notes</Text>
           {notes.map((note, index) => (
-            <Note
-              key={index}
-              note={note}
-              onDelete={handleDeleteNote}
-              onEdit={handleEditNote}
-            />
+            <Notes key={index} note={note} onDelete={handleDeleteNote} navigation={navigation} refreshNotes={fetchNotes}/>
           ))}
         </View>
       )}

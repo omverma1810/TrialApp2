@@ -16,7 +16,7 @@ import Chip from '../../../components/Chip';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
 import {LOCALES} from '../../../localization/constants';
-import {NotesScreenProps} from '../../../types/navigation/appTypes';
+// import {NotesScreenProps} from '../../../types/navigation/appTypes';
 import ExperimentCard from './ExperimentCard';
 import Filter from './Filter';
 import TakeNotesStyles from './TakeNotesStyle';
@@ -29,7 +29,7 @@ interface Chip {
   Fieldno?: string;
 }
 
-const TakeNotes = ({navigation, route}: NotesScreenProps) => {
+const TakeNotes = ({navigation, route}: any) => {
   const {t} = useTranslation();
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');

@@ -1,110 +1,73 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {Modal, StyleSheet, Text, View} from 'react-native';
-
-import Calendar from '../../../../components/Calender';
-import UpcomingVisits from '../../../../components/Upcomingvisit';
-import {URL} from '../../../../constants/URLS';
-import {useApi} from '../../../../hooks/useApi';
+import React, {useState,useEffect} from 'react';
+import {View, Text, Alert} from 'react-native';
+import { useApi } from '../../../../hooks/useApi';
 import MyVisitStyles from './MyVistStyles';
+import UpcomingVisits from '../../../../components/Upcomingvisit';
+import { URL } from '../../../../constants/URLS';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const MyVisits = () => {
-  const [visits, setVisits] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editableId, setEditableId] = useState(null);
 
-  const [getVisits, getVisitResponse] = useApi({
+import { NavigationProp } from '@react-navigation/native';
+
+const MyVisits = ({navigation}: {navigation: NavigationProp<any>}) => {
+  const [visits, setVisits] = useState<{ id: number }[]>([]);
+  const [fetchVisits, fetchVisitsResponse] = useApi({
     url: URL.VISITS,
     method: 'GET',
   });
-  useMemo(() => {
+
+  useEffect(() => {
+    const getVisits = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Error', 'No token found');
+        return;
+      }
+
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        'x-auth-token': token,
+      };
+
+      fetchVisits({headers});
+    };
+
     getVisits();
   }, []);
+
   useEffect(() => {
-    if (getVisitResponse && getVisitResponse.status_code === 200) {
-      setVisits(getVisitResponse.data.filter(i => i?.experiment_name));
+    if (fetchVisitsResponse && fetchVisitsResponse.status_code === 200) {
+      setVisits(fetchVisitsResponse.data);
+    } else if (fetchVisitsResponse) {
+      Alert.alert('Error', 'Failed to fetch visits');
     }
-  }, [getVisitResponse]);
-  const [deleteVisits] = useApi({
-    url: URL.VISITS,
-    method: 'DELETE',
-  });
-  const [updateVisits] = useApi({
-    url: URL.VISITS,
-    method: 'PUT',
-  });
+  }, [fetchVisitsResponse]);
 
-  const handleOk = (date: string) => {
-    const updatedVisit = visits.filter(i => i.id === editableId);
-    if (updatedVisit.length) {
-      updatedVisit[0].date = date;
-      updateVisits({payload: updatedVisit, pathParams: editableId});
-      setModalVisible(false);
-      setVisits((prevVisits: any[]) => {
-        let new_visits = prevVisits;
-        new_visits[
-          prevVisits.findIndex(visit => visit.id === editableId)
-        ].date = date;
-        return new_visits;
-      });
-    }
+  const handleDeletevisit = (id:any) => {
+    setVisits(prevVisits => prevVisits.filter(visit => visit.id !== id));
   };
-
-  const handleCancel = () => {
-    setModalVisible(true);
-  };
-  const handleDeletevisit = id => {
-    deleteVisits({pathParams: id});
-    setVisits((prevVisits: any[]) =>
-      prevVisits.filter(visit => visit.id !== id),
-    );
-  };
-  const handleEditVisit = id => {
-    setEditableId(id);
-    setModalVisible(true);
-  };
-
   return (
     <View style={{}}>
-      {visits && visits.length > 0 && (
+      {visits.length > 0 && (
         <View style={MyVisitStyles.upcomingVisitsContainer}>
           <Text style={MyVisitStyles.upcomingVisitsTitle}>
             My Upcoming Visits
           </Text>
-          {visits &&
-            visits.map(visit => (
-              <UpcomingVisits
-                key={visit.id}
-                visit={visit}
-                onDelete={handleDeletevisit}
-                onEdit={handleEditVisit}
-              />
-            ))}
+          {visits.map(visit => (
+            <UpcomingVisits
+              key={visit.id}
+              visit={visit}
+              onDelete={handleDeletevisit}
+              navigation={navigation}
+              refreshVisits={fetchVisits} // Passing fetchVisits as a prop
+
+            />
+          ))}
         </View>
       )}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}>
-        <View style={styles.modalContainer}>
-          <Calendar
-            modalVisible={modalVisible}
-            onCancel={handleCancel}
-            onOk={handleOk}
-          />
-        </View>
-      </Modal>
     </View>
   );
 };
-const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-});
+
 export default MyVisits;
