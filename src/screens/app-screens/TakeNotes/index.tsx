@@ -281,11 +281,6 @@ const TakeNotes = ({navigation, route}: NotesScreenProps) => {
     <SafeAreaView>
       <StatusBar />
       <View style={TakeNotesStyles.container}>
-        <Input
-          placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
-          leftIcon={Search}
-          customLeftIconStyle={{marginRight: 10}}
-        />
         <FlatList
           data={experimentList}
           contentContainerStyle={
@@ -313,7 +308,7 @@ const TakeNotes = ({navigation, route}: NotesScreenProps) => {
           />
         )}
 
-        {selectedExperiment && (
+        {selectedExperiment && selectedField && (
           <View>
             <View style={TakeNotesStyles.inputContainer}>
               <TextInput

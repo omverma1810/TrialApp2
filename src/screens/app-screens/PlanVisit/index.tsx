@@ -290,7 +290,7 @@ const PlanVisit = ({navigation}: any) => {
             onFieldSelect={handleSelectedField}
           />
         )}
-        {selectedExperiment && selectedField && (
+        {selectedExperiment && selectedField && !selectedDate &&(
           <Pressable
             style={PlanVisitStyles.chipItem}
             onPress={() => setModalVisible(true)}>

@@ -46,7 +46,7 @@ const TakeNotesStyles = StyleSheet.create({
     color: 'black',
   },
   chip: {
-    backgroundColor: '#F7F7F7',
+    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#B7B7B7',
     width: '100%',

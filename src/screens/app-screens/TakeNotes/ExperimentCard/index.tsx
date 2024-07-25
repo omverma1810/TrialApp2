@@ -30,21 +30,23 @@ const ExperimentCard = ({
   const [chipTitle, setChipTitle] = useState(`Select ${name}`);
   const [chipVisible, setChipVisible] = useState(true);
   const secondBottomSheetRef = useRef(null);
+  const [selectedField,setSelectedField] = useState<any>(null);
 
   const handleExperimentSelect = (item: any) => {
     console.log('=============>', {item});
     if (name === 'field') {
+      setSelectedField(item);
       setChipTitle(item.location.villageName);
       onFieldSelect(item);
     } else {
-      // setSelectedExperiment(item);
+      setSelectedExperiment(item);
       setChipTitle(item.fieldExperimentName);
       onExperimentSelect(item);
     }
     console.log(selectedExperiment);
     (bottomSheetModalRef.current as any).dismiss();
   };
-
+ 
   const handleFirstRightIconClick = () => {
     if (bottomSheetModalRef.current) {
       (bottomSheetModalRef.current as any).present();
@@ -66,7 +68,7 @@ const ExperimentCard = ({
         isFirstIndex && styles.firstIndex,
         isLastIndex && styles.lastIndex,
       ]}>
-      {chipVisible && (
+      {!selectedExperiment && chipVisible && !selectedField && (
         <Chip
           onPress={handleChipPress}
           rightIcon={
@@ -89,13 +91,33 @@ const ExperimentCard = ({
                 ? selectedExperiment.location.villageName
                 : selectedExperiment.fieldExperimentName}
             </Text>
-            <DropdownArrow />
+            <TouchableOpacity onPress={handleChipPress}>
+              <DropdownArrow />
+            </TouchableOpacity>
           </View>
           <View style={TakeNotesStyles.chipCropText}>
             <Text style={TakeNotesStyles.chipCropText1}>
               {selectedExperiment.cropName}
             </Text>
           </View>
+        </View>
+      )}
+      {selectedField && (
+        <View style={TakeNotesStyles.chipItem}>
+          <Text style={TakeNotesStyles.chipTitle}>Field</Text>
+          <View style={TakeNotesStyles.chipTextRow}>
+            <Text style={TakeNotesStyles.chipText}>
+              {selectedField.location.villageName}
+            </Text>
+            <TouchableOpacity onPress={handleChipPress}>
+              <DropdownArrow />
+            </TouchableOpacity>
+          </View>
+          {/* <View style={TakeNotesStyles.chipCropText}>
+            <Text style={TakeNotesStyles.chipCropText1}>
+              {selectedExperiment.cropName}
+            </Text>
+          </View> */}
         </View>
       )}
       <BottomModal

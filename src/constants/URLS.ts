@@ -17,4 +17,3 @@ const URL = {
 };
 
 export { API_CONFIG, BASE_URL, URL };
-
