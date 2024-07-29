@@ -50,7 +50,7 @@ export const UnrecordedTraitsProvider = ({
   const [recordedValue, setRecordedValue] = useState('');
 
   const onRecord = () => {
-    if (item?.dataType === 'float') {
+    if (item?.dataType === 'float' || item?.dataType === 'Number') {
       setIsInputActive(true);
     }
   };
