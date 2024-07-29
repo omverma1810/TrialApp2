@@ -18,19 +18,7 @@ const MyVisits = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   useEffect(() => {
     const getVisits = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        Alert.alert('Error', 'No token found');
-        return;
-      }
-
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'x-auth-token': token,
-      };
-
-      fetchVisits({headers});
+      fetchVisits();
     };
 
     getVisits();

@@ -17,19 +17,7 @@ const MyNote = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   useEffect(() => {
     const getNotes = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        Alert.alert('Error', 'No token found');
-        return;
-      }
-
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'x-auth-token': token,
-      };
-
-      fetchNotes({ headers });
+      fetchNotes();
     };
 
     getNotes();

@@ -26,19 +26,7 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   });
 
   const onDeleteVisit = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      Alert.alert('Error', 'No token found');
-      return;
-    } 
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
-
-    deleteVisit({headers});
+    deleteVisit();
   };
 
   useEffect(() => {
@@ -58,22 +46,10 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   })
 
   const onUpdate = async() => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      Alert.alert('Error', 'No token found');
-      return;
-    }
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
-
     const payload = {
       date: selectedDate?.format('YYYY-MM-DD'),
     };
-    update({payload,headers})
+    update({payload})
   }
 
   useEffect(() => {

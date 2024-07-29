@@ -18,6 +18,7 @@ import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types
 import CheckBox from '../../../components/CheckBox';
 import Chip from '../../../components/Chip';
 import RecordDropDown from '../../../components/RecordDropdown';
+import ComingSoon from '../ComingSoon';
 import TraitComponent from '../../../components/TraitComponent';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
@@ -195,7 +196,8 @@ const Record = () => {
   useEffect(() => console.log(selectedFields), [selectedFields]);
   return (
     <SafeAreaView>
-      <StatusBar />
+       <StatusBar />
+      {/*
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={RecordStyles.container}>
           <View style={RecordStyles.searchContainer}>
@@ -395,7 +397,8 @@ const Record = () => {
             </View>
           </BottomModal>
         </View>
-      </ScrollView>
+      </ScrollView> */}
+      <ComingSoon/>
     </SafeAreaView>
   );
 };

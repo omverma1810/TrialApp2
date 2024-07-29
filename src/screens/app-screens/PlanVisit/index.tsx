@@ -203,18 +203,6 @@ const PlanVisit = ({navigation}: any) => {
     method: 'POST',
   });
   const onPlanVisit = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      console.log('No token found');
-      return;
-    }
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
-
     if (!selectedDate) {
       Alert.alert('Error', 'Please select all fields before planning a visit');
       return;
@@ -225,8 +213,7 @@ const PlanVisit = ({navigation}: any) => {
       experiment_type: selectedExperiment?.experimentType,
       date: selectedDate.format('YYYY-MM-DD'),
     };
-    await planVisit({payload: newData, headers});
-    console.log('payload', newData);
+    await planVisit({payload: newData});
   };
   useEffect(() => {
     console.log({planVisitResponse});

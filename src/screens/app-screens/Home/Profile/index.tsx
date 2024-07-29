@@ -44,7 +44,7 @@ const Profile = () => {
 
   const dispatch = useAppDispatch();
 
-  // fetching profile details using access token
+  // fetching profile details 
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.PROFILE,
     method: 'GET',
@@ -101,17 +101,6 @@ const Profile = () => {
     method: 'PUT',
   });
   const onUpdate = async () => {
-    const token = await AsyncStorage.getItem('accessToken');
-    if (!token) {
-      console.log('No token found');
-      return;
-    }
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
     const filename = imageSource.path?.split('/').pop();
     const match_ = /\.(\w+)$/.exec(filename ?? '');
     const type = match_ ? `image/${match_[1]}` : 'image/jpeg';
@@ -121,11 +110,10 @@ const Profile = () => {
       name: filename,
       type: type,
     };
-    // let numericStr = profileData.phoneNumber.replace(/\s/, '');
-    let payload = JSON.stringify({
-      avatar_id,
-    });
-    await updateProfile({payload, headers});
+    let payload = {
+      avatar_id : avatar_id,
+    };
+    await updateProfile({payload});
   };
 
   useEffect(() => {
@@ -156,23 +144,15 @@ const Profile = () => {
   });
 
   const onUpdateEmail = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      console.log('No token found');
-      return;
-    }
-
+    const payload = {
+      email: profileData.email,
+    };
     const headers = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
     };
+  
 
-    const payload = JSON.stringify({
-      email: profileData.email,
-    });
-
-    await updateEmail({payload, headers});
+    await updateEmail({payload,headers});
   };
 
   useEffect(() => {
@@ -198,24 +178,16 @@ const Profile = () => {
   });
 
   const onUpdatePhoneNumber = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      console.log('No token found');
-      return;
-    }
-
+    let numericStr = profileData.phoneNumber.replace(/\s/, '');
+    const payload = {
+      phone_number: parseInt(numericStr),
+    };
     const headers = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
     };
+  
 
-    let numericStr = profileData.phoneNumber.replace(/\s/, '');
-    const payload = JSON.stringify({
-      phone_number: parseInt(numericStr),
-    });
-
-    await updatePhoneNumber({payload, headers});
+    await updatePhoneNumber({payload,headers});
   };
 
   useEffect(() => {

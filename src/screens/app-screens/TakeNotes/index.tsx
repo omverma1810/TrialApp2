@@ -225,18 +225,6 @@ const TakeNotes = ({navigation, route}: any) => {
     method: 'POST',
   });
   const onTakeNotes = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      console.log('No token found');
-      return;
-    }
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
-
     if (!text) {
       Alert.alert('Error', 'Please select all fields before Taking a Note');
       return;
@@ -247,7 +235,7 @@ const TakeNotes = ({navigation, route}: any) => {
       experiment_type: selectedExperiment?.experimentType,
       content: text,
     };
-    await takeNotes({payload: newData, headers});
+    await takeNotes({payload: newData});
     console.log('payload', payload);
   };
 

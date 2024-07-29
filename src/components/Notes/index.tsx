@@ -18,19 +18,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes}:any) => {
   });
 
   const onDeleteNote = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      Alert.alert('Error', 'No token found');
-      return;
-    }
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
-
-    deleteNote({ headers });
+    deleteNote();
   };
 
   React.useEffect(() => {
