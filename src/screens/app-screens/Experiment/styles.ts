@@ -70,4 +70,14 @@ export const styles = StyleSheet.create({
   modalOpen: {
     opacity: 0.2,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.SEMI_BOLD,
+  },
 });

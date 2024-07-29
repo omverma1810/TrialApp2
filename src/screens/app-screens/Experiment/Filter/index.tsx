@@ -3,15 +3,20 @@ import React from 'react';
 
 import {FONTS} from '../../../../theme/fonts';
 
-type optionType = {id: number; title: string; isSelected: boolean};
-
 type FilterType = {
-  options: optionType[];
   title: string;
-  onPress: (option: optionType) => void;
+  options: string[];
+  selectedOption: string;
+  onPress: (option: string) => void;
 };
 
-const Filter = ({options = [], title = '', onPress = () => {}}: FilterType) => {
+const Filter = ({
+  title = '',
+  options = [],
+  selectedOption = '',
+  onPress = () => {},
+}: FilterType) => {
+  if (options.length === 0) return null;
   return (
     <View style={[styles.row, styles.filter]}>
       <Text style={styles.filterTitle}>{title}</Text>
@@ -19,20 +24,20 @@ const Filter = ({options = [], title = '', onPress = () => {}}: FilterType) => {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.scrollView}>
-        {options.map(option => (
+        {options.map((option, index) => (
           <Pressable
             onPress={() => onPress(option)}
             style={[
               styles.filterOptions,
-              option.isSelected && styles.selectedOptions,
+              option === selectedOption && styles.selectedOptions,
             ]}
-            key={option.id}>
+            key={index}>
             <Text
               style={[
                 styles.filterOptionsText,
-                option.isSelected && styles.selectedOptionsText,
+                option === selectedOption && styles.selectedOptionsText,
               ]}>
-              {option.title}
+              {option}
             </Text>
           </Pressable>
         ))}
@@ -41,7 +46,7 @@ const Filter = ({options = [], title = '', onPress = () => {}}: FilterType) => {
   );
 };
 
-export default Filter;
+export default React.memo(Filter);
 
 const styles = StyleSheet.create({
   filter: {},

@@ -1,7 +1,7 @@
 import {Pressable, Text, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useCallback, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 import {styles} from '../styles';
 import {
@@ -17,46 +17,48 @@ import {
 } from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
 import {ExperimentDetailsScreenProps} from '../../../../types/navigation/appTypes';
+import TraitModal from '../../Experiment/ExperimentCard/ExperimentList/TraitModal';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
-const FieldCard = ({isFirstIndex, isLastIndex}: any) => {
+const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
   const {t} = useTranslation();
   const {navigate} =
     useNavigation<ExperimentDetailsScreenProps['navigation']>();
-  const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
+  const {
+    params: {type},
+  } = useRoute<ExperimentDetailsScreenProps['route']>();
+  const traitModalRef = useRef<BottomSheetModal>(null);
+  const handleTraitModalOpen = () => traitModalRef.current?.present();
   const fieldInfo = [
     {
       id: 0,
       icon: Rows,
       title: t(LOCALES.EXPERIMENT.LBL_ROWS),
-      value: '6',
       navigationAction: null,
-      key: 'rows_count',
+      key: 'noOfRows',
     },
     {
       id: 1,
       icon: Columns,
       title: t(LOCALES.EXPERIMENT.LBL_COLUMN),
-      value: '59',
       navigationAction: null,
-      key: 'column_count',
+      key: 'noOfColumn',
     },
-    {
-      id: 2,
-      icon: Layout,
-      title: t(LOCALES.EXPERIMENT.LBL_ORDER_LAYOUT),
-      value: 'Serpentine',
-      navigationAction: null,
-      key: 'order_layout',
-    },
+    // {
+    //   id: 2,
+    //   icon: Layout,
+    //   title: t(LOCALES.EXPERIMENT.LBL_ORDER_LAYOUT),
+    //   navigationAction: null,
+    //   key: 'order_layout',
+    // },
     {
       id: 3,
       icon: Plots,
       title: t(LOCALES.EXPERIMENT.LBL_PLOTS),
-      value: '354',
       navigationAction: {
         title: t(LOCALES.EXPERIMENT.LBL_ALL_PLOTS),
         onClick: () => {
-          navigate('Plots');
+          navigate('Plots', {id: fieldData?.id, type: type});
         },
       },
       key: 'plots_count',
@@ -65,28 +67,60 @@ const FieldCard = ({isFirstIndex, isLastIndex}: any) => {
       id: 4,
       icon: Leaf,
       title: t(LOCALES.EXPERIMENT.LBL_TRAITS_RECORDED),
-      value: '20 out of 100',
       navigationAction: {
         title: t(LOCALES.EXPERIMENT.LBL_ALL_TRAITS),
-        onClick: () => {},
+        onClick: handleTraitModalOpen,
       },
       key: 'traits',
     },
-    {
-      id: 5,
-      icon: Location,
-      title: t(LOCALES.EXPERIMENT.LBL_LOCATION),
-      value: 'Gujrat',
-      navigationAction: {
-        title: t(LOCALES.EXPERIMENT.LBL_GO_TO_LOCATION),
-        onClick: () => {},
-      },
-      key: 'location',
-    },
+    // {
+    //   id: 5,
+    //   icon: Location,
+    //   title: t(LOCALES.EXPERIMENT.LBL_LOCATION),
+    //   value: 'Gujrat',
+    //   navigationAction: {
+    //     title: t(LOCALES.EXPERIMENT.LBL_GO_TO_LOCATION),
+    //     onClick: () => {},
+    //   },
+    //   key: 'location',
+    // },
   ];
-  const onViewMoreDetailsClick = () => {
-    setIsViewMoreDetails(state => !state);
-  };
+  const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
+  const onViewMoreDetailsClick = () => setIsViewMoreDetails(!isViewMoreDetails);
+
+  const renderFieldDetail = useCallback(
+    ({id, key, title, icon: Icon, navigationAction}: (typeof fieldInfo)[0]) => {
+      const value =
+        key === 'traits'
+          ? `${fieldData[key].recorded} out of ${fieldData[key].total}`
+          : fieldData[key];
+
+      return (
+        <View
+          style={[
+            styles.fieldDetailsCard,
+            (key === 'noOfRows' || key === 'noOfColumn') &&
+              styles.fieldDetailsCardPart,
+          ]}
+          key={id}>
+          <Icon />
+          <View style={styles.fieldDetailsTextContainer}>
+            <Text style={styles.fieldDetailsKeyText}>{title}</Text>
+            <Text style={styles.fieldDetailsValueText}>{value}</Text>
+          </View>
+          {navigationAction && (
+            <Text
+              onPress={navigationAction.onClick}
+              style={styles.fieldDetailsNavAction}>
+              {navigationAction.title}
+            </Text>
+          )}
+        </View>
+      );
+    },
+    [fieldData],
+  );
+
   return (
     <View
       style={[
@@ -97,43 +131,23 @@ const FieldCard = ({isFirstIndex, isLastIndex}: any) => {
       <Pressable
         onPress={onViewMoreDetailsClick}
         style={styles.locationContainer}>
-        <View>
-          <Text style={styles.fieldName}>
-            Some random loner name of the field
+        <View style={styles.locationNameContainer}>
+          <LocationPin />
+          <Text style={styles.locationName}>
+            {fieldData?.location?.villageName}
           </Text>
-          <View style={styles.locationNameContainer}>
-            <LocationPin />
-            <Text style={styles.locationName}>Medchal, Hyderabad</Text>
-          </View>
         </View>
         {isViewMoreDetails ? <CardArrowUp /> : <CardArrowDown />}
       </Pressable>
       {isViewMoreDetails && (
         <View style={styles.fieldDetailsContainer}>
-          {fieldInfo.map((item, index) => (
-            <View
-              style={[
-                styles.fieldDetailsCard,
-                (item.key === 'rows_count' || item.key === 'column_count') &&
-                  styles.fieldDetailsCardPart,
-              ]}
-              key={index}>
-              <item.icon />
-              <View style={styles.fieldDetailsTextContainer}>
-                <Text style={styles.fieldDetailsKeyText}>{item.title}</Text>
-                <Text style={styles.fieldDetailsValueText}>{item.value}</Text>
-              </View>
-              {item.navigationAction && (
-                <Text
-                  onPress={item.navigationAction?.onClick}
-                  style={styles.fieldDetailsNavAction}>
-                  {item.navigationAction?.title}
-                </Text>
-              )}
-            </View>
-          ))}
+          {fieldInfo.map(renderFieldDetail)}
         </View>
       )}
+      <TraitModal
+        bottomSheetModalRef={traitModalRef}
+        data={fieldData?.traitList}
+      />
     </View>
   );
 };

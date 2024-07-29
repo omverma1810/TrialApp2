@@ -1,19 +1,82 @@
-import React, {useRef} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import React, {useRef, useEffect, useState} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet, Alert,Modal} from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {
-  ButtonNavigation,
-  Field,
-  Calendar,
-  Dots,
-  Trash,
-  Edit,
-} from '../../assets/icons/svgs';
+import {ButtonNavigation, Field, Calendar, Dots, Trash, Edit} from '../../assets/icons/svgs';
+import {differenceInDays} from 'date-fns';
+import {useApi} from '../../hooks/useApi';
+import {URL} from '../../constants/URLS';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import dayjs, {Dayjs} from 'dayjs';
+import PlanVisitStyles from '../..//screens/app-screens/PlanVisit/PlanVisitStyles';
+import {SafeAreaView, StatusBar, Calender} from '../../components';
 
-const UpcomingVisits = ({visit, onDelete}) => {
-  const bottomSheetModalRef = useRef(null);
+const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
+  const bottomSheetModalRef = useRef<any>(null);
   const {bottom} = useSafeAreaInsets();
+  const currentDate = new Date();
+  const daysLeft = differenceInDays(new Date(visit.date), currentDate);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+  const [isDateModelVisible, setIsDateModelVisible] = useState(false);
+
+  const [deleteVisit, deleteVisitResponse] = useApi({
+    url: `${URL.VISITS}${visit.id}`,
+    method: 'DELETE',
+  });
+
+  const onDeleteVisit = async () => {
+    deleteVisit();
+  };
+
+  useEffect(() => {
+    if (deleteVisitResponse) {
+      if (deleteVisitResponse.status_code === 200) {
+        Alert.alert('Success', 'Visit deleted successfully');
+        onDelete(visit.id);
+      } else {
+        Alert.alert('Error', 'Failed to delete visit');
+      }
+    }
+  }, [deleteVisitResponse]);
+  
+  const [update,updatedResponse] = useApi({
+    url : `${URL.VISITS}${visit.id}/`,
+    method : 'PUT',
+  })
+
+  const onUpdate = async() => {
+    const payload = {
+      date: selectedDate?.format('YYYY-MM-DD'),
+    };
+    update({payload})
+  }
+
+  useEffect(() => {
+    if (updatedResponse) {
+      if (updatedResponse.status_code === 200) {
+        Alert.alert('Success', 'Visit updated successfully');
+      } else {
+        Alert.alert('Error', 'Failed to update visit');
+      }
+    }
+  }, [updatedResponse]);
+
+  const handleEdit = () => {
+    setIsEditing(true)
+    bottomSheetModalRef.current.close()
+    setIsDateModelVisible(true)
+  };
+  const handleOk = (date: Dayjs | null) => {
+    setSelectedDate(dayjs(date));
+    onUpdate()
+    // refreshVisits(); // Refresh visits after update
+    setIsDateModelVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsDateModelVisible(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -22,12 +85,11 @@ const UpcomingVisits = ({visit, onDelete}) => {
           <View style={styles.iconRow}>
             <Field />
             <View style={styles.textColumn}>
-              <Text style={styles.fieldName}>{visit.fieldName}</Text>
-              <Text style={styles.description}>{visit.description}</Text>
+              <Text style={styles.fieldName}>{visit.experiment_name}</Text>
+              <Text style={styles.description}>{visit.trial_type}</Text>
             </View>
           </View>
-          <TouchableOpacity
-            onPress={() => bottomSheetModalRef.current?.present()}>
+          <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
             <Dots />
           </TouchableOpacity>
         </View>
@@ -36,24 +98,40 @@ const UpcomingVisits = ({visit, onDelete}) => {
             <Calendar />
             <View style={styles.textColumn}>
               <Text style={styles.date}>{visit.date}</Text>
-              <Text style={styles.daysLeft}>{visit.daysLeft}</Text>
+              <Text style={styles.daysLeft}>Days left: {daysLeft ? daysLeft : "N/A"}</Text>
             </View>
           </View>
           <ButtonNavigation />
         </View>
       </View>
+      {
+        isDateModelVisible && 
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={isDateModelVisible}
+            onRequestClose={() => {
+              setIsDateModelVisible(!isDateModelVisible);
+            }}>
+            <View style={PlanVisitStyles.modalOverlay}>
+              <Calender
+                modalVisible={isDateModelVisible}
+                onCancel={handleCancel}
+                onOk={handleOk}
+              />
+            </View>
+          </Modal>
+      }
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
         containerStyle={[styles.bottomModalContainer, {paddingBottom: bottom}]}>
         <View style={styles.modalContent}>
-          <TouchableOpacity
-            onPress={() => onDelete(visit.id)}
-            style={styles.modalOption}>
+          <TouchableOpacity onPress={onDeleteVisit} style={styles.modalOption}>
             <Trash />
             <Text style={styles.modalOptionText}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.modalOption}>
+          <TouchableOpacity style={styles.modalOption} onPress={handleEdit}>
             <Edit />
             <Text style={styles.modalOptionText}>Edit</Text>
           </TouchableOpacity>
@@ -65,67 +143,60 @@ const UpcomingVisits = ({visit, onDelete}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    marginBottom: 20,
   },
   card: {
     backgroundColor: 'white',
-    padding: 15,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#F7F7F7',
-    gap: 5,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
+    marginBottom: 10,
   },
   iconRow: {
     flexDirection: 'row',
-    gap: 15,
     alignItems: 'center',
   },
   textColumn: {
-    gap: 1,
+    marginLeft: 10,
   },
   fieldName: {
-    fontSize: 15,
-    color: '#161616',
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   description: {
-    color: '#454545',
-    fontSize: 13,
+    fontSize: 14,
+    color: '#666',
   },
   date: {
-    color: '#161616',
-    fontWeight: '500',
-    fontSize: 14,
+    fontSize: 16,
   },
   daysLeft: {
-    color: '#454545',
-    fontSize: 13,
+    fontSize: 14,
+    color: '#666',
   },
   bottomModalContainer: {
-    height: 100,
+    paddingHorizontal: 20,
   },
   modalContent: {
-    paddingHorizontal: 20,
-    gap: 20,
-    paddingVertical: 10,
+    paddingVertical: 20,
   },
   modalOption: {
     flexDirection: 'row',
-    gap: 10,
     alignItems: 'center',
+    paddingVertical: 10,
   },
   modalOptionText: {
-    color: '#161616',
-    fontSize: 15,
-    fontWeight: '400',
+    marginLeft: 10,
+    fontSize: 16,
   },
 });
 

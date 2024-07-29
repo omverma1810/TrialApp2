@@ -1,11 +1,34 @@
-import React, {createContext, useContext, useState, ReactNode} from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useCallback,
+} from 'react';
 import {useTranslation} from 'react-i18next';
 import ImagePicker from 'react-native-image-crop-picker';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
 import {ImagePlus, Notes} from '../../../assets/icons/svgs';
 import {LOCALES} from '../../../localization/constants';
 import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
+import {useRecordApi} from './RecordApiContext';
+import {UpdateRecordDataFunction} from './UnrecordedTraits/UnrecordedTraitsContext';
+import Toast from '../../../utilities/toast';
+import {
+  formatDateTime,
+  getBase64FromUrl,
+  getNameFromUrl,
+} from '../../../utilities/function';
+
+type RecordData = {
+  [key: string]: {
+    observationId: number | null;
+    traitId: number;
+    observedValue: string;
+  };
+};
 
 interface userInteractionOptionsType {
   id: number;
@@ -16,26 +39,54 @@ interface userInteractionOptionsType {
 
 interface RecordContextType {
   userInteractionOptions: userInteractionOptionsType[];
+  cropList: string[];
+  projectList: string[];
+  experimentList: any[];
+  fieldList: any[];
+  plotList: any[];
+  unRecordedTraitList: any[];
+  selectedCrop: any;
+  selectedProject: any;
   selectedExperiment: any;
   selectedField: any;
   selectedPlot: any;
+  images: string[];
+  notes: string;
   isNotesModalVisible: boolean;
   isSelectExperimentVisible: boolean;
   isSelectFieldVisible: boolean;
   isSelectPlotVisible: boolean;
   isUnrecordedTraitsVisible: boolean;
+  isSaveRecordBtnVisible: boolean;
+  isNotesVisible: boolean;
+  isTraitsImageVisible: boolean;
   handleExperimentSelect: (item: any) => void;
   handleFieldSelect: (item: any) => void;
   handlePlotSelect: (item: any) => void;
   pickImageFromCamera: () => void;
   closeNotesModal: () => void;
+  handleCropChange: (option: string) => void;
+  handleProjectChange: (option: string) => void;
+  updateRecordData: UpdateRecordDataFunction;
+  onSaveRecord: () => void;
+  onSaveNotes: (notes: string) => void;
 }
 
 const RecordContext = createContext<RecordContextType | undefined>(undefined);
 
 export const RecordProvider = ({children}: {children: ReactNode}) => {
   const {t} = useTranslation();
+  const {
+    experimentListData,
+    getFieldList,
+    fieldListData,
+    getPlotList,
+    plotListData,
+    createTraitsRecord,
+    trraitsRecordData,
+  } = useRecordApi();
   const navigation = useNavigation<NewRecordScreenProps['navigation']>();
+  const {params} = useRoute<NewRecordScreenProps['route']>();
   const userInteractionOptions = [
     {
       id: 0,
@@ -51,15 +102,33 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     },
   ];
 
-  const [selectedExperiment, setSelectedExperiment] = useState(null);
-  const [selectedField, setSelectedField] = useState(null);
-  const [selectedPlot, setSelectedPlot] = useState(null);
+  const [experimentData, setExperimentData] = useState<any>(null);
+  const [cropList, setCropList] = useState<string[]>([]);
+  const [projectList, setProjectList] = useState<string[]>([]);
+  const [experimentList, setExperimentList] = useState([]);
+  const [fieldList, setFieldList] = useState([]);
+  const [plotList, setPlotList] = useState([]);
+  const [unRecordedTraitList, setUnRecordedTraitList] = useState([]);
+  const [selectedCrop, setSelectedCrop] = useState('');
+  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedExperiment, setSelectedExperiment] = useState<any>(null);
+  const [selectedField, setSelectedField] = useState<any>(null);
+  const [selectedPlot, setSelectedPlot] = useState<any>(null);
   const [isNotesModalVisible, setIsNotesModalVisible] = useState(false);
+  const [recordData, setRecordData] = useState<RecordData>({});
+  const [notes, setNotes] = useState('');
+  const [images, setImages] = useState<string[]>([]);
   const isSelectExperimentVisible = true;
   const isSelectFieldVisible = !!selectedExperiment;
   const isSelectPlotVisible = !!selectedExperiment && !!selectedField;
   const isUnrecordedTraitsVisible =
     !!selectedExperiment && !!selectedField && !!selectedPlot;
+  const isNotesVisible = notes.trim().length > 0;
+  const isTraitsImageVisible = images.length > 0;
+  const isSaveRecordBtnVisible =
+    Object.keys(recordData).length > 0 ||
+    isNotesVisible ||
+    isTraitsImageVisible;
 
   const handleExperimentSelect = (item: any) => {
     setSelectedExperiment(item);
@@ -72,6 +141,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   };
   const handlePlotSelect = (item: any) => {
     setSelectedPlot(item);
+    setUnRecordedTraitList(item?.unrecordedTraitData);
   };
   const pickImageFromCamera = () => {
     ImagePicker.openCamera({cropping: true}).then(image => {
@@ -84,21 +154,171 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setIsNotesModalVisible(false);
   };
 
+  useEffect(() => {
+    if (params?.imageUrl) {
+      setImages([params?.imageUrl, ...images]);
+    }
+  }, [params]);
+
+  useEffect(() => {
+    if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
+      return;
+    }
+
+    const {data} = experimentListData;
+    const cropList = Object.keys(data);
+    const selectedCrop = cropList[0];
+    const projectList = Object.keys(data[selectedCrop] || {});
+    const selectedProject = projectList[0];
+    const experimentList = data[selectedCrop][selectedProject] || [];
+
+    setExperimentData(data);
+    setCropList(cropList);
+    setProjectList(projectList);
+    setExperimentList(experimentList);
+    setSelectedCrop(selectedCrop);
+    setSelectedProject(selectedProject);
+  }, [experimentListData]);
+
+  const handleCropChange = useCallback(
+    (option: string) => {
+      setSelectedCrop(option);
+      const newProjectList = Object.keys(experimentData[option] || {});
+      const experimentList = experimentData[option][newProjectList[0]] || [];
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentList);
+    },
+    [experimentData],
+  );
+
+  const handleProjectChange = useCallback(
+    (option: string) => {
+      setSelectedProject(option);
+      const experimentList = experimentData[selectedCrop][option] || [];
+      setExperimentList(experimentList);
+    },
+    [experimentData, selectedCrop],
+  );
+
+  useEffect(() => {
+    if (!selectedExperiment) return;
+    getFieldList({
+      pathParams: selectedExperiment?.id,
+      queryParams: `experimentType=${selectedExperiment?.experimentType}`,
+    });
+  }, [selectedExperiment]);
+
+  useEffect(() => {
+    if (fieldListData?.status_code !== 200 || !fieldListData?.data) {
+      return;
+    }
+
+    const {data} = fieldListData;
+    setFieldList(data?.locationList);
+  }, [fieldListData]);
+
+  useEffect(() => {
+    if (!selectedField || !selectedExperiment) return;
+    getPlotList({
+      pathParams: selectedField?.id,
+      queryParams: `experimentType=${selectedExperiment?.experimentType}`,
+    });
+  }, [selectedField, selectedExperiment]);
+
+  useEffect(() => {
+    if (plotListData?.status_code !== 200 || !plotListData?.data) {
+      return;
+    }
+
+    const {data} = plotListData;
+    setPlotList(data?.plotData);
+  }, [plotListData]);
+
+  const updateRecordData: UpdateRecordDataFunction = (
+    observationId,
+    traitId,
+    observedValue,
+  ) => {
+    setRecordData(prevData => ({
+      ...prevData,
+      [traitId]: {
+        observationId,
+        traitId,
+        observedValue: parseInt(observedValue),
+      },
+    }));
+  };
+
+  useEffect(() => {
+    if (trraitsRecordData?.status_code !== 200) {
+      return;
+    }
+    const {message} = trraitsRecordData;
+    Toast.success({message: message});
+    setRecordData({});
+    navigation.goBack();
+  }, [trraitsRecordData]);
+
+  const onSaveRecord = async () => {
+    const headers = {'Content-Type': 'application/json'};
+    const imagesNameArr = images.map(url => getNameFromUrl(url));
+    const base64Promises = images.map(url => getBase64FromUrl(url));
+    const imagesBase64Arr = await Promise.all(base64Promises);
+    const payload = {
+      plotId: selectedPlot?.id,
+      date: formatDateTime(new Date()),
+      fieldExperimentId: selectedExperiment?.id,
+      experimentType: selectedExperiment?.experimentType,
+      phenotypes: Object.values(recordData),
+      images: imagesNameArr,
+      notes,
+      applications: null,
+      imageData: imagesBase64Arr,
+      lat: '23.0225° N',
+      long: '72.5714° E',
+    };
+    createTraitsRecord({payload, headers});
+  };
+
+  const onSaveNotes = (notes: string) => {
+    setNotes(notes.trim());
+    setIsNotesModalVisible(false);
+  };
+
   const value = {
+    userInteractionOptions,
+    cropList,
+    projectList,
+    experimentList,
+    fieldList,
+    plotList,
+    unRecordedTraitList,
+    selectedCrop,
+    selectedProject,
     selectedExperiment,
     selectedField,
     selectedPlot,
+    images,
+    notes,
     isNotesModalVisible,
     isSelectExperimentVisible,
     isSelectFieldVisible,
     isSelectPlotVisible,
     isUnrecordedTraitsVisible,
+    isSaveRecordBtnVisible,
+    isNotesVisible,
+    isTraitsImageVisible,
     handleExperimentSelect,
     handleFieldSelect,
     handlePlotSelect,
     pickImageFromCamera,
     closeNotesModal,
-    userInteractionOptions,
+    handleCropChange,
+    handleProjectChange,
+    updateRecordData,
+    onSaveRecord,
+    onSaveNotes,
   };
 
   return (

@@ -4,6 +4,7 @@ export default {
     LBL_OK: 'OK',
     LBL_CANCEL: 'Cancel',
     LBL_LOADING: 'Loading',
+    LBL_NO_DATA_FOUND: 'No data found!',
   },
   BOTTOM_TAB: {
     LBL_HOME: 'Home',
@@ -25,6 +26,7 @@ export default {
     LBL_PROJECT: 'Project',
     LBL_VIEW_FIELDS: 'View Fields',
     LBL_EXPERIMENT_ID: 'Experiment ID',
+    LBL_EXPERIMENT_TYPE: 'Experiment Type',
     LBL_NO_OF_ENTRIES: 'No of Entries',
     LBL_FIELD_DESIGN: 'Field Design',
     LBL_SEASON: 'Season',
@@ -35,6 +37,8 @@ export default {
     LBL_RANDOMISATION: 'Randomisation',
     LBL_LOCATION: 'Location',
     LBL_FIELD: 'Field',
+    LBL_LOCATION_DEPLOYED: 'Location Deployed',
+    LBL_LOCATION_REQUIRED: 'Location Required',
     LBL_NO_OF_TRAITS: 'No of traits',
     LBL_VIEW: 'View',
     LBL_HIDE: 'Hide',
@@ -68,6 +72,6 @@ export default {
     LBL_RECORD: 'Record',
     LBL_DISCARD: 'Discard',
     LBL_SAVE: 'Save',
-    LBL_ASSOCIATE_TRAIT: 'Associate a Trait',
+    LBL_ASSOCIATE_TRAIT: 'List of Traits',
   },
 };

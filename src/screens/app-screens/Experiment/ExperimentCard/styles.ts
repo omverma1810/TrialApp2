@@ -6,7 +6,17 @@ export const styles = StyleSheet.create({
     marginBottom: 24,
     borderWidth: 1,
     borderColor: '#EAF4E7',
+    borderBottomWidth: 1,
     borderRadius: 6,
+  },
+  firstIndex: {
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+  },
+  lastIndex: {
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+    borderBottomWidth: 1,
   },
   cropContainer: {
     padding: 8,

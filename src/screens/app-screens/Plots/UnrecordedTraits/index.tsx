@@ -1,30 +1,103 @@
 import {Pressable, Text, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {useRoute} from '@react-navigation/native';
 
 import {LOCALES} from '../../../../localization/constants';
 import {styles} from '../styles';
+import {
+  TraitItem,
+  UnrecordedTraitsProvider,
+  UpdateRecordDataFunction,
+} from '../../NewRecord/UnrecordedTraits/UnrecordedTraitsContext';
+import UnrecordedTraitCard from '../../NewRecord/UnrecordedTraits/UnrecordedTraitCard';
+import {Button} from '../../../../components';
+import {useApi} from '../../../../hooks/useApi';
+import {URL} from '../../../../constants/URLS';
+import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
+import {formatDateTime} from '../../../../utilities/function';
+import Toast from '../../../../utilities/toast';
 
-const UnrecordedTraits = () => {
-  const {t} = useTranslation();
-  const [isShowDetails, setIsShowDetails] = useState(true);
-  const data = [
-    {
-      id: 0,
-      name: 'Date of Sowing',
-    },
-    {
-      id: 1,
-      name: 'Flowering Date',
-    },
-    {
-      id: 2,
-      name: 'Plant height after 50 days',
-    },
-  ];
-  const onViewMoreClick = () => {
-    setIsShowDetails(state => !state);
+type RecordData = {
+  [key: string]: {
+    observationId: number | null;
+    traitId: number;
+    observedValue: string;
   };
+};
+
+const UnrecordedTraits = ({
+  data = [],
+  plotId,
+  details,
+  handleRecordedTraits = () => {},
+}: {
+  data: TraitItem[];
+  plotId: number;
+  details: any;
+  handleRecordedTraits: () => void;
+}) => {
+  const {t} = useTranslation();
+  const {
+    params: {type},
+  } = useRoute<PlotsScreenProps['route']>();
+  const [recordData, setRecordData] = useState<RecordData>({});
+  const [isShowDetails, setIsShowDetails] = useState(true);
+  const buttonTitles =
+    t(LOCALES.EXPERIMENT.LBL_SAVE) + ' ' + t(LOCALES.EXPERIMENT.LBL_RECORD);
+  const updateRecordData: UpdateRecordDataFunction = (
+    observationId,
+    traitId,
+    observedValue,
+  ) => {
+    setRecordData(prevData => ({
+      ...prevData,
+      [traitId]: {
+        observationId,
+        traitId,
+        observedValue: parseInt(observedValue),
+      },
+    }));
+  };
+  const onViewMoreClick = () => setIsShowDetails(state => !state);
+
+  const [
+    createTraitsRecord,
+    trraitsRecordData,
+    isTraitsRecordLoading,
+    traitsRecordError,
+  ] = useApi({
+    url: URL.RECORD_TRAITS,
+    method: 'POST',
+  });
+
+  useEffect(() => {
+    if (trraitsRecordData?.status_code !== 200) {
+      return;
+    }
+    const {message} = trraitsRecordData;
+    Toast.success({message: message});
+    handleRecordedTraits();
+    setRecordData({});
+  }, [trraitsRecordData]);
+
+  const onSaveRecord = () => {
+    const headers = {'Content-Type': 'application/json'};
+    const payload = {
+      plotId: plotId,
+      date: formatDateTime(new Date()),
+      fieldExperimentId: details?.fieldExperimentId,
+      experimentType: type,
+      phenotypes: Object.values(recordData),
+      images: [],
+      applications: null,
+      lat: '23.0225° N',
+      long: '72.5714° E',
+      imageData: [],
+    };
+    createTraitsRecord({payload, headers});
+  };
+
   return (
     <View
       style={[
@@ -39,7 +112,7 @@ const UnrecordedTraits = () => {
         ]}>
         <Text style={styles.unrecordedTraitsTitle}>
           {t(LOCALES.EXPERIMENT.LBL_UNRECORDED_TRAITS)}
-          <Text>{` (80)`}</Text>
+          <Text>{` (${data.length})`}</Text>
         </Text>
         <View style={styles.viewContainer}>
           <Text style={styles.view}>
@@ -51,16 +124,24 @@ const UnrecordedTraits = () => {
       </Pressable>
       {isShowDetails &&
         data.map(item => (
-          <View style={styles.recordedTraitsInfoContainer} key={item.id}>
-            <View style={styles.recordedTraitsInfoKeyTextContainer}>
-              <Text style={styles.unrecordedTraitsInfoValueText}>
-                {item.name}
-              </Text>
-            </View>
-          </View>
+          <UnrecordedTraitsProvider
+            key={item.traitId}
+            item={item}
+            updateRecordData={updateRecordData}>
+            <UnrecordedTraitCard />
+          </UnrecordedTraitsProvider>
         ))}
+      {isShowDetails && Object.values(recordData).length > 0 && (
+        <Button
+          title={buttonTitles}
+          containerStyle={styles.saveRecord}
+          onPress={onSaveRecord}
+          loading={isTraitsRecordLoading}
+          disabled={isTraitsRecordLoading}
+        />
+      )}
     </View>
   );
 };
 
-export default UnrecordedTraits;
+export default React.memo(UnrecordedTraits);

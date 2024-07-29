@@ -6,33 +6,14 @@ import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import {CardArrowDown, Search} from '../../../../assets/icons/svgs';
 import {useRecord} from '../RecordContext';
+import {useRecordApi} from '../RecordApiContext';
+import {Loader} from '../../../../components';
 
 const SelectPlot = () => {
   const {t} = useTranslation();
-  const {isSelectPlotVisible, selectedPlot, handlePlotSelect} = useRecord();
-  const plotList = [
-    {
-      id: 0,
-      plot_id: 101,
-      row: 1,
-      col: 1,
-      acc_id: 'G-42',
-    },
-    {
-      id: 1,
-      plot_id: 102,
-      row: 1,
-      col: 2,
-      acc_id: 'G-42',
-    },
-    {
-      id: 2,
-      plot_id: 103,
-      row: 1,
-      col: 3,
-      acc_id: 'G-42',
-    },
-  ];
+  const {isSelectPlotVisible, selectedPlot, handlePlotSelect, plotList} =
+    useRecord();
+  const {isPlotListLoading} = useRecordApi();
   const rowColInfo = [
     {
       id: 0,
@@ -42,12 +23,12 @@ const SelectPlot = () => {
     {
       id: 1,
       name: t(LOCALES.EXPERIMENT.LBL_COL),
-      key: 'col',
+      key: 'column',
     },
     {
       id: 2,
       name: t(LOCALES.EXPERIMENT.LBL_ACC_ID),
-      key: 'acc_id',
+      key: 'accessionId',
     },
   ];
   const renderPlot = (item: any) => {
@@ -56,7 +37,7 @@ const SelectPlot = () => {
         key={item.id}
         style={styles.plotCardContainer}
         onPress={() => handlePlotSelect(item)}>
-        <Text style={styles.plotName}>{item.plot_id}</Text>
+        <Text style={styles.plotName}>{item?.id}</Text>
         <View style={styles.plotInfoContainer}>
           {rowColInfo.map(data => (
             <View style={styles.plotKeyValueContainer} key={data.id}>
@@ -69,6 +50,15 @@ const SelectPlot = () => {
     );
   };
   if (!isSelectPlotVisible) return null;
+
+  if (isPlotListLoading) {
+    return (
+      <View style={styles.loader}>
+        <Loader />
+      </View>
+    );
+  }
+
   return (
     <>
       {!selectedPlot ? (
@@ -89,7 +79,7 @@ const SelectPlot = () => {
             <Text style={styles.experimentHeaderTitle}>
               {t(LOCALES.EXPERIMENT.LBL_PLOT)}
             </Text>
-            <Text style={styles.experimentName}>{selectedPlot?.plot_id}</Text>
+            <Text style={styles.experimentName}>{selectedPlot?.id}</Text>
             <View style={styles.plotInfoContainer}>
               {rowColInfo.map(data => (
                 <View style={styles.plotKeyValueContainer} key={data.id}>

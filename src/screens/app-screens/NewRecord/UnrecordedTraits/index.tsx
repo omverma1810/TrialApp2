@@ -6,39 +6,27 @@ import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import {Search} from '../../../../assets/icons/svgs';
 import UnrecordedTraitCard from './UnrecordedTraitCard';
-import {UnrecordedTraitsProvider} from './UnrecordedTraitsContext';
+import {UnrecordedTraitsProvider, TraitItem} from './UnrecordedTraitsContext';
+import {useRecord} from '../RecordContext';
 
 const UnrecordedTraits = () => {
   const {t} = useTranslation();
-  const unrecordedTraitList = [
-    {
-      id: 0,
-      name: 'Cob Height',
-      type: 'input',
-    },
-    {
-      id: 1,
-      name: 'Seeding Vigor',
-      type: 'option',
-    },
-    {
-      id: 2,
-      name: 'Date of Sowing',
-      type: 'date',
-    },
-  ];
+  const {unRecordedTraitList, updateRecordData} = useRecord();
 
   return (
     <View style={styles.unrecordedTraitsContainer}>
       <View style={[styles.unrecordedTraitsTitleContainer, styles.row]}>
         <Text style={styles.unrecordedTraitsTitle}>
           {t(LOCALES.EXPERIMENT.LBL_UNRECORDED_TRAITS)}
-          <Text>{` (80)`}</Text>
+          <Text>{` (${unRecordedTraitList?.length})`}</Text>
         </Text>
         <Search />
       </View>
-      {unrecordedTraitList.map(item => (
-        <UnrecordedTraitsProvider key={item.id} item={item}>
+      {unRecordedTraitList.map((item: TraitItem) => (
+        <UnrecordedTraitsProvider
+          key={item.traitId}
+          item={item}
+          updateRecordData={updateRecordData}>
           <UnrecordedTraitCard />
         </UnrecordedTraitsProvider>
       ))}

@@ -1,32 +1,37 @@
 import {Pressable, Text, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigation} from '@react-navigation/native';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 
 import {styles} from '../styles';
 import {CardArrowDown, CardArrowUp} from '../../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../../localization/constants';
 import {ExperimentScreenProps} from '../../../../../types/navigation/appTypes';
+import TraitModal from './TraitModal';
 
-const ExperimentList = (experiment: any) => {
+const ExperimentList = ({experiment}: any) => {
   const {t} = useTranslation();
   const {navigate} = useNavigation<ExperimentScreenProps['navigation']>();
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
+  const traitModalRef = useRef<BottomSheetModal>(null);
+  const handleTraitModalOpen = () => traitModalRef.current?.present();
+
   const experimentInfo = [
     {
       id: 0,
-      title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT_ID),
-      key: 'id',
+      title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT_TYPE),
+      key: 'experimentType',
     },
-    {
-      id: 1,
-      title: t(LOCALES.EXPERIMENT.LBL_NO_OF_ENTRIES),
-      key: 'total_entries',
-    },
+    // {
+    //   id: 1,
+    //   title: t(LOCALES.EXPERIMENT.LBL_NO_OF_ENTRIES),
+    //   key: 'total_entries',
+    // },
     {
       id: 2,
       title: t(LOCALES.EXPERIMENT.LBL_FIELD_DESIGN),
-      key: 'field_design',
+      key: 'designType',
     },
     {
       id: 3,
@@ -36,37 +41,37 @@ const ExperimentList = (experiment: any) => {
     {
       id: 4,
       title: t(LOCALES.EXPERIMENT.LBL_ENTRIES),
-      key: 'entries_count',
+      key: 'noOfTreatment',
     },
     {
       id: 5,
       title: t(LOCALES.EXPERIMENT.LBL_PLOTS),
-      key: 'plots_count',
+      key: 'noOfPlots',
     },
     {
       id: 6,
       title: t(LOCALES.EXPERIMENT.LBL_REPLICATION),
-      key: 'replication_count',
+      key: 'noOfReplication',
     },
-    {
-      id: 7,
-      title: t(LOCALES.EXPERIMENT.LBL_RANDOMISATION),
-      key: 'randomization',
-    },
+    // {
+    //   id: 7,
+    //   title: t(LOCALES.EXPERIMENT.LBL_RANDOMISATION),
+    //   key: 'randomization',
+    // },
     {
       id: 8,
-      title: t(LOCALES.EXPERIMENT.LBL_LOCATION),
-      key: 'location_count',
+      title: t(LOCALES.EXPERIMENT.LBL_LOCATION_DEPLOYED),
+      key: 'noOfLocationsDeployed',
     },
     {
       id: 9,
-      title: t(LOCALES.EXPERIMENT.LBL_FIELD),
-      key: 'field_count',
+      title: t(LOCALES.EXPERIMENT.LBL_LOCATION_REQUIRED),
+      key: 'locationReq',
     },
     {
       id: 10,
       title: t(LOCALES.EXPERIMENT.LBL_NO_OF_TRAITS),
-      key: 'total_traits',
+      key: 'noOfTraits',
     },
   ];
 
@@ -75,15 +80,20 @@ const ExperimentList = (experiment: any) => {
   };
 
   const onViewAllFieldsClick = () => {
-    navigate('ExperimentDetails');
+    navigate('ExperimentDetails', {
+      id: experiment?.id,
+      type: experiment?.experimentType,
+    });
   };
 
   return (
-    <View style={styles.experimentContainer} key={experiment?.id}>
+    <View style={styles.experimentContainer}>
       <Pressable
         style={styles.experimentTitleContainer}
         onPress={onViewMoreDetailsClick}>
-        <Text style={styles.experimentTitle}>{experiment?.name}</Text>
+        <Text style={styles.experimentTitle}>
+          {experiment?.fieldExperimentName}
+        </Text>
         {isViewMoreDetails ? <CardArrowUp /> : <CardArrowDown />}
       </Pressable>
       {!isViewMoreDetails && (
@@ -101,15 +111,17 @@ const ExperimentList = (experiment: any) => {
             <View
               style={[
                 styles.experimentDetailsCard,
-                item.key === 'id' && {width: '100%'},
+                item.key === 'experimentType' && {width: '100%'},
               ]}
               key={index}>
               <Text style={styles.experimentDetailsKeyText}>{item.title}</Text>
               <Text style={styles.experimentDetailsValueText}>
                 {experiment[item.key]}
               </Text>
-              {item.key === 'total_traits' && (
-                <Pressable style={styles.viewContainer}>
+              {item.key === 'noOfTraits' && (
+                <Pressable
+                  style={styles.viewContainer}
+                  onPress={handleTraitModalOpen}>
                   <Text style={styles.view}>
                     {t(LOCALES.EXPERIMENT.LBL_VIEW)}
                   </Text>
@@ -128,6 +140,10 @@ const ExperimentList = (experiment: any) => {
           </Text>
         </Pressable>
       )}
+      <TraitModal
+        bottomSheetModalRef={traitModalRef}
+        data={experiment?.traitList}
+      />
     </View>
   );
 };

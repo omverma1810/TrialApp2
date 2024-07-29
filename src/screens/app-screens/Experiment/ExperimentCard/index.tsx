@@ -1,16 +1,20 @@
 import {Text, View} from 'react-native';
-import React from 'react';
+import React, {Fragment} from 'react';
 
 import {styles} from './styles';
 import ExperimentList from './ExperimentList';
 
-const ExperimentCard = ({data}: any) => {
+const ExperimentCard = ({item}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.cropContainer}>
-        <Text style={styles.cropTitle}>{data?.crop_name}</Text>
+        <Text style={styles.cropTitle}>{item?.name}</Text>
       </View>
-      {data?.experiments?.map(ExperimentList)}
+      {item?.data?.map((item: any) => (
+        <Fragment key={item?.id}>
+          <ExperimentList experiment={item} />
+        </Fragment>
+      ))}
     </View>
   );
 };

@@ -1,8 +1,11 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import {jwtDecode, JwtPayload} from 'jwt-decode';
 import EncryptedStorage from 'react-native-encrypted-storage';
+import {decode} from 'base-64';
 
 import {BASE_URL, URL} from '../constants/URLS';
+
+global.atob = decode;
 
 type TokensType = {
   accessToken: string;
@@ -38,10 +41,16 @@ const isTokenExpired = (token: string): boolean => {
   }
 };
 
-const getNewAccessToken = async (): Promise<TokensType | null> => {
+const getNewAccessToken = async (
+  tokens: TokensType,
+): Promise<TokensType | null> => {
+  const data = {
+    access_token: tokens.accessToken,
+  };
   const axiosConfig: AxiosRequestConfig = {
     url: `${BASE_URL}${URL.REFRESH_TOKEN}`,
-    method: 'GET',
+    method: 'POST',
+    data,
   };
 
   try {
@@ -66,7 +75,7 @@ const getVerifiedToken = async (
     return tokens;
   }
 
-  const newTokens = await getNewAccessToken();
+  const newTokens = await getNewAccessToken(tokens);
   if (newTokens) {
     await setTokens(newTokens);
     return newTokens;

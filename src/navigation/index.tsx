@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {PortalProvider} from '@gorhom/portal';
@@ -14,32 +14,41 @@ import {Toast} from '../components';
 import {RootStackParamList} from '../types/navigation';
 import {setIsUserSignedIn, setUserDetails} from '../store/slice/authSlice';
 import useCleanUp from '../hooks/useCleanUp';
+import SplashScreen from '../screens/auth-screens/Splash';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
+  const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
   const dispatch = useAppDispatch();
   const [logoutUser] = useCleanUp();
   const {isUserSignedIn} = useAppSelector(state => state.auth);
+  const [isSplashScreenVisible, setIsSplashScreenVisible] = useState(true);
 
   useEffect(() => {
     const init = async () => {
       try {
         const [credentials, userDetails] = await Promise.all([
           Keychain.getGenericPassword(),
-          AsyncStorage.getItem('userDetails'),
+          AsyncStorage.getItem(USER_DETAILS_STORAGE_KEY),
         ]);
 
         if (credentials && userDetails) {
           const parsedUserDetails = JSON.parse(userDetails);
           dispatch(setIsUserSignedIn(true));
           dispatch(setUserDetails(parsedUserDetails));
+          setTimeout(() => {
+            setIsSplashScreenVisible(false);
+          }, 2000);
         } else {
           throw new Error('Missing credentials or user details');
         }
       } catch (error) {
         console.log('Error during initialization:', error);
         logoutUser();
+        setTimeout(() => {
+          setIsSplashScreenVisible(false);
+        }, 2000);
       }
     };
 
@@ -53,7 +62,9 @@ const RootNavigator = () => {
         <BottomSheetModalProvider>
           <NavigationContainer>
             <Stack.Navigator screenOptions={{headerShown: false}}>
-              {isUserSignedIn ? (
+              {isSplashScreenVisible ? (
+                <Stack.Screen component={SplashScreen} name="Splash" />
+              ) : isUserSignedIn ? (
                 <Stack.Screen component={AppRoutes} name="AppRoutes" />
               ) : (
                 <Stack.Screen component={AuthRoutes} name="AuthRoutes" />

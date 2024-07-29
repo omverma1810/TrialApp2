@@ -1,12 +1,13 @@
 import { StyleSheet } from 'react-native';
-
+import { FONTS } from '../../../theme/fonts';
 const TakeNotesStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
+    gap:10
   },
   chipContainer: {
     gap: 15,
-    paddingVertical: 15,
+    paddingVertical: 5,
   },
   chipItem: {
     backgroundColor: '#F7F7F7',
@@ -115,6 +116,20 @@ const TakeNotesStyles = StyleSheet.create({
     color: '#454545',
     fontWeight: '400',
     fontSize: 13,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.SEMI_BOLD,
+  },
+  filter: {
+    gap: 16,
+    paddingVertical: 16,
   },
 });
 

@@ -4,6 +4,7 @@ import {useCallback, useMemo, useState} from 'react';
 import {BASE_URL} from '../constants/URLS';
 import {getTokens, getVerifiedToken} from '../utilities/token';
 import useCleanUp from './useCleanUp';
+import Toast from '../utilities/toast';
 
 type UseApiType = {
   url: string;
@@ -66,7 +67,10 @@ export const useApi = ({
         const tokens = await getTokens();
         const newTokens = await getVerifiedToken(tokens);
         if (newTokens) {
-          axiosConfig.headers['token'] = newTokens.accessToken;
+          axiosConfig.headers = {
+            ...axiosConfig.headers,
+            Authorization: `Bearer ${newTokens?.accessToken}`,
+          };
         } else {
           logoutUser();
         }
@@ -108,8 +112,11 @@ export const useApi = ({
         if (queryParams) console.log('API queryParams:', queryParams);
         if (headers) console.log('API headers:', headers);
         console.log('API error:', err.response || err);
+        Toast.error({
+          message: err?.response?.data?.message || 'Something went wrong!',
+        });
 
-        setError(err.response ? err.response.data : err);
+        setError(err.response ? err.response?.data : err);
         if (err?.response?.data?.statusCode === 401) {
           logoutUser();
         }
