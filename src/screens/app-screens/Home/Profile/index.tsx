@@ -22,10 +22,11 @@ import {
   setUserDetails,
 } from '../../../../store/slice/authSlice';
 import ProfileStyles from './ProfileStyles';
+import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
-const Profile = () => {
+const Profile = ({navigation}: ProfileScreenProps) => {
   const [profileData, setProfileData] = useState({
     name: '',
     location: '',
@@ -44,7 +45,7 @@ const Profile = () => {
 
   const dispatch = useAppDispatch();
 
-  // fetching profile details 
+  // fetching profile details
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.PROFILE,
     method: 'GET',
@@ -111,7 +112,7 @@ const Profile = () => {
       type: type,
     };
     let payload = {
-      avatar_id : avatar_id,
+      avatar_id: avatar_id,
     };
     await updateProfile({payload});
   };
@@ -150,9 +151,8 @@ const Profile = () => {
     const headers = {
       'Content-Type': 'application/json',
     };
-  
 
-    await updateEmail({payload,headers});
+    await updateEmail({payload, headers});
   };
 
   useEffect(() => {
@@ -185,9 +185,8 @@ const Profile = () => {
     const headers = {
       'Content-Type': 'application/json',
     };
-  
 
-    await updatePhoneNumber({payload,headers});
+    await updatePhoneNumber({payload, headers});
   };
 
   useEffect(() => {
@@ -348,7 +347,11 @@ const Profile = () => {
           </Pressable>
         </View>
       </View>
-
+      <Pressable
+        onPress={() => navigation.navigate('ChangePassword')}
+        style={ProfileStyles.logoutButton}>
+        <Text style={ProfileStyles.editButton}>Chnage Password</Text>
+      </Pressable>
       <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
         <Text style={ProfileStyles.editButton}>Logout</Text>
       </Pressable>

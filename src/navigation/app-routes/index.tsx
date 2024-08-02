@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Platform, StyleSheet} from 'react-native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -31,6 +31,10 @@ import Plots from '../../screens/app-screens/Plots';
 import NewRecord from '../../screens/app-screens/NewRecord';
 import AddImage from '../../screens/app-screens/AddImage';
 import Profile from '../../screens/app-screens/Home/Profile';
+import ChangePassword from '../../screens/app-screens/ChangePassword';
+import {useAppSelector} from '../../store';
+import Toast from '../../utilities/toast';
+import {navigationRef} from '..';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -47,6 +51,25 @@ const AppRoutes = () => {
 const TabBar = () => {
   const {t} = useTranslation();
   const {COLORS, FONTS} = useTheme();
+  const {
+    userDetails: {has_logged_in_before},
+  } = useAppSelector(state => state.auth);
+
+  useEffect(() => {
+    if (navigationRef.isReady()) {
+      if (has_logged_in_before === false) {
+        setTimeout(() => {
+          navigationRef?.navigate('HomeStack', {
+            screen: 'ChangePassword',
+          });
+          Toast.info({
+            message:
+              'Please change your password as this is your first time logging in',
+          });
+        }, 1000);
+      }
+    }
+  }, [navigationRef.isReady(), has_logged_in_before]);
 
   return (
     <Tab.Navigator
@@ -129,6 +152,11 @@ const HomeStackScreens = () => {
         options={{title: 'Take Notes'}}
       />
       <HomeStack.Screen name="Profile" component={Profile} />
+      <HomeStack.Screen
+        name="ChangePassword"
+        component={ChangePassword}
+        options={{title: 'Change Password'}}
+      />
     </HomeStack.Navigator>
   );
 };

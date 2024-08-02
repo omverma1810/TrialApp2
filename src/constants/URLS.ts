@@ -15,6 +15,7 @@ const URL = {
   LOGOUT: 'auth/logout/',
   DASH: 'app/userdashboard/',
   FIELDS: 'app/experiment-details/',
+  CHANGE_PASSWORD: 'change-password/',
 };
 
 export {API_CONFIG, BASE_URL, URL};

@@ -2,7 +2,10 @@ import React, {useEffect, useState} from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import {PortalProvider} from '@gorhom/portal';
-import {NavigationContainer} from '@react-navigation/native';
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
@@ -15,8 +18,12 @@ import {RootStackParamList} from '../types/navigation';
 import {setIsUserSignedIn, setUserDetails} from '../store/slice/authSlice';
 import useCleanUp from '../hooks/useCleanUp';
 import SplashScreen from '../screens/auth-screens/Splash';
+import {TabBarStackParamList} from '../types/navigation/appTypes';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+export const navigationRef =
+  createNavigationContainerRef<TabBarStackParamList>();
 
 const RootNavigator = () => {
   const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
@@ -60,7 +67,7 @@ const RootNavigator = () => {
       <PortalProvider>
         <Toast />
         <BottomSheetModalProvider>
-          <NavigationContainer>
+          <NavigationContainer ref={navigationRef}>
             <Stack.Navigator screenOptions={{headerShown: false}}>
               {isSplashScreenVisible ? (
                 <Stack.Screen component={SplashScreen} name="Splash" />
