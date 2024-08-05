@@ -36,10 +36,12 @@ export type NoteStackParamList = {
 export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: {id: string; type: string};
-  Plots: {id: string; type: string};
+  Plots: {id: string; type: string; imageUrl?: string; plotId?: string};
   NewRecord: undefined | {imageUrl: string};
   AddImage: {
     imageUrl: string;
+    screen: 'NewRecord' | 'Plots';
+    data?: any;
   };
 };
 export type RecordStackParamList = {

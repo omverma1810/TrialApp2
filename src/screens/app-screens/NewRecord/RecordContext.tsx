@@ -19,6 +19,7 @@ import Toast from '../../../utilities/toast';
 import {
   formatDateTime,
   getBase64FromUrl,
+  getCoordinates,
   getNameFromUrl,
 } from '../../../utilities/function';
 
@@ -147,6 +148,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     ImagePicker.openCamera({cropping: true}).then(image => {
       navigation.navigate('AddImage', {
         imageUrl: image.path,
+        screen: 'NewRecord',
       });
     });
   };
@@ -265,6 +267,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     const imagesNameArr = images.map(url => getNameFromUrl(url));
     const base64Promises = images.map(url => getBase64FromUrl(url));
     const imagesBase64Arr = await Promise.all(base64Promises);
+    const {latitude, longitude} = await getCoordinates();
     const payload = {
       plotId: selectedPlot?.id,
       date: formatDateTime(new Date()),
@@ -275,8 +278,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       notes,
       applications: null,
       imageData: imagesBase64Arr,
-      lat: '23.0225° N',
-      long: '72.5714° E',
+      lat: latitude,
+      long: longitude,
     };
     createTraitsRecord({payload, headers});
   };

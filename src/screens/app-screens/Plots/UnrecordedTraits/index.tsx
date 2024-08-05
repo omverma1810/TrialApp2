@@ -15,7 +15,7 @@ import {Button} from '../../../../components';
 import {useApi} from '../../../../hooks/useApi';
 import {URL} from '../../../../constants/URLS';
 import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
-import {formatDateTime} from '../../../../utilities/function';
+import {formatDateTime, getCoordinates} from '../../../../utilities/function';
 import Toast from '../../../../utilities/toast';
 
 type RecordData = {
@@ -81,8 +81,9 @@ const UnrecordedTraits = ({
     setRecordData({});
   }, [trraitsRecordData]);
 
-  const onSaveRecord = () => {
+  const onSaveRecord = async () => {
     const headers = {'Content-Type': 'application/json'};
+    const {latitude, longitude} = await getCoordinates();
     const payload = {
       plotId: plotId,
       date: formatDateTime(new Date()),
@@ -91,8 +92,8 @@ const UnrecordedTraits = ({
       phenotypes: Object.values(recordData),
       images: [],
       applications: null,
-      lat: '23.0225° N',
-      long: '72.5714° E',
+      lat: latitude,
+      long: longitude,
       imageData: [],
     };
     createTraitsRecord({payload, headers});

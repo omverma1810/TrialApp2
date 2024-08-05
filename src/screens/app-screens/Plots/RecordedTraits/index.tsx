@@ -14,7 +14,7 @@ import {
 import UnrecordedTraitCard from '../../NewRecord/UnrecordedTraits/UnrecordedTraitCard';
 import {useApi} from '../../../../hooks/useApi';
 import {URL} from '../../../../constants/URLS';
-import {formatDateTime} from '../../../../utilities/function';
+import {formatDateTime, getCoordinates} from '../../../../utilities/function';
 import Toast from '../../../../utilities/toast';
 import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
 
@@ -77,8 +77,9 @@ const RecordedTraits = ({
     setRecordData({});
   }, [trraitsRecordData]);
 
-  const onSaveRecord = () => {
+  const onSaveRecord = async () => {
     const headers = {'Content-Type': 'application/json'};
+    const {latitude, longitude} = await getCoordinates();
     const payload = {
       plotId: plotId,
       date: formatDateTime(new Date()),
@@ -87,8 +88,8 @@ const RecordedTraits = ({
       phenotypes: Object.values(recordData),
       images: [],
       applications: null,
-      lat: '23.0225° N',
-      long: '72.5714° E',
+      lat: latitude,
+      long: longitude,
       imageData: [],
     };
 

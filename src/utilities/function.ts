@@ -1,4 +1,9 @@
-import RNFS from 'react-native-fs';
+import Geolocation from '@react-native-community/geolocation';
+
+interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
 
 const formatDateTime = (date: Date) => {
   const year = date.getFullYear();
@@ -12,16 +17,52 @@ const formatDateTime = (date: Date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
-const getNameFromUrl = (url: string) => url.split('/').pop();
+const getNameFromUrl = (url: string) => {
+  let name = url.split('/').pop();
+  if (name?.includes('?')) {
+    name = name.split('?')[0];
+  }
+  return name;
+};
 
-const getBase64FromUrl = async (filePath: string) => {
+const getBase64FromUrl = async (url: string): Promise<string> => {
   try {
-    const base64 = RNFS.readFile(filePath, 'base64');
-    return base64;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const reader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          const base64String = reader.result.split(',')[1];
+          resolve(base64String);
+        } else {
+          reject(new Error('FileReader result is not a string'));
+        }
+      };
+
+      reader.onerror = error => {
+        reject(error);
+      };
+
+      reader.readAsDataURL(blob);
+    });
   } catch (error) {
-    console.error('Error reading file:', error);
+    console.error('Error fetching or converting to base64:', error);
     throw error;
   }
 };
 
-export {formatDateTime, getNameFromUrl, getBase64FromUrl};
+const getCoordinates = (): Promise<Coordinates> => {
+  return new Promise((resolve, reject) => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const {latitude, longitude} = position.coords;
+        resolve({latitude, longitude});
+      },
+      error => reject(error),
+    );
+  });
+};
+
+export {formatDateTime, getNameFromUrl, getBase64FromUrl, getCoordinates};
