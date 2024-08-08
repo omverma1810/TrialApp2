@@ -9,7 +9,7 @@ const ValueInputCard = () => {
   const {onSubmit, recordedValue, item} = useUnrecordedTraits();
   const [value, setValue] = useState('');
   const rightIcon = (
-    <Text style={styles.traitsInputIconText}>{item?.traitUom}</Text>
+    <Text style={styles.traitsInputIconText}>{item?.traitUom || ''}</Text>
   );
 
   const handleSubmit = (text: string) => {

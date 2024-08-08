@@ -50,9 +50,7 @@ export const UnrecordedTraitsProvider = ({
   const [recordedValue, setRecordedValue] = useState('');
 
   const onRecord = () => {
-    if (item?.dataType === 'float' || item?.dataType === 'Number') {
-      setIsInputActive(true);
-    }
+    setIsInputActive(true);
   };
 
   const onSubmit = (value: string) => {
@@ -73,12 +71,12 @@ export const UnrecordedTraitsProvider = ({
   }, [item]);
 
   const getFormattedRecordValue = useMemo(() => {
-    if (item?.dataType === 'float') {
+    if (item?.traitUom) {
       return `${recordedValue} ${item?.traitUom}`;
     } else {
       return String(recordedValue);
     }
-  }, [recordedValue, item]);
+  }, [recordedValue, item?.traitUom]);
 
   return (
     <UnrecordedTraitsContext.Provider

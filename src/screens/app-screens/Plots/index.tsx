@@ -26,6 +26,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
     cropName: '',
     fieldExperimentId: '',
     fieldExperimentName: '',
+    maxNoOfImages: 0,
   });
 
   const [getPlotList, plotListData, isPlotListLoading, plotListError] = useApi({
@@ -48,6 +49,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       cropName: data?.cropName,
       fieldExperimentId: data?.fieldExperimentId,
       fieldExperimentName: data?.fieldExperimentName,
+      maxNoOfImages: data?.maxNoOfImages || 5,
     });
   }, [plotListData]);
 

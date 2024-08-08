@@ -77,6 +77,10 @@ const PlotCard = ({
     setIsMediaSaveVisible(true);
   };
   const pickImageFromCamera = () => {
+    if (images.length >= details?.maxNoOfImages) {
+      Toast.info({message: 'Maximum number of trait image uploads exceeded.'});
+      return;
+    }
     ImagePicker.openCamera({cropping: true}).then(image => {
       navigation.navigate('AddImage', {
         imageUrl: image.path,

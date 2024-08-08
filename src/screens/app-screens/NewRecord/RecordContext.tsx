@@ -119,6 +119,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const [recordData, setRecordData] = useState<RecordData>({});
   const [notes, setNotes] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [maxNoOfImages, setMaxNoOfImages] = useState(0);
   const isSelectExperimentVisible = true;
   const isSelectFieldVisible = !!selectedExperiment;
   const isSelectPlotVisible = !!selectedExperiment && !!selectedField;
@@ -145,6 +146,10 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setUnRecordedTraitList(item?.unrecordedTraitData);
   };
   const pickImageFromCamera = () => {
+    if (images.length >= maxNoOfImages) {
+      Toast.info({message: 'Maximum number of trait image uploads exceeded.'});
+      return;
+    }
     ImagePicker.openCamera({cropping: true}).then(image => {
       navigation.navigate('AddImage', {
         imageUrl: image.path,
@@ -235,6 +240,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
 
     const {data} = plotListData;
     setPlotList(data?.plotData);
+    setMaxNoOfImages(data?.maxNoOfImages || 5);
   }, [plotListData]);
 
   const updateRecordData: UpdateRecordDataFunction = (
