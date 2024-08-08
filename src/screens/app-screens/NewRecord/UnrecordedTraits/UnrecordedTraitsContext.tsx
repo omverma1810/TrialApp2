@@ -8,12 +8,12 @@ import React, {
 } from 'react';
 
 export interface TraitItem {
-  traitId: string;
+  traitId: number;
   traitName: string;
   traitUom: string;
   dataType: 'float';
   observationStatus: boolean;
-  observationId: string;
+  observationId: number | null;
   value: string;
 }
 
@@ -28,6 +28,10 @@ interface UnrecordedTraitsContextType {
   onEdit: () => void;
 }
 
+export interface UpdateRecordDataFunction {
+  (observationId: number | null, traitId: number, observedValue: string): void;
+}
+
 const UnrecordedTraitsContext = createContext<
   UnrecordedTraitsContextType | undefined
 >(undefined);
@@ -39,22 +43,20 @@ export const UnrecordedTraitsProvider = ({
 }: {
   children: ReactNode;
   item: TraitItem;
-  updateRecordData: (key: string, value: string) => void;
+  updateRecordData: UpdateRecordDataFunction;
 }) => {
   const [isInputActive, setIsInputActive] = useState(false);
   const [isRecorded, setIsRecorded] = useState(false);
   const [recordedValue, setRecordedValue] = useState('');
 
   const onRecord = () => {
-    if (item?.dataType === 'float') {
-      setIsInputActive(true);
-    }
+    setIsInputActive(true);
   };
 
   const onSubmit = (value: string) => {
     setIsRecorded(true);
     setRecordedValue(value);
-    updateRecordData(item?.traitId, value);
+    updateRecordData(item?.observationId, item?.traitId, value);
   };
 
   const onEdit = () => {
@@ -69,12 +71,12 @@ export const UnrecordedTraitsProvider = ({
   }, [item]);
 
   const getFormattedRecordValue = useMemo(() => {
-    if (item?.dataType === 'float') {
+    if (item?.traitUom) {
       return `${recordedValue} ${item?.traitUom}`;
     } else {
       return String(recordedValue);
     }
-  }, [recordedValue, item]);
+  }, [recordedValue, item?.traitUom]);
 
   return (
     <UnrecordedTraitsContext.Provider

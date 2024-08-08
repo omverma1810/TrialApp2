@@ -20,14 +20,28 @@ export type HomeStackParamList = {
   TakeNotes: undefined;
   PlanVisit: undefined;
   Profile: undefined;
+  ChangePassword: undefined;
+};
+export type NoteStackParamList = {
+  TakeNotes: {
+    id: number;
+    user_id: number;
+    content: string;
+    location: number;
+    trial_type: string;
+    experiment_id: number;
+    experiment_name: string;
+  };
 };
 export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: {id: string; type: string};
-  Plots: {id: string; type: string};
-  NewRecord: undefined | {traitMediaInfo: {name: string; url: string}};
+  Plots: {id: string; type: string; imageUrl?: string; plotId?: string};
+  NewRecord: undefined | {imageUrl: string};
   AddImage: {
     imageUrl: string;
+    screen: 'NewRecord' | 'Plots';
+    data?: any;
   };
 };
 export type RecordStackParamList = {
@@ -39,6 +53,21 @@ export type NotificationStackParamList = {
 
 export type HomeScreenProps = CompositeScreenProps<
   NativeStackScreenProps<HomeStackParamList, 'Home'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type ProfileScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<HomeStackParamList, 'Profile'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type ChangePasswordScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<HomeStackParamList, 'ChangePassword'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type NotesScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<NoteStackParamList, 'TakeNotes'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 

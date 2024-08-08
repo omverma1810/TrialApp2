@@ -1,38 +1,24 @@
-import React, {useMemo, useState, useEffect, useRef, useCallback} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import dayjs, {Dayjs} from 'dayjs';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Alert, FlatList, Modal, Pressable, Text, View} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {DropdownArrow, Search} from '../../../assets/icons/svgs';
 import {
-  Pressable,
-  StyleSheet,
-  View,
-  Text,
-  Modal,
-  ScrollView,
-  FlatList,
-  Alert
-} from 'react-native';
-import {ExperimentScreenProps} from '../../../types/navigation/appTypes';
-import {
+  Calender,
+  Input,
+  Loader,
   SafeAreaView,
   StatusBar,
-  Calender,
-  Loader,
-  Input,
 } from '../../../components';
-import BottomModal from '../../../components/BottomSheetModal';
-import {DropdownArrow} from '../../../assets/icons/svgs';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {experiment, field} from '../../../Data';
 import Chip from '../../../components/Chip';
-import dayjs, {Dayjs} from 'dayjs';
-import PlanVisitStyles from './PlanVisitStyles';
-import Filter from './Filter';
-import {LOCALES} from '../../../localization/constants';
-import {useApi} from '../../../hooks/useApi';
 import {URL} from '../../../constants/URLS';
-import {useTranslation} from 'react-i18next';
+import {useApi} from '../../../hooks/useApi';
+import {LOCALES} from '../../../localization/constants';
 import ExperimentCard from './ExperimentCard';
-import {Search} from '../../../assets/icons/svgs';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { uses24HourClock } from 'react-native-localize';
+import Filter from './Filter';
+import PlanVisitStyles from './PlanVisitStyles';
 
 interface Chip {
   id: number;
@@ -43,7 +29,7 @@ interface Chip {
   Fieldno?: string;
 }
 
-const PlanVisit = ({navigation} : any) => {
+const PlanVisit = ({navigation}: any) => {
   const {t} = useTranslation();
   const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
@@ -62,7 +48,7 @@ const PlanVisit = ({navigation} : any) => {
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedExperiment, setSelectedExperiment] = useState<any>();
-  const [fields,setFields] = useState([])
+  const [fields, setFields] = useState([]);
 
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
@@ -119,7 +105,7 @@ const PlanVisit = ({navigation} : any) => {
   const handleOk = (date: Dayjs | null) => {
     setSelectedDate(dayjs(date));
     setModalVisible(false);
-    setPayload((prevPayload) => ({
+    setPayload(prevPayload => ({
       ...prevPayload,
       date: dayjs(date).format('YYYY-MM-DD'),
     }));
@@ -217,56 +203,42 @@ const PlanVisit = ({navigation} : any) => {
     method: 'POST',
   });
   const onPlanVisit = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      console.log('No token found');
+    if (!selectedDate) {
+      Alert.alert('Error', 'Please select all fields before planning a visit');
       return;
     }
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
-
-
-    if (!selectedDate) {
-    Alert.alert('Error', 'Please select all fields before planning a visit');
-    return;
-  }
-    setPayload((prevPayload : any) => ({
-      ...prevPayload,
+    const newData = {
       field_id: selectedField?.landVillageId,
       experiment_id: selectedExperiment?.id,
-      experiment_type: selectedExperiment?.experiment_type,
-      date : selectedDate.format('YYYY-MM-DD')
-    }));
-    planVisit({ payload,headers });
-    console.log('payload',payload)
+      experiment_type: selectedExperiment?.experimentType,
+      date: selectedDate.format('YYYY-MM-DD'),
+    };
+    await planVisit({payload: newData});
   };
   useEffect(() => {
+    console.log({planVisitResponse});
     if (planVisitResponse && planVisitResponse.status_code == 201) {
-      Alert.alert('Success', 'Visit planned successfully')
-      navigation.navigate('Home')
+      Alert.alert('Success', 'Visit planned successfully');
+      navigation.navigate('Home');
     }
   }, [planVisitResponse]);
 
   const [getFields, getFieldsResponse] = useApi({
-    url : `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
-    method : 'GET'
-  })
-  useEffect(()=>{
-    getFields()
-  },[selectedExperiment])
-  
-  useEffect(()=>{
-    if(getFieldsResponse && getFieldsResponse.status_code == 200){ 
-      setFields(getFieldsResponse.data.locationList)
+    url: `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
+    method: 'GET',
+  });
+  useEffect(() => {
+    getFields();
+  }, [selectedExperiment]);
+
+  useEffect(() => {
+    if (getFieldsResponse && getFieldsResponse.status_code == 200) {
+      setFields(getFieldsResponse.data.locationList);
     }
-  },[getFieldsResponse])
-  useEffect(()=>{
-    console.log('fields',fields,selectedField)
-  },[])
+  }, [getFieldsResponse]);
+  useEffect(() => {
+    console.log('fields', fields, selectedField);
+  }, []);
   return (
     <SafeAreaView>
       <StatusBar />
@@ -280,7 +252,7 @@ const PlanVisit = ({navigation} : any) => {
           <FlatList
             data={experimentList}
             contentContainerStyle={
-              experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 80}
+              experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
             }
             showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
@@ -289,28 +261,26 @@ const PlanVisit = ({navigation} : any) => {
             ListEmptyComponent={ListEmptyComponent}
           />
         </View>
-        {
-          selectedCrop && selectedProject && (
-            <ExperimentCard
-              data={experimentList}
-              onExperimentSelect={handleSelectedExperiment}
-              name={'experiment'}
-              onFieldSelect={handleSelectedField}
-            />
-          )
-        }
-        {
-          selectedCrop && selectedProject && selectedExperiment && (
-            <ExperimentCard
-              data={fields}
-              name={'field'}
-              onExperimentSelect={handleSelectedField}
-              onFieldSelect={handleSelectedField}
-            />
-          )
-        }
-        {selectedExperiment && selectedField && (
-          <Pressable style={PlanVisitStyles.chipItem} onPress={()=>setModalVisible(true)}>
+        {selectedCrop && selectedProject && (
+          <ExperimentCard
+            data={experimentList}
+            onExperimentSelect={handleSelectedExperiment}
+            name={'experiment'}
+            onFieldSelect={handleSelectedField}
+          />
+        )}
+        {selectedCrop && selectedProject && selectedExperiment && (
+          <ExperimentCard
+            data={fields}
+            name={'field'}
+            onExperimentSelect={handleSelectedField}
+            onFieldSelect={handleSelectedField}
+          />
+        )}
+        {selectedExperiment && selectedField && !selectedDate &&(
+          <Pressable
+            style={PlanVisitStyles.chipItem}
+            onPress={() => setModalVisible(true)}>
             <View style={PlanVisitStyles.chipTextRow}>
               <Text style={PlanVisitStyles.chipText}>Select Visit Date</Text>
               <DropdownArrow />
@@ -323,12 +293,10 @@ const PlanVisit = ({navigation} : any) => {
             <Text style={PlanVisitStyles.dateText}>
               {selectedDate.format('dddd, MMMM D, YYYY')}
             </Text>
-          </View> 
+          </View>
         )}
         {selectedDate && (
-          <Pressable
-            style={PlanVisitStyles.submitButton}
-            onPress={onPlanVisit}>
+          <Pressable style={PlanVisitStyles.submitButton} onPress={onPlanVisit}>
             <Text style={PlanVisitStyles.submitButtonText}>Plan a Visit</Text>
           </Pressable>
         )}

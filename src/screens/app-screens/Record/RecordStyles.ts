@@ -4,7 +4,6 @@ const RecordStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
   },
-  filter: {},
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -43,18 +42,18 @@ const RecordStyles = StyleSheet.create({
   },
   experimentCrop: {
     paddingHorizontal: 10,
-    alignItems:'center',
-    width: 58,
-    justifyContent:'center',
+    alignItems: 'center',
+    minWidth: 58,
+    maxWidth: 90,
+    justifyContent: 'center',
     paddingVertical: 5,
     borderRadius: 6,
     backgroundColor: '#EAF4E7',
-    display:'flex',
-    color: 'black'
-  },
-  experimentCropText:{
+    display: 'flex',
     color: 'black',
-    
+  },
+  experimentCropText: {
+    color: 'black',
   },
   chip: {
     backgroundColor: 'white',
@@ -102,7 +101,7 @@ const RecordStyles = StyleSheet.create({
   listByButton: {
     paddingVertical: 5,
     borderRadius: 6,
-    paddingHorizontal:10,
+    paddingHorizontal: 10,
     alignItems: 'center',
   },
   activeListByButton: {

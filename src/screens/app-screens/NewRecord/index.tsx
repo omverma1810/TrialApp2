@@ -21,15 +21,25 @@ import NotesModal from './NotesModal';
 import Notes from './Notes';
 import TraitsImage from './TraitsImage';
 import {useRecord, RecordProvider} from './RecordContext';
+import {RecordApiProvider, useRecordApi} from './RecordApiContext';
 
 const NewRecord = ({navigation}: NewRecordScreenProps) => {
   const {t} = useTranslation();
+  const buttonTitle = t(LOCALES.EXPERIMENT.LBL_SAVE);
   const {
+    notes,
+    images,
     userInteractionOptions,
     isNotesModalVisible,
     isUnrecordedTraitsVisible,
+    isSaveRecordBtnVisible,
+    isNotesVisible,
+    isTraitsImageVisible,
     closeNotesModal,
+    onSaveRecord,
+    onSaveNotes,
   } = useRecord();
+  const {isTraitsRecordLoading} = useRecordApi();
 
   return (
     <SafeAreaView edges={['top']}>
@@ -44,7 +54,9 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
           </Text>
         </Pressable>
 
-        <ScrollView>
+        <ScrollView
+          contentContainerStyle={{flexGrow: 1, paddingBottom: 60}}
+          showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
             <SelectExperiment />
             <SelectField />
@@ -62,33 +74,38 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
                     </Pressable>
                   ))}
                 </View>
-                <Notes />
-                <TraitsImage />
+                {isNotesVisible && <Notes notes={notes} />}
+                {isTraitsImageVisible && <TraitsImage images={images} />}
                 <UnrecordedTraits />
               </Fragment>
             )}
           </View>
         </ScrollView>
-        <View style={styles.saveRecordBtnContainer}>
-          <Button
-            title={`${t(LOCALES.EXPERIMENT.LBL_SAVE)} ${t(
-              LOCALES.EXPERIMENT.LBL_RECORD,
-            )}`}
-          />
-        </View>
+        {isSaveRecordBtnVisible && (
+          <View style={styles.saveRecordBtnContainer}>
+            <Button
+              title={buttonTitle}
+              onPress={onSaveRecord}
+              loading={isTraitsRecordLoading}
+              disabled={isTraitsRecordLoading}
+            />
+          </View>
+        )}
       </KeyboardAvoidingView>
       <NotesModal
         isModalVisible={isNotesModalVisible}
         closeModal={closeNotesModal}
         onDiscard={closeNotesModal}
-        onSave={closeNotesModal}
+        onSave={onSaveNotes}
       />
     </SafeAreaView>
   );
 };
 
 export default (props: NewRecordScreenProps) => (
-  <RecordProvider>
-    <NewRecord {...props} />
-  </RecordProvider>
+  <RecordApiProvider>
+    <RecordProvider>
+      <NewRecord {...props} />
+    </RecordProvider>
+  </RecordApiProvider>
 );

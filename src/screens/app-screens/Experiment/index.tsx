@@ -28,14 +28,17 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
   const [experimentList, setExperimentList] = useState<any[]>([]);
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleCropChange = useCallback(
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
+      const experimentList = experimentData[option][newProjectList[0]] || [];
+      const formattedExperimentList = groupByExperimentName(experimentList);
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData[option][newProjectList[0]] || []);
+      setExperimentList(formattedExperimentList);
     },
     [experimentData],
   );
@@ -43,7 +46,9 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
   const handleProjectChange = useCallback(
     (option: string) => {
       setSelectedProject(option);
-      setExperimentList(experimentData[selectedCrop][option] || []);
+      const experimentList = experimentData[selectedCrop][option] || [];
+      const formattedExperimentList = groupByExperimentName(experimentList);
+      setExperimentList(formattedExperimentList);
     },
     [experimentData, selectedCrop],
   );
@@ -93,6 +98,19 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     getExperimentList();
   }, []);
 
+  const groupByExperimentName = (array: any[]) => {
+    const groupedMap = array.reduce((acc, curr) => {
+      const key = curr.experimentName || 'N/A';
+      if (!acc.has(key)) {
+        acc.set(key, {name: key, data: []});
+      }
+      acc.get(key).data.push(curr);
+      return acc;
+    }, new Map());
+
+    return Array.from(groupedMap.values());
+  };
+
   useEffect(() => {
     if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
       return;
@@ -104,11 +122,12 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     const projectList = Object.keys(data[selectedCrop] || {});
     const selectedProject = projectList[0];
     const experimentList = data[selectedCrop][selectedProject] || [];
+    const formattedExperimentList = groupByExperimentName(experimentList);
 
     setExperimentData(data);
     setCropList(cropList);
     setProjectList(projectList);
-    setExperimentList(experimentList);
+    setExperimentList(formattedExperimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
   }, [experimentListData]);
@@ -128,6 +147,19 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     [isExperimentListLoading],
   );
 
+  const normalizeString = (str: string) => {
+    return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+  };
+
+  const filteredExperimentList = useMemo(() => {
+    if (searchQuery === '') {
+      return experimentList;
+    }
+    return experimentList.filter(experiment =>
+      normalizeString(experiment.name).includes(normalizeString(searchQuery)),
+    );
+  }, [experimentList, searchQuery]);
+
   return (
     <SafeAreaView
       edges={['top']}
@@ -143,21 +175,19 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
           placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
           leftIcon={Search}
           customLeftIconStyle={{marginRight: 10}}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
         <FlatList
-          data={experimentList}
+          data={filteredExperimentList}
           contentContainerStyle={
-            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 80}
+            filteredExperimentList?.length === 0
+              ? {flexGrow: 1}
+              : {paddingBottom: 80}
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
-          renderItem={({item, index}) => (
-            <ExperimentCard
-              data={item}
-              isFirstIndex={index === 0}
-              isLastIndex={index === experimentList.length - 1}
-            />
-          )}
+          renderItem={({item, index}) => <ExperimentCard item={item} />}
           keyExtractor={(_, index) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
         />

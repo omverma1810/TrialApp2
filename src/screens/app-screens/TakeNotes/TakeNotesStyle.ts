@@ -3,10 +3,11 @@ import { FONTS } from '../../../theme/fonts';
 const TakeNotesStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
+    gap:10
   },
   chipContainer: {
     gap: 15,
-    paddingVertical: 15,
+    paddingVertical: 5,
   },
   chipItem: {
     backgroundColor: '#F7F7F7',

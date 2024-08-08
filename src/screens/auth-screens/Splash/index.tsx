@@ -1,50 +1,28 @@
-import React, {useEffect, useRef} from 'react';
-import {View, Text, StyleSheet, Animated, Image} from 'react-native';
-import SplashScreen from 'react-native-splash-screen';
-import {Logo} from '../../../assets/icons/svgs';
-import {APP_LOGO} from '../../../assets/images';
+// SplashScreen.jsx
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image , } from 'react-native';
+import { APP_LOGO } from '../../../assets/images';
 
-const AnimatedSplashScreen = () => {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+const SplashScreen = ({ }) => {
 
-  useEffect(() => {
-    SplashScreen.hide();
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
-
-  return (
-    <View style={styles.container}>
-      <Animated.View style={{...styles.animatedView, opacity: fadeAnim}}>
-        <Image source={APP_LOGO} />
-      </Animated.View>
-    </View>
-  );
+    return (
+        <View style={styles.container}>
+            <Image source={APP_LOGO}/>
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  animatedView: {
-    alignItems: 'center',
-  },
-  logo: {
-    width: 300,
-    height: 300,
-    marginBottom: 20,
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-  },
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+    text: {
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
 });
 
-export default AnimatedSplashScreen;
+export default SplashScreen;

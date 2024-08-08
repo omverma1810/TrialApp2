@@ -1,22 +1,20 @@
 import {Text, View} from 'react-native';
-import React from 'react';
+import React, {Fragment} from 'react';
 
 import {styles} from './styles';
 import ExperimentList from './ExperimentList';
 
-const ExperimentCard = ({data, isFirstIndex, isLastIndex}: any) => {
+const ExperimentCard = ({item}: any) => {
   return (
-    <View
-      style={[
-        styles.container,
-        isFirstIndex && styles.firstIndex,
-        isLastIndex && styles.lastIndex,
-      ]}>
-      {/* <View style={styles.cropContainer}>
-        <Text style={styles.cropTitle}>{data?.crop_name}</Text>
+    <View style={styles.container}>
+      <View style={styles.cropContainer}>
+        <Text style={styles.cropTitle}>{item?.name}</Text>
       </View>
-      {data?.experiments?.map(ExperimentList)} */}
-      <ExperimentList experiment={data} />
+      {item?.data?.map((item: any) => (
+        <Fragment key={item?.id}>
+          <ExperimentList experiment={item} />
+        </Fragment>
+      ))}
     </View>
   );
 };

@@ -4,6 +4,7 @@ import {FONTS} from '../../../theme/fonts';
 const PlanVisitStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
+    gap:10
   },
   chipContainer: {
     gap: 15,

@@ -9,6 +9,7 @@ global.atob = decode;
 
 type TokensType = {
   accessToken: string;
+  refreshToken: string;
 };
 
 const TOKEN_STORAGE_KEY = 'API_TOKENS';
@@ -41,16 +42,24 @@ const isTokenExpired = (token: string): boolean => {
   }
 };
 
-const getNewAccessToken = async (): Promise<TokensType | null> => {
+const getNewAccessToken = async (
+  tokens: TokensType,
+): Promise<TokensType | null> => {
+  const data = {
+    refresh_token: tokens.refreshToken,
+  };
   const axiosConfig: AxiosRequestConfig = {
     url: `${BASE_URL}${URL.REFRESH_TOKEN}`,
-    method: 'GET',
+    method: 'POST',
+    data,
   };
 
   try {
     const response = await axios(axiosConfig);
-    const {access_token} = response?.data?.data;
-    return access_token ? {accessToken: access_token} : null;
+    const {access_token, refresh_token} = response?.data?.data;
+    return access_token && refresh_token
+      ? {accessToken: access_token, refreshToken: refresh_token}
+      : null;
   } catch (error) {
     console.log('Error while getting access token:', error);
     return null;
@@ -69,7 +78,7 @@ const getVerifiedToken = async (
     return tokens;
   }
 
-  const newTokens = await getNewAccessToken();
+  const newTokens = await getNewAccessToken(tokens);
   if (newTokens) {
     await setTokens(newTokens);
     return newTokens;

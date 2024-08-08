@@ -1,14 +1,38 @@
-import React, {useState} from 'react';
-import {View, Text} from 'react-native';
-
+import React, {useState,useEffect} from 'react';
+import {View, Text, Alert} from 'react-native';
+import { useApi } from '../../../../hooks/useApi';
 import MyVisitStyles from './MyVistStyles';
-import {visits as initialVisits} from '../../../../Data';
 import UpcomingVisits from '../../../../components/Upcomingvisit';
+import { URL } from '../../../../constants/URLS';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const MyVisits = () => {
-  const [visits, setVisits] = useState(initialVisits);
 
-  const handleDeletevisit = id => {
+import { NavigationProp } from '@react-navigation/native';
+
+const MyVisits = ({navigation}: {navigation: NavigationProp<any>}) => {
+  const [visits, setVisits] = useState<{ id: number }[]>([]);
+  const [fetchVisits, fetchVisitsResponse] = useApi({
+    url: URL.VISITS,
+    method: 'GET',
+  });
+
+  useEffect(() => {
+    const getVisits = async () => {
+      fetchVisits();
+    };
+
+    getVisits();
+  }, []);
+
+  useEffect(() => {
+    if (fetchVisitsResponse && fetchVisitsResponse.status_code === 200) {
+      setVisits(fetchVisitsResponse.data);
+    } else if (fetchVisitsResponse) {
+      Alert.alert('Error', 'Failed to fetch visits');
+    }
+  }, [fetchVisitsResponse]);
+
+  const handleDeletevisit = (id:any) => {
     setVisits(prevVisits => prevVisits.filter(visit => visit.id !== id));
   };
   return (
@@ -23,6 +47,9 @@ const MyVisits = () => {
               key={visit.id}
               visit={visit}
               onDelete={handleDeletevisit}
+              navigation={navigation}
+              refreshVisits={fetchVisits} // Passing fetchVisits as a prop
+
             />
           ))}
         </View>

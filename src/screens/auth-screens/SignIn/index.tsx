@@ -39,7 +39,7 @@ const SignIn = () => {
   useEffect(() => {
     const handleLoginData = async () => {
       const {
-        data: {user, access_token: accessToken},
+        data: {user, access_token: accessToken, refresh_token: refreshToken},
       } = loginData;
 
       if (!user || !accessToken) {
@@ -48,13 +48,12 @@ const SignIn = () => {
       }
 
       try {
-        setTokens({accessToken});
+        setTokens({accessToken, refreshToken});
         dispatch(setUserDetails(user));
         await AsyncStorage.setItem(
           USER_DETAILS_STORAGE_KEY,
           JSON.stringify(user),
         );
-        await AsyncStorage.setItem('token', accessToken);
         await Keychain.setGenericPassword(userName, password);
         dispatch(setIsUserSignedIn(true));
       } catch (error) {

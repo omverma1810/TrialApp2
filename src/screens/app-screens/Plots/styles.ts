@@ -216,4 +216,19 @@ export const styles = StyleSheet.create({
     height: 35,
     marginVertical: 10,
   },
+  userInteractionContainer: {
+    gap: 24,
+    alignSelf: 'flex-end',
+    flexDirection: 'row',
+    marginTop: 10,
+  },
+  optionContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  option: {
+    color: '#1A6DD2',
+    fontFamily: FONTS.MEDIUM,
+    fontSize: 14,
+  },
 });

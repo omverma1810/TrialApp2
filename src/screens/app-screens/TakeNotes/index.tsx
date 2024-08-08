@@ -1,29 +1,25 @@
-import React, {useState, useRef, useCallback, useMemo, useEffect} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  FlatList,
-  Pressable,
-  Alert
-} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {SafeAreaView, StatusBar, Loader, Input} from '../../../components';
-import BottomModal from '../../../components/BottomSheetModal';
-import {DropdownArrow} from '../../../assets/icons/svgs';
+import {
+  Alert,
+  FlatList,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {experiment, field} from '../../../Data';
-import Chip from '../../../components/Chip';
-import TakeNotesStyles from './TakeNotesStyle';
 import {Search} from '../../../assets/icons/svgs';
+import {Input, Loader, SafeAreaView, StatusBar} from '../../../components';
+import Chip from '../../../components/Chip';
+import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
+import {LOCALES} from '../../../localization/constants';
+// import {NotesScreenProps} from '../../../types/navigation/appTypes';
 import ExperimentCard from './ExperimentCard';
 import Filter from './Filter';
-import {useApi} from '../../../hooks/useApi';
-import {URL} from '../../../constants/URLS';
-import {LOCALES} from '../../../localization/constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import TakeNotesStyles from './TakeNotesStyle';
 interface Chip {
   id: number;
   ExperientName: string;
@@ -33,7 +29,7 @@ interface Chip {
   Fieldno?: string;
 }
 
-const TakeNotes = ({navigation} : any) => {
+const TakeNotes = ({navigation, route}: any) => {
   const {t} = useTranslation();
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
@@ -53,7 +49,8 @@ const TakeNotes = ({navigation} : any) => {
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedExperiment, setSelectedExperiment] = useState<any>();
-  const [fields,setFields] = useState([])
+  const [selectedExperimentId, setSelectedExperimentId] = useState<any>();
+  const [fields, setFields] = useState([]);
 
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
@@ -61,7 +58,6 @@ const TakeNotes = ({navigation} : any) => {
   const handleSelectedField = (field: any) => {
     setSelectedField(field);
   };
-
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -167,13 +163,42 @@ const TakeNotes = ({navigation} : any) => {
     const projectList = Object.keys(data[selectedCrop] || {});
     const selectedProject = projectList[0];
     const experimentList = data[selectedCrop][selectedProject] || [];
-
     setExperimentData(data);
+
     setCropList(cropList);
-    setProjectList(projectList);
-    setExperimentList(experimentList);
-    setSelectedCrop(selectedCrop);
-    setSelectedProject(selectedProject);
+    console.log('params,', route.params);
+    if (route.params?.data && route.params?.data.experiment_name) {
+      let data_ = route.params?.data;
+      let {experiment_name} = data_;
+      for (let crops of cropList) {
+        console.log(crops);
+        if (crops in data) {
+          let project = data[crops];
+          for (let p in project) {
+            for (let field of project[p]) {
+              if (
+                field?.fieldExperimentName === experiment_name ||
+                field?.experimentName === experiment_name
+              ) {
+                setSelectedCrop(crops);
+                setSelectedProject(p);
+                setProjectList(Object.keys(project));
+                setExperimentList(data[crops][p]);
+                // setSelectedExperiment(experiment_name);
+                handleSelectedExperiment(field);
+                // setSelectedField(field);
+                setSelectedExperimentId(field.id);
+                setText(data.content);
+              }
+            }
+          }
+        }
+      }
+    } else {
+      setExperimentList(experimentList);
+      setSelectedCrop(selectedCrop);
+      setSelectedProject(selectedProject);
+    }
   }, [experimentListData]);
   const ListEmptyComponent = useMemo(
     () => (
@@ -200,71 +225,54 @@ const TakeNotes = ({navigation} : any) => {
     method: 'POST',
   });
   const onTakeNotes = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      console.log('No token found');
+    if (!text) {
+      Alert.alert('Error', 'Please select all fields before Taking a Note');
       return;
     }
-
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
+    const newData = {
+      field_id: selectedField?.landVillageId,
+      experiment_id: selectedExperiment?.id,
+      experiment_type: selectedExperiment?.experimentType,
+      content: text,
     };
-
-
-    if (!text) {
-    Alert.alert('Error', 'Please select all fields before planning a visit');
-    return;
-  }
-  const newData = {
-    field_id: selectedField?.landVillageId,
-    experiment_id: selectedExperiment?.id,
-    experiment_type: selectedExperiment?.experimentType,
-    content : text
-  }
-    setPayload(newData);
-    takeNotes({ payload,headers });
-    console.log("payload",payload)
+    await takeNotes({payload: newData});
+    console.log('payload', payload);
   };
 
   useEffect(() => {
     if (takeNotesResponse && takeNotesResponse.status_code == 201) {
-      Alert.alert('Success', 'Visit planned successfully')
-      navigation.navigate('Home')
+      Alert.alert('Success', 'Notes Created Sucessfully');
+      navigation.navigate('Home');
     }
   }, [takeNotesResponse]);
 
   const [getFields, getFieldsResponse] = useApi({
-    url : `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
-    method : 'GET'
-  })
-  useEffect(()=>{
-    getFields()
-  },[selectedExperiment])
-  
-  useEffect(()=>{
-    if(getFieldsResponse && getFieldsResponse.status_code == 200){ 
-      setFields(getFieldsResponse.data.locationList)
+    url: `${URL.FIELDS}${
+      selectedExperiment?.id || selectedExperimentId
+    }?experiment-type=${selectedExperiment?.experimentType || 'line'}`,
+    method: 'GET',
+  });
+  useEffect(() => {
+    getFields();
+  }, [selectedExperiment, selectedExperimentId]);
+
+  useEffect(() => {
+    if (getFieldsResponse && getFieldsResponse.status_code == 200) {
+      setFields(getFieldsResponse.data.locationList);
     }
-  },[getFieldsResponse])
-  useEffect(()=>{
-    console.log('fields',fields,selectedField)
-  },[])
+  }, [getFieldsResponse]);
+  useEffect(() => {
+    console.log('fields', fields, selectedField);
+  }, []);
 
   return (
     <SafeAreaView>
       <StatusBar />
       <View style={TakeNotesStyles.container}>
-        <Input
-          placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
-          leftIcon={Search}
-          customLeftIconStyle={{marginRight: 10}}
-        />
         <FlatList
           data={experimentList}
           contentContainerStyle={
-            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 80}
+            experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
@@ -275,22 +283,20 @@ const TakeNotes = ({navigation} : any) => {
         {selectedCrop && selectedProject && (
           <ExperimentCard
             data={experimentList}
-            name='experiment'
+            name="experiment"
             onExperimentSelect={handleSelectedExperiment}
           />
         )}
-        {
-          selectedCrop && selectedProject && selectedExperiment && (
-            <ExperimentCard
-              data={fields}
-              name={'field'}
-              onExperimentSelect={handleSelectedExperiment}
-              onFieldSelect={handleSelectedField}
-            />
-          )
-        }
+        {selectedCrop && selectedProject && selectedExperiment && (
+          <ExperimentCard
+            data={fields}
+            name={'field'}
+            onExperimentSelect={handleSelectedExperiment}
+            onFieldSelect={handleSelectedField}
+          />
+        )}
 
-        {selectedExperiment && (
+        {selectedExperiment && selectedField && (
           <View>
             <View style={TakeNotesStyles.inputContainer}>
               <TextInput

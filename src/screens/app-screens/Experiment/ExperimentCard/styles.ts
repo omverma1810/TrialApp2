@@ -3,10 +3,11 @@ import {FONTS} from '../../../../theme/fonts';
 
 export const styles = StyleSheet.create({
   container: {
-    // marginBottom: 24,
+    marginBottom: 24,
     borderWidth: 1,
     borderColor: '#EAF4E7',
-    borderBottomWidth: 0,
+    borderBottomWidth: 1,
+    borderRadius: 6,
   },
   firstIndex: {
     borderTopLeftRadius: 6,
@@ -31,8 +32,8 @@ export const styles = StyleSheet.create({
   experimentContainer: {
     padding: 16,
     gap: 16,
-    // borderTopWidth: 1,
-    // borderColor: '#EAF4E7',
+    borderTopWidth: 1,
+    borderColor: '#EAF4E7',
   },
   experimentTitleContainer: {
     flexDirection: 'row',

@@ -4,6 +4,7 @@ import {useCallback, useMemo, useState} from 'react';
 import {BASE_URL} from '../constants/URLS';
 import {getTokens, getVerifiedToken} from '../utilities/token';
 import useCleanUp from './useCleanUp';
+import Toast from '../utilities/toast';
 
 type UseApiType = {
   url: string;
@@ -12,7 +13,7 @@ type UseApiType = {
 };
 
 type ApiCallType = {
-  payload?: any;
+  payload?: Record<string, unknown>;
   headers?: Record<string, string>;
   pathParams?: string;
   queryParams?: string;
@@ -110,9 +111,12 @@ export const useApi = ({
         if (pathParams) console.log('API pathParams:', pathParams);
         if (queryParams) console.log('API queryParams:', queryParams);
         if (headers) console.log('API headers:', headers);
-        console.log('API error:', err.response.message || err);
+        console.log('API error:', err.response || err);
+        Toast.error({
+          message: err?.response?.data?.message || 'Something went wrong!',
+        });
 
-        setError(err.response ? err.response.data : err);
+        setError(err.response ? err.response?.data : err);
         if (err?.response?.data?.statusCode === 401) {
           logoutUser();
         }

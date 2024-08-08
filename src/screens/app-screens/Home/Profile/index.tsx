@@ -1,32 +1,32 @@
-import React, {useState, useEffect} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, {useEffect, useState} from 'react';
 import {
-  View,
-  Text,
-  Pressable,
-  Image,
-  Alert,
-  TextInput,
   ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
-import ProfileStyles from './ProfileStyles';
-import {ProfileImg} from '../../../../assets/icons/svgs';
-import {useAppDispatch, useAppSelector} from '../../../../store';
-import {useApi} from '../../../../hooks/useApi';
+import * as Keychain from 'react-native-keychain';
+import {Edit, ProfileImg} from '../../../../assets/icons/svgs';
 import {URL} from '../../../../constants/URLS';
+import {useApi} from '../../../../hooks/useApi';
+import useCleanUp from '../../../../hooks/useCleanUp';
+import {useAppDispatch} from '../../../../store';
 import {
   setClearAuthData,
   setIsUserSignedIn,
   setUserDetails,
 } from '../../../../store/slice/authSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Keychain from 'react-native-keychain';
-import useCleanUp from '../../../../hooks/useCleanUp';
-import {Edit} from '../../../../assets/icons/svgs';
+import ProfileStyles from './ProfileStyles';
+import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
-const Profile = () => {
+const Profile = ({navigation}: ProfileScreenProps) => {
   const [profileData, setProfileData] = useState({
     name: '',
     location: '',
@@ -40,22 +40,23 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [logoutUser] = useCleanUp();
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
-  const [isEditingPhoneNumber, setIsEditingPhoneNumber] = useState<boolean>(false);
+  const [isEditingPhoneNumber, setIsEditingPhoneNumber] =
+    useState<boolean>(false);
 
   const dispatch = useAppDispatch();
 
-  // fetching profile details using access token
+  // fetching profile details
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.PROFILE,
     method: 'GET',
     isSecureEntry: true,
   });
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchProfile();
-  },[])
-  useEffect(()=>{
-    if(profileDataResponse  && profileDataResponse.status_code === 200){
+  }, []);
+  useEffect(() => {
+    if (profileDataResponse && profileDataResponse.status_code === 200) {
       const fetchedUser = profileDataResponse.data.user;
       dispatch(setUserDetails(fetchedUser));
       setProfileData({
@@ -66,7 +67,7 @@ const Profile = () => {
       });
       setIsLoading(false);
     }
-  },[profileDataResponse])
+  }, [profileDataResponse]);
 
   //logout functionality
   const [logout, logoutResponse, logoutError] = useApi({
@@ -96,146 +97,117 @@ const Profile = () => {
     logoutUser();
   };
   //update profile functionality
-  // const [updateProfile, updateProfileResponse] = useApi({
-  //   url: URL.PROFILE,
-  //   method: 'PUT',
-  // });
-  // const onUpdate = async () => {
-  //   const token = await AsyncStorage.getItem('accessToken');
-  //   if (!token) {
-  //     console.log('No token found');
-  //     return;
-  //   }
-
-  //   const headers = {
-  //     'Content-Type': 'application/json',
-  //     Authorization: `Bearer ${token}`,
-  //     'x-auth-token': token,
-  //   };
-  //   // const filename = imageSource.path?.split('/').pop();
-  //   // const match = /\.(\w+)$/.exec(filename ?? '');
-  //   // const type = match ? image/${match[1]} : 'image/jpeg';
-  //   // const uri = imageSource?.path || imageSource;
-  //   // const avatar_id = {
-  //   //   uri: uri,
-  //   //   name: filename,
-  //   //   type: type,
-  //   // };
-  //   let numericStr = profileData.phoneNumber.replace(/\s/, '');
-  //   let payload = JSON.stringify({
-  //     phone_number: parseInt(numericStr),
-  //     email: profileData.email,
-  //   });
-  //   await updateProfile({payload, headers});
-  // };
-
-  // useEffect(() => {
-  //   const handleUpdateData = async () => {
-  //     Alert.alert('Success', 'Profile updated successfully');
-  //     const user = updateProfileResponse.data.user;
-  //     console.log(user);
-  //     dispatch(setUserDetails(user));
-  //     await AsyncStorage.setItem(
-  //       USER_DETAILS_STORAGE_KEY,
-  //       JSON.stringify(user),
-  //     );
-  //     await Keychain.setGenericPassword(
-  //       profileData.email,
-  //       profileData.phoneNumber,
-  //     );
-  //     setIsEditing(false);
-  //   };
-  //   if (updateProfileResponse && updateProfileResponse.status_code === 200) {
-  //     handleUpdateData();
-  //   }
-  // }, [updateProfileResponse]);
-
-    // update email functionality
-    const [updateEmail, updateEmailResponse] = useApi({
-      url: URL.PROFILE,
-      method: 'PUT',
-    });
-  
-    const onUpdateEmail = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        console.log('No token found');
-        return;
-      }
-  
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'x-auth-token': token,
-      };
-  
-      const payload = JSON.stringify({
-        email: profileData.email,
-      });
-  
-      await updateEmail({payload, headers});
+  const [updateProfile, updateProfileResponse] = useApi({
+    url: URL.PROFILE,
+    method: 'PUT',
+  });
+  const onUpdate = async () => {
+    const filename = imageSource.path?.split('/').pop();
+    const match_ = /\.(\w+)$/.exec(filename ?? '');
+    const type = match_ ? `image/${match_[1]}` : 'image/jpeg';
+    const uri = imageSource?.path || imageSource;
+    const avatar_id = {
+      uri: uri,
+      name: filename,
+      type: type,
     };
-  
-    useEffect(() => {
-      const handleUpdateEmailData = async () => {
-        Alert.alert('Success', 'Email updated successfully');
-        const user = updateEmailResponse.data.user;
-        dispatch(setUserDetails(user));
-        await AsyncStorage.setItem(
-          USER_DETAILS_STORAGE_KEY,
-          JSON.stringify(user),
-        );
-        setIsEditingEmail(false);
-      };
-      if (updateEmailResponse && updateEmailResponse.status_code === 200) {
-        handleUpdateEmailData();
-      }
-    }, [updateEmailResponse]);
-  
-    // update phone number functionality
-    const [updatePhoneNumber, updatePhoneNumberResponse] = useApi({
-      url: URL.PROFILE,
-      method: 'PUT',
-    });
-  
-    const onUpdatePhoneNumber = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        console.log('No token found');
-        return;
-      }
-  
-      const headers = {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'x-auth-token': token,
-      };
-  
-      let numericStr = profileData.phoneNumber.replace(/\s/, '');
-      const payload = JSON.stringify({
-        phone_number: parseInt(numericStr),
-      });
-  
-      await updatePhoneNumber({payload, headers});
+    let payload = {
+      avatar_id: avatar_id,
     };
-  
-    useEffect(() => {
-      const handleUpdatePhoneNumberData = async () => {
-        Alert.alert('Success', 'Phone number updated successfully');
-        const user = updatePhoneNumberResponse.data.user;
-        dispatch(setUserDetails(user));
-        await AsyncStorage.setItem(
-          USER_DETAILS_STORAGE_KEY,
-          JSON.stringify(user),
-        );
-        setIsEditingPhoneNumber(false);
-      };
-      if (updatePhoneNumberResponse && updatePhoneNumberResponse.status_code === 200) {
-        handleUpdatePhoneNumberData();
-      }
-    }, [updatePhoneNumberResponse]);
-  
-  
+    await updateProfile({payload});
+  };
+
+  useEffect(() => {
+    const handleUpdateData = async () => {
+      Alert.alert('Success', 'Profile updated successfully');
+      const user = updateProfileResponse.data.user;
+      console.log(user);
+      dispatch(setUserDetails(user));
+      await AsyncStorage.setItem(
+        USER_DETAILS_STORAGE_KEY,
+        JSON.stringify(user),
+      );
+      await Keychain.setGenericPassword(
+        profileData.email,
+        profileData.phoneNumber,
+      );
+      setIsEditing(false);
+    };
+    if (updateProfileResponse && updateProfileResponse.status_code === 200) {
+      handleUpdateData();
+    }
+  }, [updateProfileResponse]);
+
+  // update email functionality
+  const [updateEmail, updateEmailResponse] = useApi({
+    url: URL.PROFILE,
+    method: 'PUT',
+  });
+
+  const onUpdateEmail = async () => {
+    const payload = {
+      email: profileData.email,
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    await updateEmail({payload, headers});
+  };
+
+  useEffect(() => {
+    const handleUpdateEmailData = async () => {
+      Alert.alert('Success', 'Email updated successfully');
+      const user = updateEmailResponse.data.user;
+      dispatch(setUserDetails(user));
+      await AsyncStorage.setItem(
+        USER_DETAILS_STORAGE_KEY,
+        JSON.stringify(user),
+      );
+      setIsEditingEmail(false);
+    };
+    if (updateEmailResponse && updateEmailResponse.status_code === 200) {
+      handleUpdateEmailData();
+    }
+  }, [updateEmailResponse]);
+
+  // update phone number functionality
+  const [updatePhoneNumber, updatePhoneNumberResponse] = useApi({
+    url: URL.PROFILE,
+    method: 'PUT',
+  });
+
+  const onUpdatePhoneNumber = async () => {
+    let numericStr = profileData.phoneNumber.replace(/\s/, '');
+    const payload = {
+      phone_number: parseInt(numericStr),
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    await updatePhoneNumber({payload, headers});
+  };
+
+  useEffect(() => {
+    const handleUpdatePhoneNumberData = async () => {
+      Alert.alert('Success', 'Phone number updated successfully');
+      const user = updatePhoneNumberResponse.data.user;
+      dispatch(setUserDetails(user));
+      await AsyncStorage.setItem(
+        USER_DETAILS_STORAGE_KEY,
+        JSON.stringify(user),
+      );
+      setIsEditingPhoneNumber(false);
+    };
+    if (
+      updatePhoneNumberResponse &&
+      updatePhoneNumberResponse.status_code === 200
+    ) {
+      handleUpdatePhoneNumberData();
+    }
+  }, [updatePhoneNumberResponse]);
+
   //image handling functionality
   const selectImage = () => {
     ImagePicker.openPicker({
@@ -284,7 +256,7 @@ const Profile = () => {
         {isDefaultImage ? (
           <View>
             <ProfileImg width={80} height={81} />
-              <Edit
+            <Edit
               style={{position: 'absolute', bottom: 5, right: 5, zIndex: 2}}
             />
           </View>
@@ -300,11 +272,10 @@ const Profile = () => {
               style={{width: 80, height: 80, borderRadius: 100}}
               source={{uri: imageSource.path ?? undefined}}
             />
-
           </View>
         )}
       </Pressable>
-        <View style={ProfileStyles.infoContainer}>
+      <View style={ProfileStyles.infoContainer}>
         <View style={ProfileStyles.infoItem}>
           <Text style={ProfileStyles.infoText}>Name</Text>
           <Text style={ProfileStyles.infoTextBold}>{profileData.name}</Text>
@@ -331,13 +302,14 @@ const Profile = () => {
               </Text>
             )}
           </View>
-          <Pressable onPress={() => {
-            if (isEditingPhoneNumber) {
-              onUpdatePhoneNumber();
-            } else {
-              setIsEditingPhoneNumber(true);
-            }
-          }}>
+          <Pressable
+            onPress={() => {
+              if (isEditingPhoneNumber) {
+                onUpdatePhoneNumber();
+              } else {
+                setIsEditingPhoneNumber(true);
+              }
+            }}>
             <Text style={ProfileStyles.editButton}>
               {isEditingPhoneNumber ? 'Save' : 'Edit'}
             </Text>
@@ -361,20 +333,25 @@ const Profile = () => {
               </Text>
             )}
           </View>
-          <Pressable onPress={() => {
-            if (isEditingEmail) {
-              onUpdateEmail();
-            } else {
-              setIsEditingEmail(true);
-            }
-          }}>
+          <Pressable
+            onPress={() => {
+              if (isEditingEmail) {
+                onUpdateEmail();
+              } else {
+                setIsEditingEmail(true);
+              }
+            }}>
             <Text style={ProfileStyles.editButton}>
               {isEditingEmail ? 'Save' : 'Edit'}
             </Text>
           </Pressable>
         </View>
       </View>
-      
+      <Pressable
+        onPress={() => navigation.navigate('ChangePassword')}
+        style={ProfileStyles.logoutButton}>
+        <Text style={ProfileStyles.editButton}>Chnage Password</Text>
+      </Pressable>
       <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
         <Text style={ProfileStyles.editButton}>Logout</Text>
       </Pressable>

@@ -37,7 +37,7 @@ const Home: React.FC<HomeScreenProps> = ({navigation}) => {
             </Pressable>
           </View>
           <View style={styles.container}>
-            <MyVisits/>
+            <MyVisits />
             <MyNote />
           </View>
         </ScrollView>

@@ -16,7 +16,6 @@ import LocationPin from './LocationPin';
 import Rows from './Rows';
 import Columns from './Columns';
 import Location from './Location';
-import Leaf from './leaf';
 import Layout from './Layout';
 import Plots from './Plots';
 import Edit from './Edit';
@@ -46,6 +45,7 @@ import ProfileImg from './Profile';
 import List from './List';
 import Clock from './Clock';
 import Alert from './Alert';
+import Leaf from './LeafIcon';
 
 export {
   Back,

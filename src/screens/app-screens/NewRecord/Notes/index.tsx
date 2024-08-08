@@ -6,7 +6,7 @@ import {styles} from '../styles';
 import {Notes as NotesIcon} from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
 
-const Notes = () => {
+const Notes = ({notes}: {notes: string}) => {
   const {t} = useTranslation();
   return (
     <View style={styles.notesContainer}>
@@ -14,9 +14,7 @@ const Notes = () => {
         <NotesIcon color="#000" />
         <Text style={styles.notesLabel}>{t(LOCALES.EXPERIMENT.LBL_NOTES)}</Text>
       </View>
-      <Text style={styles.notesContent}>
-        Some random notes taken during a visit. May exceed to 2 lines
-      </Text>
+      <Text style={styles.notesContent}>{notes}</Text>
     </View>
   );
 };
