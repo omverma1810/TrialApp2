@@ -48,11 +48,10 @@ const MyVisits = ({navigation}: {navigation: NavigationProp<any>}) => {
               visit={visit}
               onDelete={handleDeletevisit}
               navigation={navigation}
-              refreshVisits={fetchVisits} // Passing fetchVisits as a prop
-
+              refreshVisits={fetchVisits} 
             />
           ))}
-        </View>
+        </View> 
       )}
     </View>
   );

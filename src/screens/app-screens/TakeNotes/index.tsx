@@ -33,6 +33,7 @@ const TakeNotes = ({navigation, route}: any) => {
   const {t} = useTranslation();
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
   const [chipTitle, setChipTitle] = useState('Select an Experiment');
+  const [defaultChipTitleField, setDefaultChipTitleField] = useState();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedField, setSelectedField] = useState<any>(null);
   const [chipVisible, setChipVisible] = useState(true);
@@ -41,6 +42,9 @@ const TakeNotes = ({navigation, route}: any) => {
   const bottomSheetModalRef = useRef(null);
   const secondBottomSheetRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
+  const [isEdit, setIsEdit] = useState(false);
+  const [noteId, setNoteId] = useState(null);
+  const [editNotesData, setEditNotesData] = useState<any>(null);
   const [text, setText] = useState('');
   const [experimentData, setExperimentData] = useState<any>(null);
   const [cropList, setCropList] = useState<string[]>([]);
@@ -51,6 +55,7 @@ const TakeNotes = ({navigation, route}: any) => {
   const [selectedExperiment, setSelectedExperiment] = useState<any>();
   const [selectedExperimentId, setSelectedExperimentId] = useState<any>();
   const [fields, setFields] = useState([]);
+  const [selectedFieldId,setSelectedFieldId] = useState();
 
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
@@ -167,8 +172,9 @@ const TakeNotes = ({navigation, route}: any) => {
 
     setCropList(cropList);
     console.log('params,', route.params);
-    if (route.params?.data && route.params?.data.experiment_name) {
+    if (route.params?.data && route.params?.data.id) {
       let data_ = route.params?.data;
+      setEditNotesData(data_);
       let {experiment_name} = data_;
       for (let crops of cropList) {
         console.log(crops);
@@ -184,17 +190,20 @@ const TakeNotes = ({navigation, route}: any) => {
                 setSelectedProject(p);
                 setProjectList(Object.keys(project));
                 setExperimentList(data[crops][p]);
-                // setSelectedExperiment(experiment_name);
-                handleSelectedExperiment(field);
-                // setSelectedField(field);
-                setSelectedExperimentId(field.id);
-                setText(data.content);
+                setSelectedChips([experiment_name]);
+                setSelectedExperiment(experiment_name);
+                setSelectedFieldId(data_.field_id)
+                setIsEdit(true);
+                setSelectedExperimentId(data_?.experiment_id || field.id);
+                setNoteId(data_.id);
+                setText(data_.content);
               }
             }
           }
         }
       }
     } else {
+      console.log('test')
       setExperimentList(experimentList);
       setSelectedCrop(selectedCrop);
       setSelectedProject(selectedProject);
@@ -221,9 +230,10 @@ const TakeNotes = ({navigation, route}: any) => {
     experiment_type: '',
   });
   const [takeNotes, takeNotesResponse] = useApi({
-    url: URL.NOTES,
-    method: 'POST',
+    url: isEdit ? `${URL.NOTES}${noteId}/` : URL.NOTES,
+    method: isEdit ? 'PUT' : 'POST',
   });
+  
   const onTakeNotes = async () => {
     if (!text) {
       Alert.alert('Error', 'Please select all fields before Taking a Note');
@@ -233,31 +243,45 @@ const TakeNotes = ({navigation, route}: any) => {
       field_id: selectedField?.landVillageId,
       experiment_id: selectedExperiment?.id,
       experiment_type: selectedExperiment?.experimentType,
-      content: text,
+      content: text, 
     };
     await takeNotes({payload: newData});
     console.log('payload', payload);
   };
 
   useEffect(() => {
-    if (takeNotesResponse && takeNotesResponse.status_code == 201) {
+    console.log({takeNotesResponse});
+    if (takeNotesResponse && (takeNotesResponse.status_code == 201 || takeNotesResponse.status_code == 200)) {
       Alert.alert('Success', 'Notes Created Sucessfully');
-      navigation.navigate('Home');
+      navigation.navigate('Home', {shouldRefresh: true});
     }
   }, [takeNotesResponse]);
 
+  const experimentId = selectedExperiment?.id || selectedExperimentId;
+  const experimentType = selectedExperiment?.experimentType || 'line';
+  
   const [getFields, getFieldsResponse] = useApi({
-    url: `${URL.FIELDS}${
-      selectedExperiment?.id || selectedExperimentId
-    }?experiment-type=${selectedExperiment?.experimentType || 'line'}`,
+    url: `${URL.FIELDS}${experimentId}?experimentType=${experimentType}`,
     method: 'GET',
   });
-  useEffect(() => {
+    useEffect(() => {
     getFields();
   }, [selectedExperiment, selectedExperimentId]);
 
   useEffect(() => {
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {
+        if (isEdit) {
+          let {locationList} = getFieldsResponse.data;
+          console.log(selectedFieldId,locationList)
+          let selectedField = locationList.find(
+            (location : any) => location.landVillageId === selectedFieldId
+          );
+          console.log(selectedField)
+          if (selectedField && selectedField.length) {
+            setDefaultChipTitleField(selectedField[0].location.villageName);
+            handleSelectedField(selectedField[0]);
+          }
+        }
       setFields(getFieldsResponse.data.locationList);
     }
   }, [getFieldsResponse]);
@@ -279,12 +303,13 @@ const TakeNotes = ({navigation, route}: any) => {
           renderItem={({item, index}) => null}
           keyExtractor={(_, index: any) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
-        />
+        /> 
         {selectedCrop && selectedProject && (
           <ExperimentCard
             data={experimentList}
             name="experiment"
             onExperimentSelect={handleSelectedExperiment}
+            selectedItem={selectedExperiment}
           />
         )}
         {selectedCrop && selectedProject && selectedExperiment && (

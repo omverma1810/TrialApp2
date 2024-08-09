@@ -10,13 +10,9 @@ import {styles} from './styles';
 
 const AddImage = ({navigation, route}: AddImageScreenProps) => {
   const {t} = useTranslation();
-  const {imageUrl, screen, data} = route?.params;
+  const {imageUrl} = route?.params;
   const onDone = () => {
-    if (screen === 'NewRecord') {
-      navigation.navigate('NewRecord', {imageUrl});
-    } else if (screen === 'Plots') {
-      navigation.navigate('Plots', {imageUrl, ...data});
-    }
+    navigation.navigate('NewRecord', {imageUrl});
   };
   return (
     <SafeAreaView edges={['top']}>

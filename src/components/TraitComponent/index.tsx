@@ -1,140 +1,156 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
-  Animated,
   Dimensions,
-  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
-import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
+import {FieldSybol1} from '../../assets/icons/svgs';
 
-const TraitComponent = ({titles, selectedFieldsData}) => {
-  const [dropdownHeights] = useState(
-    Array.from({length: titles.length}, () => new Animated.Value(0)),
-  );
-  console.log({selectedFieldsData: selectedFieldsData[0].plots});
-  const [isOpen, setIsOpen] = useState(
-    Array.from({length: titles.length}, () => false),
-  );
+type selectedFieldsType = {
+  [key: string]: boolean;
+};
 
-  const toggleDropdown = index => {
-    const newIsOpen = [...isOpen];
-    newIsOpen[index] = !newIsOpen[index];
 
-    Animated.timing(dropdownHeights[index], {
-      toValue: newIsOpen[index] ? 375 : 0,
-      duration: 800,
-      useNativeDriver: false,
-    }).start();
 
-    setIsOpen(newIsOpen);
-  };
-
+const TraitSection = ({selectedFields, projectData}: {selectedFields: selectedFieldsType, projectData: any}) => {
+  console.log('plotDataaaaa',projectData)
+  const [units,setUnits] = useState<string>("")
+  useEffect(()=>{
+    setUnits(projectData[0].traitUom)
+  },[])
   return (
-    <View style={styles.projectContainer}>
-      {titles.map((title, index) => (
-        <View key={index} style={styles.borderBottom}>
-          <Pressable onPress={() => toggleDropdown(index)}>
-            <View style={styles.row}>
-              <View style={styles.column}>
-                <Text style={styles.title}>{title}</Text>
-              </View>
-              <TouchableOpacity onPress={() => toggleDropdown(index)}>
-                <DropdownArrow />
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-          <ScrollView>
-            <Animated.View
-              style={[styles.dropdown, {height: dropdownHeights[index]}]}>
-              {selectedFieldsData.map((fieldData, fieldIndex) => (
-                <View key={fieldIndex} style={styles.fieldContainer}>
-                  <View style={styles.fieldInnerContainer}>
-                    <View style={styles.fieldHeader}>
-                      <Text style={styles.fieldName}>
-                        {fieldData?.fieldName}
-                      </Text>
-                      <FieldSybol1 />
-                    </View>
-                    {Array.isArray(fieldData?.plots) &&
-                      fieldData.plots.map((plot, plotIndex) => (
-                        <View key={plotIndex} style={styles.plotContainer}>
-                          <View style={styles.plot}>
-                            <Text style={styles.plotText}>{plot.plot}</Text>
-                            <Text style={styles.plotUnit}>Cm</Text>
-                          </View>
-                        </View>
-                      ))}
-                  </View>
-                </View>
-              ))}
-            </Animated.View>
-          </ScrollView>
+    <ScrollView>
+      {Object.keys(selectedFields).map(
+        field =>
+          selectedFields[field] && (
+            <ProjectContainer
+              key={field}
+              title={field}
+              data={projectData && projectData[0].locationData[0].plotData}       
+              units={units}
+            />
+          ),
+      )}
+    </ScrollView>
+  );
+};
+
+const ProjectContainer = ({title, data,units} : {title : String, data: any,units:string }) => {
+  console.log("data" ,data)
+  return (
+    <View style={styles.paddingVertical}>
+      <View
+        style={[styles.projectContainer, styles.projectContainerBackground]}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Field {title}   {data ? data.length : 0} Plots</Text>
+          <FieldSybol1 />
         </View>
-      ))}
+        <View style={styles.contentContainer}>
+          {data &&
+            data.map((item : any, index : number) => (
+              <ItemComponent
+                key={index}
+                value={`${item.value} ${units}`}
+                title={`Plot : ${item.plotNumber}`}
+              />
+            ))}
+        </View>
+      </View>
     </View>
   );
 };
 
+const ItemComponent = ({title,value}: any) => {
+  return (
+    <View style={styles.itemContainer}>
+      <View style={styles.row}>
+        <View style={styles.column}>
+          <Text style={styles.title}>{title}</Text>
+        </View>
+        <Text>
+          {value}
+        </Text>
+      </View>
+    </View>
+  );
+};
 const styles = StyleSheet.create({
   projectContainer: {
-    borderRadius: 8,
-    marginBottom: 20,
+    borderRadius: 6,
     width: Dimensions.get('window').width - 40,
-    alignSelf: 'center',
-    borderWidth: 1,
-    borderColor: '#F7F7F7',
   },
-  borderBottom: {
-    borderBottomWidth: 1,
-    borderColor: '#F7F7F7',
+  projectContainerBackground: {
+    backgroundColor: '#F7F7F7',
+  },
+  paddingVertical: {
+    paddingVertical: 15,
+  },
+  header: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  headerText: {
+    color: '#161616',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  contentContainer: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    paddingHorizontal: 1,
+    marginBottom: 1,
+    gap: 1,
+  },
+  itemContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: 'white',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
   },
   column: {
     gap: 10,
   },
   title: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '400',
     color: '#161616',
   },
   dropdown: {
     overflow: 'hidden',
-    gap: 10,
   },
-  fieldContainer: {
+  entryContainer: {
+    gap: 16,
+    paddingVertical: 15,
+  },
+  projectContainer1: {
     borderRadius: 6,
-    width: Dimensions.get('window').width - 80,
+    width: '100%',
     alignSelf: 'center',
     backgroundColor: '#F7F7F7',
     borderWidth: 1,
     borderColor: '#F7F7F7',
   },
-  fieldInnerContainer: {
-    borderRadius: 6,
-  },
-  fieldHeader: {
+  padding: {
     paddingVertical: 8,
     paddingHorizontal: 10,
-    flexDirection: 'row',
-    gap: 5,
   },
-  fieldName: {
+  recordedTraitsText: {
     color: '#161616',
     fontSize: 14,
     fontWeight: '500',
   },
-  plotContainer: {
+  borderRadiusOverflow: {
+    borderRadius: 6,
     overflow: 'hidden',
   },
-  plot: {
+  entryRow: {
     paddingHorizontal: 20,
     paddingVertical: 20,
     flexDirection: 'row',
@@ -142,16 +158,69 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  plotText: {
-    color: '#161616',
+  entryColumn: {
+    gap: 5,
+  },
+  entryLabel: {
+    color: '#636363',
     fontWeight: '400',
+    fontSize: 12,
+  },
+  entryValue: {
+    color: '#161616',
+    fontWeight: '500',
     fontSize: 14,
   },
-  plotUnit: {
+  editButton: {
+    flexDirection: 'row',
+  },
+  editButtonText: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  notesContainer: {
+    gap: 10,
+  },
+  notesTitle: {
+    color: 'black',
+  },
+  notesContent: {
+    backgroundColor: '#FDF8EE',
+    padding: 16,
+    borderRadius: 8,
+    gap: 5,
+  },
+  notesText: {
+    color: '#161616',
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  notesDate: {
+    color: '#000000',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+  unrecordedTraitsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  unrecordedTraitsText: {
     color: '#161616',
     fontSize: 14,
     fontWeight: '500',
   },
+  viewButtonText: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
 });
 
-export default TraitComponent;
+export default TraitSection;

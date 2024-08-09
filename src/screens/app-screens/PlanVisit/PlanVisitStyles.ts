@@ -58,6 +58,7 @@ const PlanVisitStyles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: '#161616',
+    fontFamily:FONTS.SEMI_BOLD
   },
   chip: {
     backgroundColor: 'white',

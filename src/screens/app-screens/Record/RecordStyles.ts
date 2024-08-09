@@ -148,6 +148,30 @@ const RecordStyles = StyleSheet.create({
     color: '#454545',
     marginLeft: 10,
   },
+  selectedFieldContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 5,
+    margin: 5,
+    backgroundColor: 'white',
+  },
+  fieldName: {
+    color: 'black',
+    marginRight: 10,
+  },
+  SelectedFields: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    gap: 10,
+  },
+  selectedFieldsWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    flex: 1, // Ensure it takes up remaining space
+    paddingLeft: 8,
+  },
+
 });
 
 export default RecordStyles;

@@ -12,20 +12,28 @@ import {
 } from 'react-native';
 import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
 import Calendar from '../Calender';
+import { projectData } from '../../screens/app-screens/Record/Data';
 
-const RecordDropDown = ({selectedFields, projectData}) => {
+type selectedFieldsType = {
+  [key: string]: boolean;
+};
+
+
+
+const RecordDropDown = ({selectedFields, projectData}: {selectedFields: selectedFieldsType, projectData: any}) => {
+  console.log('plotDataaaaa',projectData)
   const [dropdownStates, setDropdownStates] = useState(
     Object.fromEntries(
-      Object.keys(selectedFields).flatMap(field =>
-        projectData.locationList.map((_, index) => [
-          `${field}_${index}`,
-          false,
-        ]),
-      ),
-    ),
+      Object.keys(selectedFields).flatMap(field => 
+        projectData.length > 0 && projectData[0]?.plotData 
+          ? projectData[0].plotData.map((_ : any, index: number) => [`${field}_${index}`, false]) 
+          : []
+      )
+    )
   );
+  
 
-  const toggleDropdown = (field, index) => {
+  const toggleDropdown = (field : any, index : number) => {
     setDropdownStates(prevState => ({
       ...prevState,
       [`${field}_${index}`]: !prevState[`${field}_${index}`],
@@ -40,9 +48,9 @@ const RecordDropDown = ({selectedFields, projectData}) => {
             <ProjectContainer
               key={field}
               title={field}
-              data={projectData[field]}
+              data={projectData && projectData[0].plotData}
               dropdownStates={dropdownStates}
-              toggleDropdown={index => toggleDropdown(field, index)}
+              toggleDropdown={(index : number) => toggleDropdown(field, index)}
             />
           ),
       )}
@@ -50,22 +58,24 @@ const RecordDropDown = ({selectedFields, projectData}) => {
   );
 };
 
-const ProjectContainer = ({title, data, dropdownStates, toggleDropdown}) => {
+const ProjectContainer = ({title, data, dropdownStates, toggleDropdown} : {title : String, data: any , dropdownStates:any,toggleDropdown:any}) => {
+  
   return (
     <View style={styles.paddingVertical}>
       <View
         style={[styles.projectContainer, styles.projectContainerBackground]}>
         <View style={styles.header}>
-          <Text style={styles.headerText}>{title}</Text>
+          <Text style={styles.headerText}>Field {title}   {data ? data.length : 0} Plots</Text>
           <FieldSybol1 />
         </View>
         <View style={styles.contentContainer}>
           {data &&
-            data.map((item, index) => (
+            data.map((item : any, index : number) => (
               <ItemComponent
                 key={index}
-                title={item.plot}
-                entries={item.entries}
+                title={`Plot : ${item.plotNumber}`}
+                entries={item.recordedTraitData}
+                notes={item.notes}
                 dropdownState={dropdownStates[`${title}_${index}`]}
                 toggleDropdown={() => toggleDropdown(index)}
               />
@@ -76,7 +86,7 @@ const ProjectContainer = ({title, data, dropdownStates, toggleDropdown}) => {
   );
 };
 
-const ItemComponent = ({title, entries, dropdownState, toggleDropdown}) => {
+const ItemComponent = ({title, entries, notes, dropdownState, toggleDropdown}) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const bottomSheetModalRef = useRef(null);
@@ -127,8 +137,8 @@ const ItemComponent = ({title, entries, dropdownState, toggleDropdown}) => {
                 <View style={styles.borderRadiusOverflow}>
                   <View style={styles.entryRow}>
                     <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Date of Sowing</Text>
-                      <Text style={styles.entryValue}>{entry.date}</Text>
+                      <Text style={styles.entryLabel}>Trait Name</Text>
+                      <Text style={styles.entryValue}>{entry.traitName}</Text>
                     </View>
                     <TouchableOpacity
                       onPress={handleEditPress}
@@ -138,8 +148,8 @@ const ItemComponent = ({title, entries, dropdownState, toggleDropdown}) => {
                   </View>
                   <View style={styles.entryRow}>
                     <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Flowering Date</Text>
-                      <Text style={styles.entryValue}>{entry.date}</Text>
+                      <Text style={styles.entryLabel}>Value</Text>
+                      <Text style={styles.entryValue}>{entry.value}</Text>
                     </View>
                     <TouchableOpacity
                       onPress={handleEditPress}
@@ -149,13 +159,15 @@ const ItemComponent = ({title, entries, dropdownState, toggleDropdown}) => {
                   </View>
                 </View>
               </View>
-              <View style={styles.notesContainer}>
-                <Text style={styles.notesTitle}>Notes</Text>
-                <View style={styles.notesContent}>
-                  <Text style={styles.notesText}>{entry.notes}</Text>
-                  <Text style={styles.notesDate}>24 sept</Text>
+              {notes && (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesTitle}>Notes</Text>
+                  <View style={styles.notesContent}>
+                    <Text style={styles.notesText}>{notes}</Text>
+                    <Text style={styles.notesDate}>24 Sept</Text>
+                  </View>
                 </View>
-              </View>
+              )}
               <View style={styles.unrecordedTraitsRow}>
                 <Text style={styles.unrecordedTraitsText}>
                   UnRecorded Traits
@@ -186,7 +198,6 @@ const ItemComponent = ({title, entries, dropdownState, toggleDropdown}) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   projectContainer: {
     borderRadius: 6,

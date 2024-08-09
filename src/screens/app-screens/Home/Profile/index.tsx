@@ -22,11 +22,11 @@ import {
   setUserDetails,
 } from '../../../../store/slice/authSlice';
 import ProfileStyles from './ProfileStyles';
-import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
+import { getBase64FromUrl } from '../../../../utilities/function';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
-const Profile = ({navigation}: ProfileScreenProps) => {
+const Profile = () => {
   const [profileData, setProfileData] = useState({
     name: '',
     location: '',
@@ -40,12 +40,11 @@ const Profile = ({navigation}: ProfileScreenProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [logoutUser] = useCleanUp();
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
-  const [isEditingPhoneNumber, setIsEditingPhoneNumber] =
-    useState<boolean>(false);
+  const [isEditingPhoneNumber, setIsEditingPhoneNumber] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
 
-  // fetching profile details
+  // fetching profile details 
   const [fetchProfile, profileDataResponse] = useApi({
     url: URL.PROFILE,
     method: 'GET',
@@ -69,53 +68,37 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     }
   }, [profileDataResponse]);
 
-  //logout functionality
-  const [logout, logoutResponse, logoutError] = useApi({
-    url: URL.LOGOUT,
-    method: 'DELETE',
-  });
-
-  useEffect(() => {
-    const handleLogout = async () => {
-      try {
-        if (logoutResponse && logoutResponse.status_code === 200) {
-          dispatch(setIsUserSignedIn(false));
-          dispatch(setClearAuthData(false));
-          await AsyncStorage.clear();
-          await Keychain.resetGenericPassword();
-        } else {
-          console.log('Logout failed');
-        }
-      } catch (error) {
-        console.log('Error while logging out:', error);
-      }
-    };
-    handleLogout();
-  }, [logoutResponse]);
 
   const onLogout = async () => {
     logoutUser();
   };
+
   //update profile functionality
   const [updateProfile, updateProfileResponse] = useApi({
     url: URL.PROFILE,
     method: 'PUT',
   });
-  const onUpdate = async () => {
-    const filename = imageSource.path?.split('/').pop();
-    const match_ = /\.(\w+)$/.exec(filename ?? '');
-    const type = match_ ? `image/${match_[1]}` : 'image/jpeg';
-    const uri = imageSource?.path || imageSource;
-    const avatar_id = {
-      uri: uri,
-      name: filename,
-      type: type,
+
+  useEffect(()=>{
+    const onUpdate = async () => {
+      if (imageSource) {
+        try {
+          const base64Image = await getBase64FromUrl(imageSource.path);
+          const payload = {
+            avatar_id: base64Image,
+          };
+    
+          await updateProfile({ payload });
+    
+        } catch (error) {
+          console.error('Error updating profile:', error);
+          Alert.alert('Error', 'There was an issue updating your profile. Please try again.');
+        }
+      }
     };
-    let payload = {
-      avatar_id: avatar_id,
-    };
-    await updateProfile({payload});
-  };
+    onUpdate()
+  },[imageSource])
+
 
   useEffect(() => {
     const handleUpdateData = async () => {
@@ -151,8 +134,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     const headers = {
       'Content-Type': 'application/json',
     };
+  
 
-    await updateEmail({payload, headers});
+    await updateEmail({payload,headers});
   };
 
   useEffect(() => {
@@ -185,8 +169,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     const headers = {
       'Content-Type': 'application/json',
     };
+  
 
-    await updatePhoneNumber({payload, headers});
+    await updatePhoneNumber({payload,headers});
   };
 
   useEffect(() => {
@@ -234,11 +219,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
   };
 
   const toggleImageAction = () => {
-    if (isDefaultImage) {
       selectImage();
-    } else {
-      deleteImage();
-    }
   };
   if (isLoading) {
     return (
@@ -256,9 +237,6 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         {isDefaultImage ? (
           <View>
             <ProfileImg width={80} height={81} />
-            <Edit
-              style={{position: 'absolute', bottom: 5, right: 5, zIndex: 2}}
-            />
           </View>
         ) : (
           <View
@@ -347,11 +325,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           </Pressable>
         </View>
       </View>
-      <Pressable
-        onPress={() => navigation.navigate('ChangePassword')}
-        style={ProfileStyles.logoutButton}>
-        <Text style={ProfileStyles.editButton}>Chnage Password</Text>
-      </Pressable>
+
       <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
         <Text style={ProfileStyles.editButton}>Logout</Text>
       </Pressable>

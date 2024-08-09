@@ -23,6 +23,8 @@ const ExperimentCard = ({
   onExperimentSelect,
   name,
   onFieldSelect,
+  defaultChipTitle,
+  selectedItem
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
@@ -32,7 +34,14 @@ const ExperimentCard = ({
   const secondBottomSheetRef = useRef(null);
   const [selectedField,setSelectedField] = useState<any>(null);
 
+  useEffect(()=>{
+    if(selectedItem){
+      setChipTitle(selectedItem)
+    }
+    console.log('selectedItem',selectedItem)
+  },[]) 
   const handleExperimentSelect = (item: any) => {
+    
     console.log('=============>', {item});
     if (name === 'field') {
       setSelectedField(item);
@@ -58,9 +67,13 @@ const ExperimentCard = ({
     handleFirstRightIconClick();
   };
 
+
   useEffect(() => {
-    console.log(data);
-  });
+    if (defaultChipTitle) {
+      setChipTitle(defaultChipTitle);
+    }
+  }, [defaultChipTitle]);
+
 
   return (
     <View

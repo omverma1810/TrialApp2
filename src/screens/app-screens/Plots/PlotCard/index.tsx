@@ -132,7 +132,7 @@ const PlotCard = ({
     setIsMediaSaveVisible(false);
   }, [trraitsRecordData]);
 
-  const onSave = async () => {
+  const onSave = async() => {
     const headers = {'Content-Type': 'application/json'};
     const imagesNameArr = images.map(url => getNameFromUrl(url));
     const base64Promises = images.map(url => getBase64FromUrl(url));

@@ -39,7 +39,7 @@ const SignIn = () => {
   useEffect(() => {
     const handleLoginData = async () => {
       const {
-        data: {user, access_token: accessToken, refresh_token: refreshToken},
+        data: {user, access_token: accessToken},
       } = loginData;
 
       if (!user || !accessToken) {
@@ -48,7 +48,7 @@ const SignIn = () => {
       }
 
       try {
-        setTokens({accessToken, refreshToken});
+        setTokens({accessToken});
         dispatch(setUserDetails(user));
         await AsyncStorage.setItem(
           USER_DETAILS_STORAGE_KEY,

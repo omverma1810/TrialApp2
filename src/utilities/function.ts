@@ -56,11 +56,11 @@ const getBase64FromUrl = async (url: string): Promise<string> => {
 const getCoordinates = (): Promise<Coordinates> => {
   return new Promise((resolve, reject) => {
     Geolocation.getCurrentPosition(
-      position => {
+      (position : any) => {
         const {latitude, longitude} = position.coords;
         resolve({latitude, longitude});
       },
-      error => reject(error),
+      (error : any) => reject(error),
     );
   });
 };

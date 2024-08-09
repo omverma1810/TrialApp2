@@ -10,12 +10,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import dayjs, {Dayjs} from 'dayjs';
 import PlanVisitStyles from '../..//screens/app-screens/PlanVisit/PlanVisitStyles';
 import {SafeAreaView, StatusBar, Calender} from '../../components';
+import { FONTS } from '../../theme/fonts';
 
 const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   const bottomSheetModalRef = useRef<any>(null);
   const {bottom} = useSafeAreaInsets();
   const currentDate = new Date();
-  const daysLeft = differenceInDays(new Date(visit.date), currentDate);
+  
+  const [daysLeft,setdaysLeft] = useState<any>(differenceInDays(new Date(visit.date), currentDate));
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [isDateModelVisible, setIsDateModelVisible] = useState(false);
@@ -28,7 +30,9 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   const onDeleteVisit = async () => {
     deleteVisit();
   };
-
+  useEffect(()=>{
+    setdaysLeft(differenceInDays(new Date(visit.date), currentDate))
+  },[visit.date])
   useEffect(() => {
     if (deleteVisitResponse) {
       if (deleteVisitResponse.status_code === 200) {
@@ -70,8 +74,11 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   const handleOk = (date: Dayjs | null) => {
     setSelectedDate(dayjs(date));
     onUpdate()
-    // refreshVisits(); // Refresh visits after update
+    refreshVisits(); // Refresh visits after update
     setIsDateModelVisible(false);
+    if (selectedDate) {
+      setdaysLeft(differenceInDays(new Date(selectedDate.format('YYYY-MM-DD')), currentDate)); // Recalculate daysLeft
+    }
   };
 
   const handleCancel = () => {
@@ -133,7 +140,7 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.modalOption} onPress={handleEdit}>
             <Edit />
-            <Text style={styles.modalOptionText}>Edit</Text>
+            <Text style={styles.editOptionText}>Edit</Text>
           </TouchableOpacity>
         </View>
       </BottomModal>
@@ -148,12 +155,11 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
     borderRadius: 8,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    paddingHorizontal: 16,
+    paddingVertical : 8,
+    borderWidth: 1,
+    borderColor: '#F7F7F7',
+    // elevation: 3,
   },
   row: {
     flexDirection: 'row',
@@ -170,7 +176,8 @@ const styles = StyleSheet.create({
   },
   fieldName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily : FONTS.MEDIUM,
+    color: '#161616',
   },
   description: {
     fontSize: 14,
@@ -178,6 +185,8 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 16,
+    fontFamily : FONTS.MEDIUM,
+    color: '#161616',
   },
   daysLeft: {
     fontSize: 14,
@@ -196,7 +205,16 @@ const styles = StyleSheet.create({
   },
   modalOptionText: {
     marginLeft: 10,
-    fontSize: 16,
+    fontSize: 15,
+    color:'#161616',
+    fontWeight:'400'
+  },
+  editOptionText: {
+    marginLeft: 10,
+    fontSize: 15,
+    color:'#161616',
+    fontWeight:'400',
+    marginHorizontal:20
   },
 });
 

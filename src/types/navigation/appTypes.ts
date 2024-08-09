@@ -2,7 +2,7 @@ import {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from '@react-navigation/native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export type AppStackParamList = {
   TabBar: NavigatorScreenParams<TabBarStackParamList>;
@@ -20,7 +20,6 @@ export type HomeStackParamList = {
   TakeNotes: undefined;
   PlanVisit: undefined;
   Profile: undefined;
-  ChangePassword: undefined;
 };
 export type NoteStackParamList = {
   TakeNotes: {
@@ -36,12 +35,10 @@ export type NoteStackParamList = {
 export type ExperimentStackParamList = {
   Experiment: undefined;
   ExperimentDetails: {id: string; type: string};
-  Plots: {id: string; type: string; imageUrl?: string; plotId?: string};
+  Plots: {id: string; type: string};
   NewRecord: undefined | {imageUrl: string};
   AddImage: {
     imageUrl: string;
-    screen: 'NewRecord' | 'Plots';
-    data?: any;
   };
 };
 export type RecordStackParamList = {
@@ -53,16 +50,6 @@ export type NotificationStackParamList = {
 
 export type HomeScreenProps = CompositeScreenProps<
   NativeStackScreenProps<HomeStackParamList, 'Home'>,
-  NativeStackScreenProps<AppStackParamList>
->;
-
-export type ProfileScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<HomeStackParamList, 'Profile'>,
-  NativeStackScreenProps<AppStackParamList>
->;
-
-export type ChangePasswordScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<HomeStackParamList, 'ChangePassword'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 
