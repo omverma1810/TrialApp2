@@ -9,14 +9,20 @@ import Toast from '../../../utilities/toast';
 import {ChangePasswordScreenProps} from '../../../types/navigation/appTypes';
 import {useAppDispatch, useAppSelector} from '../../../store';
 import {setUserDetails} from '../../../store/slice/authSlice';
+import {Eye, EyeSlash} from '../../../assets/icons/svgs';
 
 const ChangePassword = ({navigation}: ChangePasswordScreenProps) => {
   const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
   const dispatch = useAppDispatch();
   const {userDetails} = useAppSelector(state => state.auth);
+
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  const [showOldPassword, setOldShowPassword] = useState(false);
+  const [showNewPassword, setNewShowPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
   const [chnagePassword, chnagePasswordResponse, isChangePasswordLoading] =
     useApi({
@@ -53,19 +59,27 @@ const ChangePassword = ({navigation}: ChangePasswordScreenProps) => {
         placeholder="Old Password"
         value={oldPassword}
         onChangeText={setOldPassword}
-        secureTextEntry={true}
+        rightIcon={showOldPassword ? <EyeSlash /> : <Eye />}
+        onRightIconClick={() => setOldShowPassword(!showOldPassword)}
+        secureTextEntry={!showOldPassword}
       />
       <Input
         placeholder="New Password"
         value={newPassword}
         onChangeText={setNewPassword}
-        secureTextEntry={true}
+        rightIcon={showNewPassword ? <EyeSlash /> : <Eye />}
+        onRightIconClick={() => setNewShowPassword(!showNewPassword)}
+        secureTextEntry={!showNewPassword}
       />
       <Input
         placeholder="Confirm New Password"
         value={confirmNewPassword}
         onChangeText={setConfirmNewPassword}
-        secureTextEntry={true}
+        rightIcon={showConfirmNewPassword ? <EyeSlash /> : <Eye />}
+        onRightIconClick={() =>
+          setShowConfirmNewPassword(!showConfirmNewPassword)
+        }
+        secureTextEntry={!showConfirmNewPassword}
       />
       <Button
         title="Reset Password"

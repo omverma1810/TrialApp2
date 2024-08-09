@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {Image, View} from 'react-native';
+import {Image, View, Animated} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
+import DeviceInfo from 'react-native-device-info';
 
 import {
   Button,
@@ -12,23 +13,27 @@ import {
   Text,
 } from '../../../components';
 import {styles} from './styles';
-import {APP_LOGO} from '../../../assets/images';
+import {APP_LOGO, FARM_BG} from '../../../assets/images';
 import {LOCALES} from '../../../localization/constants';
 import {useApi} from '../../../hooks/useApi';
-import {URL} from '../../../constants/URLS';
+import {URL, DEFAULT_ENV} from '../../../constants/URLS';
 import {setTokens} from '../../../utilities/token';
 import {
   setIsUserSignedIn,
   setUserDetails,
 } from '../../../store/slice/authSlice';
 import {useAppDispatch} from '../../../store';
+import {useKeyboard} from '../../../hooks/useKeaboard';
+import {Eye, EyeSlash} from '../../../assets/icons/svgs';
 
 const SignIn = () => {
   const {t} = useTranslation();
   const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
   const dispatch = useAppDispatch();
+  const {isKeyboardOpen} = useKeyboard();
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [login, loginData, isLoginPending, loginError] = useApi({
     url: URL.LOGIN,
@@ -77,11 +82,24 @@ const SignIn = () => {
     <SafeAreaView>
       <StatusBar />
       <View style={styles.container}>
-        <View style={styles.logoContainer}>
-          <Image style={styles.logo} source={APP_LOGO} />
-        </View>
-        <View style={styles.loginSection}>
+        {!isKeyboardOpen && (
+          <Animated.View style={styles.farmBgContainer}>
+            <Animated.Image style={styles.farmBg} source={FARM_BG} />
+          </Animated.View>
+        )}
+        <View
+          style={[
+            styles.loginSection,
+            !isKeyboardOpen && styles.loginSectionWithKeyboard,
+          ]}>
           <View style={styles.loginContainer}>
+            <View style={styles.logoContainer}>
+              <Image style={styles.logo} source={APP_LOGO} />
+            </View>
+            <View style={styles.loginLabelContainer}>
+              <Text style={styles.welcome}>Welcome to Trials App 2.0</Text>
+              <Text style={styles.loginToContinue}>Login to continue!</Text>
+            </View>
             <Input
               placeholder={t(LOCALES.LOGIN.LBL_USERNAME)}
               value={userName}
@@ -91,18 +109,34 @@ const SignIn = () => {
               placeholder={t(LOCALES.LOGIN.LBL_PASSWORD)}
               value={password}
               onChangeText={setPassword}
-              secureTextEntry={true}
+              rightIcon={showPassword ? <EyeSlash /> : <Eye />}
+              onRightIconClick={() => setShowPassword(!showPassword)}
+              secureTextEntry={!showPassword}
             />
-            <Text style={styles.forgotPassword}>
+            {/* <Text style={styles.forgotPassword}>
               {t(LOCALES.LOGIN.LBL_FORGOT_PASSWORD)}
-            </Text>
+            </Text> */}
             <Button
               title={t(LOCALES.LOGIN.LBL_LOGIN)}
               disabled={!userName.trim() || !password.trim() || isLoginPending}
               loading={isLoginPending}
               onPress={onLogin}
             />
+            <View style={styles.footerContainer}>
+              <Text style={styles.footer}>Piatrika Biosystems © 2024</Text>
+              <Text style={styles.footer}>
+                {'App Version:'} {DeviceInfo.getVersion()}
+                {`(${DeviceInfo.getBuildNumber()})`}
+              </Text>
+              <Text style={styles.footer}>
+                {'App Environment:'}{' '}
+                <Text style={{textTransform: 'capitalize'}}>{DEFAULT_ENV}</Text>
+              </Text>
+            </View>
           </View>
+          <View
+            style={[styles.border, isKeyboardOpen && styles.borderWithKeyboard]}
+          />
         </View>
       </View>
     </SafeAreaView>

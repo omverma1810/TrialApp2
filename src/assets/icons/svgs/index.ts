@@ -46,6 +46,8 @@ import List from './List';
 import Clock from './Clock';
 import Alert from './Alert';
 import Leaf from './LeafIcon';
+import Eye from './Eye';
+import EyeSlash from './EyeSlash';
 
 export {
   Back,
@@ -96,4 +98,6 @@ export {
   List,
   Clock,
   Alert,
+  Eye,
+  EyeSlash,
 };

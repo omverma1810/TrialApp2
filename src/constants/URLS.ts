@@ -1,4 +1,10 @@
-const BASE_URL = 'https://dev.piatrika.com/';
+const DEFAULT_ENV: string = 'DEVELOPMENT'; // DEVELOPMENT | STAGING
+
+const DEVELOPMENT_BASE_URL = 'https://dev.piatrika.com/';
+const STAGING_BASE_URL = 'https://stage.piatrika.com/';
+
+const BASE_URL =
+  DEFAULT_ENV === 'STAGING' ? STAGING_BASE_URL : DEVELOPMENT_BASE_URL;
 
 const API_CONFIG = {};
 
@@ -18,4 +24,4 @@ const URL = {
   CHANGE_PASSWORD: 'change-password/',
 };
 
-export {API_CONFIG, BASE_URL, URL};
+export {API_CONFIG, BASE_URL, URL, DEFAULT_ENV};
