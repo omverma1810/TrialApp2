@@ -24,7 +24,8 @@ const ExperimentCard = ({
   name,
   onFieldSelect,
   defaultChipTitle,
-  selectedItem
+  selectedItem,
+  isEdit
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
@@ -36,14 +37,14 @@ const ExperimentCard = ({
 
   useEffect(()=>{
     if(selectedItem){
-      setChipTitle(selectedItem)
+      setChipTitle(name === 'field' ? selectedItem.location.villageName : selectedItem)
     }
     console.log('selectedItem',selectedItem)
-  },[]) 
+  },[selectedItem]);
   const handleExperimentSelect = (item: any) => {
     
     console.log('=============>', {item});
-    if (name === 'field') {
+    if (name === 'field' && !isEdit) {
       setSelectedField(item);
       setChipTitle(item.location.villageName);
       onFieldSelect(item);

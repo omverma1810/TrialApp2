@@ -67,7 +67,21 @@ const PlanVisit = ({navigation}: any) => {
     },
     [experimentData],
   );
-
+  useEffect(() => {
+    if (experimentData && experimentData["Rice"]) {
+      setSelectedCrop("Rice");
+  
+      const newProjectList = Object.keys(experimentData["Rice"]);
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+    } else {
+      setProjectList([]);
+      setSelectedProject('');
+      setExperimentList([]);
+    }
+  }, [experimentData]);
+    
   const handleProjectChange = useCallback(
     (option: string) => {
       setSelectedProject(option);

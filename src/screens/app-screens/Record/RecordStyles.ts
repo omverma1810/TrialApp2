@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-
+import { FONTS } from '../../../theme/fonts';
 const RecordStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
@@ -171,7 +171,39 @@ const RecordStyles = StyleSheet.create({
     flex: 1, // Ensure it takes up remaining space
     paddingLeft: 8,
   },
-
+  traitsInputContainer: {
+    paddingHorizontal: 8,
+    paddingVertical: 16,
+  },
+  traitsInputIconText: {
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+    color: '#636363',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  editButton: {
+    flexDirection: 'row',
+  },
+  editButtonText: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  entryRow: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  entryColumn: {
+    gap: 5,
+  },
 });
 
 export default RecordStyles;

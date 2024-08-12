@@ -45,7 +45,7 @@ const MyNote = ({navigation}: any ) => {
 
   const handleEditNote = (note: NoteType | unknown) => {
     console.log(note);
-    navigation.navigate('TakeNotes', {data: note});
+    navigation.navigate('TakeNotes', {data: note,fetchNotes: fetchNotes});
   };
 
   return (

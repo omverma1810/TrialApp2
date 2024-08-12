@@ -1,5 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -9,31 +9,34 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert
 } from 'react-native';
-import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
+import { DropdownArrow, FieldSybol1 } from '../../assets/icons/svgs';
 import Calendar from '../Calender';
 import { projectData } from '../../screens/app-screens/Record/Data';
+import { useApi } from '../../hooks/useApi';
+import { URL } from '../../constants/URLS';
+import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 
 type selectedFieldsType = {
   [key: string]: boolean;
 };
 
 
-
-const RecordDropDown = ({selectedFields, projectData}: {selectedFields: selectedFieldsType, projectData: any}) => {
-  console.log('plotDataaaaa',projectData)
+const RecordDropDown = ({ selectedFields, projectData ,experimentType}: { selectedFields: selectedFieldsType, projectData: any,experimentType:string }) => {
+  console.log('plotDataaaaa', projectData)
   const [dropdownStates, setDropdownStates] = useState(
     Object.fromEntries(
-      Object.keys(selectedFields).flatMap(field => 
-        projectData.length > 0 && projectData[0]?.plotData 
-          ? projectData[0].plotData.map((_ : any, index: number) => [`${field}_${index}`, false]) 
+      Object.keys(selectedFields).flatMap(field =>
+        projectData.length > 0 && projectData[0]?.plotData
+          ? projectData[0].plotData.map((_: any, index: number) => [`${field}_${index}`, false])
           : []
       )
     )
   );
-  
 
-  const toggleDropdown = (field : any, index : number) => {
+
+  const toggleDropdown = (field: any, index: number) => {
     setDropdownStates(prevState => ({
       ...prevState,
       [`${field}_${index}`]: !prevState[`${field}_${index}`],
@@ -49,8 +52,10 @@ const RecordDropDown = ({selectedFields, projectData}: {selectedFields: selected
               key={field}
               title={field}
               data={projectData && projectData[0].plotData}
+              projectData={projectData}
               dropdownStates={dropdownStates}
-              toggleDropdown={(index : number) => toggleDropdown(field, index)}
+              toggleDropdown={(index: number) => toggleDropdown(field, index)}
+              experimentType={experimentType}
             />
           ),
       )}
@@ -58,8 +63,8 @@ const RecordDropDown = ({selectedFields, projectData}: {selectedFields: selected
   );
 };
 
-const ProjectContainer = ({title, data, dropdownStates, toggleDropdown} : {title : String, data: any , dropdownStates:any,toggleDropdown:any}) => {
-  
+const ProjectContainer = ({ title, data, dropdownStates, toggleDropdown, projectData,experimentType }: { title: String, data: any, dropdownStates: any, toggleDropdown: any, projectData: any, experimentType:string }) => {
+
   return (
     <View style={styles.paddingVertical}>
       <View
@@ -70,7 +75,7 @@ const ProjectContainer = ({title, data, dropdownStates, toggleDropdown} : {title
         </View>
         <View style={styles.contentContainer}>
           {data &&
-            data.map((item : any, index : number) => (
+            data.map((item: any, index: number) => (
               <ItemComponent
                 key={index}
                 title={`Plot : ${item.plotNumber}`}
@@ -78,6 +83,9 @@ const ProjectContainer = ({title, data, dropdownStates, toggleDropdown} : {title
                 notes={item.notes}
                 dropdownState={dropdownStates[`${title}_${index}`]}
                 toggleDropdown={() => toggleDropdown(index)}
+                projectData={projectData}
+                plotId={item.id}
+                experimentType={experimentType}
               />
             ))}
         </View>
@@ -86,9 +94,12 @@ const ProjectContainer = ({title, data, dropdownStates, toggleDropdown} : {title
   );
 };
 
-const ItemComponent = ({title, entries, notes, dropdownState, toggleDropdown}) => {
+const ItemComponent = ({ title, entries, notes, dropdownState, toggleDropdown, projectData, plotId,experimentType }: any) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [showInputCard, setShowInputCard] = useState(false);
+  const [currentEntry, setCurrentEntry] = useState<any>(null);
+  const [observedValue, setObservedValue] = useState('');
   const bottomSheetModalRef = useRef(null);
 
   const [dropdownHeight] = useState(new Animated.Value(0));
@@ -101,9 +112,52 @@ const ItemComponent = ({title, entries, notes, dropdownState, toggleDropdown}) =
     }).start();
   }, [dropdownState]);
 
-  const handleEditPress = () => {
-    setModalVisible(true);
+  const formatDate = (date: any) => {
+    const pad = (num: number) => String(num).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   };
+
+
+  const [updateValue, updateValueResponse] = useApi({
+    'url': URL.RECORD_TRAITS,
+    method: "PUT"
+  });
+
+  const handleEditPress = (entry: any) => {
+    setShowInputCard(true);
+    setCurrentEntry(entry);
+  }
+  const handleValueSubmit = (value: any) => {
+    const payload = {
+      date: formatDate(new Date()),
+      fieldExperimentId: projectData[0].fieldExperimentId,
+      experimentType: experimentType,
+      phenotypes: [{
+        observationId: currentEntry?.observationId,
+        observedValue: value,
+        traitId: currentEntry?.traitId,
+      }],
+      plotId: plotId,
+    };
+    const headers = {
+      "Content-Type":"application/json"
+    }
+    updateValue({ payload ,headers});
+  };
+
+  useEffect(() => {
+    if (updateValueResponse && updateValueResponse.status_code === 200) {
+      Alert.alert('Success', 'Value Updated Successfully');
+    }
+  }, [updateValueResponse])
 
   const handleCancel = () => {
     setModalVisible(false);
@@ -124,9 +178,9 @@ const ItemComponent = ({title, entries, notes, dropdownState, toggleDropdown}) =
         </TouchableOpacity>
       </View>
 
-      <Animated.View style={[styles.dropdown, {height: dropdownHeight}]}>
+      <Animated.View style={[styles.dropdown, { height: dropdownHeight }]}>
         {dropdownState &&
-          entries.map((entry, index) => (
+          entries.map((entry: any, index: number) => (
             <View style={styles.entryContainer} key={index}>
               <View style={styles.projectContainer1}>
                 <View style={styles.padding}>
@@ -141,21 +195,31 @@ const ItemComponent = ({title, entries, notes, dropdownState, toggleDropdown}) =
                       <Text style={styles.entryValue}>{entry.traitName}</Text>
                     </View>
                     <TouchableOpacity
-                      onPress={handleEditPress}
                       style={styles.editButton}>
                       <Text style={styles.editButtonText}>Edit</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.entryRow}>
-                    <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Value</Text>
-                      <Text style={styles.entryValue}>{entry.value}</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={handleEditPress}
-                      style={styles.editButton}>
-                      <Text style={styles.editButtonText}>Edit</Text>
-                    </TouchableOpacity>
+                    {
+                      showInputCard ? (
+                        <View style={styles.entryColumn}>
+                          <ValueInputCard onSubmit={handleValueSubmit} entry={currentEntry} setShowInputCard={setShowInputCard} />
+                        </View>
+                      ) :
+                        (
+                          <>
+                            <View style={styles.entryColumn}>
+                              <Text style={styles.entryLabel}>Value</Text>
+                              <Text style={styles.entryValue}>{entry.value}</Text>
+                            </View>
+                            <TouchableOpacity
+                              onPress={() => handleEditPress(entry)}
+                              style={styles.editButton}>
+                              <Text style={styles.editButtonText}>Edit</Text>
+                            </TouchableOpacity>
+                          </>
+                        )
+                    }
                   </View>
                 </View>
               </View>
@@ -195,6 +259,8 @@ const ItemComponent = ({title, entries, notes, dropdownState, toggleDropdown}) =
           />
         </View>
       </Modal>
+      { }
+
     </View>
   );
 };

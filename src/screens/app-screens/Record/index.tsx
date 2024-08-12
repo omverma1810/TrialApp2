@@ -105,6 +105,20 @@ const Record = () => {
     },
     [experimentData, selectedCrop],
   );
+  useEffect(() => {
+    if (experimentData && experimentData["Rice"]) {
+      setSelectedCrop("Rice");
+  
+      const newProjectList = Object.keys(experimentData["Rice"]);
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+    } else {
+      setProjectList([]);
+      setSelectedProject('');
+      setExperimentList([]);
+    }
+  }, [experimentData]);
 
   const [
     getExperimentList,
@@ -446,6 +460,7 @@ const Record = () => {
                     <RecordDropDown
                       selectedFields={selectedFields}
                       projectData={plotData}
+                      experimentType={experimentType}
                     />
                   )}
                   {activeListButton === 'Traits' && (
@@ -458,6 +473,7 @@ const Record = () => {
               )}
             </View>
           )}
+          
           <BottomModal
             bottomSheetModalRef={bottomSheetModalRef}
             type="CONTENT_HEIGHT"

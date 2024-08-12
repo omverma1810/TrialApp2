@@ -82,6 +82,21 @@ const TakeNotes = ({navigation, route}: any) => {
     },
     [experimentData, selectedCrop],
   );
+  useEffect(() => {
+    if (experimentData && experimentData["Rice"]) {
+      setSelectedCrop("Rice");
+  
+      const newProjectList = Object.keys(experimentData["Rice"]);
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+    } else {
+      setProjectList([]);
+      setSelectedProject('');
+      setExperimentList([]);
+    }
+  }, [experimentData]);
+
 
   const handleFirstRightIconClick = () => {
     if (bottomSheetModalRef.current) {
@@ -252,13 +267,18 @@ const TakeNotes = ({navigation, route}: any) => {
   useEffect(() => {
     console.log({takeNotesResponse});
     if (takeNotesResponse && (takeNotesResponse.status_code == 201 || takeNotesResponse.status_code == 200)) {
-      Alert.alert('Success', 'Notes Created Sucessfully');
+      route.params?.fetchNotes();
+      if(isEdit){
+        Alert.alert('Success', 'Notes Updated Sucessfully');
+      }else{
+        Alert.alert('Success', 'Notes Created Sucessfully');
+      }
       navigation.navigate('Home', {shouldRefresh: true});
     }
   }, [takeNotesResponse]);
 
   const experimentId = selectedExperiment?.id || selectedExperimentId;
-  const experimentType = selectedExperiment?.experimentType || 'line';
+  const experimentType = selectedExperiment?.experimentType || 'hybrid';
   
   const [getFields, getFieldsResponse] = useApi({
     url: `${URL.FIELDS}${experimentId}?experimentType=${experimentType}`,
@@ -272,14 +292,20 @@ const TakeNotes = ({navigation, route}: any) => {
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {
         if (isEdit) {
           let {locationList} = getFieldsResponse.data;
-          console.log(selectedFieldId,locationList)
-          let selectedField = locationList.find(
-            (location : any) => location.landVillageId === selectedFieldId
+          console.log("selectedFieldId",selectedFieldId,"landVillageId",locationList.map((location : any) => location.landVillageId));
+
+          let selectedField = locationList && locationList.find(
+            (location: any) => {
+              if(location.landVillageId === selectedFieldId){
+                return location;
+              }
+            }
           );
-          console.log(selectedField)
-          if (selectedField && selectedField.length) {
-            setDefaultChipTitleField(selectedField[0].location.villageName);
-            handleSelectedField(selectedField[0]);
+          const field_name = selectedField?.location.villageName;
+          console.log("selectedField",field_name)
+          if (selectedField) {
+            setDefaultChipTitleField(field_name);
+            handleSelectedField(selectedField);
           }
         }
       setFields(getFieldsResponse.data.locationList);
@@ -318,6 +344,8 @@ const TakeNotes = ({navigation, route}: any) => {
             name={'field'}
             onExperimentSelect={handleSelectedExperiment}
             onFieldSelect={handleSelectedField}
+            selectedItem={selectedField}
+            isEdit={isEdit}
           />
         )}
 
