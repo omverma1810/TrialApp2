@@ -72,6 +72,7 @@ interface RecordContextType {
   updateRecordData: UpdateRecordDataFunction;
   onSaveRecord: (hasNextPlot: boolean) => void;
   onSaveNotes: (notes: string) => void;
+  onDeleteImages: (arr: number[]) => void;
 }
 
 const RecordContext = createContext<RecordContextType | undefined>(undefined);
@@ -149,7 +150,9 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   };
   const pickImageFromCamera = () => {
     if (images.length >= maxNoOfImages) {
-      Toast.info({message: 'Maximum number of trait image uploads exceeded.'});
+      Toast.info({
+        message: `Maximum number (${maxNoOfImages}) of trait image uploads exceeded.`,
+      });
       return;
     }
     ImagePicker.openCamera({cropping: true}).then(image => {
@@ -289,16 +292,23 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     const base64Promises = images.map(url => getBase64FromUrl(url));
     const imagesBase64Arr = await Promise.all(base64Promises);
     const {latitude, longitude} = await getCoordinates();
+    const imageData = images.map((image, index) => {
+      return {
+        url: null,
+        imagePath: null,
+        imageName: imagesNameArr[index],
+        base64Data: imagesBase64Arr[index],
+      };
+    });
     const payload = {
       plotId: selectedPlot?.id,
       date: formatDateTime(new Date()),
       fieldExperimentId: selectedExperiment?.id,
       experimentType: selectedExperiment?.experimentType,
       phenotypes: Object.values(recordData),
-      images: imagesNameArr,
+      imageData: imageData,
       notes,
       applications: null,
-      imageData: imagesBase64Arr,
       lat: latitude,
       long: longitude,
     };
@@ -308,6 +318,11 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const onSaveNotes = (notes: string) => {
     setNotes(notes.trim());
     setIsNotesModalVisible(false);
+  };
+
+  const onDeleteImages = (arr: number[]) => {
+    const newImages = images.filter((_, index) => !arr.includes(index));
+    setImages(newImages);
   };
 
   const value = {
@@ -344,6 +359,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     updateRecordData,
     onSaveRecord,
     onSaveNotes,
+    onDeleteImages,
   };
 
   return (

@@ -48,6 +48,7 @@ import Alert from './Alert';
 import Leaf from './LeafIcon';
 import Eye from './Eye';
 import EyeSlash from './EyeSlash';
+import SelectIcon from './SelectIcon';
 
 export {
   Back,
@@ -100,4 +101,5 @@ export {
   Alert,
   Eye,
   EyeSlash,
+  SelectIcon,
 };

@@ -86,11 +86,9 @@ const RecordedTraits = ({
       fieldExperimentId: details?.fieldExperimentId,
       experimentType: type,
       phenotypes: Object.values(recordData),
-      images: [],
       applications: null,
       lat: latitude,
       long: longitude,
-      imageData: [],
     };
 
     updateTraitsRecord({payload, headers});

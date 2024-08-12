@@ -78,7 +78,9 @@ const PlotCard = ({
   };
   const pickImageFromCamera = () => {
     if (images.length >= details?.maxNoOfImages) {
-      Toast.info({message: 'Maximum number of trait image uploads exceeded.'});
+      Toast.info({
+        message: `Maximum number (${details?.maxNoOfImages}) of trait image uploads exceeded.`,
+      });
       return;
     }
     ImagePicker.openCamera({cropping: true}).then(image => {
@@ -138,21 +140,33 @@ const PlotCard = ({
     const base64Promises = images.map(url => getBase64FromUrl(url));
     const imagesBase64Arr = await Promise.all(base64Promises);
     const {latitude, longitude} = await getCoordinates();
+    const imageData = images.map((image, index) => {
+      return {
+        url: null,
+        imagePath: null,
+        imageName: imagesNameArr[index],
+        base64Data: imagesBase64Arr[index],
+      };
+    });
     const payload = {
       plotId: plotData?.id,
       date: formatDateTime(new Date()),
       fieldExperimentId: details?.fieldExperimentId,
       experimentType: type,
       phenotypes: Object.values({}),
-      images: imagesNameArr,
       applications: null,
       lat: latitude,
       long: longitude,
-      imageData: imagesBase64Arr,
+      imageData: imageData,
       notes,
     };
 
     updateTraitsRecord({payload, headers});
+  };
+
+  const onDeleteImages = (arr: number[]) => {
+    const newImages = images.filter((_, index) => !arr.includes(index));
+    setImages(newImages);
   };
 
   return (
@@ -190,7 +204,9 @@ const PlotCard = ({
             ))}
           </View>
           {notes && <Notes notes={notes} />}
-          {images && images.length > 0 && <TraitsImage images={images} />}
+          {images && images.length > 0 && (
+            <TraitsImage images={images} onDeleteImages={onDeleteImages} />
+          )}
           {isMediaSaveVisible && (
             <Button
               title={t(LOCALES.EXPERIMENT.LBL_SAVE)}

@@ -1,6 +1,6 @@
 import {StatusBarStyle} from 'react-native';
 
-const BAR_STYLE: StatusBarStyle = 'default';
+const BAR_STYLE: StatusBarStyle = 'dark-content';
 
 export default {
   COLORS: {

@@ -38,6 +38,7 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
     closeNotesModal,
     onSaveRecord,
     onSaveNotes,
+    onDeleteImages,
   } = useRecord();
   const {isTraitsRecordLoading} = useRecordApi();
 
@@ -75,7 +76,12 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
                   ))}
                 </View>
                 {isNotesVisible && <Notes notes={notes} />}
-                {isTraitsImageVisible && <TraitsImage images={images} />}
+                {isTraitsImageVisible && (
+                  <TraitsImage
+                    images={images}
+                    onDeleteImages={onDeleteImages}
+                  />
+                )}
                 <UnrecordedTraits />
               </Fragment>
             )}

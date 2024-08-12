@@ -292,6 +292,9 @@ export const styles = StyleSheet.create({
     fontFamily: FONTS.REGULAR,
     color: '#161616',
   },
+  imageViewContainer: {
+    gap: 20,
+  },
   imageContainer: {
     gap: 12,
     flexDirection: 'row',
@@ -299,6 +302,11 @@ export const styles = StyleSheet.create({
   image: {
     height: 150,
     width: 150,
+  },
+  selectedImage: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
   },
   traitsLabel: {
     fontSize: 12,
@@ -309,5 +317,13 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  deleteBtn: {
+    backgroundColor: 'transparent',
+    borderColor: '#e53430',
+    borderWidth: 1,
+  },
+  deleteBtnLabel: {
+    color: '#e53430',
   },
 });

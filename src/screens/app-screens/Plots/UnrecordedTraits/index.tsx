@@ -90,11 +90,9 @@ const UnrecordedTraits = ({
       fieldExperimentId: details?.fieldExperimentId,
       experimentType: type,
       phenotypes: Object.values(recordData),
-      images: [],
       applications: null,
       lat: latitude,
       long: longitude,
-      imageData: [],
     };
     createTraitsRecord({payload, headers});
   };
