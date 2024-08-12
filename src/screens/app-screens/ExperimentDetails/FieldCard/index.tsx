@@ -25,7 +25,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
   const {navigate} =
     useNavigation<ExperimentDetailsScreenProps['navigation']>();
   const {
-    params: {type},
+    params: {type, data},
   } = useRoute<ExperimentDetailsScreenProps['route']>();
   const traitModalRef = useRef<BottomSheetModal>(null);
   const handleTraitModalOpen = () => traitModalRef.current?.present();
@@ -58,7 +58,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       navigationAction: {
         title: t(LOCALES.EXPERIMENT.LBL_ALL_PLOTS),
         onClick: () => {
-          navigate('Plots', {id: fieldData?.id, type: type});
+          navigate('Plots', {id: fieldData?.id, type: type, data: data});
         },
       },
       key: 'plots_count',
@@ -84,6 +84,41 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
     //   },
     //   key: 'location',
     // },
+    {
+      id: 6,
+      icon: null,
+      title: 'Block Width',
+      navigationAction: null,
+      key: 'blockWidth',
+    },
+    {
+      id: 7,
+      icon: null,
+      title: 'Block Gap',
+      navigationAction: null,
+      key: 'gapBlocks',
+    },
+    {
+      id: 8,
+      icon: null,
+      title: 'Plot Size',
+      navigationAction: null,
+      key: 'plotSize',
+    },
+    {
+      id: 9,
+      icon: null,
+      title: 'Plot Width',
+      navigationAction: null,
+      key: 'plotWidth',
+    },
+    {
+      id: 10,
+      icon: null,
+      title: 'Row Length',
+      navigationAction: null,
+      key: 'rowLength',
+    },
   ];
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const onViewMoreDetailsClick = () => setIsViewMoreDetails(!isViewMoreDetails);
@@ -99,11 +134,11 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
         <View
           style={[
             styles.fieldDetailsCard,
-            (key === 'noOfRows' || key === 'noOfColumn') &&
+            !(key === 'plots_count' || key === 'traits') &&
               styles.fieldDetailsCardPart,
           ]}
           key={id}>
-          <Icon />
+          {Icon && <Icon />}
           <View style={styles.fieldDetailsTextContainer}>
             <Text style={styles.fieldDetailsKeyText}>{title}</Text>
             <Text style={styles.fieldDetailsValueText}>{value}</Text>

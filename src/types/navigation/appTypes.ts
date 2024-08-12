@@ -33,10 +33,23 @@ export type NoteStackParamList = {
     experiment_name: string;
   };
 };
+
+type experimentData = {
+  projectId: string;
+  designType: string;
+  season: string;
+};
+
 export type ExperimentStackParamList = {
   Experiment: undefined;
-  ExperimentDetails: {id: string; type: string};
-  Plots: {id: string; type: string; imageUrl?: string; plotId?: string};
+  ExperimentDetails: {id: string; type: string; data: experimentData};
+  Plots: {
+    id: string;
+    type: string;
+    data: experimentData;
+    imageUrl?: string;
+    plotId?: string;
+  };
   NewRecord: undefined | {imageUrl: string};
   AddImage: {
     imageUrl: string;

@@ -56,7 +56,7 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
         </Pressable>
 
         <ScrollView
-          contentContainerStyle={{flexGrow: 1, paddingBottom: 60}}
+          contentContainerStyle={{flexGrow: 1, paddingBottom: 100}}
           showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
             <SelectExperiment />

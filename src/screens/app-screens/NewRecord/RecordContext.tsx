@@ -73,6 +73,7 @@ interface RecordContextType {
   onSaveRecord: (hasNextPlot: boolean) => void;
   onSaveNotes: (notes: string) => void;
   onDeleteImages: (arr: number[]) => void;
+  getExperimentTypeColor: (type: string) => string;
 }
 
 const RecordContext = createContext<RecordContextType | undefined>(undefined);
@@ -325,6 +326,16 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setImages(newImages);
   };
 
+  const getExperimentTypeColor = useCallback((type: string) => {
+    if (type === 'hybrid') {
+      return '#fdf8ee';
+    } else if (type === 'line') {
+      return '#fcebea';
+    } else {
+      return '#eaf4e7';
+    }
+  }, []);
+
   const value = {
     userInteractionOptions,
     cropList,
@@ -360,6 +371,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     onSaveRecord,
     onSaveNotes,
     onDeleteImages,
+    getExperimentTypeColor,
   };
 
   return (

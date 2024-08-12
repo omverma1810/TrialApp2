@@ -4,7 +4,7 @@ import React, {Fragment} from 'react';
 import {styles} from './styles';
 import ExperimentList from './ExperimentList';
 
-const ExperimentCard = ({item}: any) => {
+const ExperimentCard = ({item, selectedProject}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.cropContainer}>
@@ -12,7 +12,7 @@ const ExperimentCard = ({item}: any) => {
       </View>
       {item?.data?.map((item: any) => (
         <Fragment key={item?.id}>
-          <ExperimentList experiment={item} />
+          <ExperimentList experiment={item} selectedProject={selectedProject} />
         </Fragment>
       ))}
     </View>

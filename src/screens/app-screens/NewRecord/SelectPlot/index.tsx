@@ -15,16 +15,16 @@ const SelectPlot = () => {
     useRecord();
   const {isPlotListLoading} = useRecordApi();
   const rowColInfo = [
-    {
-      id: 0,
-      name: t(LOCALES.EXPERIMENT.LBL_ROW),
-      key: 'row',
-    },
-    {
-      id: 1,
-      name: t(LOCALES.EXPERIMENT.LBL_COL),
-      key: 'column',
-    },
+    // {
+    //   id: 0,
+    //   name: t(LOCALES.EXPERIMENT.LBL_ROW),
+    //   key: 'row',
+    // },
+    // {
+    //   id: 1,
+    //   name: t(LOCALES.EXPERIMENT.LBL_COL),
+    //   key: 'column',
+    // },
     {
       id: 2,
       name: t(LOCALES.EXPERIMENT.LBL_ACC_ID),

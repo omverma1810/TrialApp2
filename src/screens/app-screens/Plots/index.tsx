@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {FlatList, Pressable, View} from 'react-native';
+import {FlatList, Pressable, ScrollView, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 
 import {
@@ -19,7 +19,7 @@ import {URL} from '../../../constants/URLS';
 
 const Plots = ({navigation, route}: PlotsScreenProps) => {
   const {t} = useTranslation();
-  const {id, type} = route.params;
+  const {id, type, data} = route.params;
   const [plotList, setPlotList] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [details, setDetails] = useState({
@@ -98,11 +98,39 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
               <Text style={styles.experimentTitle}>
                 {details?.fieldExperimentName} ({type})
               </Text>
+              {/* <View style={styles.cropTitleContainer}>
+                <Text style={styles.cropTitle}>{details?.cropName}</Text>
+              </View> */}
+            </View>
+          )}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.rowContainer}>
               <View style={styles.cropTitleContainer}>
                 <Text style={styles.cropTitle}>{details?.cropName}</Text>
               </View>
+              <View
+                style={[
+                  styles.cropTitleContainer,
+                  {backgroundColor: '#e8f0fb'},
+                ]}>
+                <Text style={styles.cropTitle}>{data.projectId}</Text>
+              </View>
+              <View
+                style={[
+                  styles.cropTitleContainer,
+                  {backgroundColor: '#fdf8ee'},
+                ]}>
+                <Text style={styles.cropTitle}>{data.season}</Text>
+              </View>
+              <View
+                style={[
+                  styles.cropTitleContainer,
+                  {backgroundColor: '#fcebea'},
+                ]}>
+                <Text style={styles.cropTitle}>{data.designType}</Text>
+              </View>
             </View>
-          )}
+          </ScrollView>
         </View>
         <Input
           placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_PLOT)}

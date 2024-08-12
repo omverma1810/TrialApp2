@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {FlatList, Pressable, View} from 'react-native';
+import {FlatList, Pressable, ScrollView, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
 
 import {
@@ -22,7 +22,7 @@ const ExperimentDetails = ({
   route,
 }: ExperimentDetailsScreenProps) => {
   const {t} = useTranslation();
-  const {id, type} = route?.params;
+  const {id, type, data} = route?.params;
   const [experimentDetails, setExperimentDetails] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [
@@ -113,9 +113,34 @@ const ExperimentDetails = ({
           <Text style={styles.experimentTitle}>
             {name} ({type})
           </Text>
-          <View style={styles.cropTitleContainer}>
-            <Text style={styles.cropTitle}>{cropName}</Text>
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.row}>
+              <View style={styles.cropTitleContainer}>
+                <Text style={styles.cropTitle}>{cropName}</Text>
+              </View>
+              <View
+                style={[
+                  styles.cropTitleContainer,
+                  {backgroundColor: '#e8f0fb'},
+                ]}>
+                <Text style={styles.cropTitle}>{data.projectId}</Text>
+              </View>
+              <View
+                style={[
+                  styles.cropTitleContainer,
+                  {backgroundColor: '#fdf8ee'},
+                ]}>
+                <Text style={styles.cropTitle}>{data.season}</Text>
+              </View>
+              <View
+                style={[
+                  styles.cropTitleContainer,
+                  {backgroundColor: '#fcebea'},
+                ]}>
+                <Text style={styles.cropTitle}>{data.designType}</Text>
+              </View>
+            </View>
+          </ScrollView>
         </View>
         <Input
           placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_FIELD)}

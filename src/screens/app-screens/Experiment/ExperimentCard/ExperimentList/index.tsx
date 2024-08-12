@@ -1,5 +1,5 @@
 import {Pressable, Text, View} from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 import {useNavigation} from '@react-navigation/native';
 import {BottomSheetModal} from '@gorhom/bottom-sheet';
@@ -10,7 +10,7 @@ import {LOCALES} from '../../../../../localization/constants';
 import {ExperimentScreenProps} from '../../../../../types/navigation/appTypes';
 import TraitModal from './TraitModal';
 
-const ExperimentList = ({experiment}: any) => {
+const ExperimentList = ({experiment, selectedProject}: any) => {
   const {t} = useTranslation();
   const {navigate} = useNavigation<ExperimentScreenProps['navigation']>();
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
@@ -18,11 +18,11 @@ const ExperimentList = ({experiment}: any) => {
   const handleTraitModalOpen = () => traitModalRef.current?.present();
 
   const experimentInfo = [
-    {
-      id: 0,
-      title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT_TYPE),
-      key: 'experimentType',
-    },
+    // {
+    //   id: 0,
+    //   title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT_TYPE),
+    //   key: 'experimentType',
+    // },
     // {
     //   id: 1,
     //   title: t(LOCALES.EXPERIMENT.LBL_NO_OF_ENTRIES),
@@ -83,17 +83,44 @@ const ExperimentList = ({experiment}: any) => {
     navigate('ExperimentDetails', {
       id: experiment?.id,
       type: experiment?.experimentType,
+      data: {
+        projectId: selectedProject,
+        designType: experiment?.designType,
+        season: experiment?.season,
+      },
     });
   };
+
+  const experimentTypeColor: any = useMemo(() => {
+    let type = experiment?.experimentType;
+    if (type === 'hybrid') {
+      return '#fdf8ee';
+    } else if (type === 'line') {
+      return '#fcebea';
+    } else {
+      return '#eaf4e7';
+    }
+  }, [experiment?.experimentType]);
 
   return (
     <View style={styles.experimentContainer}>
       <Pressable
         style={styles.experimentTitleContainer}
         onPress={onViewMoreDetailsClick}>
-        <Text style={styles.experimentTitle}>
-          {experiment?.fieldExperimentName}
-        </Text>
+        <View style={styles.row}>
+          <Text style={styles.experimentTitle}>
+            {experiment?.fieldExperimentName}
+          </Text>
+          <View
+            style={[
+              styles.experimentTypeContainer,
+              {backgroundColor: experimentTypeColor},
+            ]}>
+            <Text style={styles.experimentType}>
+              {experiment?.experimentType}
+            </Text>
+          </View>
+        </View>
         {isViewMoreDetails ? <CardArrowUp /> : <CardArrowDown />}
       </Pressable>
       {!isViewMoreDetails && (

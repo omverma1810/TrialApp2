@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     borderRadius: 6,
   },
   cropTitle: {
-    color: '#123E08',
+    color: '#161616',
     fontSize: 12,
     fontFamily: FONTS.MEDIUM,
   },
@@ -131,4 +131,5 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FONTS.SEMI_BOLD,
   },
+  row: {flexDirection: 'row', alignItems: 'center', gap: 10},
 });

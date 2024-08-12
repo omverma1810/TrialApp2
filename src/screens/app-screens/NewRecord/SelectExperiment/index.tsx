@@ -24,6 +24,7 @@ const SelectExperiment = () => {
     handleExperimentSelect,
     handleCropChange,
     handleProjectChange,
+    getExperimentTypeColor,
   } = useRecord();
 
   const ListHeaderComponent = useMemo(
@@ -52,7 +53,11 @@ const SelectExperiment = () => {
       style={styles.experimentLabelContainer}
       onPress={() => handleExperimentSelect(item)}>
       <Text style={styles.experimentLabel}>{item?.fieldExperimentName}</Text>
-      <View style={styles.cropLabelContainer}>
+      <View
+        style={[
+          styles.cropLabelContainer,
+          {backgroundColor: getExperimentTypeColor(item?.experimentType)},
+        ]}>
         <Text style={styles.cropLabel}>{item?.experimentType}</Text>
       </View>
     </Pressable>
@@ -82,7 +87,15 @@ const SelectExperiment = () => {
         <Text style={styles.experimentName}>
           {selectedExperiment?.fieldExperimentName}
         </Text>
-        <View style={styles.cropLabelContainer}>
+        <View
+          style={[
+            styles.cropLabelContainer,
+            {
+              backgroundColor: getExperimentTypeColor(
+                selectedExperiment?.experimentType,
+              ),
+            },
+          ]}>
           <Text style={styles.cropLabel}>
             {selectedExperiment?.experimentType}
           </Text>

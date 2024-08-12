@@ -102,4 +102,15 @@ export const styles = StyleSheet.create({
     fontFamily: FONTS.MEDIUM,
     textAlign: 'center',
   },
+  row: {flexDirection: 'row', alignItems: 'center', gap: 20},
+  experimentTypeContainer: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  experimentType: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
 });

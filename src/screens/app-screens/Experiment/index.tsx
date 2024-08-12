@@ -187,7 +187,9 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
-          renderItem={({item, index}) => <ExperimentCard item={item} />}
+          renderItem={({item, index}) => (
+            <ExperimentCard item={item} selectedProject={selectedProject} />
+          )}
           keyExtractor={(_, index) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
         />

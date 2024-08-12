@@ -26,12 +26,12 @@ const NewRecordOptionsModal = ({
       icon: EditBox,
       onClick: onSelectFromList,
     },
-    {
-      id: 1,
-      name: t(LOCALES.EXPERIMENT.LBL_SCAN),
-      icon: Scan,
-      onClick: () => {},
-    },
+    // {
+    //   id: 1,
+    //   name: t(LOCALES.EXPERIMENT.LBL_SCAN),
+    //   icon: Scan,
+    //   onClick: () => {},
+    // },
     {
       id: 2,
       name: '',
