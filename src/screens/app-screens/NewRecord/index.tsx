@@ -25,7 +25,6 @@ import {RecordApiProvider, useRecordApi} from './RecordApiContext';
 
 const NewRecord = ({navigation}: NewRecordScreenProps) => {
   const {t} = useTranslation();
-  const buttonTitle = t(LOCALES.EXPERIMENT.LBL_SAVE);
   const {
     notes,
     images,
@@ -35,6 +34,7 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
     isSaveRecordBtnVisible,
     isNotesVisible,
     isTraitsImageVisible,
+    hasNextPlot,
     closeNotesModal,
     onSaveRecord,
     onSaveNotes,
@@ -81,13 +81,19 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
             )}
           </View>
         </ScrollView>
-        {isSaveRecordBtnVisible && (
+        {isUnrecordedTraitsVisible && (
           <View style={styles.saveRecordBtnContainer}>
             <Button
-              title={buttonTitle}
-              onPress={onSaveRecord}
-              loading={isTraitsRecordLoading}
-              disabled={isTraitsRecordLoading}
+              title={t(LOCALES.EXPERIMENT.LBL_SAVE)}
+              onPress={() => onSaveRecord(false)}
+              loading={!hasNextPlot && isTraitsRecordLoading}
+              disabled={isTraitsRecordLoading || !isSaveRecordBtnVisible}
+            />
+            <Button
+              title={t(LOCALES.EXPERIMENT.LBL_SAVE_NEXT)}
+              onPress={() => onSaveRecord(true)}
+              loading={hasNextPlot && isTraitsRecordLoading}
+              disabled={isTraitsRecordLoading || !isSaveRecordBtnVisible}
             />
           </View>
         )}

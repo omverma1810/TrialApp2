@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
   },
   welcome: {
     color: '#00000061',
-    fontSize: 14,
+    fontSize: 18,
     fontFamily: FONTS.REGULAR,
     marginBottom: 6,
   },

@@ -61,6 +61,7 @@ interface RecordContextType {
   isSaveRecordBtnVisible: boolean;
   isNotesVisible: boolean;
   isTraitsImageVisible: boolean;
+  hasNextPlot: boolean;
   handleExperimentSelect: (item: any) => void;
   handleFieldSelect: (item: any) => void;
   handlePlotSelect: (item: any) => void;
@@ -69,7 +70,7 @@ interface RecordContextType {
   handleCropChange: (option: string) => void;
   handleProjectChange: (option: string) => void;
   updateRecordData: UpdateRecordDataFunction;
-  onSaveRecord: () => void;
+  onSaveRecord: (hasNextPlot: boolean) => void;
   onSaveNotes: (notes: string) => void;
 }
 
@@ -120,6 +121,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const [notes, setNotes] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [maxNoOfImages, setMaxNoOfImages] = useState(0);
+  const [hasNextPlot, setHasNextPlot] = useState(false);
   const isSelectExperimentVisible = true;
   const isSelectFieldVisible = !!selectedExperiment;
   const isSelectPlotVisible = !!selectedExperiment && !!selectedField;
@@ -262,13 +264,26 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     if (trraitsRecordData?.status_code !== 200) {
       return;
     }
-    const {message} = trraitsRecordData;
+    const {message, nextPlotObject} = trraitsRecordData;
     Toast.success({message: message});
     setRecordData({});
-    navigation.goBack();
-  }, [trraitsRecordData]);
+    if (hasNextPlot && nextPlotObject) {
+      const plot: any = plotList?.find(
+        (item: any) =>
+          item?.id == nextPlotObject?.plotId &&
+          item?.plotNumber == nextPlotObject?.plotNumber,
+      );
+      if (plot) {
+        setSelectedPlot(plot);
+        setUnRecordedTraitList(plot?.unrecordedTraitData);
+        setNotes('');
+        setImages([]);
+      }
+    }
+  }, [trraitsRecordData, hasNextPlot]);
 
-  const onSaveRecord = async () => {
+  const onSaveRecord = async (hasNextPlot: boolean) => {
+    setHasNextPlot(hasNextPlot);
     const headers = {'Content-Type': 'application/json'};
     const imagesNameArr = images.map(url => getNameFromUrl(url));
     const base64Promises = images.map(url => getBase64FromUrl(url));
@@ -318,6 +333,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     isSaveRecordBtnVisible,
     isNotesVisible,
     isTraitsImageVisible,
+    hasNextPlot,
     handleExperimentSelect,
     handleFieldSelect,
     handlePlotSelect,

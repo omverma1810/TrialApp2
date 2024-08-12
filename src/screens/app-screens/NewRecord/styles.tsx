@@ -27,6 +27,7 @@ export const styles = StyleSheet.create({
     left: 16,
     right: 16,
     bottom: 8,
+    gap: 10,
   },
   selectExperimentContainer: {
     flex: 1,

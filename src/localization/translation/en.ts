@@ -72,6 +72,7 @@ export default {
     LBL_RECORD: 'Record',
     LBL_DISCARD: 'Discard',
     LBL_SAVE: 'Save',
+    LBL_SAVE_NEXT: 'Save and Next',
     LBL_ASSOCIATE_TRAIT: 'List of Traits',
   },
 };

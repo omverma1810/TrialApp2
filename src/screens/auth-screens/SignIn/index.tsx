@@ -97,7 +97,7 @@ const SignIn = () => {
               <Image style={styles.logo} source={APP_LOGO} />
             </View>
             <View style={styles.loginLabelContainer}>
-              <Text style={styles.welcome}>Welcome to Trials App 2.0</Text>
+              <Text style={styles.welcome}>Trials App 2.0</Text>
               <Text style={styles.loginToContinue}>Login to continue!</Text>
             </View>
             <Input
