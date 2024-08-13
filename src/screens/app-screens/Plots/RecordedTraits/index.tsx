@@ -53,7 +53,7 @@ const RecordedTraits = ({
       [traitId]: {
         observationId,
         traitId,
-        observedValue: parseInt(observedValue),
+        observedValue: observedValue,
       },
     }));
   };
@@ -93,6 +93,8 @@ const RecordedTraits = ({
 
     updateTraitsRecord({payload, headers});
   };
+
+  if (data.length === 0) return null;
 
   return (
     <View style={styles.recordedTraitsContainer}>

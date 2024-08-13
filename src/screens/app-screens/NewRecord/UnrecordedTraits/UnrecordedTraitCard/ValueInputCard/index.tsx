@@ -1,5 +1,5 @@
-import {View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {KeyboardTypeOptions, View} from 'react-native';
+import React, {useEffect, useMemo, useState} from 'react';
 
 import {OutlinedInput, Text} from '../../../../../../components';
 import {styles} from '../../../styles';
@@ -13,6 +13,9 @@ const ValueInputCard = () => {
   );
 
   const handleSubmit = (text: string) => {
+    if (text.trim() === '') {
+      return;
+    }
     onSubmit(text);
     setValue('');
   };
@@ -23,14 +26,24 @@ const ValueInputCard = () => {
     }
   }, [recordedValue]);
 
+  const keyboardType: KeyboardTypeOptions = useMemo(() => {
+    if (item?.dataType === 'float' || item?.dataType === 'int') {
+      return 'number-pad';
+    } else {
+      return 'default';
+    }
+  }, [item?.dataType]);
+
   return (
     <View style={[styles.traitsInputContainer, styles.row]}>
       <OutlinedInput
         label={item.traitName}
         rightIcon={rightIcon}
+        onEndEditing={e => handleSubmit(e.nativeEvent.text)}
         onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
         value={value}
         onChangeText={setValue}
+        keyboardType={keyboardType}
       />
     </View>
   );

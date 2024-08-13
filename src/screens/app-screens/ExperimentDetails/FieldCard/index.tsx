@@ -36,6 +36,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: t(LOCALES.EXPERIMENT.LBL_ROWS),
       navigationAction: null,
       key: 'noOfRows',
+      uom: null,
     },
     {
       id: 1,
@@ -43,6 +44,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: t(LOCALES.EXPERIMENT.LBL_COLUMN),
       navigationAction: null,
       key: 'noOfColumn',
+      uom: null,
     },
     // {
     //   id: 2,
@@ -62,6 +64,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
         },
       },
       key: 'plots_count',
+      uom: null,
     },
     {
       id: 4,
@@ -72,6 +75,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
         onClick: handleTraitModalOpen,
       },
       key: 'traits',
+      uom: null,
     },
     // {
     //   id: 5,
@@ -90,6 +94,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: 'Block Width',
       navigationAction: null,
       key: 'blockWidth',
+      uom: 'm',
     },
     {
       id: 7,
@@ -97,6 +102,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: 'Block Gap',
       navigationAction: null,
       key: 'gapBlocks',
+      uom: 'cm',
     },
     {
       id: 8,
@@ -104,6 +110,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: 'Plot Size',
       navigationAction: null,
       key: 'plotSize',
+      uom: 'sq. m',
     },
     {
       id: 9,
@@ -111,6 +118,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: 'Plot Width',
       navigationAction: null,
       key: 'plotWidth',
+      uom: 'm',
     },
     {
       id: 10,
@@ -118,13 +126,21 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       title: 'Row Length',
       navigationAction: null,
       key: 'rowLength',
+      uom: 'm',
     },
   ];
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const onViewMoreDetailsClick = () => setIsViewMoreDetails(!isViewMoreDetails);
 
   const renderFieldDetail = useCallback(
-    ({id, key, title, icon: Icon, navigationAction}: (typeof fieldInfo)[0]) => {
+    ({
+      id,
+      key,
+      title,
+      icon: Icon,
+      navigationAction,
+      uom,
+    }: (typeof fieldInfo)[0]) => {
       const value =
         key === 'traits'
           ? `${fieldData[key].recorded} out of ${fieldData[key].total}`
@@ -141,7 +157,9 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
           {Icon && <Icon />}
           <View style={styles.fieldDetailsTextContainer}>
             <Text style={styles.fieldDetailsKeyText}>{title}</Text>
-            <Text style={styles.fieldDetailsValueText}>{value}</Text>
+            <Text style={styles.fieldDetailsValueText}>
+              {value} {uom}
+            </Text>
           </View>
           {navigationAction && (
             <Text

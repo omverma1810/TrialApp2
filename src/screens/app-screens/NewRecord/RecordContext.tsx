@@ -259,7 +259,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       [traitId]: {
         observationId,
         traitId,
-        observedValue: parseInt(observedValue),
+        observedValue: observedValue,
       },
     }));
   };

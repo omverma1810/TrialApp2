@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 10,
+    // marginTop: 10,
   },
   logo: {
     width: 105,
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
   loginSectionWithKeyboard: {
     borderTopLeftRadius: 48,
     borderTopRightRadius: 48,
-    marginTop: '-40%',
+    marginTop: '-50%',
     backgroundColor: '#FFF',
   },
   loginContainer: {
@@ -38,16 +38,16 @@ export const styles = StyleSheet.create({
     color: '#00000061',
     fontSize: 18,
     fontFamily: FONTS.REGULAR,
-    marginBottom: 6,
+    // marginBottom: 6,
   },
   loginToContinue: {
     color: '#000000',
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: FONTS.MEDIUM,
   },
   loginLabelContainer: {
     alignItems: 'center',
-    paddingVertical: 10,
+    // paddingVertical: 10,
   },
   farmBgContainer: {
     width: '100%',
@@ -60,7 +60,7 @@ export const styles = StyleSheet.create({
   },
   footerContainer: {
     gap: 10,
-    marginTop: 20,
+    // marginTop: 10,
   },
   footer: {
     color: '#949494',

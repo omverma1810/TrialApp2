@@ -56,7 +56,7 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
         </Pressable>
 
         <ScrollView
-          contentContainerStyle={{flexGrow: 1, paddingBottom: 100}}
+          contentContainerStyle={{flexGrow: 1, paddingBottom: 60}}
           showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
             <SelectExperiment />
@@ -94,12 +94,14 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
               onPress={() => onSaveRecord(false)}
               loading={!hasNextPlot && isTraitsRecordLoading}
               disabled={isTraitsRecordLoading || !isSaveRecordBtnVisible}
+              containerStyle={{width: '45%'}}
             />
             <Button
               title={t(LOCALES.EXPERIMENT.LBL_SAVE_NEXT)}
               onPress={() => onSaveRecord(true)}
               loading={hasNextPlot && isTraitsRecordLoading}
               disabled={isTraitsRecordLoading || !isSaveRecordBtnVisible}
+              containerStyle={{width: '45%'}}
             />
           </View>
         )}

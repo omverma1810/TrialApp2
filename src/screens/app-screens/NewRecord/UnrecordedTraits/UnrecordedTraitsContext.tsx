@@ -1,3 +1,4 @@
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import React, {
   createContext,
   useContext,
@@ -5,16 +6,19 @@ import React, {
   ReactNode,
   useEffect,
   useMemo,
+  useRef,
 } from 'react';
+import OptionsModal from './UnrecordedTraitCard/OptionsModal';
 
 export interface TraitItem {
   traitId: number;
   traitName: string;
   traitUom: string;
-  dataType: 'float';
+  dataType: 'float' | 'fixed' | 'str' | 'int';
   observationStatus: boolean;
   observationId: number | null;
   value: string;
+  preDefiendList: any;
 }
 
 interface UnrecordedTraitsContextType {
@@ -45,12 +49,17 @@ export const UnrecordedTraitsProvider = ({
   item: TraitItem;
   updateRecordData: UpdateRecordDataFunction;
 }) => {
+  const optionsModalRef = useRef<BottomSheetModal>(null);
   const [isInputActive, setIsInputActive] = useState(false);
   const [isRecorded, setIsRecorded] = useState(false);
   const [recordedValue, setRecordedValue] = useState('');
 
   const onRecord = () => {
-    setIsInputActive(true);
+    if (item.dataType === 'fixed') {
+      optionsModalRef?.current?.present();
+    } else {
+      setIsInputActive(true);
+    }
   };
 
   const onSubmit = (value: string) => {
@@ -60,8 +69,12 @@ export const UnrecordedTraitsProvider = ({
   };
 
   const onEdit = () => {
-    setIsRecorded(false);
-    setIsInputActive(true);
+    if (item.dataType === 'fixed') {
+      optionsModalRef?.current?.present();
+    } else {
+      setIsRecorded(false);
+      setIsInputActive(true);
+    }
   };
 
   useEffect(() => {
@@ -71,7 +84,7 @@ export const UnrecordedTraitsProvider = ({
   }, [item]);
 
   const getFormattedRecordValue = useMemo(() => {
-    if (item?.traitUom) {
+    if (item?.traitUom && item.dataType !== 'fixed') {
       return `${recordedValue} ${item?.traitUom}`;
     } else {
       return String(recordedValue);
@@ -91,6 +104,7 @@ export const UnrecordedTraitsProvider = ({
         onEdit,
       }}>
       {children}
+      <OptionsModal bottomSheetModalRef={optionsModalRef} />
     </UnrecordedTraitsContext.Provider>
   );
 };

@@ -38,7 +38,7 @@ const PlotCard = ({
 }: any) => {
   const {t} = useTranslation();
   const navigation = useNavigation<PlotsScreenProps['navigation']>();
-  const {id, type, imageUrl, plotId} =
+  const {id, type, imageUrl, plotId, data} =
     useRoute<PlotsScreenProps['route']>().params;
   const userInteractionOptions = [
     {
@@ -87,7 +87,7 @@ const PlotCard = ({
       navigation.navigate('AddImage', {
         imageUrl: image.path,
         screen: 'Plots',
-        data: {id, type, plotId: plotData?.id},
+        data: {id, type, plotId: plotData?.id, data: data},
       });
     });
   };
@@ -98,16 +98,16 @@ const PlotCard = ({
     }
   }, [imageUrl, plotId, plotData?.id]);
   const rowColInfo = [
-    {
-      id: 0,
-      name: t(LOCALES.EXPERIMENT.LBL_ROW),
-      key: 'row',
-    },
-    {
-      id: 1,
-      name: t(LOCALES.EXPERIMENT.LBL_COL),
-      key: 'column',
-    },
+    // {
+    //   id: 0,
+    //   name: t(LOCALES.EXPERIMENT.LBL_ROW),
+    //   key: 'row',
+    // },
+    // {
+    //   id: 1,
+    //   name: t(LOCALES.EXPERIMENT.LBL_COL),
+    //   key: 'column',
+    // },
     {
       id: 2,
       name: t(LOCALES.EXPERIMENT.LBL_ACC_ID),

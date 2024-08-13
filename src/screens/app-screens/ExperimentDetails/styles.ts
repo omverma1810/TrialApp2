@@ -84,7 +84,7 @@ export const styles = StyleSheet.create({
     marginTop: 16,
   },
   fieldDetailsCard: {
-    padding: 16,
+    padding: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E8F0FB',
@@ -114,7 +114,7 @@ export const styles = StyleSheet.create({
   },
   fieldDetailsTextContainer: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingLeft: 12,
   },
   loader: {
     flex: 1,

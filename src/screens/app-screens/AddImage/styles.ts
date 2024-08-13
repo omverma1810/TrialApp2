@@ -45,6 +45,7 @@ export const styles = StyleSheet.create({
   },
   buttonIcon: {},
   traitsModal: {
+    flex: 1,
     paddingHorizontal: 16,
   },
   traitsModalHeader: {
@@ -66,5 +67,30 @@ export const styles = StyleSheet.create({
     color: '#161616',
     fontFamily: FONTS.REGULAR,
     fontSize: 14,
+  },
+  optionsContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+  },
+  optionsTitle: {
+    color: '#161616',
+    fontFamily: FONTS.SEMI_BOLD,
+    fontSize: 14,
+  },
+  optionsLabel: {
+    color: '#161616',
+    fontFamily: FONTS.REGULAR,
+    fontSize: 12,
+  },
+  noDataView: {
+    flex: 0.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataText: {
+    color: '#161616',
+    fontFamily: FONTS.SEMI_BOLD,
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

@@ -17,7 +17,7 @@ const RecordedValueCard = () => {
         <Text style={styles.traitsLabelValue}>{getFormattedRecordValue}</Text>
       </View>
       <Pressable style={styles.editContainer} onPress={onEdit}>
-        <Text style={styles.edit}>{t(LOCALES.EXPERIMENT.LBL_EDIT)}</Text>
+        {/* <Text style={styles.edit}>{t(LOCALES.EXPERIMENT.LBL_EDIT)}</Text> */}
         <Edit />
       </Pressable>
     </View>

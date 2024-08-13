@@ -55,7 +55,7 @@ const UnrecordedTraits = ({
       [traitId]: {
         observationId,
         traitId,
-        observedValue: parseInt(observedValue),
+        observedValue: observedValue,
       },
     }));
   };
@@ -96,6 +96,8 @@ const UnrecordedTraits = ({
     };
     createTraitsRecord({payload, headers});
   };
+
+  if (data.length === 0) return null;
 
   return (
     <View
