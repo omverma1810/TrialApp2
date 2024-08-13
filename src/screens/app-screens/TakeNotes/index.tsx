@@ -79,6 +79,8 @@ const TakeNotes = ({navigation, route}: any) => {
     (option: string) => {
       setSelectedProject(option);
       setExperimentList(experimentData[selectedCrop][option] || []);
+      setSelectedExperiment(null);
+      setChipTitle('Select an Experiment');
     },
     [experimentData, selectedCrop],
   );

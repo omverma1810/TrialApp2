@@ -102,13 +102,15 @@ const Record = () => {
     (option: string) => {
       setSelectedProject(option);
       setExperimentList(experimentData?.[selectedCrop][option] || []);
+      setSelectedExperiment(null);
+      setChipTitle('Select an Experiment');    
     },
     [experimentData, selectedCrop],
   );
   useEffect(() => {
     if (experimentData && experimentData["Rice"]) {
       setSelectedCrop("Rice");
-  
+
       const newProjectList = Object.keys(experimentData["Rice"]);
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
@@ -165,7 +167,6 @@ const Record = () => {
   const handleRightIconClick = () => {
     bottomSheetModalRef.current?.present();
   };
-
   const handleExperimentSelect = (item: any) => {
     console.log('=============>', { item });
     setSelectedExperiment(item);
@@ -316,17 +317,16 @@ const Record = () => {
   return (
     <SafeAreaView>
       <StatusBar />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={RecordStyles.container}>
-          <View style={RecordStyles.searchContainer}>
-            <Search />
-            <TextInput
-              style={RecordStyles.searchInput}
-              placeholderTextColor="#949494"
-              placeholder="Search Experiments"
-            />
-          </View>
-
+      <View style={RecordStyles.container}>
+        <View style={RecordStyles.searchContainer}>
+          <Search />
+          <TextInput
+            style={RecordStyles.searchInput}
+            placeholderTextColor="#949494"
+            placeholder="Search Experiments"
+          />
+        </View>
+        <View>
           <FlatList
             data={experimentList}
             contentContainerStyle={
@@ -338,6 +338,11 @@ const Record = () => {
             keyExtractor={(_, index: any) => index.toString()}
             ListEmptyComponent={ListEmptyComponent}
           />
+        </View>
+      </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={RecordStyles.container}>
+
           {selectedCrop && selectedProject && !selectedExperiment && (
             <Chip
               onPress={handleRightIconClick}
@@ -473,7 +478,7 @@ const Record = () => {
               )}
             </View>
           )}
-          
+
           <BottomModal
             bottomSheetModalRef={bottomSheetModalRef}
             type="CONTENT_HEIGHT"

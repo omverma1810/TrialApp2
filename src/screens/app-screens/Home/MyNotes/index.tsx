@@ -1,9 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect,useCallback} from 'react';
 import {View, Text, Alert} from 'react-native';
 import {useApi} from '../../../../hooks/useApi';
 import {URL} from '../../../../constants/URLS';
 import MyNoteStyles from './MyNotesStyles';
 import Notes from '../../../../components/Notes';
+import { useFocusEffect } from '@react-navigation/native';
 
 import {NavigationProp} from '@react-navigation/native';
 
@@ -16,7 +17,17 @@ type NoteType = {
   experiment_id: number | null;
 };
 // {navigation: NavigationProp<any>}
-const MyNote = ({navigation}: any ) => {  
+const MyNote = ({navigation,refresh}: any ) => {  
+  useFocusEffect(
+    useCallback(() => {
+      if (refresh) {
+        fetchNotes();
+        console.log('Refreshing Home screen');
+        navigation.setParams({ refresh: false });
+      }
+    }, [refresh])
+  );
+
   const [notes, setNotes] = useState<{id: number}[]>([]);
   const [fetchNotes, fetchNotesResponse] = useApi({
     url: URL.NOTES,

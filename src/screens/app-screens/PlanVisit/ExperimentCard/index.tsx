@@ -25,6 +25,7 @@ const ExperimentCard = ({
   onExperimentSelect,
   name,
   onFieldSelect,
+  isProjectSelected
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();

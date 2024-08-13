@@ -23,7 +23,7 @@ type selectedFieldsType = {
 };
 
 
-const RecordDropDown = ({ selectedFields, projectData ,experimentType}: { selectedFields: selectedFieldsType, projectData: any,experimentType:string }) => {
+const RecordDropDown = ({ selectedFields, projectData ,experimentType}: { selectedFields: selectedFieldsType, projectData: any,experimentType:(string|null) }) => {
   console.log('plotDataaaaa', projectData)
   const [dropdownStates, setDropdownStates] = useState(
     Object.fromEntries(
@@ -63,7 +63,7 @@ const RecordDropDown = ({ selectedFields, projectData ,experimentType}: { select
   );
 };
 
-const ProjectContainer = ({ title, data, dropdownStates, toggleDropdown, projectData,experimentType }: { title: String, data: any, dropdownStates: any, toggleDropdown: any, projectData: any, experimentType:string }) => {
+const ProjectContainer = ({ title, data, dropdownStates, toggleDropdown, projectData,experimentType }: { title: String, data: any, dropdownStates: any, toggleDropdown: any, projectData: any, experimentType:(string | null) }) => {
 
   return (
     <View style={styles.paddingVertical}>
@@ -194,10 +194,6 @@ const ItemComponent = ({ title, entries, notes, dropdownState, toggleDropdown, p
                       <Text style={styles.entryLabel}>Trait Name</Text>
                       <Text style={styles.entryValue}>{entry.traitName}</Text>
                     </View>
-                    <TouchableOpacity
-                      style={styles.editButton}>
-                      <Text style={styles.editButtonText}>Edit</Text>
-                    </TouchableOpacity>
                   </View>
                   <View style={styles.entryRow}>
                     {
