@@ -46,6 +46,7 @@ import List from './List';
 import Clock from './Clock';
 import Alert from './Alert';
 import Leaf from './LeafIcon';
+import DbLeaf from './DbLeaf';
 
 export {
   Back,
@@ -72,6 +73,7 @@ export {
   Plots,
   Plus,
   EditBox,
+  DbLeaf,
   Scan,
   Close,
   Notes,
