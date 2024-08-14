@@ -15,6 +15,7 @@ const URL = {
   EXPERIMENT_DETAILS: 'app/experiment-details',
   PLOT_LIST: 'app/trial-location',
   RECORD_TRAITS: 'app/trait-data-record/',
+  MULTI_TRIAL_LOCATION : 'app/multi-trial-location/',
   VISITS: 'upcoming_visits/',
   NOTES: 'notes/',
   PROFILE: 'auth/me/',

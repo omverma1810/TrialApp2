@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-
+import { FONTS } from '../../../theme/fonts';
 const RecordStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
@@ -147,6 +147,62 @@ const RecordStyles = StyleSheet.create({
     fontSize: 16,
     color: '#454545',
     marginLeft: 10,
+  },
+  selectedFieldContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 5,
+    margin: 5,
+    backgroundColor: 'white',
+  },
+  fieldName: {
+    color: 'black',
+    marginRight: 10,
+  },
+  SelectedFields: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    gap: 10,
+  },
+  selectedFieldsWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    flex: 1, // Ensure it takes up remaining space
+    paddingLeft: 8,
+  },
+  traitsInputContainer: {
+    paddingHorizontal: 8,
+    paddingVertical: 16,
+  },
+  traitsInputIconText: {
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+    color: '#636363',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  editButton: {
+    flexDirection: 'row',
+  },
+  editButtonText: {
+    color: '#1A6DD2',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  entryRow: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  entryColumn: {
+    gap: 5,
   },
 });
 

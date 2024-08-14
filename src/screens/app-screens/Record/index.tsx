@@ -1,5 +1,4 @@
-/* eslint-disable react-native/no-inline-styles */
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -7,23 +6,28 @@ import {
   Text,
   TextInput,
   View,
+  FlatList,
+  TouchableOpacity,
 } from 'react-native';
-import {Loader, SafeAreaView, StatusBar} from '../../../components';
+import { Loader, SafeAreaView, StatusBar } from '../../../components';
 
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {DropdownArrow, Search} from '../../../assets/icons/svgs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DropdownArrow, Search, X } from '../../../assets/icons/svgs';
 import BottomModal from '../../../components/BottomSheetModal';
 
-import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
 import CheckBox from '../../../components/CheckBox';
 import Chip from '../../../components/Chip';
 import RecordDropDown from '../../../components/RecordDropdown';
-import ComingSoon from '../ComingSoon';
-import TraitComponent from '../../../components/TraitComponent';
-import {URL} from '../../../constants/URLS';
-import {useApi} from '../../../hooks/useApi';
-// import {projectData} from './Data';
+import { URL } from '../../../constants/URLS';
+import { useApi } from '../../../hooks/useApi';
 import RecordStyles from './RecordStyles';
+import TakeNotesStyles from '../TakeNotes/TakeNotesStyle';
+import Filter from './Filter';
+import { LOCALES } from '../../../localization/constants';
+import { useTranslation } from 'react-i18next';
+import TraitSection from '../../../components/TraitComponent';
+import Cancel from '../../../assets/icons/svgs/Cancel';
 
 interface SelectedFieldData {
   fieldName: string;
@@ -45,10 +49,12 @@ interface Chip {
 }
 
 const Record = () => {
+  const { t } = useTranslation();
+
   const [experiment, setExperiment] = useState();
   const [experimentData, setExperimentData] = useState(null);
   const [cropList, setCropList] = useState<string[]>([]);
-  const [projectData, setProjectData] = useState<string[]>([]);
+  const [projectData, setProjectData] = useState<any>([]);
   const [projectNames, setProjectNames] = useState<
     {
       experimentType: string;
@@ -59,30 +65,63 @@ const Record = () => {
   const [experimentList, setExperimentList] = useState<any[]>([]);
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
-  const [selectedExperiment, setSelectedExperiment] = useState<Chip | null>(
+  const [selectedExperiment, setSelectedExperiment] = useState<any | null>(
     null,
   );
+  const [chipTitle, setChipTitle] = useState(`Select an Experiment`);
   const [inputVisible, setInputVisible] = useState(false);
   const bottomSheetModalRef = useRef<BottomSheetModalMethods>(null);
   const secondBottomModalRef = useRef<BottomSheetModalMethods>(null);
-  const {bottom} = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
   const [activeListButton, setActiveListButton] = useState('Plot');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFields, setSelectedFields] = useState<{
     [key: string]: boolean;
   }>({});
+  const [projectList, setProjectList] = useState<string[]>([]);
   const [selectedFieldData, setSelectedFieldData] =
     useState<SelectedFieldData | null>(null);
+  const [fields, setFields] = useState([]);
+  const [experimentType, setExperimentType] = useState<string | null>(null);
+  const [locationIds, setLocationIds] = useState<number[]>([]);
+  const [traitData, setTraitData] = useState<any>(null);
+  const [plotData, setPlotData] = useState<any>(null);
+  const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
 
-  const [
-    getExperimentDetails,
-    experimentDetailsResponse,
-    isExperimentDetailsLoading,
-    experimentDetailsError,
-  ] = useApi({
-    url: URL.EXPERIMENT_DETAILS,
-    method: 'GET',
-  });
+  const handleCropChange = useCallback(
+    (option: string) => {
+      setSelectedCrop(option);
+      const newProjectList = Object.keys(experimentData?.[option] || {});
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentData?.[option][newProjectList[0]] || []);
+    },
+    [experimentData],
+  );
+  const handleProjectChange = useCallback(
+    (option: string) => {
+      setSelectedProject(option);
+      setExperimentList(experimentData?.[selectedCrop][option] || []);
+      setSelectedExperiment(null);
+      setChipTitle('Select an Experiment');    
+    },
+    [experimentData, selectedCrop],
+  );
+  useEffect(() => {
+    if (experimentData && experimentData["Rice"]) {
+      setSelectedCrop("Rice");
+
+      const newProjectList = Object.keys(experimentData["Rice"]);
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+    } else {
+      setProjectList([]);
+      setSelectedProject('');
+      setExperimentList([]);
+    }
+  }, [experimentData]);
+
   const [
     getExperimentList,
     experimentListData,
@@ -102,34 +141,19 @@ const Record = () => {
       return;
     }
 
-    const {data} = experimentListData;
+    const { data } = experimentListData;
     const cropList = Object.keys(data);
     const selectedCrop = cropList[0];
     const projectList = Object.keys(data[selectedCrop] || {});
     const selectedProject = projectList[0];
     const experimentList = data[selectedCrop][selectedProject] || [];
 
-    const experimentSheet:
-      | React.SetStateAction<null>
-      | {CropName: string; ExperientName: string}[] = [];
-    cropList.map(rows => {
-      Object.keys(data[rows])
-        .filter(row => data[rows][row].length)
-        .map(experiments =>
-          experimentSheet.push({
-            CropName: rows,
-            ExperientName: experiments,
-          }),
-        );
-    });
-
     setExperimentData(data);
     setCropList(cropList);
-    setProjectData(projectList);
+    setProjectList(projectList);
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
-    setExperiment(experimentSheet);
   }, [experimentListData]);
 
   const handleEdit = () => {
@@ -143,75 +167,183 @@ const Record = () => {
   const handleRightIconClick = () => {
     bottomSheetModalRef.current?.present();
   };
-
-  const handleExperimentSelect = (item: Chip) => {
+  const handleExperimentSelect = (item: any) => {
+    console.log('=============>', { item });
     setSelectedExperiment(item);
-    setInputVisible(true);
-    const project_names = experimentData[item.CropName][item.ExperientName].map(
-      i => {
-        let {fieldExperimentName, id, experimentType} = i;
-        return {fieldExperimentName, id, experimentType};
-      },
-    );
-    console.log({project_names});
-    setProjectNames(project_names);
-    bottomSheetModalRef.current?.dismiss();
+    setChipTitle(item.fieldExperimentName);
+    console.log('selectedExperiment', selectedExperiment);
+    setExperimentType(item.experimentType);
+    (bottomSheetModalRef.current as any).dismiss();
   };
+
+  const [getFields, getFieldsResponse] = useApi({
+    url: `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
+    method: 'GET',
+  });
+  useEffect(() => {
+    getFields();
+  }, [selectedExperiment]);
+
+  useEffect(() => {
+    if (getFieldsResponse && getFieldsResponse.status_code == 200) {
+      setFields(getFieldsResponse.data.locationList);
+    }
+  }, [getFieldsResponse]);
 
   const handleSecondBottomModalOpen = () => {
     secondBottomModalRef.current?.present();
   };
 
-  const handleFieldSelect = (id: number, type: string) => {
-    getExperimentDetails({
-      pathParams: `${id}`,
-      queryParams: `experimentType=${type || 'line'}`,
-    });
+  useEffect(() => console.log(selectedFields), [selectedFields]);
+  const ListEmptyComponent = useMemo(
+    () => (
+      <View style={TakeNotesStyles.emptyContainer}>
+        {isExperimentListLoading ? (
+          <Loader />
+        ) : (
+          <Text style={TakeNotesStyles.emptyText}>
+            {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
+          </Text>
+        )}
+      </View>
+    ),
+    [isExperimentListLoading],
+  );
+  const ListHeaderComponent = useMemo(
+    () => (
+      <View style={TakeNotesStyles.filter}>
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_CROP)}
+          options={cropList}
+          selectedOption={selectedCrop}
+          onPress={handleCropChange}
+        />
+        <Filter
+          title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
+          options={projectList}
+          selectedOption={selectedProject}
+          onPress={handleProjectChange}
+        />
+      </View>
+    ),
+    [cropList, projectList, selectedCrop, selectedProject],
+  );
+  useEffect(() => {
+    setSelectedFields({});
+  }, [selectedExperiment]);
+
+  const handleFieldSelect = async (id: any) => {
+    const isSelected = !selectedFields[id];
+    setSelectedFields(prevState => ({
+      ...prevState,
+      [id]: isSelected,
+    }));
+    const updatedLocationIds = isSelected
+      ? [...locationIds, id]
+      : locationIds.filter(locationId => locationId !== id);
+    setLocationIds(updatedLocationIds);
+
+
+    try {
+      await fetchTraitData(updatedLocationIds);
+    } catch (error) {
+      console.error('Error fetching trait data:', error);
+    }
+
+    try {
+      await fetchPlotData(updatedLocationIds);
+    } catch (error) {
+      console.error('Error fetching plot data:', error);
+    }
+  };
+  const [getLocationTraitData, locationTraitDataResponse] = useApi({
+    url: URL.MULTI_TRIAL_LOCATION,
+    method: 'POST',
+  });
+  useEffect(() => {
+    if (locationTraitDataResponse?.status_code === 200) {
+      const data = locationTraitDataResponse.data;
+      setTraitData(data);
+    }
+    console.log('traitData', traitData);
+    secondBottomModalRef.current?.close();
+  }, [locationTraitDataResponse]);
+
+  const fetchTraitData = (updatedLocationIds: number[]) => {
+    const payloadForTrait = {
+      experimentId: selectedExperiment?.id,
+      experimentType: experimentType ? experimentType : 'line',
+      locationIds: updatedLocationIds,
+      apiCallType: 'trait',
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    getLocationTraitData({ payload: payloadForTrait, headers });
   };
 
+  const [locationPlotData, locationPlotDataResponse] = useApi({
+    url: URL.MULTI_TRIAL_LOCATION,
+    method: 'POST',
+  });
+
   useEffect(() => {
-    if (experimentDetailsResponse?.status_code === 200) {
-      let {data} = experimentDetailsResponse;
-      let field = data?.name;
-      if (field) {
-        const isSelected = !selectedFields[field];
-        setSelectedFields(prevState => ({
-          ...prevState,
-          [field]: isSelected,
-        }));
-        console.log({fieldData: data});
-        if (isSelected) {
-          setSelectedFieldData({
-            fieldName: field,
-            plots: data.locationList,
-          });
-          setProjectData(data);
-        } else {
-          setSelectedFieldData(null);
-        }
-      }
+    if (locationPlotDataResponse?.status_code === 200) {
+      let data = locationPlotDataResponse.data;
+      setPlotData(data);
     }
+    console.log('pd', plotData);
     secondBottomModalRef.current?.close();
-  }, [experimentDetailsResponse]);
-  useEffect(() => console.log(selectedFields), [selectedFields]);
+  }, [locationPlotDataResponse]);
+
+  const fetchPlotData = (updatedLocationIds: number[]) => {
+    const payloadForPlot = {
+      experimentId: selectedExperiment?.id,
+      experimentType: experimentType ? experimentType : 'line',
+      locationIds: updatedLocationIds,
+      apiCallType: 'plot',
+    };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    locationPlotData({ payload: payloadForPlot, headers });
+  };
+
+  useEffect(
+    () => console.log('selectedFields', selectedFields, plotData),
+    [plotData],
+  );
+
   return (
     <SafeAreaView>
-       <StatusBar />
-      {/*
+      <StatusBar />
+      <View style={RecordStyles.container}>
+        <View style={RecordStyles.searchContainer}>
+          <Search />
+          <TextInput
+            style={RecordStyles.searchInput}
+            placeholderTextColor="#949494"
+            placeholder="Search Experiments"
+          />
+        </View>
+        <View>
+          <FlatList
+            data={experimentList}
+            contentContainerStyle={
+              experimentList?.length === 0 ? { flexGrow: 1 } : { paddingBottom: 10 }
+            }
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={ListHeaderComponent}
+            renderItem={({ item, index }) => null}
+            keyExtractor={(_, index: any) => index.toString()}
+            ListEmptyComponent={ListEmptyComponent}
+          />
+        </View>
+      </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={RecordStyles.container}>
-          <View style={RecordStyles.searchContainer}>
-            <Search />
-            <TextInput
-              style={RecordStyles.searchInput}
-              placeholderTextColor="#949494"
-              placeholder="Search Experiments"
-            />
-          </View>
 
-          {!experimentData ? (
-            <Loader />
-          ) : (
+          {selectedCrop && selectedProject && !selectedExperiment && (
             <Chip
               onPress={handleRightIconClick}
               rightIcon={<DropdownArrow />}
@@ -225,37 +357,63 @@ const Record = () => {
 
           <View style={RecordStyles.experimentContainer}>
             {selectedExperiment && (
-              <View style={RecordStyles.experimentItem}>
-                <Text style={RecordStyles.experimentTitle}>Experiment</Text>
-                <View style={RecordStyles.experimentRow}>
-                  <Text style={RecordStyles.experimentText}>
-                    {selectedExperiment.ExperientName ||
-                      'Experiment Name Not Available'}
+              <View style={TakeNotesStyles.chipItem}>
+                <Text style={TakeNotesStyles.chipTitle}>Experiment</Text>
+                <View style={TakeNotesStyles.chipTextRow}>
+                  <Text style={TakeNotesStyles.chipText}>
+                    {selectedExperiment.fieldExperimentName}
                   </Text>
-                  <DropdownArrow />
+                  <TouchableOpacity onPress={handleRightIconClick}>
+                    <DropdownArrow />
+                  </TouchableOpacity>
                 </View>
-                <View style={RecordStyles.experimentCrop}>
-                  <Text style={RecordStyles.experimentCropText}>
-                    {selectedExperiment.CropName}
+                <View style={TakeNotesStyles.chipCropText}>
+                  <Text style={TakeNotesStyles.chipCropText1}>
+                    {selectedExperiment.cropName}
                   </Text>
                 </View>
               </View>
             )}
           </View>
 
-          {inputVisible && (
+          {selectedExperiment && (
             <View style={RecordStyles.inputContainer}>
               <Pressable onPress={handleSecondBottomModalOpen}>
                 <View style={RecordStyles.fieldContainer}>
                   <View style={RecordStyles.fieldRow}>
-                    <Text style={RecordStyles.fieldTitle}>All Fields</Text>
+                    {Object.values(selectedFields).some(isSelected => isSelected) ? (
+                      <View style={RecordStyles.selectedFieldsWrapper}>
+                        {Object.keys(selectedFields).map((fieldId, index) => {
+                          if (selectedFields[fieldId]) {
+                            return (
+                              <View
+                                key={index}
+                                style={RecordStyles.selectedFieldContainer}>
+                                <Text style={RecordStyles.fieldName}>
+                                  Field {fieldId}
+                                </Text>
+                                <TouchableOpacity
+                                  onPress={() =>
+                                    handleFieldSelect(fieldId)
+                                  }>
+                                  <Cancel />
+                                </TouchableOpacity>
+                              </View>
+                            );
+                          }
+                          return null;
+                        })}
+                      </View>
+                    ) : (
+                      <Text style={RecordStyles.fieldTitle}>All Fields</Text>
+                    )}
                     <Pressable onPress={handleSecondBottomModalOpen}>
                       <DropdownArrow />
                     </Pressable>
                   </View>
                 </View>
               </Pressable>
-              {selectedFieldData && (
+              {selectedFields && plotData && traitData && (
                 <View style={RecordStyles.inputContainer}>
                   <View style={RecordStyles.listByContainer}>
                     <Text style={RecordStyles.listByText}>List By</Text>
@@ -306,26 +464,14 @@ const Record = () => {
                   {activeListButton === 'Plot' && (
                     <RecordDropDown
                       selectedFields={selectedFields}
-                      projectData={projectData}
+                      projectData={plotData}
+                      experimentType={experimentType}
                     />
                   )}
                   {activeListButton === 'Traits' && (
-                    <TraitComponent
-                      titles={[
-                        'Plant height after 20 days',
-                        'Tiller',
-                        'Flowering Date',
-                        'Days to first Flower',
-                        'Title 5',
-                        'Title 6',
-                        'Title 7',
-                      ]}
-                      selectedFieldsData={Object.keys(selectedFields).map(
-                        field => ({
-                          fieldName: field,
-                          plots: projectData || [],
-                        }),
-                      )}
+                    <TraitSection
+                      selectedFields={selectedFields}
+                      projectData={traitData}
                     />
                   )}
                 </View>
@@ -336,19 +482,19 @@ const Record = () => {
           <BottomModal
             bottomSheetModalRef={bottomSheetModalRef}
             type="CONTENT_HEIGHT"
-            containerStyle={{paddingBottom: bottom}}>
+            containerStyle={{ paddingBottom: bottom }}>
             <View style={RecordStyles.modalContainer}>
               <Text style={RecordStyles.modalTitle}>Select an Experiment</Text>
               <ScrollView>
-                <View style={{gap: 30}}>
-                  {experiment &&
-                    experiment.map((item, index) => (
+                <View style={{ gap: 30 }}>
+                  {experimentList &&
+                    experimentList.map((item, index) => (
                       <Pressable
                         key={`${item?.id}-${index}`}
                         onPress={() => handleExperimentSelect(item)}
                         style={RecordStyles.modalItem}>
                         <Text style={RecordStyles.modalItemText}>
-                          {item.ExperientName}
+                          {item.fieldExperimentName}
                         </Text>
                         <Text
                           style={[
@@ -360,7 +506,7 @@ const Record = () => {
                                   : '#E8F0FB',
                             },
                           ]}>
-                          {item.CropName}
+                          {item.cropName}
                         </Text>
                       </Pressable>
                     ))}
@@ -372,23 +518,21 @@ const Record = () => {
           <BottomModal
             bottomSheetModalRef={secondBottomModalRef}
             type="CONTENT_HEIGHT"
-            containerStyle={{paddingBottom: bottom}}>
+            containerStyle={{ paddingBottom: bottom }}>
             <View style={RecordStyles.modalContainer}>
               <Text style={RecordStyles.modalTitle}>Select a Field</Text>
               <ScrollView>
-                <View style={{gap: 30}}>
-                  {projectNames.map((field, index) => (
+                <View style={{ gap: 30 }}>
+                  {fields.map((field: any) => (
                     <View
-                      key={index}
+                      key={field.id}
                       style={RecordStyles.fieldCheckboxContainer}>
                       <CheckBox
-                        value={!!selectedFields[field.fieldExperimentName]}
-                        onChange={() =>
-                          handleFieldSelect(field.id, field.experimentType)
-                        }
+                        value={!!selectedFields[field.id]}
+                        onChange={() => handleFieldSelect(field.id)}
                       />
                       <Text style={RecordStyles.fieldCheckboxText}>
-                        {field.fieldExperimentName}
+                        {field.location.villageName}
                       </Text>
                     </View>
                   ))}
@@ -397,8 +541,7 @@ const Record = () => {
             </View>
           </BottomModal>
         </View>
-      </ScrollView> */}
-      <ComingSoon/>
+      </ScrollView>
     </SafeAreaView>
   );
 };

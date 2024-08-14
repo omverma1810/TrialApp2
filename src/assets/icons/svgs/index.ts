@@ -49,6 +49,7 @@ import Leaf from './LeafIcon';
 import Eye from './Eye';
 import EyeSlash from './EyeSlash';
 import SelectIcon from './SelectIcon';
+import DbLeaf from './DbLeaf';
 
 export {
   Back,
@@ -75,6 +76,7 @@ export {
   Plots,
   Plus,
   EditBox,
+  DbLeaf,
   Scan,
   Close,
   Notes,

@@ -11,7 +11,9 @@ import MyVisits from './MyVists';
 import Header from './Header';
 import styles from './HomeStyles';
 
-const Home: React.FC<HomeScreenProps> = ({navigation}) => {
+const Home: React.FC<HomeScreenProps> = ({navigation,route} : any) => {
+  const { refresh } = route.params || {};  
+  console.log("Refresh",refresh)
   const goToTakeNotes = () => {
     navigation.navigate('TakeNotes');
   };
@@ -37,8 +39,8 @@ const Home: React.FC<HomeScreenProps> = ({navigation}) => {
             </Pressable>
           </View>
           <View style={styles.container}>
-            <MyVisits />
-            <MyNote />
+            <MyVisits navigation={navigation} refresh={refresh}/>
+            <MyNote navigation={navigation} refresh={refresh}/>
           </View>
         </ScrollView>
       </View>

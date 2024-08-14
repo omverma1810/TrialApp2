@@ -6,9 +6,9 @@ import { Dots, Trash, Edit } from '../../assets/icons/svgs';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useApi } from '../../hooks/useApi';
 import { URL } from '../../constants/URLS';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { FONTS } from '../../theme/fonts';
 
-const Notes = ({ note, onDelete ,navigation,refreshNotes}:any) => {
+const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const { bottom } = useSafeAreaInsets();
 
@@ -32,18 +32,6 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes}:any) => {
     }
   }, [deleteNoteResponse]);
 
-    // const handleEdit = () => {
-    //   bottomSheetModalRef.current?.close()
-    //   navigation.navigate('EditNotes',{
-    //     title: 'Edit Visit',
-    //     id: note.id,
-    //     content:note.content,
-    //     location : note.location,
-    //     experimentId: note.experiment_id, 
-    //     trail_type : note.trail_type
-    //   });
-    //   refreshNotes()
-    // };
   return (
     <View style={styles.container}>
       <View style={styles.noteContainer}>
@@ -66,9 +54,14 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes}:any) => {
             <Trash />
             <Text style={styles.modalButtonText}>Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.modalButton}>
+          <TouchableOpacity style={styles.modalButton}
+                      onPress={() => {
+                        onEdit(note);
+                        bottomSheetModalRef.current?.close();
+                      }}
+          >
             <Edit />
-            <Text style={styles.modalButtonText}>Edit</Text>
+            <Text style={styles.editOptionText}>Edit</Text>
           </TouchableOpacity>
         </View>
       </BottomModal>
@@ -80,7 +73,8 @@ const styles = StyleSheet.create({
   container: {},
   noteContainer: {
     backgroundColor: 'white',
-    padding: 15,
+    paddingVertical: 15,
+    paddingHorizontal:5,
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderRadius: 8,
@@ -95,6 +89,7 @@ const styles = StyleSheet.create({
   noteText: {
     fontSize: 15,
     fontWeight: '500',
+    fontFamily : FONTS.MEDIUM,
     color: '#161616',
   },
   noteInfo: {
@@ -116,6 +111,13 @@ const styles = StyleSheet.create({
     color: '#161616',
     fontSize: 15,
     fontWeight: '400',
+  },
+  editOptionText: {
+    marginLeft: 10,
+    fontSize: 15,
+    color:'#161616',
+    fontWeight:'400',
+    marginHorizontal:20
   },
   bottomModalContainer: {},
 });

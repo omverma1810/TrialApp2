@@ -67,11 +67,27 @@ const PlanVisit = ({navigation}: any) => {
     },
     [experimentData],
   );
-
+  useEffect(() => {
+    if (experimentData && experimentData["Rice"]) {
+      setSelectedCrop("Rice");
+  
+      const newProjectList = Object.keys(experimentData["Rice"]);
+      setProjectList(newProjectList);
+      setSelectedProject(newProjectList[0] || '');
+      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+    } else {
+      setProjectList([]);
+      setSelectedProject('');
+      setExperimentList([]);
+    }
+  }, [experimentData]);
+    
   const handleProjectChange = useCallback(
     (option: string) => {
       setSelectedProject(option);
       setExperimentList(experimentData[selectedCrop][option] || []);
+      setSelectedExperiment(null);
+      setChipTitle('Select an Experiment');
     },
     [experimentData, selectedCrop],
   );
@@ -219,7 +235,7 @@ const PlanVisit = ({navigation}: any) => {
     console.log({planVisitResponse});
     if (planVisitResponse && planVisitResponse.status_code == 201) {
       Alert.alert('Success', 'Visit planned successfully');
-      navigation.navigate('Home');
+      navigation.navigate('Home',{ refresh: true });
     }
   }, [planVisitResponse]);
 
@@ -267,6 +283,7 @@ const PlanVisit = ({navigation}: any) => {
             onExperimentSelect={handleSelectedExperiment}
             name={'experiment'}
             onFieldSelect={handleSelectedField}
+            isProjectSelected={!!selectedExperiment}
           />
         )}
         {selectedCrop && selectedProject && selectedExperiment && (
