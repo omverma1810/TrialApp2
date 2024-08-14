@@ -8,12 +8,13 @@ import {ImagePlus, SelectIcon} from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
 import {Button} from '../../../../components';
 import PreviewImageModal from './PreviewImageModal';
+import {TraitsImageTypes} from '../RecordContext';
 
 const TraitsImage = ({
   images,
   onDeleteImages = () => {},
 }: {
-  images: string[];
+  images: TraitsImageTypes[];
   onDeleteImages: (arr: number[]) => void;
 }) => {
   const {t} = useTranslation();
@@ -71,9 +72,9 @@ const TraitsImage = ({
             {images.map((image, index) => (
               <Pressable
                 key={index}
-                onPress={() => handleImagePress(index, image)}
+                onPress={() => handleImagePress(index, image.url)}
                 onLongPress={() => handleLongPressImage(index)}>
-                <Image source={{uri: image}} style={styles.image} />
+                <Image source={{uri: image.url}} style={styles.image} />
                 {selectedImageList?.find(i => i?.id === index) && (
                   <View style={styles.selectedImage}>
                     <SelectIcon />

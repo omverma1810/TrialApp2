@@ -1,4 +1,4 @@
-const DEFAULT_ENV: string = 'DEVELOPMENT'; // DEVELOPMENT | STAGING
+const DEFAULT_ENV: string = 'STAGING'; // DEVELOPMENT | STAGING
 
 const DEVELOPMENT_BASE_URL = 'https://dev.piatrika.com/';
 const STAGING_BASE_URL = 'https://stage.piatrika.com/';

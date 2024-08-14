@@ -28,6 +28,7 @@ import {
   getCoordinates,
   getNameFromUrl,
 } from '../../../../utilities/function';
+import {TraitsImageTypes} from '../../NewRecord/RecordContext';
 
 const PlotCard = ({
   isFirstIndex,
@@ -55,7 +56,9 @@ const PlotCard = ({
     },
   ];
   const [notes, setNotes] = useState(plotData?.notes || '');
-  const [images, setImages] = useState<string[]>(plotData?.imageUrls || []);
+  const [images, setImages] = useState<TraitsImageTypes[]>(
+    plotData?.imageUrls || [],
+  );
   const [isNotesModalVisible, setIsNotesModalVisible] = useState(false);
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const [isMediaSaveVisible, setIsMediaSaveVisible] = useState(false);
@@ -93,7 +96,10 @@ const PlotCard = ({
   };
   useEffect(() => {
     if (imageUrl && plotData?.id === plotId) {
-      setImages([imageUrl, ...images]);
+      setImages([
+        {url: imageUrl, imagePath: null, base64Data: null, imageName: null},
+        ...images,
+      ]);
       setIsMediaSaveVisible(true);
     }
   }, [imageUrl, plotId, plotData?.id]);
@@ -136,8 +142,8 @@ const PlotCard = ({
 
   const onSave = async () => {
     const headers = {'Content-Type': 'application/json'};
-    const imagesNameArr = images.map(url => getNameFromUrl(url));
-    const base64Promises = images.map(url => getBase64FromUrl(url));
+    const imagesNameArr = images.map(item => getNameFromUrl(item.url));
+    const base64Promises = images.map(item => getBase64FromUrl(item.url));
     const imagesBase64Arr = await Promise.all(base64Promises);
     const {latitude, longitude} = await getCoordinates();
     const imageData = images.map((image, index) => {

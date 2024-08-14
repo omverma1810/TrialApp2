@@ -78,9 +78,14 @@ export const UnrecordedTraitsProvider = ({
   };
 
   useEffect(() => {
-    if (!item || !item?.value) return;
-    setIsRecorded(true);
-    setRecordedValue(item.value);
+    if (item?.value) {
+      setIsRecorded(true);
+      setRecordedValue(item.value);
+    } else {
+      setIsInputActive(false);
+      setIsRecorded(false);
+      setRecordedValue('');
+    }
   }, [item]);
 
   const getFormattedRecordValue = useMemo(() => {

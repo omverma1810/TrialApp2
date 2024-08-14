@@ -38,6 +38,13 @@ interface userInteractionOptionsType {
   onPress: () => void;
 }
 
+export interface TraitsImageTypes {
+  url: string;
+  imagePath: string | null;
+  imageName: string | null;
+  base64Data: string | null;
+}
+
 interface RecordContextType {
   userInteractionOptions: userInteractionOptionsType[];
   cropList: string[];
@@ -51,7 +58,7 @@ interface RecordContextType {
   selectedExperiment: any;
   selectedField: any;
   selectedPlot: any;
-  images: string[];
+  images: TraitsImageTypes[];
   notes: string;
   isNotesModalVisible: boolean;
   isSelectExperimentVisible: boolean;
@@ -121,7 +128,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const [isNotesModalVisible, setIsNotesModalVisible] = useState(false);
   const [recordData, setRecordData] = useState<RecordData>({});
   const [notes, setNotes] = useState('');
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<TraitsImageTypes[]>([]);
   const [maxNoOfImages, setMaxNoOfImages] = useState(0);
   const [hasNextPlot, setHasNextPlot] = useState(false);
   const isSelectExperimentVisible = true;
@@ -169,7 +176,15 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
 
   useEffect(() => {
     if (params?.imageUrl) {
-      setImages([params?.imageUrl, ...images]);
+      setImages([
+        {
+          url: params?.imageUrl,
+          imagePath: null,
+          base64Data: null,
+          imageName: null,
+        },
+        ...images,
+      ]);
     }
   }, [params]);
 
@@ -289,8 +304,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const onSaveRecord = async (hasNextPlot: boolean) => {
     setHasNextPlot(hasNextPlot);
     const headers = {'Content-Type': 'application/json'};
-    const imagesNameArr = images.map(url => getNameFromUrl(url));
-    const base64Promises = images.map(url => getBase64FromUrl(url));
+    const imagesNameArr = images.map(item => getNameFromUrl(item.url));
+    const base64Promises = images.map(item => getBase64FromUrl(item.url));
     const imagesBase64Arr = await Promise.all(base64Promises);
     const {latitude, longitude} = await getCoordinates();
     const imageData = images.map((image, index) => {
