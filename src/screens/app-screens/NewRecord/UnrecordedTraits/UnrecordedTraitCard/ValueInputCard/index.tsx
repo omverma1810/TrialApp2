@@ -7,6 +7,10 @@ import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
 
 const ValueInputCard = () => {
   const {onSubmit, recordedValue, item} = useUnrecordedTraits();
+  const notes =
+    item.dataType === 'int' || item.dataType === 'float'
+      ? 'Use values separated by * to get the average.'
+      : '';
   const [value, setValue] = useState('');
   const rightIcon = (
     <Text style={styles.traitsInputIconText}>{item?.traitUom || ''}</Text>
@@ -26,13 +30,24 @@ const ValueInputCard = () => {
     }
   }, [recordedValue]);
 
-  const keyboardType: KeyboardTypeOptions = useMemo(() => {
-    if (item?.dataType === 'float' || item?.dataType === 'int') {
-      return 'number-pad';
+  const handleInputChange = (text: string) => {
+    if (item.dataType === 'int' || item.dataType === 'float') {
+      const cleanedText = text.replace(/[^\d.*]/g, '');
+      const segments = cleanedText.split('*');
+      const validSegments = segments
+        .filter(segment => segment !== '')
+        .slice(0, 5);
+      const formattedValue = validSegments.join('*');
+      const finalValue =
+        text.endsWith('*') && validSegments.length < 5
+          ? formattedValue + '*'
+          : formattedValue;
+
+      setValue(finalValue);
     } else {
-      return 'default';
+      setValue(text);
     }
-  }, [item?.dataType]);
+  };
 
   return (
     <View style={[styles.traitsInputContainer, styles.row]}>
@@ -42,8 +57,8 @@ const ValueInputCard = () => {
         onEndEditing={e => handleSubmit(e.nativeEvent.text)}
         onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
         value={value}
-        onChangeText={setValue}
-        keyboardType={keyboardType}
+        onChangeText={handleInputChange}
+        note={notes}
       />
     </View>
   );

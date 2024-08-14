@@ -63,9 +63,15 @@ export const UnrecordedTraitsProvider = ({
   };
 
   const onSubmit = (value: string) => {
+    let finalValue: any = value;
+    if (item?.dataType === 'int' || item?.dataType === 'float') {
+      let numbers: string[] = value.replace(/\*$/, '').split('*');
+      let sum: number = numbers.reduce((acc, curr) => acc + Number(curr), 0);
+      finalValue = (sum / numbers.length).toFixed(2).toString();
+    }
     setIsRecorded(true);
-    setRecordedValue(value);
-    updateRecordData(item?.observationId, item?.traitId, value);
+    setRecordedValue(finalValue);
+    updateRecordData(item?.observationId, item?.traitId, finalValue);
   };
 
   const onEdit = () => {
