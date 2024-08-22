@@ -62,6 +62,7 @@ const PlotCard = ({
   const [isNotesModalVisible, setIsNotesModalVisible] = useState(false);
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const [isMediaSaveVisible, setIsMediaSaveVisible] = useState(false);
+  const [shouldCallOnSave, setShouldCallOnSave] = useState(false);
   const [recordedTrait, setRecordedTrait] = useState(
     plotData?.recordedTraitData || [],
   );
@@ -148,8 +149,8 @@ const PlotCard = ({
     const {latitude, longitude} = await getCoordinates();
     const imageData = images.map((image, index) => {
       return {
-        url: null,
-        imagePath: null,
+        url: image.imagePath ? image.url : null,
+        imagePath: image.imagePath,
         imageName: imagesNameArr[index],
         base64Data: imagesBase64Arr[index],
       };
@@ -173,7 +174,16 @@ const PlotCard = ({
   const onDeleteImages = (arr: number[]) => {
     const newImages = images.filter((_, index) => !arr.includes(index));
     setImages(newImages);
+    setIsMediaSaveVisible(false);
+    setShouldCallOnSave(true);
   };
+
+  useEffect(() => {
+    if (shouldCallOnSave) {
+      onSave();
+      setShouldCallOnSave(false);
+    }
+  }, [shouldCallOnSave, images]);
 
   return (
     <View
@@ -224,18 +234,19 @@ const PlotCard = ({
           )}
           <RecordedTraits
             data={recordedTrait}
-            plotId={plotData?.id}
+            plotData={plotData}
             details={details}
           />
           <UnrecordedTraits
             data={unrecordedTrait}
-            plotId={plotData?.id}
+            plotData={plotData}
             details={details}
             handleRecordedTraits={handleRecordedTraits}
           />
         </View>
       )}
       <NotesModal
+        preNotes={notes}
         isModalVisible={isNotesModalVisible}
         closeModal={closeNotesModal}
         onDiscard={closeNotesModal}

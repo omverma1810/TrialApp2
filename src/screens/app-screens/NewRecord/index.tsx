@@ -107,6 +107,7 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
         )}
       </KeyboardAvoidingView>
       <NotesModal
+        preNotes={notes}
         isModalVisible={isNotesModalVisible}
         closeModal={closeNotesModal}
         onDiscard={closeNotesModal}

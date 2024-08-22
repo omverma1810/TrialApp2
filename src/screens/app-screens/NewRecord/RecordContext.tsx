@@ -155,6 +155,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const handlePlotSelect = (item: any) => {
     setSelectedPlot(item);
     setUnRecordedTraitList(item?.unrecordedTraitData);
+    setNotes(item?.notes || '');
+    setImages(item?.imageUrls || []);
   };
   const pickImageFromCamera = () => {
     if (images.length >= maxNoOfImages) {
@@ -295,8 +297,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       if (plot) {
         setSelectedPlot(plot);
         setUnRecordedTraitList(plot?.unrecordedTraitData);
-        setNotes('');
-        setImages([]);
+        setNotes(plot?.notes || '');
+        setImages(plot?.imageUrls || []);
       }
     }
   }, [trraitsRecordData, hasNextPlot]);
@@ -310,8 +312,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     const {latitude, longitude} = await getCoordinates();
     const imageData = images.map((image, index) => {
       return {
-        url: null,
-        imagePath: null,
+        url: image.imagePath ? image.url : null,
+        imagePath: image.imagePath,
         imageName: imagesNameArr[index],
         base64Data: imagesBase64Arr[index],
       };
