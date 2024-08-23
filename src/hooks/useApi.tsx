@@ -111,7 +111,7 @@ export const useApi = ({
         if (pathParams) console.log('API pathParams:', pathParams);
         if (queryParams) console.log('API queryParams:', queryParams);
         if (headers) console.log('API headers:', headers);
-        console.log('API error:', err.response || err);
+        console.log('API error:', err.response.data.message || err);
         Toast.error({
           message: err?.response?.data?.message || 'Something went wrong!',
         });

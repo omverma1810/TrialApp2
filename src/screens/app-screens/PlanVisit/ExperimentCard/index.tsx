@@ -142,7 +142,9 @@ const ExperimentCard = ({
                     <Text style={TakeNotesStyles.modalItemText}>
                       {item.fieldExperimentName || item.location.villageName}
                     </Text>
-                    <Text
+                    {
+                      item.cropName &&
+                      <Text
                       style={[
                         TakeNotesStyles.modalItemCropText,
                         {
@@ -152,6 +154,7 @@ const ExperimentCard = ({
                       ]}>
                       {item.cropName}
                     </Text>
+                    }
                   </TouchableOpacity>
                 ))}
             </View>

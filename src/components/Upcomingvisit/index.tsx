@@ -49,9 +49,9 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
     method : 'PUT',
   })
 
-  const onUpdate = async() => {
+  const onUpdate = async(dateSelected : any) => {
     const payload = {
-      date: selectedDate?.format('YYYY-MM-DD'),
+      date: dateSelected.format('YYYY-MM-DD'),
     };
     update({payload})
   }
@@ -73,7 +73,8 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   };
   const handleOk = (date: Dayjs | null) => {
     setSelectedDate(dayjs(date));
-    onUpdate()
+    const dateSelected = dayjs(date);
+    onUpdate(dateSelected)
     refreshVisits(); // Refresh visits after update
     setIsDateModelVisible(false);
     if (selectedDate) {

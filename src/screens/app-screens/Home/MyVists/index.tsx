@@ -6,6 +6,7 @@ import UpcomingVisits from '../../../../components/Upcomingvisit';
 import { URL } from '../../../../constants/URLS';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import Toast  from '../../../../utilities/toast';
 
 
 const MyVisits = ({navigation,refresh}: any) => {
@@ -28,7 +29,9 @@ const MyVisits = ({navigation,refresh}: any) => {
     if (fetchVisitsResponse && fetchVisitsResponse.status_code === 200) {
       setVisits(fetchVisitsResponse.data);
     } else if (fetchVisitsResponse) {
-      Alert.alert('Error', 'Failed to fetch visits');
+      Toast.error({
+        message:'Failed to fetch visits'
+      })
     }
   }, [fetchVisitsResponse]);
 
@@ -41,6 +44,7 @@ const MyVisits = ({navigation,refresh}: any) => {
     useCallback(() => {
       if (refresh) {
         console.log('Refreshing Home screen');
+        fetchVisits();
         navigation.setParams({ refresh: false });
       }
     }, [refresh])

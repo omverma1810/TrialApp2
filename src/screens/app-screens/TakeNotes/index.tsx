@@ -12,6 +12,7 @@ import {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Search} from '../../../assets/icons/svgs';
 import {Input, Loader, SafeAreaView, StatusBar} from '../../../components';
+import Toast from '../../../utilities/toast';
 import Chip from '../../../components/Chip';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
@@ -253,7 +254,9 @@ const TakeNotes = ({navigation, route}: any) => {
   
   const onTakeNotes = async () => {
     if (!text) {
-      Alert.alert('Error', 'Please select all fields before Taking a Note');
+      Toast.error({
+        message:'Please select all fields before Taking a Note'
+      })
       return;
     }
     const newData = {
@@ -269,13 +272,17 @@ const TakeNotes = ({navigation, route}: any) => {
   useEffect(() => {
     console.log({takeNotesResponse});
     if (takeNotesResponse && (takeNotesResponse.status_code == 201 || takeNotesResponse.status_code == 200)) {
-      route.params?.fetchNotes();
       if(isEdit){
-        Alert.alert('Success', 'Notes Updated Sucessfully');
+        Toast.success({
+          message:'Notes Updated Sucessfully'
+        })
+        route.params?.fetchNotes();
       }else{
-        Alert.alert('Success', 'Notes Created Sucessfully');
+        Toast.success({
+          message:'Notes Created Sucessfully'
+        })
       }
-      navigation.navigate('Home', {shouldRefresh: true});
+      navigation.navigate('Home', {refresh: true});
     }
   }, [takeNotesResponse]);
 
@@ -286,9 +293,12 @@ const TakeNotes = ({navigation, route}: any) => {
     url: `${URL.FIELDS}${experimentId}?experimentType=${experimentType}`,
     method: 'GET',
   });
-    useEffect(() => {
-    getFields();
-  }, [selectedExperiment, selectedExperimentId]);
+
+  useEffect(() => {
+    if(selectedExperiment || selectedExperimentId){
+      getFields();
+    }
+  }, [selectedExperiment,selectedExperimentId]);
 
   useEffect(() => {
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {

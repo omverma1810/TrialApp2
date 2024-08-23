@@ -51,7 +51,7 @@ const RecordDropDown = ({ selectedFields, projectData ,experimentType}: { select
             <ProjectContainer
               key={field}
               title={field}
-              data={projectData && projectData[0].plotData}
+              data={projectData && projectData[0]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
               toggleDropdown={(index: number) => toggleDropdown(field, index)}
@@ -79,13 +79,14 @@ const ProjectContainer = ({ title, data, dropdownStates, toggleDropdown, project
               <ItemComponent
                 key={index}
                 title={`Plot : ${item.plotNumber}`}
-                entries={item.recordedTraitData}
+                // entries={item.recordedTraitData}
                 notes={item.notes}
                 dropdownState={dropdownStates[`${title}_${index}`]}
                 toggleDropdown={() => toggleDropdown(index)}
                 projectData={projectData}
                 plotId={item.id}
                 experimentType={experimentType}
+                plotData={item}
               />
             ))}
         </View>
@@ -94,13 +95,15 @@ const ProjectContainer = ({ title, data, dropdownStates, toggleDropdown, project
   );
 };
 
-const ItemComponent = ({ title, entries, notes, dropdownState, toggleDropdown, projectData, plotId,experimentType }: any) => {
+const ItemComponent = ({ title, notes, dropdownState, toggleDropdown, projectData, plotId,experimentType,plotData }: any) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [showInputCard, setShowInputCard] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<any>(null);
   const [observedValue, setObservedValue] = useState('');
   const bottomSheetModalRef = useRef(null);
+  const recordedTraitData = plotData.recordedTraitData;
+  const unrecordedTraitData = plotData.unrecordedTraitData;
 
   const [dropdownHeight] = useState(new Animated.Value(0));
 
@@ -121,7 +124,6 @@ const ItemComponent = ({ title, entries, notes, dropdownState, toggleDropdown, p
     const minutes = pad(date.getMinutes());
     const seconds = pad(date.getSeconds());
     const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
-
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   };
 
@@ -153,6 +155,7 @@ const ItemComponent = ({ title, entries, notes, dropdownState, toggleDropdown, p
     updateValue({ payload ,headers});
   };
 
+
   useEffect(() => {
     if (updateValueResponse && updateValueResponse.status_code === 200) {
       Alert.alert('Success', 'Value Updated Successfully');
@@ -179,8 +182,8 @@ const ItemComponent = ({ title, entries, notes, dropdownState, toggleDropdown, p
       </View>
 
       <Animated.View style={[styles.dropdown, { height: dropdownHeight }]}>
-        {dropdownState &&
-          entries.map((entry: any, index: number) => (
+        {dropdownState  && recordedTraitData &&
+          recordedTraitData.map((entry: any, index: number) => (
             <View style={styles.entryContainer} key={index}>
               <View style={styles.projectContainer1}>
                 <View style={styles.padding}>
@@ -219,22 +222,59 @@ const ItemComponent = ({ title, entries, notes, dropdownState, toggleDropdown, p
                   </View>
                 </View>
               </View>
-              {notes && (
-                <View style={styles.notesContainer}>
-                  <Text style={styles.notesTitle}>Notes</Text>
-                  <View style={styles.notesContent}>
-                    <Text style={styles.notesText}>{notes}</Text>
-                    <Text style={styles.notesDate}>24 Sept</Text>
+            </View>
+          ))}
+          {
+            dropdownState && 
+            notes && (
+              <View style={styles.notesContainer}>
+                <Text style={styles.notesTitle}>Notes</Text>
+                <View style={styles.notesContent}>
+                  <Text style={styles.notesText}>{notes}</Text>
+                  <Text style={styles.notesDate}>24 Sept</Text>
+                </View>
+              </View>
+            )
+          }
+        {dropdownState  &&  unrecordedTraitData &&
+          unrecordedTraitData.map((entry: any, index: number) => (
+            <View style={styles.entryContainer} key={index}>
+              <View style={styles.projectContainer1}>
+                <View style={styles.padding}>
+                  <Text style={styles.recordedTraitsText}>
+                    Unrecorded Traits (Number)
+                  </Text>
+                </View>
+                <View style={styles.borderRadiusOverflow}>
+                  <View style={styles.entryRow}>
+                    <View style={styles.entryColumn}>
+                      <Text style={styles.entryLabel}>Trait Name</Text>
+                      <Text style={styles.entryValue}>{entry.traitName}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.entryRow}>
+                    {
+                      showInputCard ? (
+                        <View style={styles.entryColumn}>
+                          <ValueInputCard onSubmit={handleValueSubmit} entry={currentEntry} setShowInputCard={setShowInputCard} />
+                        </View>
+                      ) :
+                        (
+                          <>
+                            <View style={styles.entryColumn}>
+                              <Text style={styles.entryLabel}>Value</Text>
+                              <Text style={styles.entryValue}>{entry.value}</Text>
+                            </View>
+                            <TouchableOpacity
+                              onPress={() => handleEditPress(entry)}
+                              style={styles.editButton}>
+                              <Text style={styles.editButtonText}>Edit</Text>
+                            </TouchableOpacity>
+                          </>
+                        )
+                    }
                   </View>
                 </View>
-              )}
-              <View style={styles.unrecordedTraitsRow}>
-                <Text style={styles.unrecordedTraitsText}>
-                  UnRecorded Traits
-                </Text>
-                <TouchableOpacity>
-                  <Text style={styles.viewButtonText}>View</Text>
-                </TouchableOpacity>
               </View>
             </View>
           ))}

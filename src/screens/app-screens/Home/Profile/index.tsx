@@ -25,6 +25,7 @@ import {
 import ProfileStyles from './ProfileStyles';
 import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
 import DeviceInfo from 'react-native-device-info';
+import Toast from '../../../../utilities/toast';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
@@ -121,7 +122,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdateData = async () => {
-      Alert.alert('Success', 'Profile updated successfully');
+      Toast.success({
+        message:'Profile updated successfully'
+      })
       const user = updateProfileResponse.data.user;
       console.log(user);
       dispatch(setUserDetails(user));
@@ -159,7 +162,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdateEmailData = async () => {
-      Alert.alert('Success', 'Email updated successfully');
+      Toast.success({
+        message:'Email updated successfully'
+      })
       const user = updateEmailResponse.data.user;
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
@@ -193,7 +198,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdatePhoneNumberData = async () => {
-      Alert.alert('Success', 'Phone number updated successfully');
+      Toast.success({
+        message:'Phone number updated successfully'
+      })
       const user = updatePhoneNumberResponse.data.user;
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(

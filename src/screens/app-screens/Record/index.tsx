@@ -83,10 +83,11 @@ const Record = () => {
     useState<SelectedFieldData | null>(null);
   const [fields, setFields] = useState([]);
   const [experimentType, setExperimentType] = useState<string | null>(null);
-  const [locationIds, setLocationIds] = useState<number[]>([]);
-  const [traitData, setTraitData] = useState<any>(null);
+  const [locationIds, setLocationIds] = useState<any>([]);
+  const [traitData, setTraitData] = useState<any>(null);  
   const [plotData, setPlotData] = useState<any>(null);
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -119,6 +120,7 @@ const Record = () => {
       setProjectList([]);
       setSelectedProject('');
       setExperimentList([]);
+      setLocationIds([]);
     }
   }, [experimentData]);
 
@@ -181,7 +183,10 @@ const Record = () => {
     method: 'GET',
   });
   useEffect(() => {
-    getFields();
+    if(selectedExperiment){
+      setLocationIds([]);
+      getFields();
+    }
   }, [selectedExperiment]);
 
   useEffect(() => {
@@ -189,7 +194,7 @@ const Record = () => {
       setFields(getFieldsResponse.data.locationList);
     }
   }, [getFieldsResponse]);
-
+ 
   const handleSecondBottomModalOpen = () => {
     secondBottomModalRef.current?.present();
   };
@@ -199,8 +204,10 @@ const Record = () => {
     () => (
       <View style={TakeNotesStyles.emptyContainer}>
         {isExperimentListLoading ? (
-          <Loader />
-        ) : (
+        <View style={RecordStyles.loaderContainer}>
+        <Loader /> 
+      </View>
+      ) : (
           <Text style={TakeNotesStyles.emptyText}>
             {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
           </Text>
@@ -232,30 +239,36 @@ const Record = () => {
     setSelectedFields({});
   }, [selectedExperiment]);
 
-  const handleFieldSelect = async (id: any) => {
+
+  const handleFieldSelect = (id: string) => {
+    console.log("i'm vengence",id)
     const isSelected = !selectedFields[id];
-    setSelectedFields(prevState => ({
-      ...prevState,
-      [id]: isSelected,
-    }));
-    const updatedLocationIds = isSelected
-      ? [...locationIds, id]
-      : locationIds.filter(locationId => locationId !== id);
-    setLocationIds(updatedLocationIds);
 
+    setSelectedFields(prevState => {
+      const updatedFields = {
+        ...prevState,
+        [id]: isSelected,
+      };
+  
+      // Derive locationIds based on updatedFields
+      const updatedLocationIds = Object.keys(updatedFields).filter(
+        fieldId => updatedFields[fieldId]
+      );
+  
+      setLocationIds(updatedLocationIds);
+  
+      return updatedFields;
+    });
+    };
+  useEffect(() => {
+    const fetchData = async () => {
+        await fetchTraitData();
+        await fetchPlotData();
+    };
 
-    try {
-      await fetchTraitData(updatedLocationIds);
-    } catch (error) {
-      console.error('Error fetching trait data:', error);
-    }
+    fetchData();
+  }, [locationIds]);
 
-    try {
-      await fetchPlotData(updatedLocationIds);
-    } catch (error) {
-      console.error('Error fetching plot data:', error);
-    }
-  };
   const [getLocationTraitData, locationTraitDataResponse] = useApi({
     url: URL.MULTI_TRIAL_LOCATION,
     method: 'POST',
@@ -265,15 +278,17 @@ const Record = () => {
       const data = locationTraitDataResponse.data;
       setTraitData(data);
     }
-    console.log('traitData', traitData);
+    setLoading(false); 
+    // console.log('traitData', traitData);
     secondBottomModalRef.current?.close();
   }, [locationTraitDataResponse]);
 
-  const fetchTraitData = (updatedLocationIds: number[]) => {
+  const fetchTraitData = () => {
+    setLoading(true);
     const payloadForTrait = {
       experimentId: selectedExperiment?.id,
       experimentType: experimentType ? experimentType : 'line',
-      locationIds: updatedLocationIds,
+      locationIds: locationIds,
       apiCallType: 'trait',
     };
     const headers = {
@@ -292,15 +307,17 @@ const Record = () => {
       let data = locationPlotDataResponse.data;
       setPlotData(data);
     }
-    console.log('pd', plotData);
+    setLoading(false); 
+    // console.log('pd', plotData);
     secondBottomModalRef.current?.close();
   }, [locationPlotDataResponse]);
 
-  const fetchPlotData = (updatedLocationIds: number[]) => {
+  const fetchPlotData = () => {
+    setLoading(true);
     const payloadForPlot = {
       experimentId: selectedExperiment?.id,
       experimentType: experimentType ? experimentType : 'line',
-      locationIds: updatedLocationIds,
+      locationIds: locationIds,
       apiCallType: 'plot',
     };
     const headers = {
@@ -387,7 +404,7 @@ const Record = () => {
                           if (selectedFields[fieldId]) {
                             return (
                               <View
-                                key={index}
+                                key={fieldId}
                                 style={RecordStyles.selectedFieldContainer}>
                                 <Text style={RecordStyles.fieldName}>
                                   Field {fieldId}
@@ -413,6 +430,9 @@ const Record = () => {
                   </View>
                 </View>
               </Pressable>
+              {
+                loading ? <Loader /> : null
+              }
               {selectedFields && plotData && traitData && (
                 <View style={RecordStyles.inputContainer}>
                   <View style={RecordStyles.listByContainer}>

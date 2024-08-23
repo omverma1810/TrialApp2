@@ -204,6 +204,11 @@ const RecordStyles = StyleSheet.create({
   entryColumn: {
     gap: 5,
   },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default RecordStyles;

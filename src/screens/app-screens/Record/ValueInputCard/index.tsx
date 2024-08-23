@@ -24,6 +24,24 @@ const ValueInputCard = ({ entry, onSubmit ,setShowInputCard}: any) => {
     }
   }, [recordedValue]);
 
+  const handleInputChange = (text: string) => {
+    if (entry.dataType === 'int' || entry.dataType === 'float') {
+      const cleanedText = text.replace(/[^\d.*]/g, '');
+      const segments = cleanedText.split('*');
+      const validSegments = segments
+        .filter(segment => segment !== '')
+        .slice(0, 5);
+      const formattedValue = validSegments.join('*');
+      const finalValue =
+        text.endsWith('*') && validSegments.length < 5
+          ? formattedValue + '*'
+          : formattedValue;
+
+      setValue(finalValue);
+    } else {
+      setValue(text);
+    }
+  };
   return (
     <View style={[RecordStyles.row]}>
       <View style={{width:'80%'}}>
