@@ -50,8 +50,6 @@ import Eye from './Eye';
 import EyeSlash from './EyeSlash';
 import SelectIcon from './SelectIcon';
 import DbLeaf from './DbLeaf';
-import DbPlant from './DbPlant';
-import DbEdit from './DbEdit';
 
 export {
   Back,
@@ -62,8 +60,6 @@ export {
   Facebook,
   Apple,
   HomeIcon,
-  DbEdit,
-  DbPlant,
   ExperimentIcon,
   RecordIcon,
   NotificationIcon,

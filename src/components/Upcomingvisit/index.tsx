@@ -11,6 +11,7 @@ import dayjs, {Dayjs} from 'dayjs';
 import PlanVisitStyles from '../..//screens/app-screens/PlanVisit/PlanVisitStyles';
 import {SafeAreaView, StatusBar, Calender} from '../../components';
 import { FONTS } from '../../theme/fonts';
+import Toast from '../../utilities/toast';
 
 const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   const bottomSheetModalRef = useRef<any>(null);
@@ -36,10 +37,14 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   useEffect(() => {
     if (deleteVisitResponse) {
       if (deleteVisitResponse.status_code === 200) {
-        Alert.alert('Success', 'Visit deleted successfully');
+        Toast.success({
+          message: 'Visit deleted successfully',
+        })
         onDelete(visit.id);
       } else {
-        Alert.alert('Error', 'Failed to delete visit');
+        Toast.error({
+          message: 'Failed to delete visit',
+        })
       }
     }
   }, [deleteVisitResponse]);
@@ -59,9 +64,13 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   useEffect(() => {
     if (updatedResponse) {
       if (updatedResponse.status_code === 200) {
-        Alert.alert('Success', 'Visit updated successfully');
+        Toast.success({
+          message: 'Visit updated successfully'
+        })
       } else {
-        Alert.alert('Error', 'Failed to update visit');
+        Toast.error({
+          message: 'Failed to update visit'
+        })
       }
     }
   }, [updatedResponse]);

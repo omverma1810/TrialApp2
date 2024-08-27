@@ -209,6 +209,53 @@ const RecordStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  optionsContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+  },
+  optionsTitle: {
+    color: '#161616',
+    fontFamily: FONTS.SEMI_BOLD,
+    fontSize: 14,
+  },
+  optionsLabel: {
+    color: '#161616',
+    fontFamily: FONTS.REGULAR,
+    fontSize: 12,
+  },
+  noDataView: {
+    flex: 0.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noDataText: {
+    color: '#161616',
+    fontFamily: FONTS.SEMI_BOLD,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  traitsModal: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  traitsModalHeader: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    backgroundColor: '#F7F7F7',
+    borderRadius: 8,
+  },
+  traitsModalHeaderTitle: {
+    color: '#161616',
+    fontFamily: FONTS.MEDIUM,
+    fontSize: 14,
+  },
+  ScreenTitle : {
+    marginHorizontal:20,
+    marginVertical:15,
+    fontFamily: FONTS.MEDIUM,
+    fontSize:20,
+    color:'#000'
+  }
 });
 
 export default RecordStyles;

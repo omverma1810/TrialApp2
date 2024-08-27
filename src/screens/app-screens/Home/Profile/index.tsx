@@ -260,6 +260,11 @@ const Profile = ({navigation}: ProfileScreenProps) => {
   return (
     <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
       <View style={ProfileStyles.container}>
+      <View>
+        <Text style={ProfileStyles.ScreenTitle}>
+          Profile
+        </Text>
+      </View>
         <Pressable
           style={ProfileStyles.profileContainer}
           onPress={toggleImageAction}>
@@ -307,6 +312,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
                   onChangeText={text =>
                     setProfileData({...profileData, phoneNumber: text})
                   }
+                  keyboardType='number-pad'
                 />
               ) : (
                 <Text style={ProfileStyles.infoTextBold}>

@@ -7,6 +7,7 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useApi } from '../../hooks/useApi';
 import { URL } from '../../constants/URLS';
 import { FONTS } from '../../theme/fonts';
+import Toast from '../../utilities/toast';
 
 const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -24,10 +25,14 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
   React.useEffect(() => {
     if (deleteNoteResponse) {
       if (deleteNoteResponse.status_code === 200) {
-        Alert.alert('Success', 'Note deleted successfully');
+        Toast.success({
+          message: 'Note deleted successfully',
+        })
         onDelete(note.id);
       } else {
-        Alert.alert('Error', 'Failed to delete note');
+        Toast.error({
+          message: 'Failed to delete note',
+        })
       }
     }
   }, [deleteNoteResponse]);

@@ -67,5 +67,15 @@ const ProfileStyle = StyleSheet.create({
     fontFamily: FONTS.REGULAR,
     textAlign: 'center',
   },
+  ScreenTitle : {
+    marginHorizontal:20,
+    // marginVertical:10,
+    fontFamily: FONTS.MEDIUM,
+    fontSize:20,
+    color:'#000',
+    backgroundColor:"white",
+    display:'flex' ,
+  }
+
 });
 export default ProfileStyle;

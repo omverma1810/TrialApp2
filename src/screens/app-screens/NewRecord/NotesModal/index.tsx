@@ -1,5 +1,5 @@
 import {Pressable, TextInput, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {Modal, Text} from '../../../../components';
@@ -8,6 +8,7 @@ import {LOCALES} from '../../../../localization/constants';
 
 type ModalTypes = {
   isModalVisible: boolean;
+  preNotes: string;
   closeModal: () => void;
   onSave: (notes: string) => void;
   onDiscard: () => void;
@@ -15,12 +16,22 @@ type ModalTypes = {
 
 const NotesModal = ({
   isModalVisible,
+  preNotes = '',
   closeModal = () => {},
   onSave = () => {},
   onDiscard = () => {},
 }: ModalTypes) => {
   const {t} = useTranslation();
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    if (preNotes) {
+      setNotes(preNotes.trim());
+    } else {
+      setNotes('');
+    }
+  }, [preNotes]);
+
   return (
     <Modal isModalVisible={isModalVisible} closeModal={closeModal}>
       <View style={styles.notesModalContainer}>

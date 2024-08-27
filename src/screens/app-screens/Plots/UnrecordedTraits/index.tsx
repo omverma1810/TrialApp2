@@ -28,12 +28,12 @@ type RecordData = {
 
 const UnrecordedTraits = ({
   data = [],
-  plotId,
+  plotData,
   details,
   handleRecordedTraits = () => {},
 }: {
   data: TraitItem[];
-  plotId: number;
+  plotData: any;
   details: any;
   handleRecordedTraits: () => void;
 }) => {
@@ -85,7 +85,7 @@ const UnrecordedTraits = ({
     const headers = {'Content-Type': 'application/json'};
     const {latitude, longitude} = await getCoordinates();
     const payload = {
-      plotId: plotId,
+      plotId: plotData?.id,
       date: formatDateTime(new Date()),
       fieldExperimentId: details?.fieldExperimentId,
       experimentType: type,
@@ -93,6 +93,7 @@ const UnrecordedTraits = ({
       applications: null,
       lat: latitude,
       long: longitude,
+      notes: plotData?.notes || '',
     };
     createTraitsRecord({payload, headers});
   };

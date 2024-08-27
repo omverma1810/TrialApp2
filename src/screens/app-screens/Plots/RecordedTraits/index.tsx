@@ -28,11 +28,11 @@ type RecordData = {
 
 const RecordedTraits = ({
   data = [],
-  plotId,
+  plotData,
   details,
 }: {
   data: TraitItem[];
-  plotId: number;
+  plotData: any;
   details: any;
 }) => {
   const {t} = useTranslation();
@@ -65,7 +65,7 @@ const RecordedTraits = ({
     traitsRecordError,
   ] = useApi({
     url: URL.RECORD_TRAITS,
-    method: 'POST',
+    method: 'PUT',
   });
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const RecordedTraits = ({
     const headers = {'Content-Type': 'application/json'};
     const {latitude, longitude} = await getCoordinates();
     const payload = {
-      plotId: plotId,
+      plotId: plotData?.id,
       date: formatDateTime(new Date()),
       fieldExperimentId: details?.fieldExperimentId,
       experimentType: type,
@@ -89,6 +89,7 @@ const RecordedTraits = ({
       applications: null,
       lat: latitude,
       long: longitude,
+      notes: plotData?.notes || '',
     };
 
     updateTraitsRecord({payload, headers});

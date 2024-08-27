@@ -227,7 +227,7 @@ const Record = () => {
         />
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={projectList}
+          options={projectList} 
           selectedOption={selectedProject}
           onPress={handleProjectChange}
         />
@@ -238,10 +238,9 @@ const Record = () => {
   useEffect(() => {
     setSelectedFields({});
   }, [selectedExperiment]);
-
+ 
 
   const handleFieldSelect = (id: string) => {
-    console.log("i'm vengence",id)
     const isSelected = !selectedFields[id];
 
     setSelectedFields(prevState => {
@@ -334,6 +333,11 @@ const Record = () => {
   return (
     <SafeAreaView>
       <StatusBar />
+      <View>
+        <Text style={RecordStyles.ScreenTitle}>
+          Record
+        </Text>
+      </View>
       <View style={RecordStyles.container}>
         <View style={RecordStyles.searchContainer}>
           <Search />

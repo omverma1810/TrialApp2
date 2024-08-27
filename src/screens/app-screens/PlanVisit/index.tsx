@@ -265,6 +265,12 @@ const PlanVisit = ({navigation}: any) => {
   return (
     <SafeAreaView>
       <StatusBar />
+      <View>
+        <Text style={PlanVisitStyles.ScreenTitle}>
+          Plan Visit
+        </Text>
+      </View>
+
       <View style={PlanVisitStyles.container}>
         <View style={PlanVisitStyles.container}>
           <Input

@@ -1,7 +1,7 @@
 import React, { useEffect,useState } from 'react';
 import {View, Text, Image, Pressable} from 'react-native';
 
-import {Flask, DbPlant, File, Logo} from '../../../../assets/icons/svgs';
+import {Flask, DbLeaf, File, Logo} from '../../../../assets/icons/svgs';
 import DashInfoStyles from './DashInfoStyles';
 import {DashInfoData} from './Data';
 import {HomeScreenProps} from '../../../../types/navigation/appTypes';
@@ -63,7 +63,7 @@ const Dashinfo: React.FC<DashInfoProps> = ({navigation}) => {
               <Text style={DashInfoStyles.cardTitle}>Fields</Text>
               <Text style={DashInfoStyles.cardValue}>{dashInfoData?.fieldCount}</Text>
             </View>
-            <DbPlant />
+            <DbLeaf />
           </View>
         </View>
         <View style={DashInfoStyles.recordsContainer}>

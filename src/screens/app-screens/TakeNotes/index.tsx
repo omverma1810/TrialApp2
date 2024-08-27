@@ -330,6 +330,13 @@ const TakeNotes = ({navigation, route}: any) => {
   return (
     <SafeAreaView>
       <StatusBar />
+      <View>
+        <Text style={TakeNotesStyles.ScreenTitle}>
+          {
+            isEdit? 'Edit Notes' : 'Take Notes'
+          }
+        </Text>
+      </View>
       <View style={TakeNotesStyles.container}>
         <FlatList
           data={experimentList}
@@ -376,7 +383,7 @@ const TakeNotes = ({navigation, route}: any) => {
             <TouchableOpacity
               style={TakeNotesStyles.submitButton}
               onPress={onTakeNotes}>
-              <Text style={TakeNotesStyles.submitButtonText}>Submit</Text>
+              <Text style={TakeNotesStyles.submitButtonText}>{isEdit?"Update Note":"Save Note"}</Text>
             </TouchableOpacity>
           </View>
         )}
