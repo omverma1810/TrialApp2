@@ -1,6 +1,7 @@
 import {
   BackHandler,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   View,
@@ -106,7 +107,7 @@ const BottomSheetModalView = ({
           type === 'CONTENT_HEIGHT' && {flex: 0},
           containerStyle,
         ]}>
-        {children}
+        <ScrollView>{children}</ScrollView>
       </BottomSheetView>
     </BottomSheetModal>
   );
