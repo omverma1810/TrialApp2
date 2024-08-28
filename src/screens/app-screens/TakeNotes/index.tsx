@@ -12,7 +12,6 @@ import {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Search} from '../../../assets/icons/svgs';
 import {Input, Loader, SafeAreaView, StatusBar} from '../../../components';
-import Toast from '../../../utilities/toast';
 import Chip from '../../../components/Chip';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
@@ -254,9 +253,7 @@ const TakeNotes = ({navigation, route}: any) => {
   
   const onTakeNotes = async () => {
     if (!text) {
-      Toast.error({
-        message:'Please select all fields before Taking a Note'
-      })
+      Alert.alert('Error', 'Please select all fields before Taking a Note');
       return;
     }
     const newData = {
@@ -272,17 +269,13 @@ const TakeNotes = ({navigation, route}: any) => {
   useEffect(() => {
     console.log({takeNotesResponse});
     if (takeNotesResponse && (takeNotesResponse.status_code == 201 || takeNotesResponse.status_code == 200)) {
+      route.params?.fetchNotes();
       if(isEdit){
-        Toast.success({
-          message:'Notes Updated Sucessfully'
-        })
-        route.params?.fetchNotes();
+        Alert.alert('Success', 'Notes Updated Sucessfully');
       }else{
-        Toast.success({
-          message:'Notes Created Sucessfully'
-        })
+        Alert.alert('Success', 'Notes Created Sucessfully');
       }
-      navigation.navigate('Home', {refresh: true});
+      navigation.navigate('Home', {shouldRefresh: true});
     }
   }, [takeNotesResponse]);
 
@@ -293,12 +286,9 @@ const TakeNotes = ({navigation, route}: any) => {
     url: `${URL.FIELDS}${experimentId}?experimentType=${experimentType}`,
     method: 'GET',
   });
-
-  useEffect(() => {
-    if(selectedExperiment || selectedExperimentId){
-      getFields();
-    }
-  }, [selectedExperiment,selectedExperimentId]);
+    useEffect(() => {
+    getFields();
+  }, [selectedExperiment, selectedExperimentId]);
 
   useEffect(() => {
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {
@@ -330,13 +320,6 @@ const TakeNotes = ({navigation, route}: any) => {
   return (
     <SafeAreaView>
       <StatusBar />
-      <View>
-        <Text style={TakeNotesStyles.ScreenTitle}>
-          {
-            isEdit? 'Edit Notes' : 'Take Notes'
-          }
-        </Text>
-      </View>
       <View style={TakeNotesStyles.container}>
         <FlatList
           data={experimentList}
@@ -383,7 +366,7 @@ const TakeNotes = ({navigation, route}: any) => {
             <TouchableOpacity
               style={TakeNotesStyles.submitButton}
               onPress={onTakeNotes}>
-              <Text style={TakeNotesStyles.submitButtonText}>{isEdit?"Update Note":"Save Note"}</Text>
+              <Text style={TakeNotesStyles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
           </View>
         )}

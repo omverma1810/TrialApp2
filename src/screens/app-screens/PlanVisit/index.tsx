@@ -19,7 +19,6 @@ import {LOCALES} from '../../../localization/constants';
 import ExperimentCard from './ExperimentCard';
 import Filter from './Filter';
 import PlanVisitStyles from './PlanVisitStyles';
-import Toast from '../../../utilities/toast';
 
 interface Chip {
   id: number;
@@ -221,9 +220,7 @@ const PlanVisit = ({navigation}: any) => {
   });
   const onPlanVisit = async () => {
     if (!selectedDate) {
-      Toast.error({
-        message:'Please select all fields before planning a visit'
-      })
+      Alert.alert('Error', 'Please select all fields before planning a visit');
       return;
     }
     const newData = {
@@ -237,9 +234,7 @@ const PlanVisit = ({navigation}: any) => {
   useEffect(() => {
     console.log({planVisitResponse});
     if (planVisitResponse && planVisitResponse.status_code == 201) {
-      Toast.success({
-        message:'Visit planned successfully'
-      })
+      Alert.alert('Success', 'Visit planned successfully');
       navigation.navigate('Home',{ refresh: true });
     }
   }, [planVisitResponse]);
@@ -249,9 +244,7 @@ const PlanVisit = ({navigation}: any) => {
     method: 'GET',
   });
   useEffect(() => {
-    if(selectedExperiment){
-      getFields();
-    }
+    getFields();
   }, [selectedExperiment]);
 
   useEffect(() => {
@@ -265,12 +258,6 @@ const PlanVisit = ({navigation}: any) => {
   return (
     <SafeAreaView>
       <StatusBar />
-      <View>
-        <Text style={PlanVisitStyles.ScreenTitle}>
-          Plan Visit
-        </Text>
-      </View>
-
       <View style={PlanVisitStyles.container}>
         <View style={PlanVisitStyles.container}>
           <Input

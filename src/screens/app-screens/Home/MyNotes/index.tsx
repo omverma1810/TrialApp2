@@ -7,7 +7,6 @@ import Notes from '../../../../components/Notes';
 import { useFocusEffect } from '@react-navigation/native';
 
 import {NavigationProp} from '@react-navigation/native';
-import Toast from '../../../../utilities/toast';
 
 type NoteType = {
   id: number;
@@ -47,9 +46,7 @@ const MyNote = ({navigation,refresh}: any ) => {
       setNotes(fetchNotesResponse.data);
       // console.log(fetchNotesResponse.data)
     } else if (fetchNotesResponse) {
-      Toast.error({
-        message:'Failed to fetch notes'
-      })
+      Alert.alert('Error', 'Failed to fetch notes');
     }
   }, [fetchNotesResponse]); 
 

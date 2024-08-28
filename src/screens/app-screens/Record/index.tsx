@@ -83,11 +83,10 @@ const Record = () => {
     useState<SelectedFieldData | null>(null);
   const [fields, setFields] = useState([]);
   const [experimentType, setExperimentType] = useState<string | null>(null);
-  const [locationIds, setLocationIds] = useState<any>([]);
-  const [traitData, setTraitData] = useState<any>(null);  
+  const [locationIds, setLocationIds] = useState<number[]>([]);
+  const [traitData, setTraitData] = useState<any>(null);
   const [plotData, setPlotData] = useState<any>(null);
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -120,7 +119,6 @@ const Record = () => {
       setProjectList([]);
       setSelectedProject('');
       setExperimentList([]);
-      setLocationIds([]);
     }
   }, [experimentData]);
 
@@ -183,10 +181,7 @@ const Record = () => {
     method: 'GET',
   });
   useEffect(() => {
-    if(selectedExperiment){
-      setLocationIds([]);
-      getFields();
-    }
+    getFields();
   }, [selectedExperiment]);
 
   useEffect(() => {
@@ -194,7 +189,7 @@ const Record = () => {
       setFields(getFieldsResponse.data.locationList);
     }
   }, [getFieldsResponse]);
- 
+
   const handleSecondBottomModalOpen = () => {
     secondBottomModalRef.current?.present();
   };
@@ -204,10 +199,8 @@ const Record = () => {
     () => (
       <View style={TakeNotesStyles.emptyContainer}>
         {isExperimentListLoading ? (
-        <View style={RecordStyles.loaderContainer}>
-        <Loader /> 
-      </View>
-      ) : (
+          <Loader />
+        ) : (
           <Text style={TakeNotesStyles.emptyText}>
             {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
           </Text>
@@ -227,7 +220,7 @@ const Record = () => {
         />
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={projectList} 
+          options={projectList}
           selectedOption={selectedProject}
           onPress={handleProjectChange}
         />
@@ -238,36 +231,31 @@ const Record = () => {
   useEffect(() => {
     setSelectedFields({});
   }, [selectedExperiment]);
- 
 
-  const handleFieldSelect = (id: string) => {
+  const handleFieldSelect = async (id: any) => {
     const isSelected = !selectedFields[id];
+    setSelectedFields(prevState => ({
+      ...prevState,
+      [id]: isSelected,
+    }));
+    const updatedLocationIds = isSelected
+      ? [...locationIds, id]
+      : locationIds.filter(locationId => locationId !== id);
+    setLocationIds(updatedLocationIds);
 
-    setSelectedFields(prevState => {
-      const updatedFields = {
-        ...prevState,
-        [id]: isSelected,
-      };
-  
-      // Derive locationIds based on updatedFields
-      const updatedLocationIds = Object.keys(updatedFields).filter(
-        fieldId => updatedFields[fieldId]
-      );
-  
-      setLocationIds(updatedLocationIds);
-  
-      return updatedFields;
-    });
-    };
-  useEffect(() => {
-    const fetchData = async () => {
-        await fetchTraitData();
-        await fetchPlotData();
-    };
 
-    fetchData();
-  }, [locationIds]);
+    try {
+      await fetchTraitData(updatedLocationIds);
+    } catch (error) {
+      console.error('Error fetching trait data:', error);
+    }
 
+    try {
+      await fetchPlotData(updatedLocationIds);
+    } catch (error) {
+      console.error('Error fetching plot data:', error);
+    }
+  };
   const [getLocationTraitData, locationTraitDataResponse] = useApi({
     url: URL.MULTI_TRIAL_LOCATION,
     method: 'POST',
@@ -277,17 +265,15 @@ const Record = () => {
       const data = locationTraitDataResponse.data;
       setTraitData(data);
     }
-    setLoading(false); 
-    // console.log('traitData', traitData);
+    console.log('traitData', traitData);
     secondBottomModalRef.current?.close();
   }, [locationTraitDataResponse]);
 
-  const fetchTraitData = () => {
-    setLoading(true);
+  const fetchTraitData = (updatedLocationIds: number[]) => {
     const payloadForTrait = {
       experimentId: selectedExperiment?.id,
       experimentType: experimentType ? experimentType : 'line',
-      locationIds: locationIds,
+      locationIds: updatedLocationIds,
       apiCallType: 'trait',
     };
     const headers = {
@@ -306,17 +292,15 @@ const Record = () => {
       let data = locationPlotDataResponse.data;
       setPlotData(data);
     }
-    setLoading(false); 
-    // console.log('pd', plotData);
+    console.log('pd', plotData);
     secondBottomModalRef.current?.close();
   }, [locationPlotDataResponse]);
 
-  const fetchPlotData = () => {
-    setLoading(true);
+  const fetchPlotData = (updatedLocationIds: number[]) => {
     const payloadForPlot = {
       experimentId: selectedExperiment?.id,
       experimentType: experimentType ? experimentType : 'line',
-      locationIds: locationIds,
+      locationIds: updatedLocationIds,
       apiCallType: 'plot',
     };
     const headers = {
@@ -333,11 +317,6 @@ const Record = () => {
   return (
     <SafeAreaView>
       <StatusBar />
-      <View>
-        <Text style={RecordStyles.ScreenTitle}>
-          Record
-        </Text>
-      </View>
       <View style={RecordStyles.container}>
         <View style={RecordStyles.searchContainer}>
           <Search />
@@ -408,7 +387,7 @@ const Record = () => {
                           if (selectedFields[fieldId]) {
                             return (
                               <View
-                                key={fieldId}
+                                key={index}
                                 style={RecordStyles.selectedFieldContainer}>
                                 <Text style={RecordStyles.fieldName}>
                                   Field {fieldId}
@@ -434,9 +413,6 @@ const Record = () => {
                   </View>
                 </View>
               </Pressable>
-              {
-                loading ? <Loader /> : null
-              }
               {selectedFields && plotData && traitData && (
                 <View style={RecordStyles.inputContainer}>
                   <View style={RecordStyles.listByContainer}>

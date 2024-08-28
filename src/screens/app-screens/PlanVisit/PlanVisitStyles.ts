@@ -140,15 +140,6 @@ const PlanVisitStyles = StyleSheet.create({
     gap: 16,
     paddingVertical: 16,
   },
-  ScreenTitle : {
-    marginHorizontal:20,
-    marginVertical:10,
-    fontFamily: FONTS.MEDIUM,
-    fontSize:20,
-    color:'#000',
-    backgroundColor:"white",
-    display:'flex' ,
-  }
 });
 
 export default PlanVisitStyles;

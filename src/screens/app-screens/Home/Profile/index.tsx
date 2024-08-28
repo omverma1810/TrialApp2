@@ -25,7 +25,6 @@ import {
 import ProfileStyles from './ProfileStyles';
 import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
 import DeviceInfo from 'react-native-device-info';
-import Toast from '../../../../utilities/toast';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
@@ -122,9 +121,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdateData = async () => {
-      Toast.success({
-        message:'Profile updated successfully'
-      })
+      Alert.alert('Success', 'Profile updated successfully');
       const user = updateProfileResponse.data.user;
       console.log(user);
       dispatch(setUserDetails(user));
@@ -162,9 +159,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdateEmailData = async () => {
-      Toast.success({
-        message:'Email updated successfully'
-      })
+      Alert.alert('Success', 'Email updated successfully');
       const user = updateEmailResponse.data.user;
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
@@ -198,9 +193,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdatePhoneNumberData = async () => {
-      Toast.success({
-        message:'Phone number updated successfully'
-      })
+      Alert.alert('Success', 'Phone number updated successfully');
       const user = updatePhoneNumberResponse.data.user;
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
@@ -260,11 +253,6 @@ const Profile = ({navigation}: ProfileScreenProps) => {
   return (
     <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
       <View style={ProfileStyles.container}>
-      <View>
-        <Text style={ProfileStyles.ScreenTitle}>
-          Profile
-        </Text>
-      </View>
         <Pressable
           style={ProfileStyles.profileContainer}
           onPress={toggleImageAction}>
@@ -303,16 +291,16 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           </View>
           <View
             style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-            <View style={{gap: 8}}>
+            <View style={{gap: 8,width:'80%'}}>
               <Text style={ProfileStyles.infoText}>Phone Number</Text>
               {isEditingPhoneNumber ? (
                 <TextInput
                   style={ProfileStyles.infoTextBold}
                   value={profileData.phoneNumber}
+                  keyboardType='number-pad'
                   onChangeText={text =>
                     setProfileData({...profileData, phoneNumber: text})
                   }
-                  keyboardType='number-pad'
                 />
               ) : (
                 <Text style={ProfileStyles.infoTextBold}>
@@ -368,7 +356,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         <Pressable
           onPress={() => navigation.navigate('ChangePassword')}
           style={ProfileStyles.logoutButton}>
-          <Text style={ProfileStyles.editButton}>Chnage Password</Text>
+          <Text style={ProfileStyles.editButton}>Change Password</Text>
         </Pressable>
         <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
           <Text style={ProfileStyles.editButton}>Logout</Text>

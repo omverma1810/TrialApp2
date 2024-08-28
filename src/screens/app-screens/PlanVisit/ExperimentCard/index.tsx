@@ -131,31 +131,30 @@ const ExperimentCard = ({
           <Text style={TakeNotesStyles.modalTitle}>
             Select an Experiment (or) Field
           </Text>
-          <ScrollView>
-            <View style={{gap: 30}}>
-              {Array.isArray(data) &&
-                data.map((item: any, index: number) => (
-                  <TouchableOpacity
-                    key={`${item.id}-${index}`}
-                    onPress={() => handleExperimentSelect(item)}
-                    style={TakeNotesStyles.modalItemContainer}>
-                    <Text style={TakeNotesStyles.modalItemText}>
-                      {item.fieldExperimentName || item.location.villageName}
-                    </Text>
+          <View style={{gap: 30}}>
+            {Array.isArray(data) &&
+              data.map((item: any, index: number) => (
+                <TouchableOpacity
+                  key={`${item.id}-${index}`}
+                  onPress={() => handleExperimentSelect(item)}
+                  style={TakeNotesStyles.modalItemContainer}>
+                  <Text style={TakeNotesStyles.modalItemText}>
+                    {item.fieldExperimentName || item.location.villageName}
+                  </Text>
+                  {item.fieldExperimentName ? (
                     <Text
                       style={[
                         TakeNotesStyles.modalItemCropText,
                         {
-                          backgroundColor:
-                            item.cropName === 'Rice' ? '#FCEBEA' : '#E8F0FB',
+                          backgroundColor: item.cropName === 'Rice' ? '#FCEBEA' : '#E8F0FB',
                         },
                       ]}>
                       {item.cropName}
                     </Text>
-                  </TouchableOpacity>
-                ))}
-            </View>
-          </ScrollView>
+                  ) : null}
+                </TouchableOpacity>
+              ))}
+          </View>
         </View>
       </BottomModal>
     </View>
