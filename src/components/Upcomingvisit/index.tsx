@@ -2,7 +2,7 @@ import React, {useRef, useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Alert,Modal} from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ButtonNavigation, Field, Calendar, Dots, Trash, Edit} from '../../assets/icons/svgs';
+import {ButtonNavigation, Field, Calendar, Dots, Trash, DbEdit} from '../../assets/icons/svgs';
 import {differenceInDays} from 'date-fns';
 import {useApi} from '../../hooks/useApi';
 import {URL} from '../../constants/URLS';
@@ -149,7 +149,7 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
             <Text style={styles.modalOptionText}>Delete</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.modalOption} onPress={handleEdit}>
-            <Edit />
+            <DbEdit />
             <Text style={styles.editOptionText}>Edit</Text>
           </TouchableOpacity>
         </View>

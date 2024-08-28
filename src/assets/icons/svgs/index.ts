@@ -45,6 +45,7 @@ import ProfileImg from './Profile';
 import List from './List';
 import Clock from './Clock';
 import Alert from './Alert';
+import DbEdit from './DbEdit';
 import Leaf from './LeafIcon';
 import Eye from './Eye';
 import EyeSlash from './EyeSlash';
@@ -69,6 +70,7 @@ export {
   LocationPin,
   Rows,
   Columns,
+  DbEdit,
   Location,
   Leaf,
   Layout,

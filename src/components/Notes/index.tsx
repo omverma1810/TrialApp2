@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dots, Trash, Edit } from '../../assets/icons/svgs';
+import { Dots, Trash, DbEdit } from '../../assets/icons/svgs';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useApi } from '../../hooks/useApi';
 import { URL } from '../../constants/URLS';
@@ -57,7 +57,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
         <View style={styles.modalContent}>
           <TouchableOpacity onPress={onDeleteNote} style={styles.modalButton}>
             <Trash />
-            <Text style={styles.modalButtonText}>Delete</Text>
+            <Text style={styles.modalButtonText}>  Delete</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.modalButton}
                       onPress={() => {
@@ -65,7 +65,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
                         bottomSheetModalRef.current?.close();
                       }}
           >
-            <Edit />
+            <DbEdit />
             <Text style={styles.editOptionText}>Edit</Text>
           </TouchableOpacity>
         </View>
