@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>$(App_Name) uses device location services to obtain the location of user and listing location to the server.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>$(App_Name) uses device location services to obtain the location of user and listing location to the server.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>$(App_Name) uses the camera to capture and upload user profile image and listing image to the server.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>$(App_Name) uses the camera to capture and upload user profile image and listing image to the server.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -54,8 +62,6 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Inter-Bold.ttf</string>
