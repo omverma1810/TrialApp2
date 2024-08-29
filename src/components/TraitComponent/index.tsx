@@ -1,85 +1,168 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Dimensions,
-  ScrollView,
+  Animated,
+  Pressable,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import {FieldSybol1} from '../../assets/icons/svgs';
+import {ScrollView} from 'react-native-gesture-handler';
+import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
+import {FONTS} from '../../theme/fonts';
 
-type selectedFieldsType = {
-  [key: string]: boolean;
-};
+const TraitComponent = ({projectData, selectedFields}: any) => { 
+  // console.log('i'm batman',projectData)
+  const [dropdownHeights, setDropdownHeights] = useState(
+    Array.from({length: projectData.length}, () => new Animated.Value(0)),
+  );
+  const [isOpen, setIsOpen] = useState(
+    Array.from({length: projectData.length}, () => false),
+  );
+  const [height, setHeight] = useState<any>(null);
 
+  useEffect(() => {
+    let noOfPlots = 0;
+    
+    projectData.forEach((trait: any) => {
+      if (Array.isArray(trait.locationData)) {
+        trait.locationData.forEach((location: any) => {
+          if (Array.isArray(location.plotData)) {
+            noOfPlots += location.plotData.length;
+          }
+        });
+      }
+    });
+   
+    setHeight(noOfPlots);
+  }, [projectData]);
+  
+  const toggleDropdown = (index: number) => {
+    const newIsOpen = [...isOpen];
+    newIsOpen[index] = !newIsOpen[index];
+    const dropdownHeight = newIsOpen[index] ? height*15 : 0;
 
+    Animated.timing(dropdownHeights[index], {
+      toValue: dropdownHeight,
+      duration: 800,
+      useNativeDriver: false,
+    }).start();
 
-const TraitSection = ({selectedFields, projectData}: {selectedFields: selectedFieldsType, projectData: any}) => {
-  console.log('plotDataaaaa',projectData)
-  const [units,setUnits] = useState<string>("")
-  useEffect(()=>{
-    setUnits(projectData[0].traitUom)
-  },[])
+    setIsOpen(newIsOpen);
+  };
+
   return (
-    <ScrollView>
-      {Object.keys(selectedFields).map(
-        field =>
-          selectedFields[field] && (
-            <ProjectContainer
-              key={field}
-              title={field}
-              data={projectData && projectData[0].locationData[0].plotData}       
-              units={units}
-            />
-          ),
-      )}
+    <ScrollView contentContainerStyle={styles.projectContainer}>
+      {projectData.map((trait: any, traitIndex: number) => (
+        <View
+          key={traitIndex}
+          style={[styles.projectContainer]}>
+          {/* Trait Title and Dropdown Toggle */}
+          <Pressable onPress={() => toggleDropdown(traitIndex)}>
+            <View style={styles.row}>
+              <Text style={styles.title}>{trait.traitName}</Text>
+              <TouchableOpacity onPress={() => toggleDropdown(traitIndex)}>
+                <DropdownArrow />
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+
+          <Animated.View
+            style={[
+              styles.dropdown,
+              styles.borderBottom,
+              {height: dropdownHeights[traitIndex]},
+            ]}>
+            {trait.locationData.map(
+              (location: any, locationIndex: number) =>
+                selectedFields[location.trialLocationId] && (
+                  <View key={locationIndex} style={styles.locationContainer}>
+                    <View style={styles.projectContainerBackground}>
+                      <View style={styles.header}>
+                        <Text style={styles.headerText}>
+                          Field {location.trialLocationId}
+                        </Text>
+                        <FieldSybol1 />
+                      </View>
+                    </View>
+                    <View style={styles.plotWrapper}>
+                      {location.plotData.map((plot: any, plotIndex: number) => (
+                        <View key={plotIndex} style={styles.plotContainer}>
+                          <Text style={styles.plotText}>
+                            Plot {plot.plotNumber}
+                          </Text>
+                          <Text>
+                            {plot.value || 'N/A'}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                ),
+            )}
+          </Animated.View>
+        </View>
+      ))}
     </ScrollView>
   );
 };
 
-const ProjectContainer = ({title, data,units} : {title : String, data: any,units:string }) => {
-  console.log("data" ,data)
-  return (
-    <View style={styles.paddingVertical}>
-      <View
-        style={[styles.projectContainer, styles.projectContainerBackground]}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Field {title}   {data ? data.length : 0} Plots</Text>
-          <FieldSybol1 />
-        </View>
-        <View style={styles.contentContainer}>
-          {data &&
-            data.map((item : any, index : number) => (
-              <ItemComponent
-                key={index}
-                value={`${item.value} ${units}`}
-                title={`Plot : ${item.plotNumber}`}
-              />
-            ))}
-        </View>
-      </View>
-    </View>
-  );
-};
-
-const ItemComponent = ({title,value}: any) => {
-  return (
-    <View style={styles.itemContainer}>
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.title}>{title}</Text>
-        </View>
-        <Text>
-          {value}
-        </Text>
-      </View>
-    </View>
-  );
-};
 const styles = StyleSheet.create({
   projectContainer: {
-    borderRadius: 6,
-    width: Dimensions.get('window').width - 40,
+    padding: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  column: {
+    flexDirection: 'column',
+  },
+  title: {
+    fontSize: 15,
+    fontFamily: FONTS.MEDIUM,
+    color: '#161616',
+  },
+  dropdown: {
+    overflow: 'hidden',
+  },
+  locationContainer: {
+    marginVertical: 8,
+  },
+  borderBottom: {
+    borderBottomColor: '#ddd',
+    marginBottom: 10,
+  },
+
+  locationName: {
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+    marginBottom: 5,
+  },
+  plotWrapper: {
+    paddingLeft: 10,
+  },
+  plotContainer: {
+    display:'flex',
+    marginVertical: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 5,
+    justifyContent:'space-between',
+    flexDirection: 'row',
+  },
+  plot: {
+    justifyContent: 'space-between',
+  },
+  plotText: {
+    fontSize: 16,
+    color:'#161616'
+  },
+  plotValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   projectContainerBackground: {
     backgroundColor: '#F7F7F7',
@@ -98,129 +181,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  contentContainer: {
-    borderRadius: 6,
-    overflow: 'hidden',
-    paddingHorizontal: 1,
-    marginBottom: 1,
-    gap: 1,
-  },
-  itemContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: 'white',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  column: {
-    gap: 10,
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: '400',
-    color: '#161616',
-  },
-  dropdown: {
-    overflow: 'hidden',
-  },
-  entryContainer: {
-    gap: 16,
-    paddingVertical: 15,
-  },
-  projectContainer1: {
-    borderRadius: 6,
-    width: '100%',
-    alignSelf: 'center',
-    backgroundColor: '#F7F7F7',
-    borderWidth: 1,
-    borderColor: '#F7F7F7',
-  },
-  padding: {
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  recordedTraitsText: {
-    color: '#161616',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  borderRadiusOverflow: {
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  entryRow: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  entryColumn: {
-    gap: 5,
-  },
-  entryLabel: {
-    color: '#636363',
-    fontWeight: '400',
-    fontSize: 12,
-  },
-  entryValue: {
-    color: '#161616',
-    fontWeight: '500',
-    fontSize: 14,
-  },
-  editButton: {
-    flexDirection: 'row',
-  },
-  editButtonText: {
-    color: '#1A6DD2',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  notesContainer: {
-    gap: 10,
-  },
-  notesTitle: {
-    color: 'black',
-  },
-  notesContent: {
-    backgroundColor: '#FDF8EE',
-    padding: 16,
-    borderRadius: 8,
-    gap: 5,
-  },
-  notesText: {
-    color: '#161616',
-    fontSize: 14,
-    fontWeight: '400',
-  },
-  notesDate: {
-    color: '#000000',
-    fontSize: 12,
-    fontWeight: '400',
-  },
-  unrecordedTraitsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  unrecordedTraitsText: {
-    color: '#161616',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  viewButtonText: {
-    color: '#1A6DD2',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
 });
 
-export default TraitSection;
+export default TraitComponent;

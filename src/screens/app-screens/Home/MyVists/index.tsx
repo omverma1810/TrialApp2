@@ -4,7 +4,6 @@ import { useApi } from '../../../../hooks/useApi';
 import MyVisitStyles from './MyVistStyles';
 import UpcomingVisits from '../../../../components/Upcomingvisit';
 import { URL } from '../../../../constants/URLS';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 

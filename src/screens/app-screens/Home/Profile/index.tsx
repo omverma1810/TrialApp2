@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import * as Keychain from 'react-native-keychain';
-import {Edit, ProfileImg} from '../../../../assets/icons/svgs';
+import {DbEdit, ProfileImg} from '../../../../assets/icons/svgs';
 import {DEFAULT_ENV, URL} from '../../../../constants/URLS';
 import {useApi} from '../../../../hooks/useApi';
 import useCleanUp from '../../../../hooks/useCleanUp';
@@ -259,7 +259,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           {isDefaultImage ? (
             <View>
               <ProfileImg width={80} height={81} />
-              <Edit
+              <DbEdit
                 style={{position: 'absolute', bottom: 5, right: 5, zIndex: 2}}
               />
             </View>
@@ -291,12 +291,13 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           </View>
           <View
             style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-            <View style={{gap: 8}}>
+            <View style={{gap: 8,width:'80%'}}>
               <Text style={ProfileStyles.infoText}>Phone Number</Text>
               {isEditingPhoneNumber ? (
                 <TextInput
                   style={ProfileStyles.infoTextBold}
                   value={profileData.phoneNumber}
+                  keyboardType='number-pad'
                   onChangeText={text =>
                     setProfileData({...profileData, phoneNumber: text})
                   }
@@ -355,7 +356,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         <Pressable
           onPress={() => navigation.navigate('ChangePassword')}
           style={ProfileStyles.logoutButton}>
-          <Text style={ProfileStyles.editButton}>Chnage Password</Text>
+          <Text style={ProfileStyles.editButton}>Change Password</Text>
         </Pressable>
         <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
           <Text style={ProfileStyles.editButton}>Logout</Text>

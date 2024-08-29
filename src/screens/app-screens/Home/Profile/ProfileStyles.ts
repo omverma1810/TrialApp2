@@ -32,6 +32,7 @@ const ProfileStyle = StyleSheet.create({
     fontWeight: '500',
     color: '#161616',
     fontSize: 15,
+    // width: '80%',
   },
   editButtonContainer: {
     flexDirection: 'row',

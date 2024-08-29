@@ -3,7 +3,6 @@ import {View, Text, Image, Pressable} from 'react-native';
 
 import {Flask, DbLeaf, File, Logo} from '../../../../assets/icons/svgs';
 import DashInfoStyles from './DashInfoStyles';
-import {DashInfoData} from './Data';
 import {HomeScreenProps} from '../../../../types/navigation/appTypes';
 import { useApi } from '../../../../hooks/useApi';
 import { URL } from '../../../../constants/URLS';

@@ -2,7 +2,7 @@ import React, {useRef, useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Alert,Modal} from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ButtonNavigation, Field, Calendar, Dots, Trash, Edit} from '../../assets/icons/svgs';
+import {ButtonNavigation, Field, Calendar, Dots, Trash, DbEdit} from '../../assets/icons/svgs';
 import {differenceInDays} from 'date-fns';
 import {useApi} from '../../hooks/useApi';
 import {URL} from '../../constants/URLS';
@@ -11,6 +11,7 @@ import dayjs, {Dayjs} from 'dayjs';
 import PlanVisitStyles from '../..//screens/app-screens/PlanVisit/PlanVisitStyles';
 import {SafeAreaView, StatusBar, Calender} from '../../components';
 import { FONTS } from '../../theme/fonts';
+import Toast from '../../utilities/toast';
 
 const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   const bottomSheetModalRef = useRef<any>(null);
@@ -36,10 +37,14 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   useEffect(() => {
     if (deleteVisitResponse) {
       if (deleteVisitResponse.status_code === 200) {
-        Alert.alert('Success', 'Visit deleted successfully');
+        Toast.success({
+          message: 'Visit deleted successfully',
+        })
         onDelete(visit.id);
       } else {
-        Alert.alert('Error', 'Failed to delete visit');
+        Toast.error({
+          message: 'Failed to delete visit',
+        })
       }
     }
   }, [deleteVisitResponse]);
@@ -49,9 +54,9 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
     method : 'PUT',
   })
 
-  const onUpdate = async() => {
+  const onUpdate = async(dateSelected : any) => {
     const payload = {
-      date: selectedDate?.format('YYYY-MM-DD'),
+      date: dateSelected.format('YYYY-MM-DD'),
     };
     update({payload})
   }
@@ -59,9 +64,13 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   useEffect(() => {
     if (updatedResponse) {
       if (updatedResponse.status_code === 200) {
-        Alert.alert('Success', 'Visit updated successfully');
+        Toast.success({
+          message: 'Visit updated successfully'
+        })
       } else {
-        Alert.alert('Error', 'Failed to update visit');
+        Toast.error({
+          message: 'Failed to update visit'
+        })
       }
     }
   }, [updatedResponse]);
@@ -73,7 +82,8 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   };
   const handleOk = (date: Dayjs | null) => {
     setSelectedDate(dayjs(date));
-    onUpdate()
+    const dateSelected = dayjs(date);
+    onUpdate(dateSelected)
     refreshVisits(); // Refresh visits after update
     setIsDateModelVisible(false);
     if (selectedDate) {
@@ -139,7 +149,7 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
             <Text style={styles.modalOptionText}>Delete</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.modalOption} onPress={handleEdit}>
-            <Edit />
+            <DbEdit />
             <Text style={styles.editOptionText}>Edit</Text>
           </TouchableOpacity>
         </View>

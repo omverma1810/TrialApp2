@@ -144,14 +144,14 @@ const HomeStackScreens = () => {
       <HomeStack.Screen
         name="PlanVisit"
         component={PlanVisit}
-        options={{title: 'Plan a Visit'}}
+        options={{headerShown: false}}
       />
       <HomeStack.Screen
         name="TakeNotes"
         component={TakeNotes}
-        options={{title: 'Take Notes'}}
+        options={{headerShown: false}}
       />
-      <HomeStack.Screen name="Profile" component={Profile} />
+      <HomeStack.Screen name="Profile" component={Profile} options={{headerShown:false}} />
       <HomeStack.Screen
         name="ChangePassword"
         component={ChangePassword}
@@ -189,7 +189,7 @@ const RecordStackScreens = () => {
         headerShadowVisible: false,
         animation: 'slide_from_right',
       }}>
-      <RecordStack.Screen name="Record" component={Record} />
+      <RecordStack.Screen name="Record" component={Record} options={{headerShown:false}}/>
     </RecordStack.Navigator>
   );
 };
