@@ -31,7 +31,7 @@ export const useApi = ({
 
   const getUrl = useMemo(() => {
     return (pathParams = '', queryParams = '') => {
-      const formattedPathParams = pathParams ? `/${pathParams}` : '';
+      const formattedPathParams = pathParams ? `/${pathParams}/` : '';
       const formattedQueryParams = queryParams ? `?${queryParams}` : '';
       return `${BASE_URL}${url}${formattedPathParams}${formattedQueryParams}`;
     };
