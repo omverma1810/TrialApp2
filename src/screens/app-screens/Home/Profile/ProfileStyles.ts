@@ -9,6 +9,14 @@ const ProfileStyle = StyleSheet.create({
     gap: 24,
     paddingVertical: 10,
   },
+  loaderContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+    height: '100%',
+    gap: 24,
+    paddingVertical: 10,
+  },  
   profileContainer: {
     height: 80,
     width: 80,
@@ -32,7 +40,6 @@ const ProfileStyle = StyleSheet.create({
     fontWeight: '500',
     color: '#161616',
     fontSize: 15,
-    // width: '80%',
   },
   editButtonContainer: {
     flexDirection: 'row',
@@ -68,5 +75,15 @@ const ProfileStyle = StyleSheet.create({
     fontFamily: FONTS.REGULAR,
     textAlign: 'center',
   },
+  ScreenTitle : {
+    marginHorizontal:20,
+    // marginVertical:10,
+    fontFamily: FONTS.MEDIUM,
+    fontSize:20,
+    color:'#000',
+    backgroundColor:"white",
+    display:'flex' ,
+  }
+
 });
 export default ProfileStyle;

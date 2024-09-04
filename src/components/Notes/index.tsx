@@ -29,6 +29,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
           message: 'Note deleted successfully',
         })
         onDelete(note.id);
+        bottomSheetModalRef.current?.close();
       } else {
         Toast.error({
           message: 'Failed to delete note',

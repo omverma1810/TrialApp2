@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import React, {useEffect, useRef, useState, useMemo, useCallback} from 'react';
 import {
   Pressable,
   ScrollView,
@@ -9,23 +9,23 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import { Loader, SafeAreaView, StatusBar } from '../../../components';
+import {Loader, SafeAreaView, StatusBar} from '../../../components';
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DropdownArrow, Search, X } from '../../../assets/icons/svgs';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {DropdownArrow, Search, X} from '../../../assets/icons/svgs';
 import BottomModal from '../../../components/BottomSheetModal';
 
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import CheckBox from '../../../components/CheckBox';
 import Chip from '../../../components/Chip';
 import RecordDropDown from '../../../components/RecordDropdown';
-import { URL } from '../../../constants/URLS';
-import { useApi } from '../../../hooks/useApi';
+import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
 import RecordStyles from './RecordStyles';
 import TakeNotesStyles from '../TakeNotes/TakeNotesStyle';
 import Filter from './Filter';
-import { LOCALES } from '../../../localization/constants';
-import { useTranslation } from 'react-i18next';
+import {LOCALES} from '../../../localization/constants';
+import {useTranslation} from 'react-i18next';
 import TraitSection from '../../../components/TraitComponent';
 import Cancel from '../../../assets/icons/svgs/Cancel';
 
@@ -49,7 +49,7 @@ interface Chip {
 }
 
 const Record = () => {
-  const { t } = useTranslation();
+  const {t} = useTranslation();
 
   const [experiment, setExperiment] = useState();
   const [experimentData, setExperimentData] = useState(null);
@@ -72,7 +72,7 @@ const Record = () => {
   const [inputVisible, setInputVisible] = useState(false);
   const bottomSheetModalRef = useRef<BottomSheetModalMethods>(null);
   const secondBottomModalRef = useRef<BottomSheetModalMethods>(null);
-  const { bottom } = useSafeAreaInsets();
+  const {bottom} = useSafeAreaInsets();
   const [activeListButton, setActiveListButton] = useState('Plot');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFields, setSelectedFields] = useState<{
@@ -83,10 +83,11 @@ const Record = () => {
     useState<SelectedFieldData | null>(null);
   const [fields, setFields] = useState([]);
   const [experimentType, setExperimentType] = useState<string | null>(null);
-  const [locationIds, setLocationIds] = useState<number[]>([]);
+  const [locationIds, setLocationIds] = useState<any>([]);
   const [traitData, setTraitData] = useState<any>(null);
   const [plotData, setPlotData] = useState<any>(null);
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -103,22 +104,23 @@ const Record = () => {
       setSelectedProject(option);
       setExperimentList(experimentData?.[selectedCrop][option] || []);
       setSelectedExperiment(null);
-      setChipTitle('Select an Experiment');    
+      setChipTitle('Select an Experiment');
     },
     [experimentData, selectedCrop],
   );
   useEffect(() => {
-    if (experimentData && experimentData["Rice"]) {
-      setSelectedCrop("Rice");
+    if (experimentData && experimentData['Rice']) {
+      setSelectedCrop('Rice');
 
-      const newProjectList = Object.keys(experimentData["Rice"]);
+      const newProjectList = Object.keys(experimentData['Rice']);
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+      setExperimentList(experimentData['Rice'][newProjectList[0]] || []);
     } else {
       setProjectList([]);
       setSelectedProject('');
       setExperimentList([]);
+      setLocationIds([]);
     }
   }, [experimentData]);
 
@@ -141,7 +143,7 @@ const Record = () => {
       return;
     }
 
-    const { data } = experimentListData;
+    const {data} = experimentListData;
     const cropList = Object.keys(data);
     const selectedCrop = cropList[0];
     const projectList = Object.keys(data[selectedCrop] || {});
@@ -168,7 +170,7 @@ const Record = () => {
     bottomSheetModalRef.current?.present();
   };
   const handleExperimentSelect = (item: any) => {
-    console.log('=============>', { item });
+    console.log('=============>', {item});
     setSelectedExperiment(item);
     setChipTitle(item.fieldExperimentName);
     console.log('selectedExperiment', selectedExperiment);
@@ -181,7 +183,10 @@ const Record = () => {
     method: 'GET',
   });
   useEffect(() => {
-    getFields();
+    if (selectedExperiment) {
+      setLocationIds([]);
+      getFields();
+    }
   }, [selectedExperiment]);
 
   useEffect(() => {
@@ -199,7 +204,9 @@ const Record = () => {
     () => (
       <View style={TakeNotesStyles.emptyContainer}>
         {isExperimentListLoading ? (
-          <Loader />
+          <View style={RecordStyles.loaderContainer}>
+            <Loader />
+          </View>
         ) : (
           <Text style={TakeNotesStyles.emptyText}>
             {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
@@ -232,30 +239,34 @@ const Record = () => {
     setSelectedFields({});
   }, [selectedExperiment]);
 
-  const handleFieldSelect = async (id: any) => {
+  const handleFieldSelect = (id: string) => {
     const isSelected = !selectedFields[id];
-    setSelectedFields(prevState => ({
-      ...prevState,
-      [id]: isSelected,
-    }));
-    const updatedLocationIds = isSelected
-      ? [...locationIds, id]
-      : locationIds.filter(locationId => locationId !== id);
-    setLocationIds(updatedLocationIds);
 
+    setSelectedFields(prevState => {
+      const updatedFields = {
+        ...prevState,
+        [id]: isSelected,
+      };
 
-    try {
-      await fetchTraitData(updatedLocationIds);
-    } catch (error) {
-      console.error('Error fetching trait data:', error);
-    }
+      // Derive locationIds based on updatedFields
+      const updatedLocationIds = Object.keys(updatedFields).filter(
+        fieldId => updatedFields[fieldId],
+      );
 
-    try {
-      await fetchPlotData(updatedLocationIds);
-    } catch (error) {
-      console.error('Error fetching plot data:', error);
-    }
+      setLocationIds(updatedLocationIds);
+
+      return updatedFields;
+    });
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchTraitData();
+      await fetchPlotData();
+    };
+
+    fetchData();
+  }, [locationIds]);
+
   const [getLocationTraitData, locationTraitDataResponse] = useApi({
     url: URL.MULTI_TRIAL_LOCATION,
     method: 'POST',
@@ -265,21 +276,23 @@ const Record = () => {
       const data = locationTraitDataResponse.data;
       setTraitData(data);
     }
-    console.log('traitData', traitData);
+    setLoading(false);
+    // console.log('traitData', traitData);
     secondBottomModalRef.current?.close();
   }, [locationTraitDataResponse]);
 
-  const fetchTraitData = (updatedLocationIds: number[]) => {
+  const fetchTraitData = () => {
+    setLoading(true);
     const payloadForTrait = {
       experimentId: selectedExperiment?.id,
       experimentType: experimentType ? experimentType : 'line',
-      locationIds: updatedLocationIds,
+      locationIds: locationIds,
       apiCallType: 'trait',
     };
     const headers = {
       'Content-Type': 'application/json',
     };
-    getLocationTraitData({ payload: payloadForTrait, headers });
+    getLocationTraitData({payload: payloadForTrait, headers});
   };
 
   const [locationPlotData, locationPlotDataResponse] = useApi({
@@ -292,21 +305,23 @@ const Record = () => {
       let data = locationPlotDataResponse.data;
       setPlotData(data);
     }
-    console.log('pd', plotData);
+    setLoading(false);
+    // console.log('pd', plotData);
     secondBottomModalRef.current?.close();
   }, [locationPlotDataResponse]);
 
-  const fetchPlotData = (updatedLocationIds: number[]) => {
+  const fetchPlotData = () => {
+    setLoading(true);
     const payloadForPlot = {
       experimentId: selectedExperiment?.id,
       experimentType: experimentType ? experimentType : 'line',
-      locationIds: updatedLocationIds,
+      locationIds: locationIds,
       apiCallType: 'plot',
     };
     const headers = {
       'Content-Type': 'application/json',
     };
-    locationPlotData({ payload: payloadForPlot, headers });
+    locationPlotData({payload: payloadForPlot, headers});
   };
 
   useEffect(
@@ -315,26 +330,24 @@ const Record = () => {
   );
 
   return (
-    <SafeAreaView>
+    <SafeAreaView edges={['top']}>
       <StatusBar />
+      <View>
+        <Text style={RecordStyles.ScreenTitle}>Record</Text>
+      </View>
       <View style={RecordStyles.container}>
-        <View style={RecordStyles.searchContainer}>
-          <Search />
-          <TextInput
-            style={RecordStyles.searchInput}
-            placeholderTextColor="#949494"
-            placeholder="Search Experiments"
-          />
-        </View>
         <View>
           <FlatList
             data={experimentList}
             contentContainerStyle={
-              experimentList?.length === 0 ? { flexGrow: 1 } : { paddingBottom: 10 }
+              // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
+              experimentList?.length === 0 
+              ? { flexGrow: 1, justifyContent: 'center', alignItems: 'center' ,height:'100%'} 
+              : { paddingBottom: 10 }      
             }
-            showsVerticalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
-            renderItem={({ item, index }) => null}
+            renderItem={({item, index}) => null}
             keyExtractor={(_, index: any) => index.toString()}
             ListEmptyComponent={ListEmptyComponent}
           />
@@ -342,7 +355,6 @@ const Record = () => {
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={RecordStyles.container}>
-
           {selectedCrop && selectedProject && !selectedExperiment && (
             <Chip
               onPress={handleRightIconClick}
@@ -381,21 +393,21 @@ const Record = () => {
               <Pressable onPress={handleSecondBottomModalOpen}>
                 <View style={RecordStyles.fieldContainer}>
                   <View style={RecordStyles.fieldRow}>
-                    {Object.values(selectedFields).some(isSelected => isSelected) ? (
+                    {Object.values(selectedFields).some(
+                      isSelected => isSelected,
+                    ) ? (
                       <View style={RecordStyles.selectedFieldsWrapper}>
                         {Object.keys(selectedFields).map((fieldId, index) => {
                           if (selectedFields[fieldId]) {
                             return (
                               <View
-                                key={index}
+                                key={fieldId}
                                 style={RecordStyles.selectedFieldContainer}>
                                 <Text style={RecordStyles.fieldName}>
                                   Field {fieldId}
                                 </Text>
                                 <TouchableOpacity
-                                  onPress={() =>
-                                    handleFieldSelect(fieldId)
-                                  }>
+                                  onPress={() => handleFieldSelect(fieldId)}>
                                   <Cancel />
                                 </TouchableOpacity>
                               </View>
@@ -461,6 +473,12 @@ const Record = () => {
                       </Pressable>
                     </View>
                   </View>
+                  {loading ? (
+                    <View>
+                      <Loader />
+                    </View>
+                  ) : null}
+
                   {activeListButton === 'Plot' && (
                     <RecordDropDown
                       selectedFields={selectedFields}
@@ -482,11 +500,11 @@ const Record = () => {
           <BottomModal
             bottomSheetModalRef={bottomSheetModalRef}
             type="CONTENT_HEIGHT"
-            containerStyle={{ paddingBottom: bottom }}>
+            containerStyle={{paddingBottom: bottom}}>
             <View style={RecordStyles.modalContainer}>
               <Text style={RecordStyles.modalTitle}>Select an Experiment</Text>
               <ScrollView>
-                <View style={{ gap: 30 }}>
+                <View style={{gap: 30}}>
                   {experimentList &&
                     experimentList.map((item, index) => (
                       <Pressable
@@ -518,11 +536,11 @@ const Record = () => {
           <BottomModal
             bottomSheetModalRef={secondBottomModalRef}
             type="CONTENT_HEIGHT"
-            containerStyle={{ paddingBottom: bottom }}>
+            containerStyle={{paddingBottom: bottom}}>
             <View style={RecordStyles.modalContainer}>
               <Text style={RecordStyles.modalTitle}>Select a Field</Text>
               <ScrollView>
-                <View style={{ gap: 30 }}>
+                <View style={{gap: 30}}>
                   {fields.map((field: any) => (
                     <View
                       key={field.id}

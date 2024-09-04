@@ -1,9 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import dayjs, {Dayjs} from 'dayjs';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Alert, FlatList, Modal, Pressable, Text, View} from 'react-native';
+import {Alert, FlatList, Modal, Pressable, Text, View,TouchableOpacity} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {DropdownArrow, Search} from '../../../assets/icons/svgs';
+import {Back, DropdownArrow, Search} from '../../../assets/icons/svgs';
 import {
   Calender,
   Input,
@@ -18,6 +19,7 @@ import {LOCALES} from '../../../localization/constants';
 import ExperimentCard from './ExperimentCard';
 import Filter from './Filter';
 import PlanVisitStyles from './PlanVisitStyles';
+import Toast from '../../../utilities/toast';
 
 interface Chip {
   id: number;
@@ -219,7 +221,9 @@ const PlanVisit = ({navigation}: any) => {
   });
   const onPlanVisit = async () => {
     if (!selectedDate) {
-      Alert.alert('Error', 'Please select all fields before planning a visit');
+      Toast.error({
+        message:'Please select all fields before planning a visit'
+      })
       return;
     }
     const newData = {
@@ -233,8 +237,16 @@ const PlanVisit = ({navigation}: any) => {
   useEffect(() => {
     console.log({planVisitResponse});
     if (planVisitResponse && planVisitResponse.status_code == 201) {
-      Alert.alert('Success', 'Visit planned successfully');
+      Toast.success({
+        message:'Visit planned successfully'
+      })
       navigation.navigate('Home',{ refresh: true });
+    }else{
+      if(planVisitResponse){
+        Toast.error({
+          'message':"Something Went Wrong"
+        })
+      }
     }
   }, [planVisitResponse]);
 
@@ -243,7 +255,9 @@ const PlanVisit = ({navigation}: any) => {
     method: 'GET',
   });
   useEffect(() => {
-    getFields();
+    if(selectedExperiment){
+      getFields();
+    }
   }, [selectedExperiment]);
 
   useEffect(() => {
@@ -255,21 +269,33 @@ const PlanVisit = ({navigation}: any) => {
     console.log('fields', fields, selectedField);
   }, []);
   return (
-    <SafeAreaView>
+    <SafeAreaView edges={['top']}>
       <StatusBar />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginHorizontal: 20,
+        }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Back width={24} height={24} />
+        </TouchableOpacity>
+        <Text style={PlanVisitStyles.ScreenTitle}>
+          Plan Visit
+        </Text>
+      </View>
+
       <View style={PlanVisitStyles.container}>
         <View style={PlanVisitStyles.container}>
-          <Input
-            placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
-            leftIcon={Search}
-            customLeftIconStyle={{marginRight: 10}}
-          />
           <FlatList
             data={experimentList}
             contentContainerStyle={
-              experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
+              // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
+              experimentList?.length === 0 
+              ? { flexGrow: 1, justifyContent: 'center', alignItems: 'center' ,height:'100%'} 
+              : { paddingBottom: 10 }      
             }
-            showsVerticalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
             renderItem={({item, index}) => null}
             keyExtractor={(_, index) => index.toString()}

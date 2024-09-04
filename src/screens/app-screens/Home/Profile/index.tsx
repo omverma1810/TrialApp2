@@ -1,8 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -12,7 +10,7 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import * as Keychain from 'react-native-keychain';
-import {DbEdit, ProfileImg} from '../../../../assets/icons/svgs';
+import {Back, Edit, ProfileImg} from '../../../../assets/icons/svgs';
 import {DEFAULT_ENV, URL} from '../../../../constants/URLS';
 import {useApi} from '../../../../hooks/useApi';
 import useCleanUp from '../../../../hooks/useCleanUp';
@@ -25,6 +23,8 @@ import {
 import ProfileStyles from './ProfileStyles';
 import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
 import DeviceInfo from 'react-native-device-info';
+import Toast from '../../../../utilities/toast';
+import { Loader } from '../../../../components';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
@@ -68,6 +68,13 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         email: fetchedUser.email,
       });
       setIsLoading(false);
+    } else {
+      if (profileDataResponse) {
+        setIsLoading(false);
+        Toast.error({
+          message: 'Error Fetching Profile',
+        });
+      }
     }
   }, [profileDataResponse]);
 
@@ -121,7 +128,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdateData = async () => {
-      Alert.alert('Success', 'Profile updated successfully');
+      Toast.success({
+        message: 'Profile updated successfully',
+      });
       const user = updateProfileResponse.data.user;
       console.log(user);
       dispatch(setUserDetails(user));
@@ -137,6 +146,12 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     };
     if (updateProfileResponse && updateProfileResponse.status_code === 200) {
       handleUpdateData();
+    } else {
+      if (updateProfileResponse) {
+        Toast.error({
+          message: 'Something Went Wrong',
+        });
+      }
     }
   }, [updateProfileResponse]);
 
@@ -159,7 +174,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdateEmailData = async () => {
-      Alert.alert('Success', 'Email updated successfully');
+      Toast.success({
+        message: 'Email updated successfully',
+      });
       const user = updateEmailResponse.data.user;
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
@@ -170,6 +187,12 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     };
     if (updateEmailResponse && updateEmailResponse.status_code === 200) {
       handleUpdateEmailData();
+    } else {
+      if (updateEmailResponse) {
+        Toast.error({
+          message: 'Something Went Wrong',
+        });
+      }
     }
   }, [updateEmailResponse]);
 
@@ -193,7 +216,9 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     const handleUpdatePhoneNumberData = async () => {
-      Alert.alert('Success', 'Phone number updated successfully');
+      Toast.success({
+        message: 'Phone number updated successfully',
+      });
       const user = updatePhoneNumberResponse.data.user;
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
@@ -207,6 +232,12 @@ const Profile = ({navigation}: ProfileScreenProps) => {
       updatePhoneNumberResponse.status_code === 200
     ) {
       handleUpdatePhoneNumberData();
+    } else {
+      if (updatePhoneNumberResponse) {
+        Toast.error({
+          message: 'Something Went Wrong',
+        });
+      }
     }
   }, [updatePhoneNumberResponse]);
 
@@ -243,15 +274,23 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     }
   };
   if (isLoading) {
-    return (
-      <View style={ProfileStyles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
+    <Loader />;
   }
 
   return (
     <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginHorizontal: 20,
+        }}>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Back width={24} height={24} />
+        </Pressable>
+        <Text style={ProfileStyles.ScreenTitle}>Profile</Text>
+      </View>
+
       <View style={ProfileStyles.container}>
         <Pressable
           style={ProfileStyles.profileContainer}
@@ -259,7 +298,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           {isDefaultImage ? (
             <View>
               <ProfileImg width={80} height={81} />
-              <DbEdit
+              <Edit
                 style={{position: 'absolute', bottom: 5, right: 5, zIndex: 2}}
               />
             </View>
@@ -291,16 +330,16 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           </View>
           <View
             style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-            <View style={{gap: 8,width:'80%'}}>
+            <View style={{gap: 8}}>
               <Text style={ProfileStyles.infoText}>Phone Number</Text>
               {isEditingPhoneNumber ? (
                 <TextInput
                   style={ProfileStyles.infoTextBold}
                   value={profileData.phoneNumber}
-                  keyboardType='number-pad'
                   onChangeText={text =>
                     setProfileData({...profileData, phoneNumber: text})
                   }
+                  keyboardType="number-pad"
                 />
               ) : (
                 <Text style={ProfileStyles.infoTextBold}>

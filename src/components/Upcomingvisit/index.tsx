@@ -1,24 +1,39 @@
 import React, {useRef, useEffect, useState} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Alert,Modal} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Modal,
+} from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {ButtonNavigation, Field, Calendar, Dots, Trash, DbEdit} from '../../assets/icons/svgs';
+import {
+  ButtonNavigation,
+  Field,
+  Calendar,
+  Dots,
+  Trash,
+  DbEdit,
+} from '../../assets/icons/svgs';
 import {differenceInDays} from 'date-fns';
 import {useApi} from '../../hooks/useApi';
 import {URL} from '../../constants/URLS';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import dayjs, {Dayjs} from 'dayjs';
 import PlanVisitStyles from '../..//screens/app-screens/PlanVisit/PlanVisitStyles';
 import {SafeAreaView, StatusBar, Calender} from '../../components';
-import { FONTS } from '../../theme/fonts';
+import {FONTS} from '../../theme/fonts';
 import Toast from '../../utilities/toast';
 
-const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
+const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
   const bottomSheetModalRef = useRef<any>(null);
   const {bottom} = useSafeAreaInsets();
   const currentDate = new Date();
-  
-  const [daysLeft,setdaysLeft] = useState<any>(differenceInDays(new Date(visit.date), currentDate));
+
+  const [daysLeft, setdaysLeft] = useState<any>(
+    differenceInDays(new Date(visit.date), currentDate),
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [isDateModelVisible, setIsDateModelVisible] = useState(false);
@@ -31,63 +46,68 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
   const onDeleteVisit = async () => {
     deleteVisit();
   };
-  useEffect(()=>{
-    setdaysLeft(differenceInDays(new Date(visit.date), currentDate))
-  },[visit.date])
+  useEffect(() => {
+    setdaysLeft(differenceInDays(new Date(visit.date), currentDate));
+  }, [visit.date]);
   useEffect(() => {
     if (deleteVisitResponse) {
       if (deleteVisitResponse.status_code === 200) {
         Toast.success({
           message: 'Visit deleted successfully',
-        })
+        });
         onDelete(visit.id);
       } else {
         Toast.error({
           message: 'Failed to delete visit',
-        })
+        });
       }
     }
   }, [deleteVisitResponse]);
-  
-  const [update,updatedResponse] = useApi({
-    url : `${URL.VISITS}${visit.id}/`,
-    method : 'PUT',
-  })
 
-  const onUpdate = async(dateSelected : any) => {
+  const [update, updatedResponse] = useApi({
+    url: `${URL.VISITS}${visit.id}/`,
+    method: 'PUT',
+  });
+
+  const onUpdate = async (dateSelected: any) => {
     const payload = {
       date: dateSelected.format('YYYY-MM-DD'),
     };
-    update({payload})
-  }
+    update({payload});
+  };
 
   useEffect(() => {
     if (updatedResponse) {
       if (updatedResponse.status_code === 200) {
         Toast.success({
-          message: 'Visit updated successfully'
-        })
+          message: 'Visit updated successfully',
+        });
       } else {
         Toast.error({
-          message: 'Failed to update visit'
-        })
+          message: 'Failed to update visit',
+        });
       }
     }
   }, [updatedResponse]);
 
   const handleEdit = () => {
-    setIsEditing(true)
-    bottomSheetModalRef.current.close()
-    setIsDateModelVisible(true)
+    setIsEditing(true);
+    bottomSheetModalRef.current.close();
+    setIsDateModelVisible(true);
   };
   const handleOk = (date: Dayjs | null) => {
     setSelectedDate(dayjs(date));
     const dateSelected = dayjs(date);
-    onUpdate(dateSelected)
+    onUpdate(dateSelected);
     refreshVisits(); // Refresh visits after update
     setIsDateModelVisible(false);
     if (selectedDate) {
-      setdaysLeft(differenceInDays(new Date(selectedDate.format('YYYY-MM-DD')), currentDate)); // Recalculate daysLeft
+      setdaysLeft(
+        differenceInDays(
+          new Date(selectedDate.format('YYYY-MM-DD')),
+          currentDate,
+        ),
+      ); // Recalculate daysLeft
     }
   };
 
@@ -106,7 +126,8 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
               <Text style={styles.description}>{visit.trial_type}</Text>
             </View>
           </View>
-          <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
+          <TouchableOpacity
+            onPress={() => bottomSheetModalRef.current?.present()}>
             <Dots />
           </TouchableOpacity>
         </View>
@@ -115,30 +136,31 @@ const UpcomingVisits = ({visit, onDelete, navigation,refreshVisits} : any) => {
             <Calendar />
             <View style={styles.textColumn}>
               <Text style={styles.date}>{visit.date}</Text>
-              <Text style={styles.daysLeft}>Days left: {daysLeft ? daysLeft : "N/A"}</Text>
+              <Text style={styles.daysLeft}>
+                Days left: {daysLeft ? daysLeft : 'N/A'}
+              </Text>
             </View>
           </View>
           <ButtonNavigation />
         </View>
       </View>
-      {
-        isDateModelVisible && 
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={isDateModelVisible}
-            onRequestClose={() => {
-              setIsDateModelVisible(!isDateModelVisible);
-            }}>
-            <View style={PlanVisitStyles.modalOverlay}>
-              <Calender
-                modalVisible={isDateModelVisible}
-                onCancel={handleCancel}
-                onOk={handleOk}
-              />
-            </View>
-          </Modal>
-      }
+      {isDateModelVisible && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isDateModelVisible}
+          onRequestClose={() => {
+            setIsDateModelVisible(!isDateModelVisible);
+          }}>
+          <View style={PlanVisitStyles.modalOverlay}>
+            <Calender
+              modalVisible={isDateModelVisible}
+              onCancel={handleCancel}
+              onOk={handleOk}
+            />
+          </View>
+        </Modal>
+      )}
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
@@ -166,7 +188,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical : 8,
+    paddingVertical: 8,
     borderWidth: 1,
     borderColor: '#F7F7F7',
     // elevation: 3,
@@ -186,7 +208,7 @@ const styles = StyleSheet.create({
   },
   fieldName: {
     fontSize: 16,
-    fontFamily : FONTS.MEDIUM,
+    fontFamily: FONTS.MEDIUM,
     color: '#161616',
   },
   description: {
@@ -195,7 +217,7 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 16,
-    fontFamily : FONTS.MEDIUM,
+    fontFamily: FONTS.MEDIUM,
     color: '#161616',
   },
   daysLeft: {
@@ -216,15 +238,15 @@ const styles = StyleSheet.create({
   modalOptionText: {
     marginLeft: 10,
     fontSize: 15,
-    color:'#161616',
-    fontWeight:'400'
+    color: '#161616',
+    fontWeight: '400',
   },
   editOptionText: {
     marginLeft: 10,
     fontSize: 15,
-    color:'#161616',
-    fontWeight:'400',
-    marginHorizontal:20
+    color: '#161616',
+    fontWeight: '400',
+    marginHorizontal: 20,
   },
 });
 

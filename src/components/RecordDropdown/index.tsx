@@ -140,7 +140,7 @@ const ItemComponent = ({
   const unrecordedTraitData = plotData.unrecordedTraitData;
   const [dropdownHeight] = useState(new Animated.Value(0));
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
-  const [changedValue,setChangedValue] = useState<any>(null);
+  const [changedValue, setChangedValue] = useState<any>(null);
   useEffect(() => {
     const height = recordedTraitData.length + unrecordedTraitData.length;
     Animated.timing(dropdownHeight, {
@@ -171,17 +171,16 @@ const ItemComponent = ({
     setCurrentEntry(entry);
     if (entry.dataType === 'fixed') {
       setModalVisible(true);
-    }else{
+    } else {
       setEditingEntryId(entry.observationId);
     }
-};
+  };
 
-useEffect(() => {
-  if (modalVisible && optionsModalRef.current) {
-    optionsModalRef.current.present();
-  }
-}, [modalVisible, optionsModalRef]);
-
+  useEffect(() => {
+    if (modalVisible && optionsModalRef.current) {
+      optionsModalRef.current.present();
+    }
+  }, [modalVisible, optionsModalRef]);
 
   const handleValueSubmit = (value: any) => {
     const payload = {
@@ -210,8 +209,8 @@ useEffect(() => {
         message: 'Value Updated Successfully',
       });
       currentEntry.value = changedValue;
-    } else{
-      if(updateValueResponse){
+    } else {
+      if (updateValueResponse) {
         Toast.error({
           message: 'Something Went Wrong',
         });
@@ -223,7 +222,7 @@ useEffect(() => {
     optionsModalRef.current?.close();
   }, [updateValueResponse]);
 
-  return ( 
+  return (
     <View style={styles.itemContainer}>
       <View style={styles.row}>
         <View style={styles.column}>
@@ -253,23 +252,29 @@ useEffect(() => {
                     </View>
                   </View>
                   <View style={styles.entryRow}>
-                  {editingEntryId === entry.observationId ? (
+                    {editingEntryId === entry.observationId ? (
                       <View style={styles.entryColumn}>
-                            <ValueInputCard
-                              onSubmit={handleValueSubmit}
-                              entry={currentEntry} 
-                              setShowInputCard={setEditingEntryId}
-                            />
+                        <ValueInputCard
+                          onSubmit={handleValueSubmit}
+                          entry={currentEntry}
+                          setShowInputCard={setEditingEntryId}
+                        />
                       </View>
                     ) : (
-                      <TouchableOpacity
-                        onPress={() => handleEditPress(entry)}
-                      >
-                        <View style={styles.entryColumn}>
-                          <Text style={styles.entryLabel}>Value</Text>
-                          <Text style={styles.entryValue}>{entry.value}</Text>
-                        </View>
-                      </TouchableOpacity>
+                      <>
+                        <TouchableOpacity
+                          onPress={() => handleEditPress(entry)}>
+                          <View style={styles.entryColumn}>
+                            <Text style={styles.entryLabel}>Value</Text>
+                            <Text style={styles.entryValue}>{entry.value}</Text>
+                          </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleEditPress(entry)}
+                          style={styles.editButton}>
+                          <Text style={styles.editButtonText}>Edit</Text>
+                        </TouchableOpacity>
+                      </>
                     )}
                   </View>
                 </View>
@@ -281,7 +286,7 @@ useEffect(() => {
             <Text style={styles.notesTitle}>Notes</Text>
             <View style={styles.notesContent}>
               <Text style={styles.notesText}>{notes}</Text>
-              <Text style={styles.notesDate}>24 Sept</Text>
+              {/* <Text style={styles.notesDate}>24 Sept</Text> */}
             </View>
           </View>
         )}
@@ -303,23 +308,29 @@ useEffect(() => {
                     </View>
                   </View>
                   <View style={styles.entryRow}>
-                  {editingEntryId === entry.observationId ? (
+                    {editingEntryId === entry.observationId ? (
                       <View style={styles.entryColumn}>
-                            <ValueInputCard
-                              onSubmit={handleValueSubmit}
-                              entry={currentEntry}
-                              setShowInputCard={setEditingEntryId}
-                            />
+                        <ValueInputCard
+                          onSubmit={handleValueSubmit}
+                          entry={currentEntry}
+                          setShowInputCard={setEditingEntryId}
+                        />
                       </View>
                     ) : (
-                      <TouchableOpacity
-                        onPress={() => handleEditPress(entry)}
-                      >
-                        <View style={styles.entryColumn}>
-                          <Text style={styles.entryLabel}>Value</Text>
-                          <Text style={styles.entryValue}>{entry.value}</Text>
-                        </View>
-                      </TouchableOpacity>
+                      <>
+                        <TouchableOpacity
+                          onPress={() => handleEditPress(entry)}>
+                          <View style={styles.entryColumn}>
+                            <Text style={styles.entryLabel}>Value</Text>
+                            <Text style={styles.entryValue}>{entry.value}</Text>
+                          </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => handleEditPress(entry)}
+                          style={styles.editButton}>
+                          <Text style={styles.editButtonText}>Edit</Text>
+                        </TouchableOpacity>
+                      </>
                     )}
                   </View>
                 </View>

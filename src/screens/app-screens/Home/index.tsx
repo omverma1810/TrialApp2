@@ -22,7 +22,7 @@ const Home: React.FC<HomeScreenProps> = ({navigation,route} : any) => {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView edges={['top']}>
       <StatusBar />
       <View style={styles.viewStyle}>
         <Header navigation={navigation} />
