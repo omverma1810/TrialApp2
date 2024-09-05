@@ -20,17 +20,24 @@ import {URL, DEFAULT_ENV} from '../../../constants/URLS';
 import {setTokens} from '../../../utilities/token';
 import {
   setIsUserSignedIn,
+  setOrganizationURL,
   setUserDetails,
 } from '../../../store/slice/authSlice';
-import {useAppDispatch} from '../../../store';
+import {useAppDispatch, useAppSelector} from '../../../store';
 import {useKeyboard} from '../../../hooks/useKeaboard';
 import {Eye, EyeSlash} from '../../../assets/icons/svgs';
+import axios from 'axios';
+import Toast from '../../../utilities/toast';
 
 const SignIn = () => {
   const {t} = useTranslation();
   const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
+  const ORGANIZATION_URL_STORAGE_KEY = 'ORGANIZATION_URL';
   const dispatch = useAppDispatch();
+  const {organizationURL} = useAppSelector(state => state.auth);
   const {isKeyboardOpen} = useKeyboard();
+  const [isValidateURLPending, setIsValidateURLPending] = useState(false);
+  const [url, setUrl] = useState('');
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -78,6 +85,84 @@ const SignIn = () => {
     };
     login({payload});
   };
+
+  const renderLoginView = () => {
+    return (
+      <>
+        <View style={styles.loginLabelContainer}>
+          <Text style={styles.welcome}>Trials App 2.0</Text>
+          <Text style={styles.loginToContinue}>Login to continue!</Text>
+        </View>
+        <Input
+          placeholder={t(LOCALES.LOGIN.LBL_USERNAME)}
+          value={userName}
+          onChangeText={setUserName}
+        />
+        <Input
+          placeholder={t(LOCALES.LOGIN.LBL_PASSWORD)}
+          value={password}
+          onChangeText={setPassword}
+          rightIcon={showPassword ? <EyeSlash /> : <Eye />}
+          onRightIconClick={() => setShowPassword(!showPassword)}
+          secureTextEntry={!showPassword}
+        />
+        {/* <Text style={styles.forgotPassword}>
+              {t(LOCALES.LOGIN.LBL_FORGOT_PASSWORD)}
+            </Text> */}
+        <Button
+          title={t(LOCALES.LOGIN.LBL_LOGIN)}
+          disabled={!userName.trim() || !password.trim() || isLoginPending}
+          loading={isLoginPending}
+          onPress={onLogin}
+        />
+      </>
+    );
+  };
+
+  const validateURL = () => {
+    setIsValidateURLPending(true);
+    const newURL = url.trim() + URL.ORGANIZATION_URL_VALIDATOR;
+    axios
+      .get(newURL)
+      .then(response => {
+        if (response.data?.status_code === 200) {
+          dispatch(setOrganizationURL(url.trim()));
+          AsyncStorage.setItem(ORGANIZATION_URL_STORAGE_KEY, url.trim());
+        }
+      })
+      .catch(error => {
+        console.log('Error validating URL:', error);
+        Toast.error({message: 'Invalid organization URL'});
+      })
+      .finally(() => {
+        setIsValidateURLPending(false);
+      });
+  };
+
+  const renderConfigureOrganisationView = () => {
+    return (
+      <>
+        <View style={styles.loginLabelContainer}>
+          <Text style={styles.welcome}>Trials App 2.0</Text>
+          <Text style={[styles.loginToContinue, {fontSize: 16, marginTop: 10}]}>
+            Enter your organization URL to continue!
+          </Text>
+        </View>
+        <Input
+          placeholder="Organization URL"
+          value={url}
+          onChangeText={setUrl}
+        />
+        <Button
+          title="Continue"
+          disabled={!url.trim() || isValidateURLPending}
+          loading={isValidateURLPending}
+          onPress={validateURL}
+        />
+      </>
+    );
+  };
+
   return (
     <SafeAreaView>
       <StatusBar />
@@ -96,42 +181,19 @@ const SignIn = () => {
             <View style={styles.logoContainer}>
               <Image style={styles.logo} source={APP_LOGO} />
             </View>
-            <View style={styles.loginLabelContainer}>
-              <Text style={styles.welcome}>Trials App 2.0</Text>
-              <Text style={styles.loginToContinue}>Login to continue!</Text>
-            </View>
-            <Input
-              placeholder={t(LOCALES.LOGIN.LBL_USERNAME)}
-              value={userName}
-              onChangeText={setUserName}
-            />
-            <Input
-              placeholder={t(LOCALES.LOGIN.LBL_PASSWORD)}
-              value={password}
-              onChangeText={setPassword}
-              rightIcon={showPassword ? <EyeSlash /> : <Eye />}
-              onRightIconClick={() => setShowPassword(!showPassword)}
-              secureTextEntry={!showPassword}
-            />
-            {/* <Text style={styles.forgotPassword}>
-              {t(LOCALES.LOGIN.LBL_FORGOT_PASSWORD)}
-            </Text> */}
-            <Button
-              title={t(LOCALES.LOGIN.LBL_LOGIN)}
-              disabled={!userName.trim() || !password.trim() || isLoginPending}
-              loading={isLoginPending}
-              onPress={onLogin}
-            />
+            {organizationURL
+              ? renderLoginView()
+              : renderConfigureOrganisationView()}
             <View style={styles.footerContainer}>
               <Text style={styles.footer}>Piatrika Biosystems © 2024</Text>
               <Text style={styles.footer}>
                 {'App Version:'} {DeviceInfo.getVersion()}
                 {`(${DeviceInfo.getBuildNumber()})`}
               </Text>
-              <Text style={styles.footer}>
+              {/* <Text style={styles.footer}>
                 {'App Environment:'}{' '}
                 <Text style={{textTransform: 'capitalize'}}>{DEFAULT_ENV}</Text>
-              </Text>
+              </Text> */}
             </View>
           </View>
           <View

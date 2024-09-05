@@ -15,7 +15,11 @@ import AppRoutes from './app-routes';
 import {useAppDispatch, useAppSelector} from '../store';
 import {Toast} from '../components';
 import {RootStackParamList} from '../types/navigation';
-import {setIsUserSignedIn, setUserDetails} from '../store/slice/authSlice';
+import {
+  setIsUserSignedIn,
+  setOrganizationURL,
+  setUserDetails,
+} from '../store/slice/authSlice';
 import useCleanUp from '../hooks/useCleanUp';
 import SplashScreen from '../screens/auth-screens/Splash';
 import {TabBarStackParamList} from '../types/navigation/appTypes';
@@ -27,6 +31,7 @@ export const navigationRef =
 
 const RootNavigator = () => {
   const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
+  const ORGANIZATION_URL_STORAGE_KEY = 'ORGANIZATION_URL';
   const dispatch = useAppDispatch();
   const [logoutUser] = useCleanUp();
   const {isUserSignedIn} = useAppSelector(state => state.auth);
@@ -34,16 +39,20 @@ const RootNavigator = () => {
 
   useEffect(() => {
     const init = async () => {
+      const organizationURL = await AsyncStorage.getItem(
+        ORGANIZATION_URL_STORAGE_KEY,
+      );
       try {
         const [credentials, userDetails] = await Promise.all([
           Keychain.getGenericPassword(),
           AsyncStorage.getItem(USER_DETAILS_STORAGE_KEY),
         ]);
 
-        if (credentials && userDetails) {
+        if (credentials && userDetails && organizationURL) {
           const parsedUserDetails = JSON.parse(userDetails);
           dispatch(setIsUserSignedIn(true));
           dispatch(setUserDetails(parsedUserDetails));
+          dispatch(setOrganizationURL(organizationURL));
           setTimeout(() => {
             setIsSplashScreenVisible(false);
           }, 2000);
@@ -53,6 +62,9 @@ const RootNavigator = () => {
       } catch (error) {
         console.log('Error during initialization:', error);
         logoutUser();
+        if (organizationURL) {
+          dispatch(setOrganizationURL(organizationURL));
+        }
         setTimeout(() => {
           setIsSplashScreenVisible(false);
         }, 2000);
