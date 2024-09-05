@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   Modal,
 } from 'react-native';
 import BottomModal from '../BottomSheetModal';
@@ -68,6 +67,7 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
     url: `${URL.VISITS}${visit.id}/`,
     method: 'PUT',
   });
+
 
   const onUpdate = async (dateSelected: any) => {
     const payload = {

@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Text,
 } from 'react-native';
-import {Edit} from '../../assets/icons/svgs';
+import {DbEdit} from '../../assets/icons/svgs';
 
 export default function Calender({modalVisible, onCancel, onOk}: any) {
   const [date, setDate] = useState(dayjs());
@@ -71,7 +71,7 @@ export default function Calender({modalVisible, onCancel, onOk}: any) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5FCFF',
-    width: 350,
+    width: 410,
     borderRadius: 25,
   },
   header: {

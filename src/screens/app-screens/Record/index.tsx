@@ -341,11 +341,16 @@ const Record = () => {
             data={experimentList}
             contentContainerStyle={
               // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
-              experimentList?.length === 0 
-              ? { flexGrow: 1, justifyContent: 'center', alignItems: 'center' ,height:'100%'} 
-              : { paddingBottom: 10 }      
+              experimentList?.length === 0
+                ? {
+                    flexGrow: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                  }
+                : {paddingBottom: 10}
             }
-              showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
             renderItem={({item, index}) => null}
             keyExtractor={(_, index: any) => index.toString()}

@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {
   Image,
   Pressable,
+  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
@@ -10,7 +11,7 @@ import {
 } from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
 import * as Keychain from 'react-native-keychain';
-import {Back, Edit, ProfileImg} from '../../../../assets/icons/svgs';
+import {Back, ProfileImg} from '../../../../assets/icons/svgs';
 import {DEFAULT_ENV, URL} from '../../../../constants/URLS';
 import {useApi} from '../../../../hooks/useApi';
 import useCleanUp from '../../../../hooks/useCleanUp';
@@ -298,9 +299,6 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           {isDefaultImage ? (
             <View>
               <ProfileImg width={80} height={81} />
-              <Edit
-                style={{position: 'absolute', bottom: 5, right: 5, zIndex: 2}}
-              />
             </View>
           ) : (
             <View

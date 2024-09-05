@@ -1,54 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert,StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView, StatusBar } from '../../../components';
 import { useApi } from '../../../hooks/useApi';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { URL } from '../../../constants/URLS';
 
 const EditNotes = ({ route, navigation }) => {
-  const { id, content, experimentId, location,trail_type} = route.params;
+  const { content, experimentId, location, trail_type, id } = route.params;
   const [noteContent, setNoteContent] = useState(content);
-  
-  const [updateNote, updateNoteResponse] = useApi({
-    url: `${URL.NOTES}${id}/`,
+
+  // Initialize the useApi hook without passing the id initially
+  const [updateNote, updateNoteResponse, updateNoteLoading, updateNoteError] = useApi({
+    url: 'notes/', // Base API URL
     method: 'PUT',
   });
 
-  const handleUpdate = async () => {
-    const token = await AsyncStorage.getItem('accessToken');
-    if (!token) {
-      Alert.alert('Error', 'No token found');
-      return;
-    }
-
+  const handleUpdate = () => {
     if (!noteContent) {
       Alert.alert('Error', 'Please enter content before updating');
       return;
     }
 
-    const payload = {
-      content: noteContent
-    };
+    const payload = { content: noteContent };
 
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      'x-auth-token': token,
-    };
-
-    updateNote({ payload, headers });
+    // Pass the id dynamically as a pathParam and update the note
+    updateNote({ payload, pathParams: id });
   };
 
   useEffect(() => {
     if (updateNoteResponse) {
-      if (updateNoteResponse.status_code === 200) {
-        Alert.alert('Success', 'Note updated successfully');
-        navigation.navigate('Home');
-      } else {
-        Alert.alert('Error', 'Failed to update note');
-      }
+      Alert.alert('Success', 'Note updated successfully');
+      navigation.navigate('Home');
     }
-  }, [updateNoteResponse]);
+
+    if (updateNoteError) {
+      Alert.alert('Error', updateNoteError?.message || 'Something went wrong while updating the note');
+    }
+  }, [updateNoteResponse, updateNoteError]);
 
   return (
     <SafeAreaView>
@@ -75,13 +61,14 @@ const EditNotes = ({ route, navigation }) => {
             onChangeText={setNoteContent}
           />
         </View>
-        <TouchableOpacity style={EditNotesStyles.submitButton} onPress={handleUpdate}>
-          <Text style={EditNotesStyles.submitButtonText}>Update Note</Text>
+        <TouchableOpacity style={EditNotesStyles.submitButton} onPress={handleUpdate} disabled={updateNoteLoading}>
+          <Text style={EditNotesStyles.submitButtonText}>{updateNoteLoading ? 'Updating...' : 'Update Note'}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 };
+
 
 const EditNotesStyles = StyleSheet.create({
   container: {
