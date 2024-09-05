@@ -404,10 +404,10 @@ const Profile = ({navigation}: ProfileScreenProps) => {
             {'App Version:'} {DeviceInfo.getVersion()}
             {`(${DeviceInfo.getBuildNumber()})`}
           </Text>
-          <Text style={ProfileStyles.footer}>
+          {/* <Text style={ProfileStyles.footer}>
             {'App Environment:'}{' '}
             <Text style={{textTransform: 'capitalize'}}>{DEFAULT_ENV}</Text>
-          </Text>
+          </Text> */}
         </View>
       </View>
     </ScrollView>

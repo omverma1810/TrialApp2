@@ -1,10 +1,11 @@
 import axios, {AxiosRequestConfig, Method} from 'axios';
 import {useCallback, useMemo, useState} from 'react';
 
-import {BASE_URL} from '../constants/URLS';
+// import {BASE_URL} from '../constants/URLS';
 import {getTokens, getVerifiedToken} from '../utilities/token';
 import useCleanUp from './useCleanUp';
 import Toast from '../utilities/toast';
+import {useAppSelector} from '../store';
 
 type UseApiType = {
   url: string;
@@ -24,6 +25,7 @@ export const useApi = ({
   method,
   isSecureEntry = true,
 }: UseApiType): [typeof apiCall, any, boolean, any] => {
+  const {organizationURL} = useAppSelector(state => state.auth);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -33,9 +35,9 @@ export const useApi = ({
     return (pathParams = '', queryParams = '') => {
       const formattedPathParams = pathParams ? `/${pathParams}/` : '';
       const formattedQueryParams = queryParams ? `?${queryParams}` : '';
-      return `${BASE_URL}${url}${formattedPathParams}${formattedQueryParams}`;
+      return `${organizationURL}${url}${formattedPathParams}${formattedQueryParams}`;
     };
-  }, [url]);
+  }, [url, organizationURL]);
 
   const defaultHeaders = useMemo(
     () => ({
@@ -117,7 +119,7 @@ export const useApi = ({
         });
 
         setError(err.response ? err.response?.data : err);
-        if (err?.response?.data?.statusCode === 401) {
+        if (err?.response?.data?.status_code === 401) {
           logoutUser();
         }
       } finally {

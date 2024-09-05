@@ -9,13 +9,14 @@ const BASE_URL =
 const API_CONFIG = {};
 
 const URL = {
+  ORGANIZATION_URL_VALIDATOR: 'app/url-validation/',
   LOGIN: 'auth/login/',
   REFRESH_TOKEN: 'auth/token/refresh/',
   EXPERIMENT_LIST: 'app/experiment-list/',
   EXPERIMENT_DETAILS: 'app/experiment-details',
   PLOT_LIST: 'app/trial-location',
   RECORD_TRAITS: 'app/trait-data-record/',
-  MULTI_TRIAL_LOCATION : 'app/multi-trial-location/',
+  MULTI_TRIAL_LOCATION: 'app/multi-trial-location/',
   VISITS: 'upcoming_visits/',
   NOTES: 'notes/',
   PROFILE: 'auth/me/',
