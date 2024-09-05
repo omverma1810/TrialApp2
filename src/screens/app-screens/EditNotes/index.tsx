@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView, StatusBar } from '../../../components';
 import { useApi } from '../../../hooks/useApi';
+import {URL} from '../../../constants/URLS';
 
 const EditNotes = ({ route, navigation }) => {
   const { content, experimentId, location, trail_type, id } = route.params;
@@ -9,7 +10,7 @@ const EditNotes = ({ route, navigation }) => {
 
   // Initialize the useApi hook without passing the id initially
   const [updateNote, updateNoteResponse, updateNoteLoading, updateNoteError] = useApi({
-    url: 'notes/', // Base API URL
+    url: URL.NOTES, // Base API URL
     method: 'PUT',
   });
 
