@@ -22,7 +22,6 @@ const URL = {
   PROFILE: 'auth/me/',
   LOGOUT: 'auth/logout/',
   DASH: 'app/userdashboard/',
-  FIELDS: 'app/experiment-details/',
   CHANGE_PASSWORD: 'change-password/',
 };
 

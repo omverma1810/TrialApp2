@@ -123,7 +123,7 @@ const TakeNotes = ({navigation, route}: any) => {
 
   const handleFieldSelect = (item: Chip) => {
     setSelectedField(item);
-    setChipTitle('Select Date');
+    setChipTitle('Note Title');
     setChipVisible(false);
     setInputVisible(true);
     (secondBottomSheetRef.current as any).dismiss();
@@ -298,7 +298,7 @@ const TakeNotes = ({navigation, route}: any) => {
   const experimentType = selectedExperiment?.experimentType || 'hybrid';
 
   const [getFields, getFieldsResponse] = useApi({
-    url: `${URL.FIELDS}${experimentId}?experimentType=${experimentType}`,
+    url: `${URL.EXPERIMENT_DETAILS}${experimentId}?experimentType=${experimentType}`,
     method: 'GET',
   });
 

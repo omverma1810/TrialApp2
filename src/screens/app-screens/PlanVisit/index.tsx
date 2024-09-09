@@ -1,8 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import dayjs, {Dayjs} from 'dayjs';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Alert, FlatList, Modal, Pressable, Text, View,TouchableOpacity} from 'react-native';
+import {Alert, FlatList, Modal, Pressable, Text, View, TouchableOpacity} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Back, DropdownArrow, Search} from '../../../assets/icons/svgs';
 import {
@@ -54,6 +53,7 @@ const PlanVisit = ({navigation}: any) => {
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
   };
+
   const handleSelectedField = (field: any) => {
     setSelectedField(field);
   };
@@ -68,6 +68,7 @@ const PlanVisit = ({navigation}: any) => {
     },
     [experimentData],
   );
+
   useEffect(() => {
     if (experimentData && experimentData["Rice"]) {
       setSelectedCrop("Rice");
@@ -92,6 +93,7 @@ const PlanVisit = ({navigation}: any) => {
     },
     [experimentData, selectedCrop],
   );
+
   const handleFirstRightIconClick = () => {
     if (bottomSheetModalRef.current) {
       (bottomSheetModalRef.current as any).present();
@@ -141,6 +143,7 @@ const PlanVisit = ({navigation}: any) => {
       handleThirdRightIconClick();
     }
   };
+
   const ListHeaderComponent = useMemo(
     () => (
       <View style={PlanVisitStyles.filter}>
@@ -194,6 +197,7 @@ const PlanVisit = ({navigation}: any) => {
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
   }, [experimentListData]);
+
   const ListEmptyComponent = useMemo(
     () => (
       <View style={PlanVisitStyles.emptyContainer}>
@@ -215,15 +219,17 @@ const PlanVisit = ({navigation}: any) => {
     date: '',
     experiment_type: '',
   });
+
   const [planVisit, planVisitResponse] = useApi({
     url: URL.VISITS,
     method: 'POST',
   });
+
   const onPlanVisit = async () => {
     if (!selectedDate) {
       Toast.error({
-        message:'Please select all fields before planning a visit'
-      })
+        message: 'Please select all fields before planning a visit',
+      });
       return;
     }
     const newData = {
@@ -234,29 +240,35 @@ const PlanVisit = ({navigation}: any) => {
     };
     await planVisit({payload: newData});
   };
+
   useEffect(() => {
     console.log({planVisitResponse});
     if (planVisitResponse && planVisitResponse.status_code == 201) {
       Toast.success({
-        message:'Visit planned successfully'
-      })
-      navigation.navigate('Home',{ refresh: true });
-    }else{
-      if(planVisitResponse){
+        message: 'Visit planned successfully',
+      });
+      navigation.navigate('Home', {refresh: true});
+    } else {
+      if (planVisitResponse) {
         Toast.error({
-          'message':"Something Went Wrong"
-        })
+          message: 'Something Went Wrong',
+        });
       }
     }
   }, [planVisitResponse]);
 
   const [getFields, getFieldsResponse] = useApi({
-    url: `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
+    url: URL.EXPERIMENT_DETAILS,
     method: 'GET',
   });
+
   useEffect(() => {
-    if(selectedExperiment){
-      getFields();
+    if (selectedExperiment) {
+      const queryParams = `experimentType=${selectedExperiment?.experimentType}`;
+      getFields({
+        pathParams: selectedExperiment?.id,
+        queryParams,
+      });
     }
   }, [selectedExperiment]);
 
@@ -265,6 +277,7 @@ const PlanVisit = ({navigation}: any) => {
       setFields(getFieldsResponse.data.locationList);
     }
   }, [getFieldsResponse]);
+
   useEffect(() => {
     console.log('fields', fields, selectedField);
   }, []);

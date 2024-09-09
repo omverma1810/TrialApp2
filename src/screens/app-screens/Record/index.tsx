@@ -179,13 +179,17 @@ const Record = () => {
   };
 
   const [getFields, getFieldsResponse] = useApi({
-    url: `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
+    url: URL.EXPERIMENT_DETAILS,
     method: 'GET',
   });
+
   useEffect(() => {
     if (selectedExperiment) {
-      setLocationIds([]);
-      getFields();
+      const queryParams = `experimentType=${selectedExperiment?.experimentType}`;
+      getFields({
+        pathParams: selectedExperiment?.id,
+        queryParams,
+      });
     }
   }, [selectedExperiment]);
 
@@ -409,7 +413,7 @@ const Record = () => {
                                 key={fieldId}
                                 style={RecordStyles.selectedFieldContainer}>
                                 <Text style={RecordStyles.fieldName}>
-                                  Field {fieldId}
+                                  {fieldId} -
                                 </Text>
                                 <TouchableOpacity
                                   onPress={() => handleFieldSelect(fieldId)}>
@@ -430,6 +434,7 @@ const Record = () => {
                   </View>
                 </View>
               </Pressable>
+
               {selectedFields && plotData && traitData && (
                 <View style={RecordStyles.inputContainer}>
                   <View style={RecordStyles.listByContainer}>
@@ -555,7 +560,7 @@ const Record = () => {
                         onChange={() => handleFieldSelect(field.id)}
                       />
                       <Text style={RecordStyles.fieldCheckboxText}>
-                        {field.location.villageName}
+                        {field.id} - {field.location.villageName}
                       </Text>
                     </View>
                   ))}
