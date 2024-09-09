@@ -4,7 +4,7 @@ import { SafeAreaView, StatusBar } from '../../../components';
 import { useApi } from '../../../hooks/useApi';
 import {URL} from '../../../constants/URLS';
 
-const EditNotes = ({ route, navigation }) => {
+const EditNotes = ({ route, navigation }: any) => {
   const { content, experimentId, location, trail_type, id } = route.params;
   const [noteContent, setNoteContent] = useState(content);
 

@@ -144,7 +144,7 @@ const ItemComponent = ({
   useEffect(() => {
     const height = recordedTraitData.length + unrecordedTraitData.length;
     Animated.timing(dropdownHeight, {
-      toValue: dropdownState ? height * 285 : 0,
+      toValue: dropdownState ? height * 375 : 0,
       duration: 800,
       useNativeDriver: false,
     }).start();
@@ -216,14 +216,14 @@ const ItemComponent = ({
         });
       }
     }
-    setEditingEntryId(null);
+    setEditingEntryId(null); 
     setModalVisible(false);
     setCurrentEntry(null);
     optionsModalRef.current?.close();
   }, [updateValueResponse]);
 
   return (
-    <View style={styles.itemContainer}>
+    <ScrollView style={styles.itemContainer}>
       <View style={styles.row}>
         <View style={styles.column}>
           <Text style={styles.title}>{title}</Text>
@@ -238,7 +238,7 @@ const ItemComponent = ({
           recordedTraitData &&
           recordedTraitData.map((entry: any, index: number) => (
             <View style={styles.entryContainer} key={index}>
-              <View style={styles.projectContainer1}>
+              <View style={styles.projectContainer1}> 
                 <View style={styles.padding}>
                   <Text style={styles.recordedTraitsText}>
                     Recorded Traits (Number)
@@ -252,7 +252,7 @@ const ItemComponent = ({
                     </View>
                   </View>
                   <View style={styles.entryRow}>
-                    {editingEntryId === entry.observationId ? (
+                    {(editingEntryId === entry.observationId)? (
                       <View style={styles.entryColumn}>
                         <ValueInputCard
                           onSubmit={handleValueSubmit}
@@ -345,7 +345,7 @@ const ItemComponent = ({
           bottomSheetModalRef={optionsModalRef}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 const styles = StyleSheet.create({

@@ -3,7 +3,6 @@ import React, {useEffect, useState} from 'react';
 import {
   Image,
   Pressable,
-  SafeAreaView,
   ScrollView,
   Text,
   TextInput,
@@ -25,7 +24,7 @@ import ProfileStyles from './ProfileStyles';
 import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
 import DeviceInfo from 'react-native-device-info';
 import Toast from '../../../../utilities/toast';
-import { Loader } from '../../../../components';
+import {Loader, SafeAreaView} from '../../../../components';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
@@ -280,17 +279,19 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   return (
     <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginHorizontal: 20,
-        }}>
-        <Pressable onPress={() => navigation.goBack()}>
-          <Back width={24} height={24} />
-        </Pressable>
-        <Text style={ProfileStyles.ScreenTitle}>Profile</Text>
-      </View>
+      <SafeAreaView edges={['top']}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginHorizontal: 20,
+          }}>
+          <Pressable onPress={() => navigation.goBack()}>
+            <Back width={24} height={24} />
+          </Pressable>
+          <Text style={ProfileStyles.ScreenTitle}>Profile</Text>
+        </View>
+      </SafeAreaView>
 
       <View style={ProfileStyles.container}>
         <Pressable

@@ -9,7 +9,7 @@ import { NotificationScreenProps } from '../../../types/navigation/appTypes';
 
 const Notification: React.FC<NotificationScreenProps> = ({navigation}) => {
   return (
-    <SafeAreaView>
+    <SafeAreaView edges={['top']}>
       <StatusBar />
       <NotificationScreen navigation={navigation}/>
     </SafeAreaView>
