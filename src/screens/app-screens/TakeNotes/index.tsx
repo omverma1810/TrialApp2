@@ -368,7 +368,9 @@ const TakeNotes = ({navigation, route}: any) => {
                   alignItems: 'center',
                   height: '100%',
                 }
-              : {paddingBottom: 10}
+              : {paddingBottom: 10,
+                height: 105,
+              }
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}

@@ -306,7 +306,9 @@ const PlanVisit = ({navigation}: any) => {
               // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
               experimentList?.length === 0 
               ? { flexGrow: 1, justifyContent: 'center', alignItems: 'center' ,height:'100%'} 
-              : { paddingBottom: 10 }      
+              : { paddingBottom: 10,
+                height: 105,
+               }      
             }
               showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
