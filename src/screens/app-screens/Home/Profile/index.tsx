@@ -111,17 +111,17 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     method: 'PUT',
   });
   const onUpdate = async () => {
-    const filename = imageSource.path?.split('/').pop();
-    const match_ = /\.(\w+)$/.exec(filename ?? '');
-    const type = match_ ? `image/${match_[1]}` : 'image/jpeg';
-    const uri = imageSource?.path || imageSource;
-    const avatar_id = {
-      uri: uri,
-      name: filename,
-      type: type,
+    const fileName = imageSource.path?.split('/').pop();
+    const match_ = /\.(\w+)$/.exec(fileName ?? '');
+    const imageData = match_ ? `image/${match_[1]}` : 'image/jpeg';
+    const url = imageSource?.path || imageSource;
+    const avatar = {
+      url: url,
+      fileName: fileName,
+      imageData: imageData,
     };
     let payload = {
-      avatar_id: avatar_id,
+      avatar: avatar,
     };
     await updateProfile({payload});
   };

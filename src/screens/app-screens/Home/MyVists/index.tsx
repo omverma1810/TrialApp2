@@ -1,21 +1,19 @@
-import React, {useState,useEffect,useCallback} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {View, Text, Alert} from 'react-native';
-import { useApi } from '../../../../hooks/useApi';
+import {useApi} from '../../../../hooks/useApi';
 import MyVisitStyles from './MyVistStyles';
 import UpcomingVisits from '../../../../components/Upcomingvisit';
-import { URL } from '../../../../constants/URLS';
-import { useFocusEffect } from '@react-navigation/native';
-import Toast  from '../../../../utilities/toast';
+import {URL} from '../../../../constants/URLS';
+import {useFocusEffect} from '@react-navigation/native';
+import Toast from '../../../../utilities/toast';
 
-
-const MyVisits = ({navigation,refresh}: any) => {
-  const [visits, setVisits] = useState<{ id: number }[]>([]);
+const MyVisits = ({navigation, refresh}: any) => {
+  const [visits, setVisits] = useState<{id: number}[]>([]);
   const [fetchVisits, fetchVisitsResponse] = useApi({
     url: URL.VISITS,
     method: 'GET',
   });
 
-  
   useEffect(() => {
     const getVisits = async () => {
       fetchVisits();
@@ -29,24 +27,22 @@ const MyVisits = ({navigation,refresh}: any) => {
       setVisits(fetchVisitsResponse.data);
     } else if (fetchVisitsResponse) {
       Toast.error({
-        message:'Failed to fetch visits'
-      })
+        message: 'Failed to fetch visits',
+      });
     }
   }, [fetchVisitsResponse]);
 
-  const handleDeletevisit = (id:any) => {
+  const handleDeletevisit = (id: any) => {
     setVisits(prevVisits => prevVisits.filter(visit => visit.id !== id));
   };
-
 
   useFocusEffect(
     useCallback(() => {
       if (refresh) {
-        console.log('Refreshing Home screen');
         fetchVisits();
-        navigation.setParams({ refresh: false });
+        navigation.setParams({refresh: false});
       }
-    }, [refresh])
+    }, [refresh]),
   );
 
   return (
@@ -62,10 +58,10 @@ const MyVisits = ({navigation,refresh}: any) => {
               visit={visit}
               onDelete={handleDeletevisit}
               navigation={navigation}
-              refreshVisits={fetchVisits} 
+              refreshVisits={fetchVisits}
             />
           ))}
-        </View> 
+        </View>
       )}
     </View>
   );

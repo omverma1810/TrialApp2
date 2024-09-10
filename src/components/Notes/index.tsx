@@ -40,6 +40,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress = {() => bottomSheetModalRef.current?.present()}>
       <View style={styles.noteContainer}>
         <View style={styles.noteContent}>
           <Text style={styles.noteText}>{note.content}</Text>
@@ -49,6 +50,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
           <Dots />
         </TouchableOpacity>
       </View>
+      </TouchableOpacity>
 
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}

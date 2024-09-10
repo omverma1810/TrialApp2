@@ -118,6 +118,7 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
+        <TouchableOpacity onPress = {() => bottomSheetModalRef.current?.present()}>
         <View style={styles.row}>
           <View style={styles.iconRow}>
             <Field />
@@ -131,6 +132,7 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
             <Dots />
           </TouchableOpacity>
         </View>
+        </TouchableOpacity>
         <View style={styles.row}>
           <View style={styles.iconRow}>
             <Calendar />

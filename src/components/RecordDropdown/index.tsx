@@ -224,6 +224,7 @@ const ItemComponent = ({
 
   return (
     <ScrollView style={styles.itemContainer}>
+      <TouchableOpacity onPress={toggleDropdown}>
       <View style={styles.row}>
         <View style={styles.column}>
           <Text style={styles.title}>{title}</Text>
@@ -232,6 +233,7 @@ const ItemComponent = ({
           <DropdownArrow />
         </TouchableOpacity>
       </View>
+      </TouchableOpacity>
 
       <Animated.View style={[styles.dropdown, {height: dropdownHeight}]}>
         {dropdownState &&

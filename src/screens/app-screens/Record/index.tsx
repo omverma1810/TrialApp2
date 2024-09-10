@@ -169,10 +169,9 @@ const Record = () => {
     bottomSheetModalRef.current?.present();
   };
   const handleExperimentSelect = (item: any) => {
-    console.log('=============>', {item});
     setSelectedExperiment(item);
     setChipTitle(item.fieldExperimentName);
-    console.log('selectedExperiment', selectedExperiment);
+    
     setExperimentType(item.experimentType);
     (bottomSheetModalRef.current as any).dismiss();
   };
@@ -351,9 +350,7 @@ const Record = () => {
                     alignItems: 'center',
                     height: '100%',
                   }
-                : {paddingBottom: 10,
-                  height: 105,
-                }
+                : {paddingBottom: 10, height: 105}
             }
             showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
@@ -409,12 +406,42 @@ const Record = () => {
                       <View style={RecordStyles.selectedFieldsWrapper}>
                         {Object.keys(selectedFields).map((fieldId, index) => {
                           if (selectedFields[fieldId]) {
+                            // Log the structures for debugging
+                            console.log('Fields:', fields); // Ensure fields array is correct
+                            console.log('Selected fieldId:', fieldId); // Ensure fieldId matches
+
+                            // Ensure that fieldId and field.id are compared correctly (type consistency)
+                            const matchedFieldId = fields.find(
+                              field => String(field.id) === String(fieldId),
+                            );
+
+                            // Log matchedFieldId to confirm if we are able to find the correct field
+                            console.log('Matched FieldData:', matchedFieldId);
+
+                            if (!matchedFieldId) {
+                              return (
+                                <View
+                                  key={fieldId}
+                                  style={RecordStyles.selectedFieldContainer}>
+                                  <Text style={RecordStyles.fieldName}>
+                                    {fieldId} - Unknown
+                                  </Text>
+                                  <Pressable
+                                    onPress={() => handleFieldSelect(fieldId)}>
+                                    <Cancel />
+                                  </Pressable>
+                                </View>
+                              );
+                            }
+
                             return (
                               <View
                                 key={fieldId}
                                 style={RecordStyles.selectedFieldContainer}>
                                 <Text style={RecordStyles.fieldName}>
-                                  {fieldId} -
+                                  {fieldId} -{' '}
+                                  {matchedFieldId.location?.villageName ||
+                                    'Unknown'}
                                 </Text>
                                 <Pressable
                                   onPress={() => handleFieldSelect(fieldId)}>
@@ -439,7 +466,7 @@ const Record = () => {
               {selectedFields && plotData && traitData && (
                 <View style={RecordStyles.inputContainer}>
                   <View style={RecordStyles.listByContainer}>
-                    <Text style={RecordStyles.listByText}>List By</Text>
+                    <Text style={RecordStyles.listByText}>  List By</Text>
                     <View style={RecordStyles.listByButtonsContainer}>
                       <Pressable
                         onPress={() => handleListPress('Plot')}
