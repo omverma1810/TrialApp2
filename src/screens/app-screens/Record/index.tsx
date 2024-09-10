@@ -1,13 +1,12 @@
 import React, {useEffect, useRef, useState, useMemo, useCallback} from 'react';
 import {
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
   FlatList,
-  TouchableOpacity,
+  Pressable,
 } from 'react-native';
 import {Loader, SafeAreaView, StatusBar} from '../../../components';
 
@@ -386,9 +385,9 @@ const Record = () => {
                   <Text style={TakeNotesStyles.chipText}>
                     {selectedExperiment.fieldExperimentName}
                   </Text>
-                  <TouchableOpacity onPress={handleRightIconClick}>
+                  <Pressable onPress={handleRightIconClick}>
                     <DropdownArrow />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
                 <View style={TakeNotesStyles.chipCropText}>
                   <Text style={TakeNotesStyles.chipCropText1}>
@@ -417,10 +416,10 @@ const Record = () => {
                                 <Text style={RecordStyles.fieldName}>
                                   {fieldId} -
                                 </Text>
-                                <TouchableOpacity
+                                <Pressable
                                   onPress={() => handleFieldSelect(fieldId)}>
                                   <Cancel />
-                                </TouchableOpacity>
+                                </Pressable>
                               </View>
                             );
                           }
