@@ -27,6 +27,8 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
     fieldExperimentId: '',
     fieldExperimentName: '',
     maxNoOfImages: 0,
+    villageName: '',
+    trialLocationId: '',
   });
 
   const [getPlotList, plotListData, isPlotListLoading, plotListError] = useApi({
@@ -50,6 +52,8 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       fieldExperimentId: data?.fieldExperimentId,
       fieldExperimentName: data?.fieldExperimentName,
       maxNoOfImages: data?.maxNoOfImages || 5,
+      villageName: data?.villageName,
+      trialLocationId: data?.trialLocationId,
     });
   }, [plotListData]);
 
@@ -90,9 +94,12 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       </Pressable>
       <View style={styles.container}>
         <View style={styles.plotContainer}>
-          <Text style={styles.fieldTitle}>
-            {t(LOCALES.EXPERIMENT.LBL_FIELD)} {id}
-          </Text>
+          {details?.trialLocationId && (
+            <Text style={styles.fieldTitle}>
+              {t(LOCALES.EXPERIMENT.LBL_FIELD)} {details?.trialLocationId}-
+              {details?.villageName}
+            </Text>
+          )}
           {details.fieldExperimentName && details.cropName && (
             <View style={styles.row}>
               <Text style={styles.experimentTitle}>
@@ -105,30 +112,38 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
           )}
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.rowContainer}>
-              <View style={styles.cropTitleContainer}>
-                <Text style={styles.cropTitle}>{details?.cropName}</Text>
-              </View>
-              <View
-                style={[
-                  styles.cropTitleContainer,
-                  {backgroundColor: '#e8f0fb'},
-                ]}>
-                <Text style={styles.cropTitle}>{data.projectId}</Text>
-              </View>
-              <View
-                style={[
-                  styles.cropTitleContainer,
-                  {backgroundColor: '#fdf8ee'},
-                ]}>
-                <Text style={styles.cropTitle}>{data.season}</Text>
-              </View>
-              <View
-                style={[
-                  styles.cropTitleContainer,
-                  {backgroundColor: '#fcebea'},
-                ]}>
-                <Text style={styles.cropTitle}>{data.designType}</Text>
-              </View>
+              {details?.cropName && (
+                <View style={styles.cropTitleContainer}>
+                  <Text style={styles.cropTitle}>{details?.cropName}</Text>
+                </View>
+              )}
+              {data?.projectId && (
+                <View
+                  style={[
+                    styles.cropTitleContainer,
+                    {backgroundColor: '#e8f0fb'},
+                  ]}>
+                  <Text style={styles.cropTitle}>{data?.projectId}</Text>
+                </View>
+              )}
+              {data?.season && (
+                <View
+                  style={[
+                    styles.cropTitleContainer,
+                    {backgroundColor: '#fdf8ee'},
+                  ]}>
+                  <Text style={styles.cropTitle}>{data?.season}</Text>
+                </View>
+              )}
+              {data?.designType && (
+                <View
+                  style={[
+                    styles.cropTitleContainer,
+                    {backgroundColor: '#fcebea'},
+                  ]}>
+                  <Text style={styles.cropTitle}>{data?.designType}</Text>
+                </View>
+              )}
             </View>
           </ScrollView>
         </View>

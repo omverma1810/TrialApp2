@@ -194,7 +194,7 @@ const PlotCard = ({
       ]}>
       <Pressable onPress={onViewMoreDetailsClick} style={styles.row}>
         <View>
-          <Text style={styles.plotName}>{plotData?.id}</Text>
+          <Text style={styles.plotName}>{plotData?.plotNumber}</Text>
           <View style={styles.plotInfoContainer}>
             {rowColInfo.map(item => (
               <View style={styles.plotKeyValueContainer} key={item.id}>
@@ -236,6 +236,7 @@ const PlotCard = ({
             data={recordedTrait}
             plotData={plotData}
             details={details}
+            handleRecordedTraits={handleRecordedTraits}
           />
           <UnrecordedTraits
             data={unrecordedTrait}

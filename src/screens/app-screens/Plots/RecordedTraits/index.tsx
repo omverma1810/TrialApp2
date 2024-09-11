@@ -30,10 +30,12 @@ const RecordedTraits = ({
   data = [],
   plotData,
   details,
+  handleRecordedTraits = () => {},
 }: {
   data: TraitItem[];
   plotData: any;
   details: any;
+  handleRecordedTraits: () => void;
 }) => {
   const {t} = useTranslation();
   const {
@@ -74,6 +76,7 @@ const RecordedTraits = ({
     }
     const {message} = trraitsRecordData;
     Toast.success({message: message});
+    handleRecordedTraits();
     setRecordData({});
   }, [trraitsRecordData]);
 

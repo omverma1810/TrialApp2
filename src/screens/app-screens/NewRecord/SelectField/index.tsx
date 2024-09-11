@@ -28,7 +28,9 @@ const SelectField = () => {
         {/* <Text style={styles.fieldName}>{item.field_name}</Text> */}
         <View style={styles.locationNameContainer}>
           <LocationPin />
-          <Text style={styles.locationName}>{item?.location?.villageName}</Text>
+          <Text style={styles.locationName}>
+            {item?.id}-{item?.location?.villageName}
+          </Text>
         </View>
       </Pressable>
     );
@@ -70,7 +72,7 @@ const SelectField = () => {
             <View style={styles.locationNameContainer}>
               <LocationPin />
               <Text style={styles.locationName}>
-                {selectedField?.location?.villageName}
+                {selectedField?.id}-{selectedField?.location?.villageName}
               </Text>
             </View>
           </View>

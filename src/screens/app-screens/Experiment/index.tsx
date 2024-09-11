@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {FlatList, Pressable, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
+import {useIsFocused} from '@react-navigation/native';
 
 import {styles} from './styles';
 import Filter from './Filter';
@@ -21,6 +22,7 @@ import {useApi} from '../../../hooks/useApi';
 
 const Experiment = ({navigation}: ExperimentScreenProps) => {
   const {t} = useTranslation();
+  const isFocused = useIsFocused();
   const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
   const [experimentData, setExperimentData] = useState<any>(null);
   const [cropList, setCropList] = useState<string[]>([]);
@@ -95,8 +97,15 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
   });
 
   useEffect(() => {
-    getExperimentList();
-  }, []);
+    if (isFocused) {
+      getExperimentList();
+      setSelectedCrop('');
+      setSelectedProject('');
+      setCropList([]);
+      setProjectList([]);
+      setExperimentList([]);
+    }
+  }, [isFocused]);
 
   const groupByExperimentName = (array: any[]) => {
     const groupedMap = array.reduce((acc, curr) => {

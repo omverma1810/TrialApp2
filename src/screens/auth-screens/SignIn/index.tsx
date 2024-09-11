@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Image, View, Animated} from 'react-native';
+import {Image, View, Animated, Pressable} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
@@ -25,7 +25,7 @@ import {
 } from '../../../store/slice/authSlice';
 import {useAppDispatch, useAppSelector} from '../../../store';
 import {useKeyboard} from '../../../hooks/useKeaboard';
-import {Eye, EyeSlash} from '../../../assets/icons/svgs';
+import {Eye, EyeSlash, Setting} from '../../../assets/icons/svgs';
 import axios from 'axios';
 import Toast from '../../../utilities/toast';
 
@@ -41,6 +41,8 @@ const SignIn = () => {
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  const [showSettingsOptions, setShowSettingsOptions] = useState(false);
 
   const [login, loginData, isLoginPending, loginError] = useApi({
     url: URL.LOGIN,
@@ -163,6 +165,14 @@ const SignIn = () => {
     );
   };
 
+  const onSetting = () => setShowSettingsOptions(!showSettingsOptions);
+
+  const onEditURL = () => {
+    setShowSettingsOptions(false);
+    organizationURL && setUrl(organizationURL);
+    dispatch(setOrganizationURL(null));
+  };
+
   return (
     <SafeAreaView>
       <StatusBar />
@@ -170,6 +180,16 @@ const SignIn = () => {
         {!isKeyboardOpen && (
           <Animated.View style={styles.farmBgContainer}>
             <Animated.Image style={styles.farmBg} source={FARM_BG} />
+            {organizationURL && (
+              <Pressable style={styles.settingView} onPress={onSetting}>
+                <Setting />
+              </Pressable>
+            )}
+            {showSettingsOptions && (
+              <Pressable style={styles.optionsView} onPress={onEditURL}>
+                <Text style={styles.optionsText}>Change Organization URL</Text>
+              </Pressable>
+            )}
           </Animated.View>
         )}
         <View

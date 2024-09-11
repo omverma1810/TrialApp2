@@ -81,4 +81,26 @@ export const styles = StyleSheet.create({
   borderWithKeyboard: {
     borderRadius: 0,
   },
+  settingView: {
+    backgroundColor: '#fff',
+    position: 'absolute',
+    right: 16,
+    top: 16,
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  optionsView: {
+    backgroundColor: '#fff',
+    position: 'absolute',
+    right: 16,
+    top: 64,
+    padding: 8,
+    borderRadius: 8,
+  },
+  optionsText: {
+    color: '#161616',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
 });

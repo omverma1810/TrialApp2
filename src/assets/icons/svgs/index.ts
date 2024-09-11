@@ -51,6 +51,7 @@ import Eye from './Eye';
 import EyeSlash from './EyeSlash';
 import SelectIcon from './SelectIcon';
 import DbLeaf from './DbLeaf';
+import Setting from './Setting';
 
 export {
   Back,
@@ -106,4 +107,5 @@ export {
   Eye,
   EyeSlash,
   SelectIcon,
+  Setting,
 };

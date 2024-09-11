@@ -37,7 +37,7 @@ const SelectPlot = () => {
         key={item.id}
         style={styles.plotCardContainer}
         onPress={() => handlePlotSelect(item)}>
-        <Text style={styles.plotName}>{item?.id}</Text>
+        <Text style={styles.plotName}>{item?.plotNumber}</Text>
         <View style={styles.plotInfoContainer}>
           {rowColInfo.map(data => (
             <View style={styles.plotKeyValueContainer} key={data.id}>
@@ -79,7 +79,7 @@ const SelectPlot = () => {
             <Text style={styles.experimentHeaderTitle}>
               {t(LOCALES.EXPERIMENT.LBL_PLOT)}
             </Text>
-            <Text style={styles.experimentName}>{selectedPlot?.id}</Text>
+            <Text style={styles.experimentName}>{selectedPlot?.plotNumber}</Text>
             <View style={styles.plotInfoContainer}>
               {rowColInfo.map(data => (
                 <View style={styles.plotKeyValueContainer} key={data.id}>

@@ -1,6 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {FlatList, Pressable, ScrollView, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
+import {useIsFocused} from '@react-navigation/native';
 
 import {
   Input,
@@ -22,6 +23,7 @@ const ExperimentDetails = ({
   route,
 }: ExperimentDetailsScreenProps) => {
   const {t} = useTranslation();
+  const isFocused = useIsFocused();
   const {id, type, data} = route?.params;
   const [experimentDetails, setExperimentDetails] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,11 +38,12 @@ const ExperimentDetails = ({
   });
 
   useEffect(() => {
-    getExperimentDetails({
-      pathParams: id,
-      queryParams: `experimentType=${type}`,
-    });
-  }, []);
+    isFocused &&
+      getExperimentDetails({
+        pathParams: id,
+        queryParams: `experimentType=${type}`,
+      });
+  }, [isFocused]);
 
   useEffect(() => {
     if (
