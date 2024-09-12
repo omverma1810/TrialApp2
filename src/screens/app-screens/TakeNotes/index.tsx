@@ -85,13 +85,13 @@ const TakeNotes = ({navigation, route}: any) => {
     [experimentData, selectedCrop],
   );
   useEffect(() => {
-    if (experimentData && experimentData['Rice']) {
-      setSelectedCrop('Rice');
+    if (experimentData && Object.keys(experimentData).length > 0) {
+      const firstCrop = Object.keys(experimentData)[0];
+      const newProjectList = Object.keys(experimentData[firstCrop]);
 
-      const newProjectList = Object.keys(experimentData['Rice']);
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData['Rice'][newProjectList[0]] || []);
+      setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
       setProjectList([]);
       setSelectedProject('');
@@ -278,7 +278,7 @@ const TakeNotes = ({navigation, route}: any) => {
         Toast.success({
           message: 'Notes Updated Sucessfully',
         });
-        route.params?.fetchNotes();
+        // route.params?.fetchNotes();
       } else {
         Toast.success({
           message: 'Notes Created Sucessfully',
@@ -294,17 +294,21 @@ const TakeNotes = ({navigation, route}: any) => {
     }
   }, [takeNotesResponse]);
 
-  const experimentId = selectedExperiment?.id || selectedExperimentId;
-  const experimentType = selectedExperiment?.experimentType || 'hybrid';
-
+  
   const [getFields, getFieldsResponse] = useApi({
-    url: `${URL.EXPERIMENT_DETAILS}${experimentId}?experimentType=${experimentType}`,
+    url: URL.EXPERIMENT_DETAILS,
     method: 'GET',
   });
-
+  
   useEffect(() => {
+    const experimentId = selectedExperiment?.id || selectedExperimentId;
+    const experimentType = selectedExperiment?.experimentType || 'line';
     if (selectedExperiment || selectedExperimentId) {
-      getFields();
+      const queryParams = `experimentType=${experimentType}`;
+      getFields({
+        pathParams: experimentId,
+        queryParams: queryParams,
+      });
     }
   }, [selectedExperiment, selectedExperimentId]);
 
@@ -367,10 +371,10 @@ const TakeNotes = ({navigation, route}: any) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   height: '100%',
+                  width: '100%',
+                  paddingHorizontal: 20,
                 }
-              : {paddingBottom: 10,
-                height: 105,
-              }
+              : {paddingBottom: 10, height: 105}
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}

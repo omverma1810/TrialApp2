@@ -1,7 +1,15 @@
 import dayjs, {Dayjs} from 'dayjs';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Alert, FlatList, Modal, Pressable, Text, View, TouchableOpacity} from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Back, DropdownArrow, Search} from '../../../assets/icons/svgs';
 import {
@@ -70,20 +78,20 @@ const PlanVisit = ({navigation}: any) => {
   );
 
   useEffect(() => {
-    if (experimentData && experimentData["Rice"]) {
-      setSelectedCrop("Rice");
-  
-      const newProjectList = Object.keys(experimentData["Rice"]);
+    if (experimentData && Object.keys(experimentData).length > 0) {
+      const firstCrop = Object.keys(experimentData)[0];
+      const newProjectList = Object.keys(experimentData[firstCrop]);
+
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+      setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
       setProjectList([]);
       setSelectedProject('');
       setExperimentList([]);
     }
   }, [experimentData]);
-    
+
   const handleProjectChange = useCallback(
     (option: string) => {
       setSelectedProject(option);
@@ -293,9 +301,7 @@ const PlanVisit = ({navigation}: any) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Back width={24} height={24} />
         </TouchableOpacity>
-        <Text style={PlanVisitStyles.ScreenTitle}>
-          Plan Visit
-        </Text>
+        <Text style={PlanVisitStyles.ScreenTitle}>Plan Visit</Text>
       </View>
 
       <View style={PlanVisitStyles.container}>
@@ -304,13 +310,18 @@ const PlanVisit = ({navigation}: any) => {
             data={experimentList}
             contentContainerStyle={
               // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
-              experimentList?.length === 0 
-              ? { flexGrow: 1, justifyContent: 'center', alignItems: 'center' ,height:'100%'} 
-              : { paddingBottom: 10,
-                height: 105,
-               }      
+              experimentList?.length === 0
+                ? {
+                    flexGrow: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    width:'100%',
+                    paddingHorizontal: 20,
+                  }
+                : {paddingBottom: 10, height: 105}
             }
-              showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
             renderItem={({item, index}) => null}
             keyExtractor={(_, index) => index.toString()}
@@ -334,7 +345,7 @@ const PlanVisit = ({navigation}: any) => {
             onFieldSelect={handleSelectedField}
           />
         )}
-        {selectedExperiment && selectedField && !selectedDate &&(
+        {selectedExperiment && selectedField && !selectedDate && (
           <Pressable
             style={PlanVisitStyles.chipItem}
             onPress={() => setModalVisible(true)}>

@@ -94,6 +94,10 @@ const Record = () => {
       const newProjectList = Object.keys(experimentData?.[option] || {});
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
+      setSelectedExperiment(null);
+      setSelectedFields({});
+      setTraitData(null);
+      setPlotData(null);
       setExperimentList(experimentData?.[option][newProjectList[0]] || []);
     },
     [experimentData],
@@ -103,18 +107,21 @@ const Record = () => {
       setSelectedProject(option);
       setExperimentList(experimentData?.[selectedCrop][option] || []);
       setSelectedExperiment(null);
+      setSelectedFields({});
+      setTraitData(null);
+      setPlotData(null);
       setChipTitle('Select an Experiment');
     },
     [experimentData, selectedCrop],
   );
   useEffect(() => {
-    if (experimentData && experimentData['Rice']) {
-      setSelectedCrop('Rice');
+    if (experimentData && Object.keys(experimentData).length > 0) {
+      const firstCrop = Object.keys(experimentData)[0];
+      const newProjectList = Object.keys(experimentData[firstCrop]);
 
-      const newProjectList = Object.keys(experimentData['Rice']);
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData['Rice'][newProjectList[0]] || []);
+      setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
       setProjectList([]);
       setSelectedProject('');
@@ -171,7 +178,7 @@ const Record = () => {
   const handleExperimentSelect = (item: any) => {
     setSelectedExperiment(item);
     setChipTitle(item.fieldExperimentName);
-    
+
     setExperimentType(item.experimentType);
     (bottomSheetModalRef.current as any).dismiss();
   };
@@ -194,6 +201,7 @@ const Record = () => {
   useEffect(() => {
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {
       setFields(getFieldsResponse.data.locationList);
+      console.log(fields);
     }
   }, [getFieldsResponse]);
 
@@ -266,7 +274,9 @@ const Record = () => {
       await fetchPlotData();
     };
 
-    fetchData();
+    if (locationIds && locationIds.length > 0) {
+      fetchData();
+    }
   }, [locationIds]);
 
   const [getLocationTraitData, locationTraitDataResponse] = useApi({
@@ -338,27 +348,27 @@ const Record = () => {
         <Text style={RecordStyles.ScreenTitle}>Record</Text>
       </View>
       <View style={RecordStyles.container}>
-        <View>
-          <FlatList
-            data={experimentList}
-            contentContainerStyle={
-              // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
-              experimentList?.length === 0
-                ? {
-                    flexGrow: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '100%',
-                  }
-                : {paddingBottom: 10, height: 105}
-            }
-            showsVerticalScrollIndicator={false}
-            ListHeaderComponent={ListHeaderComponent}
-            renderItem={({item, index}) => null}
-            keyExtractor={(_, index: any) => index.toString()}
-            ListEmptyComponent={ListEmptyComponent}
-          />
-        </View>
+        <FlatList
+          data={experimentList}
+          contentContainerStyle={
+            // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
+            experimentList?.length === 0
+              ? {
+                  flexGrow: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: '100%',
+                  width: '100%',
+                  paddingHorizontal: 20,
+                }
+              : {paddingBottom: 10, height: 105}
+          }
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={ListHeaderComponent}
+          renderItem={({item, index}) => null}
+          keyExtractor={(_, index: any) => index.toString()}
+          ListEmptyComponent={ListEmptyComponent}
+        />
       </View>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={RecordStyles.container}>
@@ -376,22 +386,22 @@ const Record = () => {
 
           <View style={RecordStyles.experimentContainer}>
             {selectedExperiment && (
-              <View style={TakeNotesStyles.chipItem}>
-                <Text style={TakeNotesStyles.chipTitle}>Experiment</Text>
-                <View style={TakeNotesStyles.chipTextRow}>
-                  <Text style={TakeNotesStyles.chipText}>
-                    {selectedExperiment.fieldExperimentName}
-                  </Text>
-                  <Pressable onPress={handleRightIconClick}>
+              <Pressable onPress={handleRightIconClick}>
+                <View style={TakeNotesStyles.chipItem}>
+                  <Text style={TakeNotesStyles.chipTitle}>Experiment</Text>
+                  <View style={TakeNotesStyles.chipTextRow}>
+                    <Text style={TakeNotesStyles.chipText}>
+                      {selectedExperiment.fieldExperimentName}
+                    </Text>
                     <DropdownArrow />
-                  </Pressable>
+                  </View>
+                  <View style={TakeNotesStyles.chipCropText}>
+                    <Text style={TakeNotesStyles.chipCropText1}>
+                      {selectedExperiment.cropName}
+                    </Text>
+                  </View>
                 </View>
-                <View style={TakeNotesStyles.chipCropText}>
-                  <Text style={TakeNotesStyles.chipCropText1}>
-                    {selectedExperiment.cropName}
-                  </Text>
-                </View>
-              </View>
+              </Pressable>
             )}
           </View>
 
@@ -466,7 +476,7 @@ const Record = () => {
               {selectedFields && plotData && traitData && (
                 <View style={RecordStyles.inputContainer}>
                   <View style={RecordStyles.listByContainer}>
-                    <Text style={RecordStyles.listByText}>  List By</Text>
+                    <Text style={RecordStyles.listByText}> List By</Text>
                     <View style={RecordStyles.listByButtonsContainer}>
                       <Pressable
                         onPress={() => handleListPress('Plot')}
@@ -511,12 +521,6 @@ const Record = () => {
                       </Pressable>
                     </View>
                   </View>
-                  {loading ? (
-                    <View>
-                      <Loader />
-                    </View>
-                  ) : null}
-
                   {activeListButton === 'Plot' && (
                     <RecordDropDown
                       selectedFields={selectedFields}
@@ -534,6 +538,11 @@ const Record = () => {
               )}
             </View>
           )}
+          {loading ? (
+            <View>
+              <Loader />
+            </View>
+          ) : null}
 
           <BottomModal
             bottomSheetModalRef={bottomSheetModalRef}

@@ -6,6 +6,7 @@ import UpcomingVisits from '../../../../components/Upcomingvisit';
 import {URL} from '../../../../constants/URLS';
 import {useFocusEffect} from '@react-navigation/native';
 import Toast from '../../../../utilities/toast';
+import {useIsFocused} from '@react-navigation/native';
 
 const MyVisits = ({navigation, refresh}: any) => {
   const [visits, setVisits] = useState<{id: number}[]>([]);
@@ -13,14 +14,11 @@ const MyVisits = ({navigation, refresh}: any) => {
     url: URL.VISITS,
     method: 'GET',
   });
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    const getVisits = async () => {
-      fetchVisits();
-    };
-
-    getVisits();
-  }, []);
+    isFocused && fetchVisits();
+  }, [isFocused]);
 
   useEffect(() => {
     if (fetchVisitsResponse && fetchVisitsResponse.status_code === 200) {

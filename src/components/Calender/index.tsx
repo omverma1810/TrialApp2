@@ -71,7 +71,7 @@ export default function Calender({modalVisible, onCancel, onOk}: any) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5FCFF',
-    width: 410,
+    width: 380,
     borderRadius: 25,
   },
   header: {
