@@ -1,4 +1,10 @@
-import {Text, View, ScrollView, TouchableOpacity} from 'react-native';
+import {
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import BottomModal from '../../../../components/BottomSheetModal';
 import TakeNotesStyles from '../../TakeNotes/TakeNotesStyle';
@@ -25,7 +31,7 @@ const ExperimentCard = ({
   onExperimentSelect,
   name,
   onFieldSelect,
-  isProjectSelected
+  isProjectSelected,
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
@@ -37,7 +43,7 @@ const ExperimentCard = ({
 
   const handleExperimentSelect = (item: any) => {
     if (name === 'field') {
-      setSelectedField(item)
+      setSelectedField(item);
       setChipTitle(item.location.villageName);
       onFieldSelect(item);
     } else {
@@ -86,42 +92,42 @@ const ExperimentCard = ({
         />
       )}
       {selectedExperiment && (
-        <View style={TakeNotesStyles.chipItem}>
-          <Text style={TakeNotesStyles.chipTitle}>Experiment</Text>
-          <View style={TakeNotesStyles.chipTextRow}>
-            <Text style={TakeNotesStyles.chipText}>
-              {name == 'field'
-                ? selectedExperiment.location.villageName
-                : selectedExperiment.fieldExperimentName}
-            </Text>
-            <TouchableOpacity onPress={handleChipPress}>
+        <Pressable onPress={handleChipPress}>
+          <View style={TakeNotesStyles.chipItem}>
+            <Text style={TakeNotesStyles.chipTitle}>Experiment</Text>
+            <View style={TakeNotesStyles.chipTextRow}>
+              <Text style={TakeNotesStyles.chipText}>
+                {name == 'field'
+                  ? selectedExperiment.location.villageName
+                  : selectedExperiment.fieldExperimentName}
+              </Text>
               <DropdownArrow />
-            </TouchableOpacity>
+            </View>
+            <View style={TakeNotesStyles.chipCropText}>
+              <Text style={TakeNotesStyles.chipCropText1}>
+                {selectedExperiment.cropName}
+              </Text>
+            </View>
           </View>
-          <View style={TakeNotesStyles.chipCropText}>
-            <Text style={TakeNotesStyles.chipCropText1}>
-              {selectedExperiment.cropName}
-            </Text>
-          </View>
-        </View>
+        </Pressable>
       )}
       {selectedField && (
-        <View style={TakeNotesStyles.chipItem}>
-          <Text style={TakeNotesStyles.chipTitle}>Field</Text>
-          <View style={TakeNotesStyles.chipTextRow}>
-            <Text style={TakeNotesStyles.chipText}>
-              {selectedField.location.villageName}
-            </Text>
-            <TouchableOpacity onPress={handleChipPress}>
+        <Pressable onPress={handleChipPress}>
+          <View style={TakeNotesStyles.chipItem}>
+            <Text style={TakeNotesStyles.chipTitle}>Field</Text>
+            <View style={TakeNotesStyles.chipTextRow}>
+              <Text style={TakeNotesStyles.chipText}>
+                {selectedField.location.villageName}
+              </Text>
               <DropdownArrow />
-            </TouchableOpacity>
-          </View>
-          {/* <View style={TakeNotesStyles.chipCropText}>
+            </View>
+            {/* <View style={TakeNotesStyles.chipCropText}>
             <Text style={TakeNotesStyles.chipCropText1}>
               {selectedExperiment.cropName}
             </Text>
           </View> */}
-        </View>
+          </View>
+        </Pressable>
       )}
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
@@ -131,30 +137,38 @@ const ExperimentCard = ({
           <Text style={TakeNotesStyles.modalTitle}>
             Select an Experiment (or) Field
           </Text>
-          <View style={{gap: 30}}>
-            {Array.isArray(data) &&
-              data.map((item: any, index: number) => (
-                <TouchableOpacity
-                  key={`${item.id}-${index}`}
-                  onPress={() => handleExperimentSelect(item)}
-                  style={TakeNotesStyles.modalItemContainer}>
-                  <Text style={TakeNotesStyles.modalItemText}>
-                    {item.fieldExperimentName || item.location.villageName}
-                  </Text>
-                  {item.fieldExperimentName ? (
-                    <Text
-                      style={[
-                        TakeNotesStyles.modalItemCropText,
-                        {
-                          backgroundColor: item.cropName === 'Rice' ? '#FCEBEA' : '#E8F0FB',
-                        },
-                      ]}>
-                      {item.cropName}
+          <ScrollView>
+            <View style={{gap: 30}}>
+              {Array.isArray(data) &&
+                data.map((item: any, index: number) => (
+                  <TouchableOpacity
+                    key={`${item.id}-${index}`}
+                    onPress={() => handleExperimentSelect(item)}
+                    style={TakeNotesStyles.modalItemContainer}>
+                    <Text style={TakeNotesStyles.modalItemText}>
+                      {name == 'field' ? `${item.id} - ` : null}{' '}
+                      {item.fieldExperimentName || item.location.villageName}
                     </Text>
-                  ) : null}
-                </TouchableOpacity>
-              ))}
-          </View>
+                    {name == 'experiment' ? (
+                      <Text
+                        style={[
+                          TakeNotesStyles.modalItemCropText,
+                          {
+                            backgroundColor:
+                              item.experimentType === 'hybrid'
+                                ? '#fdf8ee'
+                                : item.experimentType === 'line'
+                                ? '#fcebea'
+                                : '#eaf4e7',
+                          },
+                        ]}>
+                        {item.experimentType}
+                      </Text>
+                    ) : null}
+                  </TouchableOpacity>
+                ))}
+            </View>
+          </ScrollView>
         </View>
       </BottomModal>
     </View>

@@ -203,7 +203,7 @@ const NotificationStackScreens = () => {
         headerShadowVisible: false,
         animation: 'slide_from_right',
       }}>
-      <NotificationStack.Screen name="Notification" component={Notification} />
+      <NotificationStack.Screen name="Notification" component={Notification} options={{headerShown:false}} />
     </NotificationStack.Navigator>
   );
 };

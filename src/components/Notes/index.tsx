@@ -29,6 +29,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
           message: 'Note deleted successfully',
         })
         onDelete(note.id);
+        bottomSheetModalRef.current?.close();
       } else {
         Toast.error({
           message: 'Failed to delete note',
@@ -39,6 +40,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress = {() => bottomSheetModalRef.current?.present()}>
       <View style={styles.noteContainer}>
         <View style={styles.noteContent}>
           <Text style={styles.noteText}>{note.content}</Text>
@@ -48,6 +50,7 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
           <Dots />
         </TouchableOpacity>
       </View>
+      </TouchableOpacity>
 
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}

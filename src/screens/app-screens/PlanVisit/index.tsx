@@ -1,9 +1,17 @@
 import dayjs, {Dayjs} from 'dayjs';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {Alert, FlatList, Modal, Pressable, Text, View} from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  Text,
+  View,
+  TouchableOpacity,
+} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {DropdownArrow, Search} from '../../../assets/icons/svgs';
+import {Back, DropdownArrow, Search} from '../../../assets/icons/svgs';
 import {
   Calender,
   Input,
@@ -18,6 +26,7 @@ import {LOCALES} from '../../../localization/constants';
 import ExperimentCard from './ExperimentCard';
 import Filter from './Filter';
 import PlanVisitStyles from './PlanVisitStyles';
+import Toast from '../../../utilities/toast';
 
 interface Chip {
   id: number;
@@ -52,6 +61,7 @@ const PlanVisit = ({navigation}: any) => {
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
   };
+
   const handleSelectedField = (field: any) => {
     setSelectedField(field);
   };
@@ -66,21 +76,22 @@ const PlanVisit = ({navigation}: any) => {
     },
     [experimentData],
   );
+
   useEffect(() => {
-    if (experimentData && experimentData["Rice"]) {
-      setSelectedCrop("Rice");
-  
-      const newProjectList = Object.keys(experimentData["Rice"]);
+    if (experimentData && Object.keys(experimentData).length > 0) {
+      const firstCrop = Object.keys(experimentData)[0];
+      const newProjectList = Object.keys(experimentData[firstCrop]);
+
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData["Rice"][newProjectList[0]] || []);
+      setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
       setProjectList([]);
       setSelectedProject('');
       setExperimentList([]);
     }
   }, [experimentData]);
-    
+
   const handleProjectChange = useCallback(
     (option: string) => {
       setSelectedProject(option);
@@ -90,6 +101,7 @@ const PlanVisit = ({navigation}: any) => {
     },
     [experimentData, selectedCrop],
   );
+
   const handleFirstRightIconClick = () => {
     if (bottomSheetModalRef.current) {
       (bottomSheetModalRef.current as any).present();
@@ -139,6 +151,7 @@ const PlanVisit = ({navigation}: any) => {
       handleThirdRightIconClick();
     }
   };
+
   const ListHeaderComponent = useMemo(
     () => (
       <View style={PlanVisitStyles.filter}>
@@ -192,6 +205,7 @@ const PlanVisit = ({navigation}: any) => {
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
   }, [experimentListData]);
+
   const ListEmptyComponent = useMemo(
     () => (
       <View style={PlanVisitStyles.emptyContainer}>
@@ -213,13 +227,17 @@ const PlanVisit = ({navigation}: any) => {
     date: '',
     experiment_type: '',
   });
+
   const [planVisit, planVisitResponse] = useApi({
     url: URL.VISITS,
     method: 'POST',
   });
+
   const onPlanVisit = async () => {
     if (!selectedDate) {
-      Alert.alert('Error', 'Please select all fields before planning a visit');
+      Toast.error({
+        message: 'Please select all fields before planning a visit',
+      });
       return;
     }
     const newData = {
@@ -230,20 +248,36 @@ const PlanVisit = ({navigation}: any) => {
     };
     await planVisit({payload: newData});
   };
+
   useEffect(() => {
     console.log({planVisitResponse});
     if (planVisitResponse && planVisitResponse.status_code == 201) {
-      Alert.alert('Success', 'Visit planned successfully');
-      navigation.navigate('Home',{ refresh: true });
+      Toast.success({
+        message: 'Visit planned successfully',
+      });
+      navigation.navigate('Home', {refresh: true});
+    } else {
+      if (planVisitResponse) {
+        Toast.error({
+          message: 'Something Went Wrong',
+        });
+      }
     }
   }, [planVisitResponse]);
 
   const [getFields, getFieldsResponse] = useApi({
-    url: `${URL.FIELDS}${selectedExperiment?.id}?$experimentType=line`,
+    url: URL.EXPERIMENT_DETAILS,
     method: 'GET',
   });
+
   useEffect(() => {
-    getFields();
+    if (selectedExperiment) {
+      const queryParams = `experimentType=${selectedExperiment?.experimentType}`;
+      getFields({
+        pathParams: selectedExperiment?.id,
+        queryParams,
+      });
+    }
   }, [selectedExperiment]);
 
   useEffect(() => {
@@ -251,23 +285,41 @@ const PlanVisit = ({navigation}: any) => {
       setFields(getFieldsResponse.data.locationList);
     }
   }, [getFieldsResponse]);
+
   useEffect(() => {
     console.log('fields', fields, selectedField);
   }, []);
   return (
-    <SafeAreaView>
+    <SafeAreaView edges={['top']}>
       <StatusBar />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          marginHorizontal: 20,
+        }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Back width={24} height={24} />
+        </TouchableOpacity>
+        <Text style={PlanVisitStyles.ScreenTitle}>Plan Visit</Text>
+      </View>
+
       <View style={PlanVisitStyles.container}>
         <View style={PlanVisitStyles.container}>
-          <Input
-            placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
-            leftIcon={Search}
-            customLeftIconStyle={{marginRight: 10}}
-          />
           <FlatList
             data={experimentList}
             contentContainerStyle={
-              experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
+              // experimentList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 10}
+              experimentList?.length === 0
+                ? {
+                    flexGrow: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    width:'100%',
+                    paddingHorizontal: 20,
+                  }
+                : {paddingBottom: 10, height: 105}
             }
             showsVerticalScrollIndicator={false}
             ListHeaderComponent={ListHeaderComponent}
@@ -293,7 +345,7 @@ const PlanVisit = ({navigation}: any) => {
             onFieldSelect={handleSelectedField}
           />
         )}
-        {selectedExperiment && selectedField && !selectedDate &&(
+        {selectedExperiment && selectedField && !selectedDate && (
           <Pressable
             style={PlanVisitStyles.chipItem}
             onPress={() => setModalVisible(true)}>

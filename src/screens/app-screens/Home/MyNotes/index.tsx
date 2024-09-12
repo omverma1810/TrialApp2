@@ -5,8 +5,10 @@ import {URL} from '../../../../constants/URLS';
 import MyNoteStyles from './MyNotesStyles';
 import Notes from '../../../../components/Notes';
 import { useFocusEffect } from '@react-navigation/native';
+import {useIsFocused} from '@react-navigation/native';
 
 import {NavigationProp} from '@react-navigation/native';
+import Toast from '../../../../utilities/toast';
 
 type NoteType = {
   id: number;
@@ -18,6 +20,8 @@ type NoteType = {
 };
 // {navigation: NavigationProp<any>}
 const MyNote = ({navigation,refresh}: any ) => {  
+  const isFocused = useIsFocused();
+
   useFocusEffect(
     useCallback(() => {
       if (refresh) {
@@ -35,18 +39,17 @@ const MyNote = ({navigation,refresh}: any ) => {
   });
 
   useEffect(() => {
-    const getNotes = async () => {
-      fetchNotes();
-    };
-    getNotes();
-  }, []);
+    isFocused && fetchNotes();
+  }, [isFocused]);
 
   useEffect(() => {
     if (fetchNotesResponse && fetchNotesResponse.status_code === 200) {
       setNotes(fetchNotesResponse.data);
       // console.log(fetchNotesResponse.data)
     } else if (fetchNotesResponse) {
-      Alert.alert('Error', 'Failed to fetch notes');
+      Toast.error({
+        message:'Failed to fetch notes'
+      })
     }
   }, [fetchNotesResponse]); 
 
@@ -56,7 +59,7 @@ const MyNote = ({navigation,refresh}: any ) => {
 
   const handleEditNote = (note: NoteType | unknown) => {
     console.log(note);
-    navigation.navigate('TakeNotes', {data: note,fetchNotes: fetchNotes});
+    navigation.navigate('TakeNotes', {data: note});
   };
 
   return (
