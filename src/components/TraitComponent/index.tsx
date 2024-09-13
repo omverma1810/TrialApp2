@@ -11,7 +11,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
 import {FONTS} from '../../theme/fonts';
 
-const TraitComponent = ({projectData, selectedFields}: any) => { 
+const TraitComponent = ({projectData, selectedFields,fields}: any) => {
   // console.log('i'm batman',projectData)
   const [dropdownHeights, setDropdownHeights] = useState(
     Array.from({length: projectData.length}, () => new Animated.Value(0)),
@@ -23,7 +23,7 @@ const TraitComponent = ({projectData, selectedFields}: any) => {
 
   useEffect(() => {
     let noOfPlots = 0;
-    
+
     projectData.forEach((trait: any) => {
       if (Array.isArray(trait.locationData)) {
         trait.locationData.forEach((location: any) => {
@@ -33,14 +33,14 @@ const TraitComponent = ({projectData, selectedFields}: any) => {
         });
       }
     });
-   
+
     setHeight(noOfPlots);
   }, [projectData]);
-  
+
   const toggleDropdown = (index: number) => {
     const newIsOpen = [...isOpen];
     newIsOpen[index] = !newIsOpen[index];
-    const dropdownHeight = newIsOpen[index] ? height*15 : 0;
+    const dropdownHeight = newIsOpen[index] ? height * 15 : 0;
 
     Animated.timing(dropdownHeights[index], {
       toValue: dropdownHeight,
@@ -50,13 +50,16 @@ const TraitComponent = ({projectData, selectedFields}: any) => {
 
     setIsOpen(newIsOpen);
   };
+  const getVillageName = (fieldId: string) => {
+    const field = fields.find((field: any) => String(field.id) === String(fieldId));
+    return field?.location?.villageName || 'Unknown';
+  };
+
 
   return (
     <ScrollView contentContainerStyle={styles.projectContainer}>
       {projectData.map((trait: any, traitIndex: number) => (
-        <View
-          key={traitIndex}
-          style={[styles.projectContainer]}>
+        <View key={traitIndex} style={[styles.projectContainer]}>
           {/* Trait Title and Dropdown Toggle */}
           <Pressable onPress={() => toggleDropdown(traitIndex)}>
             <View style={styles.row}>
@@ -67,42 +70,38 @@ const TraitComponent = ({projectData, selectedFields}: any) => {
             </View>
           </Pressable>
 
-          <Animated.View
-            style={[
-              styles.dropdown,
-              styles.borderBottom,
-              {height: dropdownHeights[traitIndex]},
-            ]}>
-            {trait.locationData.map(
-              (location: any, locationIndex: number) =>
-                selectedFields[location.trialLocationId] && (
-                  <View key={locationIndex} style={styles.locationContainer}>
-                    <View style={styles.projectContainerBackground}>
-                      <View style={styles.header}>
-                        <Text style={styles.headerText}>
-                          Field {location.trialLocationId}
-                        </Text>
-                        <FieldSybol1 />
-                      </View>
-                    </View>
-                    <View style={styles.plotWrapper}>
-                      {location.plotData.map((plot: any, plotIndex: number) => (
-                        <View key={plotIndex} style={styles.plotContainer}>
-                          <Text style={styles.plotText}>
-                            Plot {plot.plotNumber}
-                          </Text>
-                          <Text>
-                            {plot.value || 'N/A'}
-                          </Text>
+          {isOpen[traitIndex] && (
+            <Animated.View style={[styles.dropdown]}>
+              <ScrollView nestedScrollEnabled>
+                {trait.locationData.map(
+                  (location: any, locationIndex: number) =>
+                    selectedFields[location.trialLocationId] && (
+                      <View key={locationIndex} style={styles.locationContainer}>
+                        <View style={styles.projectContainerBackground}>
+                          <View style={styles.header}>
+                            <Text style={styles.headerText}>
+                            {location.trialLocationId} - {getVillageName(location.trialLocationId)}
+                              </Text>
+                            <FieldSybol1 />
+                          </View>
                         </View>
-                      ))}
-                    </View>
-                  </View>
-                ),
-            )}
-          </Animated.View>
+
+                        {/* Plot Data */}
+                        {location.plotData.map((plot: any, plotIndex: number) => (
+                          <View key={plotIndex} style={styles.plotContainer}>
+                            <Text style={styles.plotText}>Plot {plot.plotNumber}</Text>
+                            <Text>{plot.value || 'N/A'}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    ),
+                )}
+              </ScrollView>
+            </Animated.View>
+          )}
         </View>
       ))}
+
     </ScrollView>
   );
 };
@@ -145,12 +144,12 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   plotContainer: {
-    display:'flex',
+    display: 'flex',
     marginVertical: 5,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 5,
-    justifyContent:'space-between',
+    justifyContent: 'space-between',
     flexDirection: 'row',
   },
   plot: {
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
   },
   plotText: {
     fontSize: 16,
-    color:'#161616'
+    color: '#161616',
   },
   plotValue: {
     fontSize: 16,

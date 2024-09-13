@@ -70,6 +70,9 @@ const TakeNotes = ({navigation, route}: any) => {
       const newProjectList = Object.keys(experimentData[option] || {});
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
+      setSelectedExperiment(null);
+      setSelectedExperimentId(null);
+      setFields([]);
       setExperimentList(experimentData[option][newProjectList[0]] || []);
     },
     [experimentData],
@@ -80,6 +83,7 @@ const TakeNotes = ({navigation, route}: any) => {
       setSelectedProject(option);
       setExperimentList(experimentData[selectedCrop][option] || []);
       setSelectedExperiment(null);
+      setSelectedField(null);
       setChipTitle('Select an Experiment');
     },
     [experimentData, selectedCrop],

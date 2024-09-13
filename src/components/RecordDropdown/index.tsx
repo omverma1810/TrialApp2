@@ -29,9 +29,11 @@ const RecordDropDown = ({
   selectedFields,
   projectData,
   experimentType,
+  fields
 }: {
   selectedFields: selectedFieldsType;
   projectData: any;
+  fields:any;
   experimentType: string | null;
 }) => {
   const [dropdownStates, setDropdownStates] = useState(
@@ -62,6 +64,7 @@ const RecordDropDown = ({
             <ProjectContainer
               key={field}
               title={field}
+              heading={`${field} - ${fields.find((f : any) => String(f.id) === String(field))?.location?.villageName || 'Unknown'}`}
               data={projectData && projectData[0]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
@@ -81,13 +84,15 @@ const ProjectContainer = ({
   toggleDropdown,
   projectData,
   experimentType,
+  heading
 }: {
-  title: String;
+  title: any;
   data: any;
   dropdownStates: any;
   toggleDropdown: any;
   projectData: any;
   experimentType: string | null;
+  heading:any
 }) => {
   return (
     <View style={styles.paddingVertical}>
@@ -95,7 +100,7 @@ const ProjectContainer = ({
         style={[styles.projectContainer, styles.projectContainerBackground]}>
         <View style={styles.header}>
           <Text style={styles.headerText}>
-            Field {title} {data ? data.length : 0} Plots
+            {heading} {data ? data.length : 0} Plots
           </Text>
           <FieldSybol1 />
         </View>
@@ -248,7 +253,7 @@ const ItemComponent = ({
                     <View style={styles.projectContainer1}>
                       <View style={styles.padding}>
                         <Text style={styles.recordedTraitsText}>
-                          Recorded Traits (Number)
+                          Recorded Traits
                         </Text>
                       </View>
                       <View style={styles.borderRadiusOverflow}>
@@ -262,7 +267,7 @@ const ItemComponent = ({
                         </View>
                         <View style={styles.entryRow}>
                           {editingEntryId === entry.observationId ? (
-                            <View style={styles.entryColumn}>
+                            <View style={[styles.entryColumn]}>
                               <ValueInputCard
                                 onSubmit={handleValueSubmit}
                                 entry={currentEntry}
@@ -299,7 +304,7 @@ const ItemComponent = ({
                     <View style={styles.projectContainer1}>
                       <View style={styles.padding}>
                         <Text style={styles.recordedTraitsText}>
-                          Unrecorded Traits (Number)
+                          Unrecorded Traits
                         </Text>
                       </View>
                       <View style={styles.borderRadiusOverflow}>
@@ -343,7 +348,7 @@ const ItemComponent = ({
                     </View>
                   </View>
                 ))}
-              {dropdownState && notes && (
+              {dropdownState && notes && notes != '' && (
                 <View style={styles.notesContainer}>
                   <Text style={styles.notesTitle}>Notes</Text>
                   <View style={styles.notesContent}>

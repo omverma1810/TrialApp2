@@ -398,7 +398,7 @@ const Record = () => {
                   </View>
                   <View style={TakeNotesStyles.chipCropText}>
                     <Text style={TakeNotesStyles.chipCropText1}>
-                      {selectedExperiment.cropName}
+                      {selectedExperiment.experimentType}
                     </Text>
                   </View>
                 </View>
@@ -527,12 +527,14 @@ const Record = () => {
                       selectedFields={selectedFields}
                       projectData={plotData}
                       experimentType={experimentType}
+                      fields={fields}
                     />
                   )}
                   {activeListButton === 'Traits' && (
                     <TraitSection
                       selectedFields={selectedFields}
                       projectData={traitData}
+                      fields={fields}
                     />
                   )}
                 </View>
@@ -540,7 +542,10 @@ const Record = () => {
             </View>
           )}
           {loading ? (
-            <View>
+            <View
+              style={{
+                marginTop:'30%'
+              }}>
               <Loader />
             </View>
           ) : null}
@@ -563,19 +568,19 @@ const Record = () => {
                           {item.fieldExperimentName}
                         </Text>
                         <Text
-                        style={[
-                          TakeNotesStyles.modalItemCropText,
-                          {
-                            backgroundColor:
-                              item.experimentType === 'hybrid'
-                                ? '#fdf8ee'
-                                : item.experimentType === 'line'
-                                ? '#fcebea'
-                                : '#eaf4e7',
-                          },
-                        ]}>
-                        {item.experimentType}
-                      </Text>
+                          style={[
+                            TakeNotesStyles.modalItemCropText,
+                            {
+                              backgroundColor:
+                                item.experimentType === 'hybrid'
+                                  ? '#fdf8ee'
+                                  : item.experimentType === 'line'
+                                  ? '#fcebea'
+                                  : '#eaf4e7',
+                            },
+                          ]}>
+                          {item.experimentType}
+                        </Text>
                       </Pressable>
                     ))}
                 </View>

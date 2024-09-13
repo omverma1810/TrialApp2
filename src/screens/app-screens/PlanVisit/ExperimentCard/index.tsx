@@ -69,6 +69,16 @@ const ExperimentCard = ({
   useEffect(() => {
     console.log(data);
   });
+  const getBackgroundColor = (experimentType: any) => {
+    switch (experimentType) {
+      case 'hybrid':
+        return '#fdf8ee';
+      case 'line':
+        return '#fcebea';
+      default:
+        return '#eaf4e7';
+    }
+  };
 
   return (
     <View
@@ -103,9 +113,17 @@ const ExperimentCard = ({
               </Text>
               <DropdownArrow />
             </View>
-            <View style={TakeNotesStyles.chipCropText}>
+            <View
+              style={[
+                TakeNotesStyles.chipCropText,
+                {
+                  backgroundColor: getBackgroundColor(
+                    selectedExperiment.experimentType,
+                  ),
+                },
+              ]}>
               <Text style={TakeNotesStyles.chipCropText1}>
-                {selectedExperiment.cropName}
+                {selectedExperiment.experimentType}
               </Text>
             </View>
           </View>
