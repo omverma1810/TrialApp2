@@ -9,6 +9,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
   Alert,
 } from 'react-native';
 import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
@@ -112,6 +113,7 @@ const ProjectContainer = ({
                 plotId={item.id}
                 experimentType={experimentType}
                 plotData={item}
+                imageUrls={item.imageUrls}
               />
             ))}
         </View>
@@ -129,6 +131,7 @@ const ItemComponent = ({
   plotId,
   experimentType,
   plotData,
+  imageUrls
 }: any) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -149,7 +152,6 @@ const ItemComponent = ({
       useNativeDriver: false,
     }).start();
   }, [dropdownState]);
-
   const formatDate = (date: any) => {
     const pad = (num: number) => String(num).padStart(2, '0');
     const year = date.getFullYear();
@@ -216,7 +218,7 @@ const ItemComponent = ({
         });
       }
     }
-    setEditingEntryId(null); 
+    setEditingEntryId(null);
     setModalVisible(false);
     setCurrentEntry(null);
     optionsModalRef.current?.close();
@@ -225,120 +227,146 @@ const ItemComponent = ({
   return (
     <ScrollView style={styles.itemContainer}>
       <TouchableOpacity onPress={toggleDropdown}>
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.title}>{title}</Text>
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={styles.title}>{title}</Text>
+          </View>
+          <TouchableOpacity onPress={toggleDropdown}>
+            <DropdownArrow />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={toggleDropdown}>
-          <DropdownArrow />
-        </TouchableOpacity>
-      </View>
       </TouchableOpacity>
 
-      <Animated.View style={[styles.dropdown, {height: dropdownHeight}]}>
-        {dropdownState &&
-          recordedTraitData &&
-          recordedTraitData.map((entry: any, index: number) => (
-            <View style={styles.entryContainer} key={index}>
-              <View style={styles.projectContainer1}> 
-                <View style={styles.padding}>
-                  <Text style={styles.recordedTraitsText}>
-                    Recorded Traits (Number)
-                  </Text>
-                </View>
-                <View style={styles.borderRadiusOverflow}>
-                  <View style={styles.entryRow}>
-                    <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Trait Name</Text>
-                      <Text style={styles.entryValue}>{entry.traitName}</Text>
+      <Animated.View style={[styles.dropdown]}>
+        {dropdownState && (
+          <>
+            <ScrollView>
+              {dropdownState &&
+                recordedTraitData &&
+                recordedTraitData.map((entry: any, index: number) => (
+                  <View style={styles.entryContainer} key={index}>
+                    <View style={styles.projectContainer1}>
+                      <View style={styles.padding}>
+                        <Text style={styles.recordedTraitsText}>
+                          Recorded Traits (Number)
+                        </Text>
+                      </View>
+                      <View style={styles.borderRadiusOverflow}>
+                        <View style={styles.entryRow}>
+                          <View style={styles.entryColumn}>
+                            <Text style={styles.entryLabel}>Trait Name</Text>
+                            <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.entryRow}>
+                          {editingEntryId === entry.observationId ? (
+                            <View style={styles.entryColumn}>
+                              <ValueInputCard
+                                onSubmit={handleValueSubmit}
+                                entry={currentEntry}
+                                setShowInputCard={setEditingEntryId}
+                              />
+                            </View>
+                          ) : (
+                            <>
+                              <TouchableOpacity
+                                onPress={() => handleEditPress(entry)}>
+                                <View style={styles.entryColumn}>
+                                  <Text style={styles.entryLabel}>Value</Text>
+                                  <Text style={styles.entryValue}>
+                                    {entry.value}
+                                  </Text>
+                                </View>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                onPress={() => handleEditPress(entry)}
+                                style={styles.editButton}>
+                                <Text style={styles.editButtonText}>Edit</Text>
+                              </TouchableOpacity>
+                            </>
+                          )}
+                        </View>
+                      </View>
                     </View>
                   </View>
-                  <View style={styles.entryRow}>
-                    {(editingEntryId === entry.observationId)? (
-                      <View style={styles.entryColumn}>
-                        <ValueInputCard
-                          onSubmit={handleValueSubmit}
-                          entry={currentEntry}
-                          setShowInputCard={setEditingEntryId}
-                        />
+                ))}
+              {dropdownState &&
+                unrecordedTraitData &&
+                unrecordedTraitData.map((entry: any, index: number) => (
+                  <View style={styles.entryContainer} key={index}>
+                    <View style={styles.projectContainer1}>
+                      <View style={styles.padding}>
+                        <Text style={styles.recordedTraitsText}>
+                          Unrecorded Traits (Number)
+                        </Text>
                       </View>
-                    ) : (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}>
+                      <View style={styles.borderRadiusOverflow}>
+                        <View style={styles.entryRow}>
                           <View style={styles.entryColumn}>
-                            <Text style={styles.entryLabel}>Value</Text>
-                            <Text style={styles.entryValue}>{entry.value}</Text>
+                            <Text style={styles.entryLabel}>Trait Name</Text>
+                            <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text>
                           </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}
-                          style={styles.editButton}>
-                          <Text style={styles.editButtonText}>Edit</Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
+                        </View>
+                        <View style={styles.entryRow}>
+                          {editingEntryId === entry.observationId ? (
+                            <View style={styles.entryColumn}>
+                              <ValueInputCard
+                                onSubmit={handleValueSubmit}
+                                entry={currentEntry}
+                                setShowInputCard={setEditingEntryId}
+                              />
+                            </View>
+                          ) : (
+                            <>
+                              <TouchableOpacity
+                                onPress={() => handleEditPress(entry)}>
+                                <View style={styles.entryColumn}>
+                                  <Text style={styles.entryLabel}>Value</Text>
+                                  <Text style={styles.entryValue}>
+                                    {entry.value}
+                                  </Text>
+                                </View>
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                onPress={() => handleEditPress(entry)}
+                                style={styles.editButton}>
+                                <Text style={styles.editButtonText}>Edit</Text>
+                              </TouchableOpacity>
+                            </>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              {dropdownState && notes && (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesTitle}>Notes</Text>
+                  <View style={styles.notesContent}>
+                    <Text style={styles.notesText}>{notes}</Text>
                   </View>
                 </View>
-              </View>
-            </View>
-          ))}
-        {dropdownState && notes && (
-          <View style={styles.notesContainer}>
-            <Text style={styles.notesTitle}>Notes</Text>
-            <View style={styles.notesContent}>
-              <Text style={styles.notesText}>{notes}</Text>
-              {/* <Text style={styles.notesDate}>24 Sept</Text> */}
-            </View>
-          </View>
+              )}
+              {imageUrls && imageUrls.length > 0 && (
+                <View style={styles.imageContainer}>
+                  {imageUrls.map((image : any) => (
+                    <Image
+                      key={image.imageName}
+                      source={{uri: image.url}}
+                      style={styles.image}
+                      resizeMode="contain"
+                      onError={(e) => console.log("Image Load Error: ", e.nativeEvent.error)}
+                    />
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+          </>
         )}
-        {dropdownState &&
-          unrecordedTraitData &&
-          unrecordedTraitData.map((entry: any, index: number) => (
-            <View style={styles.entryContainer} key={index}>
-              <View style={styles.projectContainer1}>
-                <View style={styles.padding}>
-                  <Text style={styles.recordedTraitsText}>
-                    Unrecorded Traits (Number)
-                  </Text>
-                </View>
-                <View style={styles.borderRadiusOverflow}>
-                  <View style={styles.entryRow}>
-                    <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Trait Name</Text>
-                      <Text style={styles.entryValue}>{entry.traitName}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.entryRow}>
-                    {editingEntryId === entry.observationId ? (
-                      <View style={styles.entryColumn}>
-                        <ValueInputCard
-                          onSubmit={handleValueSubmit}
-                          entry={currentEntry}
-                          setShowInputCard={setEditingEntryId}
-                        />
-                      </View>
-                    ) : (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}>
-                          <View style={styles.entryColumn}>
-                            <Text style={styles.entryLabel}>Value</Text>
-                            <Text style={styles.entryValue}>{entry.value}</Text>
-                          </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}
-                          style={styles.editButton}>
-                          <Text style={styles.editButtonText}>Edit</Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
-                  </View>
-                </View>
-              </View>
-            </View>
-          ))}
       </Animated.View>
       {modalVisible && (
         <OptionsModal
@@ -494,6 +522,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  imageContainer: {
+    marginTop: 20,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    marginBottom: 10,
   },
 });
 

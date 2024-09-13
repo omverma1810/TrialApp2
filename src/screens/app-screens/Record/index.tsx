@@ -178,7 +178,8 @@ const Record = () => {
   const handleExperimentSelect = (item: any) => {
     setSelectedExperiment(item);
     setChipTitle(item.fieldExperimentName);
-
+    setTraitData(null);
+    setPlotData(null);
     setExperimentType(item.experimentType);
     (bottomSheetModalRef.current as any).dismiss();
   };
@@ -257,8 +258,8 @@ const Record = () => {
         ...prevState,
         [id]: isSelected,
       };
-
-      // Derive locationIds based on updatedFields
+      setTraitData(null);
+      setPlotData(null);
       const updatedLocationIds = Object.keys(updatedFields).filter(
         fieldId => updatedFields[fieldId],
       );
@@ -562,17 +563,19 @@ const Record = () => {
                           {item.fieldExperimentName}
                         </Text>
                         <Text
-                          style={[
-                            RecordStyles.modalItemCropText,
-                            {
-                              backgroundColor:
-                                item.CropName === 'Rice'
-                                  ? '#FCEBEA'
-                                  : '#E8F0FB',
-                            },
-                          ]}>
-                          {item.cropName}
-                        </Text>
+                        style={[
+                          TakeNotesStyles.modalItemCropText,
+                          {
+                            backgroundColor:
+                              item.experimentType === 'hybrid'
+                                ? '#fdf8ee'
+                                : item.experimentType === 'line'
+                                ? '#fcebea'
+                                : '#eaf4e7',
+                          },
+                        ]}>
+                        {item.experimentType}
+                      </Text>
                       </Pressable>
                     ))}
                 </View>
