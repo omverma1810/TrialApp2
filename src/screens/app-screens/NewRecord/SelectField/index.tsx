@@ -1,16 +1,17 @@
-import {FlatList, Pressable, Text, View} from 'react-native';
-import React from 'react';
+import {Pressable, Text, View} from 'react-native';
+import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
 import {
   CardArrowDown,
+  Close,
   LocationPin,
   Search,
 } from '../../../../assets/icons/svgs';
 import {useRecord} from '../RecordContext';
-import {Loader} from '../../../../components';
+import {Input, Loader} from '../../../../components';
 import {useRecordApi} from '../RecordApiContext';
 
 const SelectField = () => {
@@ -18,6 +19,23 @@ const SelectField = () => {
   const {isSelectFieldVisible, selectedField, handleFieldSelect, fieldList} =
     useRecord();
   const {isFieldListLoading} = useRecordApi();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchEnabled, setIsSearchEnabled] = useState(false);
+  const onRightIconClick = () => {
+    setIsSearchEnabled(false);
+    setSearchQuery('');
+  };
+
+  const filteredLocationList = useMemo(() => {
+    if (searchQuery === '') {
+      return fieldList;
+    }
+    return fieldList.filter((location: any) =>
+      location?.location?.villageName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
+    );
+  }, [fieldList, searchQuery]);
 
   const renderField = (item: any, index: number) => {
     return (
@@ -50,13 +68,28 @@ const SelectField = () => {
     <>
       {!selectedField ? (
         <View style={styles.selectExperimentContainer}>
-          <View style={[styles.selectExperimentTextContainer, styles.row]}>
-            <Text style={styles.selectExperimentText}>
-              {t(LOCALES.EXPERIMENT.LBL_SELECT_FIELD)}
-            </Text>
-            <Search />
-          </View>
-          {fieldList.map(renderField)}
+          {isSearchEnabled ? (
+            <Input
+              placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_FIELD)}
+              leftIcon={Search}
+              customLeftIconStyle={{marginRight: 10}}
+              rightIcon={<Close color={'#161616'} />}
+              customRightIconStyle={{marginLeft: 10}}
+              onRightIconClick={onRightIconClick}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          ) : (
+            <View style={[styles.selectExperimentTextContainer, styles.row]}>
+              <Text style={styles.selectExperimentText}>
+                {t(LOCALES.EXPERIMENT.LBL_SELECT_FIELD)}
+              </Text>
+              <Pressable onPress={() => setIsSearchEnabled(!isSearchEnabled)}>
+                <Search />
+              </Pressable>
+            </View>
+          )}
+          {filteredLocationList.map(renderField)}
         </View>
       ) : (
         <Pressable

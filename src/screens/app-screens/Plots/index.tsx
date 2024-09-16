@@ -82,7 +82,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       return plotList;
     }
     return plotList.filter(plot =>
-      plot.id.toString().toLowerCase().includes(searchQuery.toLowerCase()),
+      plot.plotNumber.toString().toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [plotList, searchQuery]);
 

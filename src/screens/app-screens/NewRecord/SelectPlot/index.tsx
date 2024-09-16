@@ -1,19 +1,38 @@
-import {FlatList, Pressable, Text, View} from 'react-native';
-import React from 'react';
+import {Pressable, Text, View} from 'react-native';
+import React, {useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
 
 import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
-import {CardArrowDown, Search} from '../../../../assets/icons/svgs';
+import {CardArrowDown, Close, Search} from '../../../../assets/icons/svgs';
 import {useRecord} from '../RecordContext';
 import {useRecordApi} from '../RecordApiContext';
-import {Loader} from '../../../../components';
+import {Input, Loader} from '../../../../components';
 
 const SelectPlot = () => {
   const {t} = useTranslation();
   const {isSelectPlotVisible, selectedPlot, handlePlotSelect, plotList} =
     useRecord();
   const {isPlotListLoading} = useRecordApi();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchEnabled, setIsSearchEnabled] = useState(false);
+  const onRightIconClick = () => {
+    setIsSearchEnabled(false);
+    setSearchQuery('');
+  };
+
+  const filteredPlotList = useMemo(() => {
+    if (searchQuery === '') {
+      return plotList;
+    }
+    return plotList.filter(plot =>
+      plot.plotNumber
+        .toString()
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
+    );
+  }, [plotList, searchQuery]);
+
   const rowColInfo = [
     // {
     //   id: 0,
@@ -63,13 +82,28 @@ const SelectPlot = () => {
     <>
       {!selectedPlot ? (
         <View style={styles.selectExperimentContainer}>
-          <View style={[styles.selectExperimentTextContainer, styles.row]}>
-            <Text style={styles.selectExperimentText}>
-              {t(LOCALES.EXPERIMENT.LBL_SELECT_PLOT)}
-            </Text>
-            <Search />
-          </View>
-          {plotList.map(renderPlot)}
+          {isSearchEnabled ? (
+            <Input
+              placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_PLOT)}
+              leftIcon={Search}
+              customLeftIconStyle={{marginRight: 10}}
+              rightIcon={<Close color={'#161616'} />}
+              customRightIconStyle={{marginLeft: 10}}
+              onRightIconClick={onRightIconClick}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          ) : (
+            <View style={[styles.selectExperimentTextContainer, styles.row]}>
+              <Text style={styles.selectExperimentText}>
+                {t(LOCALES.EXPERIMENT.LBL_SELECT_PLOT)}
+              </Text>
+              <Pressable onPress={() => setIsSearchEnabled(!isSearchEnabled)}>
+                <Search />
+              </Pressable>
+            </View>
+          )}
+          {filteredPlotList.map(renderPlot)}
         </View>
       ) : (
         <Pressable
@@ -79,7 +113,9 @@ const SelectPlot = () => {
             <Text style={styles.experimentHeaderTitle}>
               {t(LOCALES.EXPERIMENT.LBL_PLOT)}
             </Text>
-            <Text style={styles.experimentName}>{selectedPlot?.plotNumber}</Text>
+            <Text style={styles.experimentName}>
+              {selectedPlot?.plotNumber}
+            </Text>
             <View style={styles.plotInfoContainer}>
               {rowColInfo.map(data => (
                 <View style={styles.plotKeyValueContainer} key={data.id}>
