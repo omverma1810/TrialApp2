@@ -31,8 +31,8 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
             }}>
             <Text style={styles.optionsTitle}>{item?.name}</Text>
             <Text style={styles.optionsLabel}>
-              Min: {item?.minimumValue}
-              {'  '}Max: {item?.maximumValue}
+              {item?.minimumValue ? `Min: ${item?.minimumValue}  ` : ''}
+              {item?.maximumValue ? `Max: ${item?.maximumValue}` : ''}
             </Text>
           </Pressable>
         ))}
