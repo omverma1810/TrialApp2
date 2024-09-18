@@ -10,6 +10,7 @@ import {
   BottomSheetModal,
   BottomSheetView,
   SCREEN_HEIGHT,
+  BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -99,15 +100,16 @@ const BottomSheetModalView = ({
       handleComponent={handleComponent}
       backdropComponent={renderBackdrop}
       onChange={(index: number) => setIsBottomSheetModalOpen(!(index < 0))}>
-      <BottomSheetView
-        style={[
-          styles.container,
-          {paddingBottom: bottom},
-          type === 'CONTENT_HEIGHT' && {flex: 0},
-          containerStyle,
-        ]}>
-        {children}
-      </BottomSheetView>
+      <BottomSheetScrollView
+      contentContainerStyle={[
+        styles.container,
+        {paddingBottom: bottom},
+        type === 'CONTENT_HEIGHT' && {flex: 0},
+        containerStyle,
+      ]}
+    >
+      {children} 
+    </BottomSheetScrollView>
     </BottomSheetModal>
   );
 };
