@@ -32,6 +32,8 @@ const ExperimentCard = ({
   name,
   onFieldSelect,
   isProjectSelected,
+  resetExperiment,
+  onReset
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
@@ -79,6 +81,13 @@ const ExperimentCard = ({
         return '#eaf4e7';
     }
   };
+  useEffect(() => {
+    if (resetExperiment) {
+      setChipTitle(`Select ${name}`); // Reset chip title
+      onReset(); // Reset the flag in the parent component
+      setSelectedExperiment(null); // Reset selected experiment
+    }
+  }, [resetExperiment]);
 
   return (
     <View

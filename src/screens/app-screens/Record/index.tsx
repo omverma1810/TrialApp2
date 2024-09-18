@@ -396,9 +396,17 @@ const Record = () => {
                     </Text>
                     <DropdownArrow />
                   </View>
-                  <View style={TakeNotesStyles.chipCropText}>
+                  <View style={[TakeNotesStyles.chipCropText,
+                      {
+                            backgroundColor: selectedExperiment.experimentType === 'hybrid'
+                            ? '#fdf8ee'
+                            : selectedExperiment.experimentType === 'line'
+                            ? '#fcebea'
+                            : '#eaf4e7',
+                      }
+                    ]}>
                     <Text style={TakeNotesStyles.chipCropText1}>
-                      {selectedExperiment.experimentType}
+                      {selectedExperiment?.experimentType}
                     </Text>
                   </View>
                 </View>
@@ -604,9 +612,12 @@ const Record = () => {
                         value={!!selectedFields[field.id]}
                         onChange={() => handleFieldSelect(field.id)}
                       />
-                      <Text style={RecordStyles.fieldCheckboxText}>
+                      <Pressable onPress={()=> handleFieldSelect(field.id)}>
+                      <Text style={RecordStyles.fieldCheckboxText} >
                         {field.id} - {field.location.villageName}
                       </Text>
+                      </Pressable>
+
                     </View>
                   ))}
                 </View>

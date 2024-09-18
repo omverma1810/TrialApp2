@@ -329,7 +329,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           </View>
           <View
             style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-            <View style={{gap: 8}}>
+            <View style={{gap: 8,width:'80%'}}>
               <Text style={ProfileStyles.infoText}>Phone Number</Text>
               {isEditingPhoneNumber ? (
                 <TextInput
@@ -361,7 +361,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
           </View>
           <View
             style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-            <View style={{gap: 8}}>
+            <View style={{gap: 8,width:'80%'}}>
               <Text style={ProfileStyles.infoText}>Email Id</Text>
               {isEditingEmail ? (
                 <TextInput

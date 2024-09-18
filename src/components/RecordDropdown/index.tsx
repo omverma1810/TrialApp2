@@ -1,5 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -12,11 +12,11 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
+import { DropdownArrow, Edit, FieldSybol1 } from '../../assets/icons/svgs';
 import Calendar from '../Calender';
-import {projectData} from '../../screens/app-screens/Record/Data';
-import {useApi} from '../../hooks/useApi';
-import {URL} from '../../constants/URLS';
+import { projectData } from '../../screens/app-screens/Record/Data';
+import { useApi } from '../../hooks/useApi';
+import { URL } from '../../constants/URLS';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 import Toast from '../../utilities/toast';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
@@ -33,7 +33,7 @@ const RecordDropDown = ({
 }: {
   selectedFields: selectedFieldsType;
   projectData: any;
-  fields:any;
+  fields: any;
   experimentType: string | null;
 }) => {
   const [dropdownStates, setDropdownStates] = useState(
@@ -41,9 +41,9 @@ const RecordDropDown = ({
       Object.keys(selectedFields).flatMap(field =>
         projectData.length > 0 && projectData[0]?.plotData
           ? projectData[0].plotData.map((_: any, index: number) => [
-              `${field}_${index}`,
-              false,
-            ])
+            `${field}_${index}`,
+            false,
+          ])
           : [],
       ),
     ),
@@ -64,7 +64,7 @@ const RecordDropDown = ({
             <ProjectContainer
               key={field}
               title={field}
-              heading={`${field} - ${fields.find((f : any) => String(f.id) === String(field))?.location?.villageName || 'Unknown'}`}
+              heading={`${field} - ${fields.find((f: any) => String(f.id) === String(field))?.location?.villageName || 'Unknown'}`}
               data={projectData && projectData[0]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
@@ -92,7 +92,7 @@ const ProjectContainer = ({
   toggleDropdown: any;
   projectData: any;
   experimentType: string | null;
-  heading:any
+  heading: any
 }) => {
   return (
     <View style={styles.paddingVertical}>
@@ -207,7 +207,7 @@ const ItemComponent = ({
     const headers = {
       'Content-Type': 'application/json',
     };
-    updateValue({payload, headers});
+    updateValue({ payload, headers });
   };
 
   useEffect(() => {
@@ -247,107 +247,126 @@ const ItemComponent = ({
           <>
             <ScrollView>
               {dropdownState &&
-                recordedTraitData &&
-                recordedTraitData.map((entry: any, index: number) => (
-                  <View style={styles.entryContainer} key={index}>
-                    <View style={styles.projectContainer1}>
-                      <View style={styles.padding}>
-                        <Text style={styles.recordedTraitsText}>
-                          Recorded Traits
-                        </Text>
-                      </View>
-                      <View style={styles.borderRadiusOverflow}>
-                        <View style={styles.entryRow}>
-                          <View style={styles.entryColumn}>
-                            <Text style={styles.entryLabel}>Trait Name</Text>
-                            <Text style={styles.entryValue}>
-                              {entry.traitName}
-                            </Text>
-                          </View>
-                        </View>
-                        <View style={styles.entryRow}>
-                          {editingEntryId === entry.observationId ? (
-                            <View style={[styles.entryColumn]}>
-                              <ValueInputCard
-                                onSubmit={handleValueSubmit}
-                                entry={currentEntry}
-                                setShowInputCard={setEditingEntryId}
-                              />
-                            </View>
-                          ) : (
-                            <>
-                              <TouchableOpacity
-                                onPress={() => handleEditPress(entry)}>
-                                <View style={styles.entryColumn}>
-                                  <Text style={styles.entryLabel}>Value</Text>
-                                  <Text style={styles.entryValue}>
-                                    {entry.value}
-                                  </Text>
-                                </View>
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                onPress={() => handleEditPress(entry)}
-                                style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit</Text>
-                              </TouchableOpacity>
-                            </>
-                          )}
+                recordedTraitData && (
+                  <>
+                    {
+                      recordedTraitData.length > 0 &&
+                      <View style={[styles.projectContainer1, { marginVertical: 10 }]}>
+                        <View style={styles.padding}>
+                          <Text style={styles.recordedTraitsText}>Recorded Traits ({recordedTraitData.length})</Text>
                         </View>
                       </View>
-                    </View>
-                  </View>
-                ))}
-              {dropdownState &&
-                unrecordedTraitData &&
-                unrecordedTraitData.map((entry: any, index: number) => (
-                  <View style={styles.entryContainer} key={index}>
-                    <View style={styles.projectContainer1}>
-                      <View style={styles.padding}>
-                        <Text style={styles.recordedTraitsText}>
-                          Unrecorded Traits
-                        </Text>
-                      </View>
-                      <View style={styles.borderRadiusOverflow}>
-                        <View style={styles.entryRow}>
-                          <View style={styles.entryColumn}>
-                            <Text style={styles.entryLabel}>Trait Name</Text>
-                            <Text style={styles.entryValue}>
-                              {entry.traitName}
-                            </Text>
-                          </View>
-                        </View>
-                        <View style={styles.entryRow}>
-                          {editingEntryId === entry.observationId ? (
+                    }
+                    {recordedTraitData.map((entry: any, index: number) => (
+                      <View style={styles.entryContainer} key={index}>
+                        {/* <View style={styles.projectContainer1}> */}
+                        <View style={styles.borderRadiusOverflow}>
+                          <View style={styles.entryRow}>
                             <View style={styles.entryColumn}>
-                              <ValueInputCard
-                                onSubmit={handleValueSubmit}
-                                entry={currentEntry}
-                                setShowInputCard={setEditingEntryId}
-                              />
+                              {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
+                              <Text style={styles.entryLabel}>{entry.traitName}</Text>
+                              {/* <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text> */}
                             </View>
-                          ) : (
-                            <>
-                              <TouchableOpacity
-                                onPress={() => handleEditPress(entry)}>
-                                <View style={styles.entryColumn}>
-                                  <Text style={styles.entryLabel}>Value</Text>
-                                  <Text style={styles.entryValue}>
-                                    {entry.value}
-                                  </Text>
-                                </View>
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                onPress={() => handleEditPress(entry)}
-                                style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit</Text>
-                              </TouchableOpacity>
-                            </>
-                          )}
+                          </View>
+                          <View style={styles.entryRow}>
+                            {editingEntryId === entry.observationId ? (
+                              <View style={[styles.entryColumn,{paddingTop:12}]}>
+                                <ValueInputCard
+                                  onSubmit={handleValueSubmit}
+                                  entry={currentEntry}
+                                  setShowInputCard={setEditingEntryId}
+                                />
+                              </View>
+                            ) : (
+                              <>
+                                <TouchableOpacity
+                                  onPress={() => handleEditPress(entry)}>
+                                  <View style={styles.entryColumn}>
+                                    {/* <Text style={styles.entryLabel}>Value</Text> */}
+                                    <Text style={styles.entryValue}>
+                                      {entry.value}
+                                    </Text>
+                                  </View>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => handleEditPress(entry)}
+                                  style={styles.editButton}>
+                                  <Edit />
+                                </TouchableOpacity>
+                              </>
+                            )}
+                          </View>
+                        </View>
+                        {/* </View> */}
+                      </View>
+                    ))}
+                  </>
+                )}
+              {dropdownState &&
+                unrecordedTraitData && (
+                  <>
+                    {
+                      unrecordedTraitData.length > 0 &&
+                      <View style={[styles.projectContainer1, { marginVertical: 10 }]}>
+                        <View style={styles.padding}>
+                          <Text style={styles.recordedTraitsText}>
+                            Unrecorded Traits ({unrecordedTraitData?.length})
+                          </Text>
                         </View>
                       </View>
-                    </View>
-                  </View>
-                ))}
+                    }
+                    {
+                      unrecordedTraitData.map((entry: any, index: number) => (
+                        <View style={styles.entryContainer} key={index}>
+                          <View style={styles.projectContainer1}>
+                            <View style={styles.borderRadiusOverflow}>
+                            <View style={styles.entryRow}>
+                            <View style={styles.entryColumn}>
+                              {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
+                              <Text style={styles.entryLabel}>{entry.traitName}</Text>
+                              {/* <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text> */}
+                            </View>
+                          </View>
+                              <View style={styles.entryRow}>
+                                {editingEntryId === entry.observationId ? (
+                                  <View style={styles.entryColumn}>
+                                    <ValueInputCard
+                                      onSubmit={handleValueSubmit}
+                                      entry={currentEntry}
+                                      setShowInputCard={setEditingEntryId}
+                                    />
+                                  </View>
+                                ) : (
+                                  <>
+                                    <TouchableOpacity
+                                      onPress={() => handleEditPress(entry)}>
+                                      <View style={styles.entryColumn}>
+                                        <Text style={styles.entryLabel}>Value</Text>
+                                        <Text style={styles.entryValue}>
+                                          {entry.value}
+                                        </Text>
+                                      </View>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                      onPress={() => handleEditPress(entry)}
+                                      style={styles.editButton}>
+                                  <Edit />
+                                  </TouchableOpacity>
+                                  </>
+                                )}
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      ))
+                    }
+                  </>
+                )
+              }
               {dropdownState && notes && notes != '' && (
                 <View style={styles.notesContainer}>
                   <Text style={styles.notesTitle}>Notes</Text>
@@ -358,10 +377,10 @@ const ItemComponent = ({
               )}
               {imageUrls && imageUrls.length > 0 && (
                 <View style={styles.imageContainer}>
-                  {imageUrls.map((image : any) => (
+                  {imageUrls.map((image: any) => (
                     <Image
                       key={image.imageName}
-                      source={{uri: image.url}}
+                      source={{ uri: image.url }}
                       style={styles.image}
                       resizeMode="contain"
                       onError={(e) => console.log("Image Load Error: ", e.nativeEvent.error)}
@@ -445,7 +464,7 @@ const styles = StyleSheet.create({
     borderColor: '#F7F7F7',
   },
   padding: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 10,
   },
   recordedTraitsText: {
@@ -459,7 +478,7 @@ const styles = StyleSheet.create({
   },
   entryRow: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 5,
     flexDirection: 'row',
     backgroundColor: 'white',
     justifyContent: 'space-between',
@@ -471,12 +490,12 @@ const styles = StyleSheet.create({
   entryLabel: {
     color: '#636363',
     fontWeight: '400',
-    fontSize: 12,
+    fontSize: 15,
   },
   entryValue: {
     color: '#161616',
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: 15,
   },
   editButton: {
     flexDirection: 'row',
