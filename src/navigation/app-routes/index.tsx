@@ -35,6 +35,7 @@ import ChangePassword from '../../screens/app-screens/ChangePassword';
 import {useAppSelector} from '../../store';
 import Toast from '../../utilities/toast';
 import {navigationRef} from '..';
+import QRScanner from '../../screens/app-screens/QRScanner';
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
 const Tab = createBottomTabNavigator<TabBarStackParamList>();
@@ -177,6 +178,7 @@ const ExperimentStackScreens = () => {
       <ExperimentStack.Screen name="Plots" component={Plots} />
       <ExperimentStack.Screen name="NewRecord" component={NewRecord} />
       <ExperimentStack.Screen name="AddImage" component={AddImage} />
+      <ExperimentStack.Screen name="QRScanner" component={QRScanner} />
     </ExperimentStack.Navigator>
   );
 };

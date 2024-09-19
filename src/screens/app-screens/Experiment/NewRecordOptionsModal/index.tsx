@@ -1,11 +1,13 @@
 import {Pressable, View} from 'react-native';
 import React from 'react';
 import {useTranslation} from 'react-i18next';
+import {useNavigation} from '@react-navigation/native';
 
 import {Modal, Text} from '../../../../components';
 import {styles} from '../styles';
 import {Close, EditBox, Scan} from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
+import {ExperimentScreenProps} from '../../../../types/navigation/appTypes';
 
 type ModalTypes = {
   isModalVisible: boolean;
@@ -19,6 +21,7 @@ const NewRecordOptionsModal = ({
   onSelectFromList = () => {},
 }: ModalTypes) => {
   const {t} = useTranslation();
+  const navigation = useNavigation<ExperimentScreenProps['navigation']>();
   const newRecordOptions = [
     {
       id: 0,
@@ -26,12 +29,15 @@ const NewRecordOptionsModal = ({
       icon: EditBox,
       onClick: onSelectFromList,
     },
-    // {
-    //   id: 1,
-    //   name: t(LOCALES.EXPERIMENT.LBL_SCAN),
-    //   icon: Scan,
-    //   onClick: () => {},
-    // },
+    {
+      id: 1,
+      name: t(LOCALES.EXPERIMENT.LBL_SCAN),
+      icon: Scan,
+      onClick: () => {
+        closeModal();
+        navigation.navigate('QRScanner');
+      },
+    },
     {
       id: 2,
       name: '',

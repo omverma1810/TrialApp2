@@ -177,10 +177,11 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   };
 
   useEffect(() => {
-    if (params?.imageUrl) {
+    const data: any = params;
+    if (data?.imageUrl) {
       setImages([
         {
-          url: params?.imageUrl,
+          url: data?.imageUrl,
           imagePath: null,
           base64Data: null,
           imageName: null,
@@ -208,6 +209,18 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
+    const paramsData: any = params;
+    if (paramsData?.QRData) {
+      const data = paramsData?.QRData;
+      const experiment = experimentList?.find(
+        (item: any) => item?.id === data?.experiment_id,
+      );
+      if (experiment) {
+        setSelectedCrop(data?.crop || '');
+        setSelectedProject(data?.project || '');
+        handleExperimentSelect(experiment);
+      }
+    }
   }, [experimentListData]);
 
   const handleCropChange = useCallback(
@@ -245,7 +258,16 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     }
 
     const {data} = fieldListData;
-    setFieldList(data?.locationList);
+    const fieldList = data?.locationList;
+    setFieldList(fieldList);
+    const paramsData: any = params;
+    if (paramsData?.QRData) {
+      const data = paramsData?.QRData;
+      const field = fieldList?.find((item: any) => item?.id === data?.field_id);
+      if (field) {
+        handleFieldSelect(field);
+      }
+    }
   }, [fieldListData]);
 
   useEffect(() => {
@@ -262,8 +284,17 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     }
 
     const {data} = plotListData;
-    setPlotList(data?.plotData);
+    const plotList = data?.plotData;
+    setPlotList(plotList);
     setMaxNoOfImages(data?.maxNoOfImages || 5);
+    const paramsData: any = params;
+    if (paramsData?.QRData) {
+      const data = paramsData?.QRData;
+      const plot = plotList?.find((item: any) => item?.id === data?.plot_id);
+      if (plot) {
+        handlePlotSelect(plot);
+      }
+    }
   }, [plotListData]);
 
   const updateRecordData: UpdateRecordDataFunction = (

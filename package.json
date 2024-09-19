@@ -51,6 +51,7 @@
     "react-native-svg": "^14.1.0",
     "react-native-tab-view": "^3.5.2",
     "react-native-ui-datepicker": "^2.0.3",
+    "react-native-vision-camera": "^4.5.3",
     "react-redux": "^9.0.4"
   },
   "devDependencies": {

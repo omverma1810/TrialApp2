@@ -50,12 +50,24 @@ export type ExperimentStackParamList = {
     imageUrl?: string;
     plotId?: string;
   };
-  NewRecord: undefined | {imageUrl: string};
+  NewRecord:
+    | undefined
+    | {imageUrl: string}
+    | {
+        QRData: {
+          crop: string;
+          project: string;
+          experiment_id: number;
+          field_id: number;
+          plot_id: number;
+        };
+      };
   AddImage: {
     imageUrl: string;
     screen: 'NewRecord' | 'Plots';
     data?: any;
   };
+  QRScanner: undefined;
 };
 export type RecordStackParamList = {
   Record: undefined;
@@ -106,6 +118,11 @@ export type NewRecordScreenProps = CompositeScreenProps<
 
 export type AddImageScreenProps = CompositeScreenProps<
   NativeStackScreenProps<ExperimentStackParamList, 'AddImage'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+export type QRScannerScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<ExperimentStackParamList, 'QRScanner'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 
