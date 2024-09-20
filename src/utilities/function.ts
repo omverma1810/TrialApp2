@@ -1,4 +1,5 @@
 import Geolocation from '@react-native-community/geolocation';
+import Toast from './toast';
 
 interface Coordinates {
   latitude: number;
@@ -60,7 +61,10 @@ const getCoordinates = (): Promise<Coordinates> => {
         const {latitude, longitude} = position.coords;
         resolve({latitude, longitude});
       },
-      error => reject(error),
+      error => {
+        Toast.error({message: error.message || 'Something went wrong!'});
+        reject(error);
+      },
     );
   });
 };
