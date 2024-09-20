@@ -201,6 +201,7 @@ const TakeNotes = ({navigation, route}: any) => {
       let data_ = route.params?.data;
       setEditNotesData(data_);
       let {experiment_name} = data_;
+      console.log(data_)
       for (let crops of cropList) {
         console.log(crops);
         if (crops in data) {
@@ -311,8 +312,14 @@ const TakeNotes = ({navigation, route}: any) => {
   
   useEffect(() => {
     const experimentId = selectedExperiment?.id || selectedExperimentId;
-    const experimentType = selectedExperiment?.experimentType || 'line';
-    if (selectedExperiment || selectedExperimentId) {
+    let experimentType = 'line';
+    console.log(editNotesData?.trial_type)
+    if (isEdit && editNotesData?.trial_type) {
+      experimentType = editNotesData.trial_type;
+    } else if (selectedExperiment?.experimentType) {
+      experimentType = selectedExperiment.experimentType;
+    }
+      if (selectedExperiment || selectedExperimentId) {
       const queryParams = `experimentType=${experimentType}`;
       getFields({
         pathParams: experimentId,
@@ -339,6 +346,7 @@ const TakeNotes = ({navigation, route}: any) => {
               return location;
             }
           });
+          console.log('selectedFieldId', selectedFieldId, 'landVillageId', selectedField);
         const field_name = selectedField?.location.villageName;
         console.log('selectedField', field_name);
         if (selectedField) {

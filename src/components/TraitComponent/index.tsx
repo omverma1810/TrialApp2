@@ -90,8 +90,8 @@ const TraitComponent = ({projectData, selectedFields,fields}: any) => {
                         {location.plotData.map((plot: any, plotIndex: number) => (
                           <View key={plotIndex} style={styles.plotContainer}>
                             <Text style={styles.plotText}>Plot {plot.plotNumber}</Text>
-                            <Text>{plot.value || 'N/A'}</Text>
-                          </View>
+                            <Text>{`${plot.value ? `${plot.value} ${trait.traitUom || ''}` : 'N/A'}`}</Text>
+                            </View>
                         ))}
                       </View>
                     ),
