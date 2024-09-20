@@ -16,7 +16,7 @@ import {
   Trash,
   DbEdit,
 } from '../../assets/icons/svgs';
-import {differenceInDays} from 'date-fns';
+import {differenceInDays, isToday, isTomorrow, isYesterday} from 'date-fns';
 import {useApi} from '../../hooks/useApi';
 import {URL} from '../../constants/URLS';
 import dayjs, {Dayjs} from 'dayjs';
@@ -46,9 +46,20 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
     deleteVisit();
   };
   useEffect(() => {
-    setdaysLeft(differenceInDays(new Date(visit.date), currentDate));
+    const visitDate = new Date(visit.date);
+    const difference = differenceInDays(visitDate, currentDate);
+    
+    if (isToday(visitDate)) {
+      setdaysLeft('Today');
+    } else if (isTomorrow(visitDate)) {
+      setdaysLeft('Tomorrow');
+    } else if (isYesterday(visitDate)) {
+      setdaysLeft('Yesterday');
+    } else {
+      setdaysLeft(difference);
+    }
   }, [visit.date]);
-  useEffect(() => {
+    useEffect(() => {
     if (deleteVisitResponse) {
       if (deleteVisitResponse.status_code === 200) {
         Toast.success({
