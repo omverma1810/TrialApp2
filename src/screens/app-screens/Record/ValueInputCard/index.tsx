@@ -67,12 +67,12 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
                 width: '100%',
                 gap: 10,
               }}>
-              <View style={{width: '75%'}}>
+              <View style={{width: '100%'}}>
                 <OutlinedInput
                   label={entry?.traitName}
                   rightIcon={rightIcon}
-                  onEndEditing={e => handleSubmit(e.nativeEvent.text)}
-                  onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
+                  // onEndEditing={e => handleSubmit(e.nativeEvent.text)}
+                  // onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
                   value={value}
                   onChangeText={setValue}
                   keyboardType={keyboardType}

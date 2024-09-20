@@ -10,18 +10,24 @@ import {
 } from 'react-native';
 import {DbEdit} from '../../assets/icons/svgs';
 
-export default function Calender({modalVisible, onCancel, onOk}: any) {
+export default function Calender({modalVisible, onCancel, onOk,selectedDate}: any) {
   const [date, setDate] = useState(dayjs());
   const [textInputValue, setTextInputValue] = useState('');
-
   useEffect(() => {
-    setTextInputValue(dayjs().format('dddd, MMMM D'));
-  }, []);
+    if (selectedDate) {
+      const initialDate = dayjs(selectedDate);
+      setDate(initialDate);
+      setTextInputValue(initialDate.format('dddd, MMMM D'));
+    } else {
+      setTextInputValue(dayjs().format('dddd, MMMM D'));
+    }
+  }, [selectedDate]);
+
 
   const handleDateChange = (params: any) => {
     setDate(dayjs(params.date));
     setTextInputValue(dayjs(params.date).format('dddd, MMMM D'));
-  };
+  }; 
 
   const handleOk = () => {
     const formattedDate = date.format('YYYY-MM-DD');
@@ -54,6 +60,7 @@ export default function Calender({modalVisible, onCancel, onOk}: any) {
           dayContainerStyle={styles.dayContainerStyle}
           todayContainerStyle={styles.todayContainerStyle}
           weekDaysContainerStyle={styles.weekDaysContainerStyle}
+          minDate={dayjs().format('YYYY-MM-DD')} // Disable past dates
         />
         <View style={styles.footer}>
           <TouchableOpacity onPress={onCancel}>
@@ -71,7 +78,7 @@ export default function Calender({modalVisible, onCancel, onOk}: any) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F5FCFF',
-    width: 380,
+    width: 410,
     borderRadius: 25,
   },
   header: {

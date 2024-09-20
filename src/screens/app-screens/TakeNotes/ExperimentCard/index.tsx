@@ -32,6 +32,8 @@ const ExperimentCard = ({
   defaultChipTitle,
   selectedItem,
   isEdit,
+  resetExperiment,
+  onReset
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
@@ -80,7 +82,25 @@ const ExperimentCard = ({
       setChipTitle(defaultChipTitle);
     }
   }, [defaultChipTitle]);
-
+  const getBackgroundColor = (experimentType: any) => {
+    switch (experimentType) {
+      case 'hybrid':
+        return '#fdf8ee';
+      case 'line':
+        return '#fcebea';
+      default:
+        return '#eaf4e7';
+    }
+  };
+  useEffect(() => {
+    if (resetExperiment) {
+      setSelectedExperiment(null); // Reset the selected experiment
+      setSelectedField(null); // If needed, reset the selected field as well
+      setChipTitle(`Select ${name}`); // Reset chip title
+      onReset(); // Reset the flag in the parent component
+    }
+  }, [resetExperiment, onReset]);
+  
   return (
     <View
       style={[
@@ -114,9 +134,17 @@ const ExperimentCard = ({
               </Text>
               <DropdownArrow />
             </View>
-            <View style={TakeNotesStyles.chipCropText}>
+            <View
+              style={[
+                TakeNotesStyles.chipCropText,
+                {
+                  backgroundColor: getBackgroundColor(
+                    selectedExperiment.experimentType,
+                  ),
+                },
+              ]}>
               <Text style={TakeNotesStyles.chipCropText1}>
-                {selectedExperiment.cropName}
+                {selectedExperiment.experimentType}
               </Text>
             </View>
           </View>

@@ -1,5 +1,5 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -9,13 +9,14 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
   Alert,
 } from 'react-native';
-import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
+import { DropdownArrow, Edit, FieldSybol1 } from '../../assets/icons/svgs';
 import Calendar from '../Calender';
-import {projectData} from '../../screens/app-screens/Record/Data';
-import {useApi} from '../../hooks/useApi';
-import {URL} from '../../constants/URLS';
+import { projectData } from '../../screens/app-screens/Record/Data';
+import { useApi } from '../../hooks/useApi';
+import { URL } from '../../constants/URLS';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 import Toast from '../../utilities/toast';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
@@ -28,9 +29,11 @@ const RecordDropDown = ({
   selectedFields,
   projectData,
   experimentType,
+  fields
 }: {
   selectedFields: selectedFieldsType;
   projectData: any;
+  fields: any;
   experimentType: string | null;
 }) => {
   const [dropdownStates, setDropdownStates] = useState(
@@ -38,9 +41,9 @@ const RecordDropDown = ({
       Object.keys(selectedFields).flatMap(field =>
         projectData.length > 0 && projectData[0]?.plotData
           ? projectData[0].plotData.map((_: any, index: number) => [
-              `${field}_${index}`,
-              false,
-            ])
+            `${field}_${index}`,
+            false,
+          ])
           : [],
       ),
     ),
@@ -61,6 +64,7 @@ const RecordDropDown = ({
             <ProjectContainer
               key={field}
               title={field}
+              heading={`${field} - ${fields.find((f: any) => String(f.id) === String(field))?.location?.villageName || 'Unknown'}`}
               data={projectData && projectData[0]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
@@ -80,13 +84,15 @@ const ProjectContainer = ({
   toggleDropdown,
   projectData,
   experimentType,
+  heading
 }: {
-  title: String;
+  title: any;
   data: any;
   dropdownStates: any;
   toggleDropdown: any;
   projectData: any;
   experimentType: string | null;
+  heading: any
 }) => {
   return (
     <View style={styles.paddingVertical}>
@@ -94,7 +100,7 @@ const ProjectContainer = ({
         style={[styles.projectContainer, styles.projectContainerBackground]}>
         <View style={styles.header}>
           <Text style={styles.headerText}>
-            Field {title} {data ? data.length : 0} Plots
+            {heading} {data ? data.length : 0} Plots
           </Text>
           <FieldSybol1 />
         </View>
@@ -112,6 +118,7 @@ const ProjectContainer = ({
                 plotId={item.id}
                 experimentType={experimentType}
                 plotData={item}
+                imageUrls={item.imageUrls}
               />
             ))}
         </View>
@@ -129,6 +136,7 @@ const ItemComponent = ({
   plotId,
   experimentType,
   plotData,
+  imageUrls
 }: any) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -149,7 +157,6 @@ const ItemComponent = ({
       useNativeDriver: false,
     }).start();
   }, [dropdownState]);
-
   const formatDate = (date: any) => {
     const pad = (num: number) => String(num).padStart(2, '0');
     const year = date.getFullYear();
@@ -200,7 +207,7 @@ const ItemComponent = ({
     const headers = {
       'Content-Type': 'application/json',
     };
-    updateValue({payload, headers});
+    updateValue({ payload, headers });
   };
 
   useEffect(() => {
@@ -216,7 +223,7 @@ const ItemComponent = ({
         });
       }
     }
-    setEditingEntryId(null); 
+    setEditingEntryId(null);
     setModalVisible(false);
     setCurrentEntry(null);
     optionsModalRef.current?.close();
@@ -225,120 +232,165 @@ const ItemComponent = ({
   return (
     <ScrollView style={styles.itemContainer}>
       <TouchableOpacity onPress={toggleDropdown}>
-      <View style={styles.row}>
-        <View style={styles.column}>
-          <Text style={styles.title}>{title}</Text>
+        <View style={styles.row}>
+          <View style={styles.column}>
+            <Text style={styles.title}>{title}</Text>
+          </View>
+          <TouchableOpacity onPress={toggleDropdown}>
+            <DropdownArrow />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={toggleDropdown}>
-          <DropdownArrow />
-        </TouchableOpacity>
-      </View>
       </TouchableOpacity>
 
-      <Animated.View style={[styles.dropdown, {height: dropdownHeight}]}>
-        {dropdownState &&
-          recordedTraitData &&
-          recordedTraitData.map((entry: any, index: number) => (
-            <View style={styles.entryContainer} key={index}>
-              <View style={styles.projectContainer1}> 
-                <View style={styles.padding}>
-                  <Text style={styles.recordedTraitsText}>
-                    Recorded Traits (Number)
-                  </Text>
-                </View>
-                <View style={styles.borderRadiusOverflow}>
-                  <View style={styles.entryRow}>
-                    <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Trait Name</Text>
-                      <Text style={styles.entryValue}>{entry.traitName}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.entryRow}>
-                    {(editingEntryId === entry.observationId)? (
-                      <View style={styles.entryColumn}>
-                        <ValueInputCard
-                          onSubmit={handleValueSubmit}
-                          entry={currentEntry}
-                          setShowInputCard={setEditingEntryId}
-                        />
+      <Animated.View style={[styles.dropdown]}>
+        {dropdownState && (
+          <>
+            <ScrollView>
+              {dropdownState &&
+                recordedTraitData && (
+                  <>
+                    {
+                      recordedTraitData.length > 0 &&
+                      <View style={[styles.projectContainer1, { marginVertical: 10 }]}>
+                        <View style={styles.padding}>
+                          <Text style={styles.recordedTraitsText}>Recorded Traits ({recordedTraitData.length})</Text>
+                        </View>
                       </View>
-                    ) : (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}>
-                          <View style={styles.entryColumn}>
-                            <Text style={styles.entryLabel}>Value</Text>
-                            <Text style={styles.entryValue}>{entry.value}</Text>
+                    }
+                    {recordedTraitData.map((entry: any, index: number) => (
+                      <View style={styles.entryContainer} key={index}>
+                        {/* <View style={styles.projectContainer1}> */}
+                        <View style={styles.borderRadiusOverflow}>
+                          <View style={styles.entryRow}>
+                            <View style={styles.entryColumn}>
+                              {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
+                              <Text style={styles.entryLabel}>{entry.traitName}</Text>
+                              {/* <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text> */}
+                            </View>
                           </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}
-                          style={styles.editButton}>
-                          <Text style={styles.editButtonText}>Edit</Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
+                          <View style={styles.entryRow}>
+                            {editingEntryId === entry.observationId ? (
+                              <View style={[styles.entryColumn,{paddingTop:12}]}>
+                                <ValueInputCard
+                                  onSubmit={handleValueSubmit}
+                                  entry={currentEntry}
+                                  setShowInputCard={setEditingEntryId}
+                                />
+                              </View>
+                            ) : (
+                              <>
+                                <TouchableOpacity
+                                  onPress={() => handleEditPress(entry)}>
+                                  <View style={styles.entryColumn}>
+                                    {/* <Text style={styles.entryLabel}>Value</Text> */}
+                                    <Text style={styles.entryValue}>
+                                      {entry.value}
+                                    </Text>
+                                  </View>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => handleEditPress(entry)}
+                                  style={styles.editButton}>
+                                  <Edit />
+                                </TouchableOpacity>
+                              </>
+                            )}
+                          </View>
+                        </View>
+                        {/* </View> */}
+                      </View>
+                    ))}
+                  </>
+                )}
+              {dropdownState &&
+                unrecordedTraitData && (
+                  <>
+                    {
+                      unrecordedTraitData.length > 0 &&
+                      <View style={[styles.projectContainer1, { marginVertical: 10 }]}>
+                        <View style={styles.padding}>
+                          <Text style={styles.recordedTraitsText}>
+                            Unrecorded Traits ({unrecordedTraitData?.length})
+                          </Text>
+                        </View>
+                      </View>
+                    }
+                    {
+                      unrecordedTraitData.map((entry: any, index: number) => (
+                        <View style={styles.entryContainer} key={index}>
+                          <View style={styles.projectContainer1}>
+                            <View style={styles.borderRadiusOverflow}>
+                            <View style={styles.entryRow}>
+                            <View style={styles.entryColumn}>
+                              {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
+                              <Text style={styles.entryLabel}>{entry.traitName}</Text>
+                              {/* <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text> */}
+                            </View>
+                          </View>
+                              <View style={styles.entryRow}>
+                                {editingEntryId === entry.observationId ? (
+                                  <View style={styles.entryColumn}>
+                                    <ValueInputCard
+                                      onSubmit={handleValueSubmit}
+                                      entry={currentEntry}
+                                      setShowInputCard={setEditingEntryId}
+                                    />
+                                  </View>
+                                ) : (
+                                  <>
+                                    <TouchableOpacity
+                                      onPress={() => handleEditPress(entry)}>
+                                      <View style={styles.entryColumn}>
+                                        <Text style={styles.entryLabel}>Value</Text>
+                                        <Text style={styles.entryValue}>
+                                          {entry.value}
+                                        </Text>
+                                      </View>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                      onPress={() => handleEditPress(entry)}
+                                      style={styles.editButton}>
+                                  <Edit />
+                                  </TouchableOpacity>
+                                  </>
+                                )}
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      ))
+                    }
+                  </>
+                )
+              }
+              {dropdownState && notes && notes != '' && (
+                <View style={styles.notesContainer}>
+                  <Text style={styles.notesTitle}>Notes</Text>
+                  <View style={styles.notesContent}>
+                    <Text style={styles.notesText}>{notes}</Text>
                   </View>
                 </View>
-              </View>
-            </View>
-          ))}
-        {dropdownState && notes && (
-          <View style={styles.notesContainer}>
-            <Text style={styles.notesTitle}>Notes</Text>
-            <View style={styles.notesContent}>
-              <Text style={styles.notesText}>{notes}</Text>
-              {/* <Text style={styles.notesDate}>24 Sept</Text> */}
-            </View>
-          </View>
+              )}
+              {imageUrls && imageUrls.length > 0 && (
+                <View style={styles.imageContainer}>
+                  {imageUrls.map((image: any) => (
+                    <Image
+                      key={image.imageName}
+                      source={{ uri: image.url }}
+                      style={styles.image}
+                      resizeMode="contain"
+                      onError={(e) => console.log("Image Load Error: ", e.nativeEvent.error)}
+                    />
+                  ))}
+                </View>
+              )}
+            </ScrollView>
+          </>
         )}
-        {dropdownState &&
-          unrecordedTraitData &&
-          unrecordedTraitData.map((entry: any, index: number) => (
-            <View style={styles.entryContainer} key={index}>
-              <View style={styles.projectContainer1}>
-                <View style={styles.padding}>
-                  <Text style={styles.recordedTraitsText}>
-                    Unrecorded Traits (Number)
-                  </Text>
-                </View>
-                <View style={styles.borderRadiusOverflow}>
-                  <View style={styles.entryRow}>
-                    <View style={styles.entryColumn}>
-                      <Text style={styles.entryLabel}>Trait Name</Text>
-                      <Text style={styles.entryValue}>{entry.traitName}</Text>
-                    </View>
-                  </View>
-                  <View style={styles.entryRow}>
-                    {editingEntryId === entry.observationId ? (
-                      <View style={styles.entryColumn}>
-                        <ValueInputCard
-                          onSubmit={handleValueSubmit}
-                          entry={currentEntry}
-                          setShowInputCard={setEditingEntryId}
-                        />
-                      </View>
-                    ) : (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}>
-                          <View style={styles.entryColumn}>
-                            <Text style={styles.entryLabel}>Value</Text>
-                            <Text style={styles.entryValue}>{entry.value}</Text>
-                          </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => handleEditPress(entry)}
-                          style={styles.editButton}>
-                          <Text style={styles.editButtonText}>Edit</Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
-                  </View>
-                </View>
-              </View>
-            </View>
-          ))}
       </Animated.View>
       {modalVisible && (
         <OptionsModal
@@ -412,7 +464,7 @@ const styles = StyleSheet.create({
     borderColor: '#F7F7F7',
   },
   padding: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 10,
   },
   recordedTraitsText: {
@@ -426,7 +478,7 @@ const styles = StyleSheet.create({
   },
   entryRow: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingVertical: 5,
     flexDirection: 'row',
     backgroundColor: 'white',
     justifyContent: 'space-between',
@@ -438,12 +490,12 @@ const styles = StyleSheet.create({
   entryLabel: {
     color: '#636363',
     fontWeight: '400',
-    fontSize: 12,
+    fontSize: 15,
   },
   entryValue: {
     color: '#161616',
     fontWeight: '500',
-    fontSize: 14,
+    fontSize: 15,
   },
   editButton: {
     flexDirection: 'row',
@@ -494,6 +546,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  imageContainer: {
+    marginTop: 20,
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    marginBottom: 10,
   },
 });
 

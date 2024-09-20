@@ -57,13 +57,19 @@ const PlanVisit = ({navigation}: any) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedExperiment, setSelectedExperiment] = useState<any>();
   const [fields, setFields] = useState([]);
-
+  const [resetExperiment, setResetExperiment] = useState(false);
+  const [resetField, setResetField] = useState(false);
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
   };
 
   const handleSelectedField = (field: any) => {
     setSelectedField(field);
+  };
+  const resetSelection = () => {
+    setSelectedExperiment(null);
+    setSelectedField(null);
+    setSelectedDate(null);
   };
 
   const handleCropChange = useCallback(
@@ -73,7 +79,12 @@ const PlanVisit = ({navigation}: any) => {
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentData[option][newProjectList[0]] || []);
-    },
+      
+      setResetExperiment(true);
+      setSelectedExperiment(null);
+      setSelectedField(null);
+      setSelectedDate(null);
+      },
     [experimentData],
   );
 
@@ -98,7 +109,11 @@ const PlanVisit = ({navigation}: any) => {
       setExperimentList(experimentData[selectedCrop][option] || []);
       setSelectedExperiment(null);
       setChipTitle('Select an Experiment');
+      setResetExperiment(true);
+      setResetField(true);
+      setSelectedDate(null);
     },
+
     [experimentData, selectedCrop],
   );
 
@@ -335,7 +350,9 @@ const PlanVisit = ({navigation}: any) => {
             name={'experiment'}
             onFieldSelect={handleSelectedField}
             isProjectSelected={!!selectedExperiment}
-          />
+            resetExperiment={resetExperiment}
+            onReset={() => setResetExperiment(false)}
+            />
         )}
         {selectedCrop && selectedProject && selectedExperiment && (
           <ExperimentCard
@@ -343,6 +360,10 @@ const PlanVisit = ({navigation}: any) => {
             name={'field'}
             onExperimentSelect={handleSelectedField}
             onFieldSelect={handleSelectedField}
+            onReset={() => setResetField(false)} // Function to reset the flag
+            resetExperiment={resetSelection}
+            selectedField={selectedField} // Pass selectedField as prop
+            selectedDate={selectedDate} // Pass selectedDate as prop
           />
         )}
         {selectedExperiment && selectedField && !selectedDate && (

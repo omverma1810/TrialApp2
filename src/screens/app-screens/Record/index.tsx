@@ -178,7 +178,8 @@ const Record = () => {
   const handleExperimentSelect = (item: any) => {
     setSelectedExperiment(item);
     setChipTitle(item.fieldExperimentName);
-
+    setTraitData(null);
+    setPlotData(null);
     setExperimentType(item.experimentType);
     (bottomSheetModalRef.current as any).dismiss();
   };
@@ -257,8 +258,8 @@ const Record = () => {
         ...prevState,
         [id]: isSelected,
       };
-
-      // Derive locationIds based on updatedFields
+      setTraitData(null);
+      setPlotData(null);
       const updatedLocationIds = Object.keys(updatedFields).filter(
         fieldId => updatedFields[fieldId],
       );
@@ -395,9 +396,17 @@ const Record = () => {
                     </Text>
                     <DropdownArrow />
                   </View>
-                  <View style={TakeNotesStyles.chipCropText}>
+                  <View style={[TakeNotesStyles.chipCropText,
+                      {
+                            backgroundColor: selectedExperiment.experimentType === 'hybrid'
+                            ? '#fdf8ee'
+                            : selectedExperiment.experimentType === 'line'
+                            ? '#fcebea'
+                            : '#eaf4e7',
+                      }
+                    ]}>
                     <Text style={TakeNotesStyles.chipCropText1}>
-                      {selectedExperiment.cropName}
+                      {selectedExperiment?.experimentType}
                     </Text>
                   </View>
                 </View>
@@ -526,12 +535,14 @@ const Record = () => {
                       selectedFields={selectedFields}
                       projectData={plotData}
                       experimentType={experimentType}
+                      fields={fields}
                     />
                   )}
                   {activeListButton === 'Traits' && (
                     <TraitSection
                       selectedFields={selectedFields}
                       projectData={traitData}
+                      fields={fields}
                     />
                   )}
                 </View>
@@ -539,7 +550,10 @@ const Record = () => {
             </View>
           )}
           {loading ? (
-            <View>
+            <View
+              style={{
+                marginTop:'30%'
+              }}>
               <Loader />
             </View>
           ) : null}
@@ -563,15 +577,17 @@ const Record = () => {
                         </Text>
                         <Text
                           style={[
-                            RecordStyles.modalItemCropText,
+                            TakeNotesStyles.modalItemCropText,
                             {
                               backgroundColor:
-                                item.CropName === 'Rice'
-                                  ? '#FCEBEA'
-                                  : '#E8F0FB',
+                                item.experimentType === 'hybrid'
+                                  ? '#fdf8ee'
+                                  : item.experimentType === 'line'
+                                  ? '#fcebea'
+                                  : '#eaf4e7',
                             },
                           ]}>
-                          {item.cropName}
+                          {item.experimentType}
                         </Text>
                       </Pressable>
                     ))}
@@ -596,9 +612,12 @@ const Record = () => {
                         value={!!selectedFields[field.id]}
                         onChange={() => handleFieldSelect(field.id)}
                       />
-                      <Text style={RecordStyles.fieldCheckboxText}>
+                      <Pressable onPress={()=> handleFieldSelect(field.id)}>
+                      <Text style={RecordStyles.fieldCheckboxText} >
                         {field.id} - {field.location.villageName}
                       </Text>
+                      </Pressable>
+
                     </View>
                   ))}
                 </View>

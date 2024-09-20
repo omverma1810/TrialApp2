@@ -56,6 +56,7 @@ const TakeNotes = ({navigation, route}: any) => {
   const [selectedExperimentId, setSelectedExperimentId] = useState<any>();
   const [fields, setFields] = useState([]);
   const [selectedFieldId, setSelectedFieldId] = useState();
+  const [resetExperiment, setResetExperiment] = useState(false);
 
   const handleSelectedExperiment = (experiment: any) => {
     setSelectedExperiment(experiment);
@@ -70,7 +71,12 @@ const TakeNotes = ({navigation, route}: any) => {
       const newProjectList = Object.keys(experimentData[option] || {});
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
+      setSelectedExperiment(null);
+      setSelectedExperimentId(null);
+      setFields([]);
       setExperimentList(experimentData[option][newProjectList[0]] || []);
+      setResetExperiment(true);
+
     },
     [experimentData],
   );
@@ -80,7 +86,10 @@ const TakeNotes = ({navigation, route}: any) => {
       setSelectedProject(option);
       setExperimentList(experimentData[selectedCrop][option] || []);
       setSelectedExperiment(null);
+      setSelectedField(null);
       setChipTitle('Select an Experiment');
+      setResetExperiment(true);
+
     },
     [experimentData, selectedCrop],
   );
@@ -388,6 +397,8 @@ const TakeNotes = ({navigation, route}: any) => {
             name="experiment"
             onExperimentSelect={handleSelectedExperiment}
             selectedItem={selectedExperiment}
+            resetExperiment={resetExperiment}
+            onReset={() => setResetExperiment(false)} // Function to reset the flag
           />
         )}
         {selectedCrop && selectedProject && selectedExperiment && (

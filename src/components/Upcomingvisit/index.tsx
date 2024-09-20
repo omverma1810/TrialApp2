@@ -159,6 +159,7 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
               modalVisible={isDateModelVisible}
               onCancel={handleCancel}
               onOk={handleOk}
+              selectedDate={visit.date}
             />
           </View>
         </Modal>
