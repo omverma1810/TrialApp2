@@ -12,7 +12,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { DropdownArrow, Edit, FieldSybol1 } from '../../assets/icons/svgs';
+import { CardArrowDown, CardArrowUp, DropdownArrow, Edit, FieldSybol1 } from '../../assets/icons/svgs';
 import Calendar from '../Calender';
 import { projectData } from '../../screens/app-screens/Record/Data';
 import { useApi } from '../../hooks/useApi';
@@ -20,6 +20,7 @@ import { URL } from '../../constants/URLS';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 import Toast from '../../utilities/toast';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
+import { FONTS } from '../../theme/fonts';
 
 type selectedFieldsType = {
   [key: string]: boolean;
@@ -109,7 +110,7 @@ const ProjectContainer = ({
             data.map((item: any, index: number) => (
               <ItemComponent
                 key={index}
-                title={`Plot : ${item.plotNumber}`}
+                title={`${item.plotNumber}`}
                 // entries={item.recordedTraitData}
                 notes={item.notes}
                 dropdownState={dropdownStates[`${title}_${index}`]}
@@ -237,7 +238,7 @@ const ItemComponent = ({
             <Text style={styles.title}>{title}</Text>
           </View>
           <TouchableOpacity onPress={toggleDropdown}>
-            <DropdownArrow />
+          {dropdownState ? <CardArrowUp /> : <CardArrowDown />}
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -447,6 +448,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
     color: '#161616',
+    fontFamily:FONTS.MEDIUM
   },
   dropdown: {
     overflow: 'hidden',
@@ -460,8 +462,8 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
     backgroundColor: '#F7F7F7',
-    borderWidth: 1,
-    borderColor: '#F7F7F7',
+    // borderWidth: 1,
+    // borderColor: '#F7F7F7',
   },
   padding: {
     paddingVertical: 10,
