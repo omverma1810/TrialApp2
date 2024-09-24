@@ -31,7 +31,7 @@ const TakeNotesStyles = StyleSheet.create({
   chipCropText: {
     paddingHorizontal: 10,
     alignItems:'center',
-    width: 58,
+    width: 60,
     justifyContent:'center',
     paddingVertical: 5,
     borderRadius: 6,

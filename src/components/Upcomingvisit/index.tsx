@@ -38,12 +38,12 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
   const [isDateModelVisible, setIsDateModelVisible] = useState(false);
 
   const [deleteVisit, deleteVisitResponse] = useApi({
-    url: `${URL.VISITS}${visit.id}`,
+    url: URL.VISITS.replace(/\/$/, ''),
     method: 'DELETE',
   });
 
   const onDeleteVisit = async () => {
-    deleteVisit();
+    deleteVisit({pathParams: visit.id});
   };
   useEffect(() => {
     const visitDate = new Date(visit.date);
@@ -61,7 +61,7 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
   }, [visit.date]);
     useEffect(() => {
     if (deleteVisitResponse) {
-      if (deleteVisitResponse.status_code === 200) {
+      if (deleteVisitResponse.status_code === 204) {
         Toast.success({
           message: 'Visit deleted successfully',
         });

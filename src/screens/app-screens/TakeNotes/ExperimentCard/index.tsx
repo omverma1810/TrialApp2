@@ -1,11 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Pressable, Text, TouchableOpacity, View} from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {DropdownArrow} from '../../../../assets/icons/svgs';
 import BottomModal from '../../../../components/BottomSheetModal';
@@ -33,7 +28,7 @@ const ExperimentCard = ({
   selectedItem,
   isEdit,
   resetExperiment,
-  onReset
+  onReset,
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
@@ -100,7 +95,7 @@ const ExperimentCard = ({
       onReset(); // Reset the flag in the parent component
     }
   }, [resetExperiment, onReset]);
-  
+
   return (
     <View
       style={[
@@ -168,16 +163,17 @@ const ExperimentCard = ({
           </View>
         </Pressable>
       )}
-      <BottomModal
-        bottomSheetModalRef={bottomSheetModalRef}
-        type="CONTENT_HEIGHT"
-        containerStyle={{paddingBottom: bottom} }>
-        <View style={TakeNotesStyles.modalContainer}>
-          <Text style={TakeNotesStyles.modalTitle}>
-            Select an Experiment (or) Field
-          </Text>
-          <ScrollView style={{ flexGrow: 1 }}>
-          <View style={{gap: 30}}>
+      <ScrollView style={{flexGrow: 1}}>
+        <BottomModal
+          bottomSheetModalRef={bottomSheetModalRef}
+          type="CONTENT_HEIGHT"
+          containerStyle={{paddingBottom: bottom}}>
+          <View style={TakeNotesStyles.modalContainer}>
+            <Text style={TakeNotesStyles.modalTitle}>
+              Select an Experiment (or) Field
+            </Text>
+
+            <View style={{gap: 30}}>
               {Array.isArray(data) &&
                 data.map((item: any, index: number) => (
                   <TouchableOpacity
@@ -207,9 +203,9 @@ const ExperimentCard = ({
                   </TouchableOpacity>
                 ))}
             </View>
-          </ScrollView>
-        </View>
-      </BottomModal>
+          </View>
+        </BottomModal>
+      </ScrollView>
     </View>
   );
 };

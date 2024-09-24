@@ -14,17 +14,17 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
   const { bottom } = useSafeAreaInsets();
 
   const [deleteNote, deleteNoteResponse] = useApi({
-    url: `${URL.NOTES}${note.id}`,
+    url: URL.NOTES.replace(/\/$/, ''),
     method: 'DELETE',
   });
 
   const onDeleteNote = async () => {
-    deleteNote();
+    deleteNote({ pathParams: note.id });
   };
 
   React.useEffect(() => {
     if (deleteNoteResponse) {
-      if (deleteNoteResponse.status_code === 200) {
+      if (deleteNoteResponse.status_code === 204) {
         Toast.success({
           message: 'Note deleted successfully',
         })
