@@ -1,78 +1,73 @@
-import React, {useEffect, useRef} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import BottomModal from '../BottomSheetModal';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Dots, Trash, DbEdit} from '../../assets/icons/svgs';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
-import {useApi} from '../../hooks/useApi';
-import {URL} from '../../constants/URLS';
-import {FONTS} from '../../theme/fonts';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Dots, Trash, DbEdit } from '../../assets/icons/svgs';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useApi } from '../../hooks/useApi';
+import { URL } from '../../constants/URLS';
+import { FONTS } from '../../theme/fonts';
 import Toast from '../../utilities/toast';
 
-const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
+const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const {bottom} = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
 
   const [deleteNote, deleteNoteResponse] = useApi({
-    url: URL.NOTES.replace(/\/$/, ''), // Ensure no trailing slash in base URL
+    url: URL.NOTES.replace(/\/$/, ''),
     method: 'DELETE',
   });
 
   const onDeleteNote = async () => {
-    deleteNote({pathParams: note?.id}); // Pass note.id as pathParams here
+    deleteNote({ pathParams: note.id });
   };
 
   React.useEffect(() => {
     if (deleteNoteResponse) {
-      if (deleteNoteResponse.status_code === 200) {
+      if (deleteNoteResponse.status_code === 204) {
         Toast.success({
           message: 'Note deleted successfully',
-        });
+        })
         onDelete(note.id);
         bottomSheetModalRef.current?.close();
       } else {
         Toast.error({
           message: 'Failed to delete note',
-        });
+        })
       }
     }
   }, [deleteNoteResponse]);
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
-        <View style={styles.noteContainer}>
-          <View style={styles.noteContent}>
-            <Text style={styles.noteText}>{note.content}</Text>
-            <Text style={styles.noteInfo}>
-              Exp {note.experiment_id} - Field {note.location}
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => bottomSheetModalRef.current?.present()}>
-            <Dots />
-          </TouchableOpacity>
+      <TouchableOpacity onPress = {() => bottomSheetModalRef.current?.present()}>
+      <View style={styles.noteContainer}>
+        <View style={styles.noteContent}>
+          <Text style={styles.noteText}>{note.content}</Text>
+          <Text style={styles.noteInfo}>Exp {note.experiment_id} - Field {note.location}</Text>
         </View>
+        <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
+          <Dots />
+        </TouchableOpacity>
+      </View>
       </TouchableOpacity>
 
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
-        containerStyle={[
-          styles.bottomModalContainer,
-          {paddingBottom: bottom, height: 100},
-        ]}>
+        containerStyle={[styles.bottomModalContainer, { paddingBottom: bottom, height: 100 }]}
+      >
         <View style={styles.modalContent}>
           <TouchableOpacity onPress={onDeleteNote} style={styles.modalButton}>
             <Trash />
-            <Text style={styles.modalButtonText}> Delete</Text>
+            <Text style={styles.modalButtonText}>  Delete</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={() => {
-              onEdit(note);
-              bottomSheetModalRef.current?.close();
-            }}>
+          <TouchableOpacity style={styles.modalButton}
+                      onPress={() => {
+                        onEdit(note);
+                        bottomSheetModalRef.current?.close();
+                      }}
+          >
             <DbEdit />
             <Text style={styles.editOptionText}>Edit</Text>
           </TouchableOpacity>
@@ -87,7 +82,7 @@ const styles = StyleSheet.create({
   noteContainer: {
     backgroundColor: 'white',
     paddingVertical: 15,
-    paddingHorizontal: 5,
+    paddingHorizontal:5,
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderRadius: 8,
@@ -102,7 +97,7 @@ const styles = StyleSheet.create({
   noteText: {
     fontSize: 15,
     fontWeight: '500',
-    fontFamily: FONTS.MEDIUM,
+    fontFamily : FONTS.MEDIUM,
     color: '#161616',
   },
   noteInfo: {
@@ -128,9 +123,9 @@ const styles = StyleSheet.create({
   editOptionText: {
     marginLeft: 10,
     fontSize: 15,
-    color: '#161616',
-    fontWeight: '400',
-    marginHorizontal: 20,
+    color:'#161616',
+    fontWeight:'400',
+    marginHorizontal:20
   },
   bottomModalContainer: {},
 });
