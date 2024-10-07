@@ -406,7 +406,8 @@ const TakeNotes = ({navigation, route}: any) => {
             onExperimentSelect={handleSelectedExperiment}
             selectedItem={selectedExperiment}
             resetExperiment={resetExperiment}
-            onReset={() => setResetExperiment(false)} // Function to reset the flag
+            onReset={() => setResetExperiment(false)}
+            isEdit={isEdit}
           />
         )}
         {selectedCrop && selectedProject && selectedExperiment && (

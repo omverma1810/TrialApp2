@@ -258,7 +258,27 @@ const RecordStyles = StyleSheet.create({
     fontFamily: FONTS.MEDIUM,
     fontSize:20,
     color:'#000'
-  }
+  },
+  modalOpen: {
+    opacity: 0.2,
+  },
+  newRecord: {
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#1A6DD2',
+    borderRadius: 16,
+    bottom: 8,
+    right: 16,
+    gap: 8,
+  },
+  newRecordText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
+  },
+
 });
 
 export default RecordStyles;

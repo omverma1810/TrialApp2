@@ -9,11 +9,11 @@ import {
   Pressable,
 } from 'react-native';
 import {Loader, SafeAreaView, StatusBar} from '../../../components';
-
+import {Plus} from '../../../assets/icons/svgs';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {DropdownArrow, Search, X} from '../../../assets/icons/svgs';
 import BottomModal from '../../../components/BottomSheetModal';
-
+import NewRecordOptionsModal from '../Experiment/NewRecordOptionsModal';
 import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import CheckBox from '../../../components/CheckBox';
 import Chip from '../../../components/Chip';
@@ -47,7 +47,7 @@ interface Chip {
   CropName: string;
 }
 
-const Record = () => {
+const Record = ({navigation} : any) => {
   const {t} = useTranslation();
 
   const [experiment, setExperiment] = useState();
@@ -87,6 +87,7 @@ const Record = () => {
   const [plotData, setPlotData] = useState<any>(null);
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -342,8 +343,19 @@ const Record = () => {
     [plotData],
   );
 
+  const onNewRecordClick = () => {
+    setIsOptionModalVisible(true);
+  };
+  const onCloseOptionsModalClick = () => {
+    setIsOptionModalVisible(false);
+  };
+  const onSelectFromList = () => {
+    setIsOptionModalVisible(false);
+    navigation.navigate('NewRecord');
+  };
+
   return (
-    <SafeAreaView edges={['top']}>
+    <SafeAreaView edges={['top']} parentStyle={isOptionModalVisible && RecordStyles.modalOpen}>
       <StatusBar />
       <View>
         <Text style={RecordStyles.ScreenTitle}>Record</Text>
@@ -626,6 +638,21 @@ const Record = () => {
           </BottomModal>
         </View>
       </ScrollView>
+      {!isOptionModalVisible && (
+        <Pressable style={RecordStyles.newRecord} onPress={onNewRecordClick}>
+          <Plus />
+          <Text style={RecordStyles.newRecordText}>
+            {t(LOCALES.EXPERIMENT.NEW_RECORD)}
+          </Text>
+        </Pressable>
+      )}
+
+      <NewRecordOptionsModal
+        isModalVisible={isOptionModalVisible}
+        closeModal={onCloseOptionsModalClick}
+        onSelectFromList={onSelectFromList}
+      />
+
     </SafeAreaView>
   );
 };

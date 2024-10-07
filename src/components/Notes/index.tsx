@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef ,useState} from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,47 +9,38 @@ import { URL } from '../../constants/URLS';
 import { FONTS } from '../../theme/fonts';
 import Toast from '../../utilities/toast';
 
-const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
+const Notes = ({ note, onDelete, navigation, refreshNotes, onEdit }: any) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const { bottom } = useSafeAreaInsets();
 
-  const [deleteNote, deleteNoteResponse] = useApi({
-    url: URL.NOTES.replace(/\/$/, ''),
-    method: 'DELETE',
-  });
 
   const onDeleteNote = async () => {
-    deleteNote({ pathParams: note.id });
+    onDelete(note.id);
   };
 
-  React.useEffect(() => {
-    if (deleteNoteResponse) {
-      if (deleteNoteResponse.status_code === 204) {
-        Toast.success({
-          message: 'Note deleted successfully',
-        })
-        onDelete(note.id);
-        bottomSheetModalRef.current?.close();
-      } else {
-        Toast.error({
-          message: 'Failed to delete note',
-        })
-      }
-    }
-  }, [deleteNoteResponse]);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded); // Toggle the expanded state
+  };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress = {() => bottomSheetModalRef.current?.present()}>
-      <View style={styles.noteContainer}>
-        <View style={styles.noteContent}>
-          <Text style={styles.noteText}>{note.content}</Text>
-          <Text style={styles.noteInfo}>Exp {note.experiment_id} - Field {note.location}</Text>
+      <TouchableOpacity onPress={toggleExpanded}>
+        <View style={styles.noteContainer}>
+          <View style={styles.noteContent}>
+            <Text style={styles.noteText} 
+            numberOfLines={isExpanded ? undefined : 2}
+            ellipsizeMode='tail'
+            >
+                {note.content}
+            </Text>
+            <Text style={styles.noteInfo}>Exp {note.experiment_id} - Field {note.field_id}</Text>
+          </View>
+          <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
+            <Dots />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
-          <Dots />
-        </TouchableOpacity>
-      </View>
       </TouchableOpacity>
 
       <BottomModal
@@ -63,10 +54,10 @@ const Notes = ({ note, onDelete ,navigation,refreshNotes,onEdit}:any) => {
             <Text style={styles.modalButtonText}>  Delete</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.modalButton}
-                      onPress={() => {
-                        onEdit(note);
-                        bottomSheetModalRef.current?.close();
-                      }}
+            onPress={() => {
+              onEdit(note);
+              bottomSheetModalRef.current?.close();
+            }}
           >
             <DbEdit />
             <Text style={styles.editOptionText}>Edit</Text>
@@ -82,7 +73,7 @@ const styles = StyleSheet.create({
   noteContainer: {
     backgroundColor: 'white',
     paddingVertical: 15,
-    paddingHorizontal:5,
+    paddingHorizontal: 5,
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderRadius: 8,
@@ -97,7 +88,7 @@ const styles = StyleSheet.create({
   noteText: {
     fontSize: 15,
     fontWeight: '500',
-    fontFamily : FONTS.MEDIUM,
+    fontFamily: FONTS.MEDIUM,
     color: '#161616',
   },
   noteInfo: {
@@ -123,9 +114,9 @@ const styles = StyleSheet.create({
   editOptionText: {
     marginLeft: 10,
     fontSize: 15,
-    color:'#161616',
-    fontWeight:'400',
-    marginHorizontal:20
+    color: '#161616',
+    fontWeight: '400',
+    marginHorizontal: 20
   },
   bottomModalContainer: {},
 });

@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import {FONTS} from '../../../theme/fonts';
 
 const styles = StyleSheet.create({
   container: {
@@ -48,6 +49,25 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
+  },
+  modalOpen: {
+    opacity: 0.2,
+  },
+  newRecord: {
+    position: 'absolute',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#1A6DD2',
+    borderRadius: 16,
+    bottom: 8,
+    right: 16,
+    gap: 8,
+  },
+  newRecordText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: FONTS.MEDIUM,
   },
 });
 

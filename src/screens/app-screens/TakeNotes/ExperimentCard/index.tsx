@@ -1,12 +1,17 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {Pressable, Text, TouchableOpacity, View} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {DropdownArrow} from '../../../../assets/icons/svgs';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DropdownArrow } from '../../../../assets/icons/svgs';
 import BottomModal from '../../../../components/BottomSheetModal';
 import Chip from '../../../../components/Chip';
 import TakeNotesStyles from '../../TakeNotes/TakeNotesStyle';
-import {styles} from './styles';
+import { styles } from './styles';
 
 interface Chip {
   id: number;
@@ -28,10 +33,10 @@ const ExperimentCard = ({
   selectedItem,
   isEdit,
   resetExperiment,
-  onReset,
+  onReset
 }: any) => {
   const bottomSheetModalRef = useRef(null);
-  const {bottom} = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
   const [selectedExperiment, setSelectedExperiment] = useState<any>(null);
   const [chipTitle, setChipTitle] = useState(`Select ${name}`);
   const [chipVisible, setChipVisible] = useState(true);
@@ -40,14 +45,17 @@ const ExperimentCard = ({
 
   useEffect(() => {
     if (selectedItem) {
-      setChipTitle(
-        name === 'field' ? selectedItem.location.villageName : selectedItem,
-      );
+      if (name === 'field') {
+        setSelectedField(selectedItem);
+        setChipTitle(selectedItem.location.villageName);
+      } else if (name === 'experiment') {
+        setSelectedExperiment(selectedItem);
+        setChipTitle(selectedItem);
+      }
     }
-    console.log('selectedItem', selectedItem);
   }, [selectedItem]);
   const handleExperimentSelect = (item: any) => {
-    console.log('=============>', {item});
+    console.log('=============>', { item });
     if (name === 'field' && !isEdit) {
       setSelectedField(item);
       setChipTitle(item.location.villageName);
@@ -117,43 +125,55 @@ const ExperimentCard = ({
         />
       )}
       {selectedExperiment && (
-        <Pressable onPress={handleChipPress}>
+        <Pressable onPress={!isEdit ? handleChipPress : null}>
           <View style={TakeNotesStyles.chipItem}>
             <Text style={TakeNotesStyles.chipTitle}>Experiment</Text>
 
             <View style={TakeNotesStyles.chipTextRow}>
               <Text style={TakeNotesStyles.chipText}>
-                {name == 'field'
+                {name === 'field'
                   ? selectedExperiment.location.villageName
-                  : selectedExperiment.fieldExperimentName}
+                  : isEdit
+                    ? selectedExperiment
+                    : selectedExperiment.fieldExperimentName}
               </Text>
-              <DropdownArrow />
+              {
+                !isEdit &&
+                <DropdownArrow />
+              }
             </View>
-            <View
-              style={[
-                TakeNotesStyles.chipCropText,
-                {
-                  backgroundColor: getBackgroundColor(
-                    selectedExperiment.experimentType,
-                  ),
-                },
-              ]}>
-              <Text style={TakeNotesStyles.chipCropText1}>
-                {selectedExperiment.experimentType}
-              </Text>
-            </View>
+            {
+              !isEdit &&
+              <View
+                style={[
+                  TakeNotesStyles.chipCropText,
+                  {
+                    backgroundColor: getBackgroundColor(
+                      selectedExperiment.experimentType,
+                    ),
+                  },
+                ]}>
+                <Text style={TakeNotesStyles.chipCropText1}>
+                  {selectedExperiment.experimentType}
+                </Text>
+              </View>
+            }
+
           </View>
         </Pressable>
       )}
       {selectedField && (
-        <Pressable onPress={handleChipPress}>
+        <Pressable onPress={!isEdit ? handleChipPress : null}>
           <View style={TakeNotesStyles.chipItem}>
             <Text style={TakeNotesStyles.chipTitle}>Field</Text>
             <View style={TakeNotesStyles.chipTextRow}>
               <Text style={TakeNotesStyles.chipText}>
-                {selectedField.location.villageName}
+                {selectedField?.location?.villageName}
               </Text>
-              <DropdownArrow />
+              {
+                !isEdit &&
+                <DropdownArrow />
+              }
             </View>
             {/* <View style={TakeNotesStyles.chipCropText}>
             <Text style={TakeNotesStyles.chipCropText1}>
@@ -163,17 +183,16 @@ const ExperimentCard = ({
           </View>
         </Pressable>
       )}
-      <ScrollView style={{flexGrow: 1}}>
-        <BottomModal
-          bottomSheetModalRef={bottomSheetModalRef}
-          type="CONTENT_HEIGHT"
-          containerStyle={{paddingBottom: bottom}}>
-          <View style={TakeNotesStyles.modalContainer}>
-            <Text style={TakeNotesStyles.modalTitle}>
-              Select an Experiment (or) Field
-            </Text>
-
-            <View style={{gap: 30}}>
+      <BottomModal
+        bottomSheetModalRef={bottomSheetModalRef}
+        type="CONTENT_HEIGHT"
+        containerStyle={{ paddingBottom: bottom }}>
+        <View style={TakeNotesStyles.modalContainer}>
+          <Text style={TakeNotesStyles.modalTitle}>
+            Select an Experiment (or) Field
+          </Text>
+          <ScrollView style={{ flexGrow: 1 }}>
+            <View style={{ gap: 30 }}>
               {Array.isArray(data) &&
                 data.map((item: any, index: number) => (
                   <TouchableOpacity
@@ -193,8 +212,8 @@ const ExperimentCard = ({
                               item.experimentType === 'hybrid'
                                 ? '#fdf8ee'
                                 : item.experimentType === 'line'
-                                ? '#fcebea'
-                                : '#eaf4e7',
+                                  ? '#fcebea'
+                                  : '#eaf4e7',
                           },
                         ]}>
                         {item.experimentType}
@@ -203,9 +222,9 @@ const ExperimentCard = ({
                   </TouchableOpacity>
                 ))}
             </View>
-          </View>
-        </BottomModal>
-      </ScrollView>
+          </ScrollView>
+        </View>
+      </BottomModal>
     </View>
   );
 };
