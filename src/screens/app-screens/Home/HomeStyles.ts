@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   modalOpen: {
-    opacity: 0.2,
+    opacity: 0.1,
   },
   newRecord: {
     position: 'absolute',

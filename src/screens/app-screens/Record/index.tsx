@@ -641,9 +641,6 @@ const Record = ({navigation} : any) => {
       {!isOptionModalVisible && (
         <Pressable style={RecordStyles.newRecord} onPress={onNewRecordClick}>
           <Plus />
-          <Text style={RecordStyles.newRecordText}>
-            {t(LOCALES.EXPERIMENT.NEW_RECORD)}
-          </Text>
         </Pressable>
       )}
 

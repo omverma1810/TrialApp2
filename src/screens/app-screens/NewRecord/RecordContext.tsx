@@ -195,12 +195,25 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
       return;
     }
-
+    const paramsData: any = params;
     const {data} = experimentListData;
     const cropList = Object.keys(data);
-    const selectedCrop = cropList[0];
+
+    let selectedCrop = null;    
+    if (paramsData?.QRData) {
+      selectedCrop = paramsData.QRData.crop
+    }else {
+      selectedCrop = cropList[0];
+    }
     const projectList = Object.keys(data[selectedCrop] || {});
-    const selectedProject = projectList[0];
+    let selectedProject = null;
+
+    if (paramsData?.QRData) {
+      selectedProject = paramsData.QRData.project;
+    }else {
+      selectedProject = projectList[0];
+    }
+
     const experimentList = data[selectedCrop][selectedProject] || [];
 
     setExperimentData(data);
@@ -209,7 +222,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
-    const paramsData: any = params;
     if (paramsData?.QRData) {
       const data = paramsData?.QRData;
       const experiment = experimentList?.find(
@@ -263,7 +275,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     const paramsData: any = params;
     if (paramsData?.QRData) {
       const data = paramsData?.QRData;
-      const field = fieldList?.find((item: any) => item?.id === data?.field_id);
+      const field = fieldList?.find((item: any) => item?.landVillageId === data?.field_id);
       if (field) {
         handleFieldSelect(field);
       }

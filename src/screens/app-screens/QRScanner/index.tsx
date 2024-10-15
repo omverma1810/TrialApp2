@@ -12,6 +12,8 @@ import {StatusBar, SafeAreaView} from '../../../components';
 import {Back} from '../../../assets/icons/svgs';
 import {QRScannerScreenProps} from '../../../types/navigation/appTypes';
 import Toast from '../../../utilities/toast';
+import { URL } from '../../../constants/URLS';
+import { useApi } from '../../../hooks/useApi'; 
 
 const QRScanner = ({navigation}: QRScannerScreenProps) => {
   const device = useCameraDevice('back');
@@ -22,32 +24,49 @@ const QRScanner = ({navigation}: QRScannerScreenProps) => {
       requestPermission();
     }
   }, []);
+  const [decodeQr, decodeQrResponse] = useApi({
+    url: URL.DECODE_QR,
+    method: 'POST',
+  });
 
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: codes => {
       if (codes[0].value) {
         try {
-          const data: any = JSON.parse(codes[0].value.trim());
-          if (data?.experiment_id && data?.field_id && data?.plot_id) {
-            navigation.replace('NewRecord', {
-              QRData: {
-                crop: data?.crop,
-                project: data?.project,
-                experiment_id: data?.experiment_id,
-                field_id: data?.field_id,
-                plot_id: data?.plot_id,
-              },
-            });
-          } else {
-            throw new Error('Invalid QR Code!');
+          const data: any = codes[0].value;
+          const payload = {
+            "plotCode" : data
           }
+          const headers = {
+            'Content-Type': 'application/json',
+          };      
+          console.log(payload)
+          decodeQr({payload:payload,headers})
         } catch (error) {
           Toast.error({message: 'Invalid QR Code!'});
         }
       }
     },
   });
+  useEffect(()=>{
+    if(decodeQrResponse){
+      const data = decodeQrResponse;
+      if (data?.fieldExperimentId && data?.landVillageId && data?.plotId) {
+        navigation.replace('NewRecord', {
+          QRData: {
+            crop: data.crop,
+            project: data.project, 
+            experiment_id: data.fieldExperimentId,
+            field_id: data.landVillageId,
+            plot_id: data.plotId,
+          },
+        });
+      } else {
+        throw new Error('Invalid hai bhai!');
+      }
+    }
+  },[decodeQrResponse])
 
   return (
     <SafeAreaView edges={['top']}>

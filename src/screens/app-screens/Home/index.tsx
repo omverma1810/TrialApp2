@@ -64,9 +64,6 @@ const Home: React.FC<HomeScreenProps> = ({ navigation, route }: any) => {
       {!isOptionModalVisible && (
         <Pressable style={styles.newRecord} onPress={onNewRecordClick}>
           <Plus />
-          <Text style={styles.newRecordText}>
-            {t(LOCALES.EXPERIMENT.NEW_RECORD)}
-          </Text>
         </Pressable>
       )}
 

@@ -158,6 +158,10 @@ const HomeStackScreens = () => {
         component={ChangePassword}
         options={{title: 'Change Password'}}
       />
+      <ExperimentStack.Screen name="NewRecord" component={NewRecord} options={{headerShown:false}} />
+      <ExperimentStack.Screen name="AddImage" component={AddImage} />
+      <ExperimentStack.Screen name="QRScanner" component={QRScanner} />
+      <ExperimentStack.Screen name="Plots" component={Plots} />
     </HomeStack.Navigator>
   );
 };
@@ -167,7 +171,7 @@ const ExperimentStackScreens = () => {
   return (
     <ExperimentStack.Navigator
       screenOptions={{
-        animation: 'slide_from_right',
+        animation: 'slide_from_right', 
         headerShown: false,
       }}>
       <ExperimentStack.Screen name="Experiment" component={Experiment} />
@@ -177,14 +181,14 @@ const ExperimentStackScreens = () => {
       />
       <ExperimentStack.Screen name="Plots" component={Plots} />
       <ExperimentStack.Screen name="NewRecord" component={NewRecord} />
-      <ExperimentStack.Screen name="AddImage" component={AddImage} />
+      <ExperimentStack.Screen name="AddImage" component={AddImage} /> 
       <ExperimentStack.Screen name="QRScanner" component={QRScanner} />
     </ExperimentStack.Navigator>
   );
 };
 const RecordStack = createNativeStackNavigator<RecordStackParamList>();
 
-const RecordStackScreens = () => {
+const RecordStackScreens = () => { 
   return (
     <RecordStack.Navigator
       screenOptions={{
@@ -192,6 +196,10 @@ const RecordStackScreens = () => {
         animation: 'slide_from_right',
       }}>
       <RecordStack.Screen name="Record" component={Record} options={{headerShown:false}}/>
+      <ExperimentStack.Screen name="Plots" component={Plots} />
+      <ExperimentStack.Screen name="NewRecord" component={NewRecord} options={{headerShown:false}} />
+      <ExperimentStack.Screen name="AddImage" component={AddImage} />
+      <ExperimentStack.Screen name="QRScanner" component={QRScanner} />
     </RecordStack.Navigator>
   );
 };
