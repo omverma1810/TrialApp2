@@ -34,6 +34,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     location: '',
     phoneNumber: '',
     email: '',
+    role: '',
   });
 
   const [imageSource, setImageSource] = useState<any | null>(null);
@@ -61,11 +62,13 @@ const Profile = ({navigation}: ProfileScreenProps) => {
     if (profileDataResponse && profileDataResponse.status_code === 200) {
       const fetchedUser = profileDataResponse.data.user;
       dispatch(setUserDetails(fetchedUser));
+      const roleName = fetchedUser.role && fetchedUser.role.length > 0 ? fetchedUser.role[0].role_name : 'N/A';
       setProfileData({
         name: `${fetchedUser.first_name} ${fetchedUser.last_name}`,
         location: fetchedUser.location?.name || 'N/A',
         phoneNumber: `${fetchedUser.phone_number}`,
         email: fetchedUser.email,
+        role: roleName,
       });
       setIsLoading(false);
     } else {
@@ -326,6 +329,10 @@ const Profile = ({navigation}: ProfileScreenProps) => {
             <Text style={ProfileStyles.infoTextBold}>
               {profileData.location}
             </Text>
+          </View>
+          <View style={ProfileStyles.infoItem}>
+            <Text style={ProfileStyles.infoText}>Role Name</Text>
+            <Text style={ProfileStyles.infoTextBold}>{profileData.role}</Text>
           </View>
           <View
             style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>

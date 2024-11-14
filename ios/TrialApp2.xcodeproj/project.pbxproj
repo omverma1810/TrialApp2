@@ -12,6 +12,7 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		2AE1D175C9A4DB47B186C691 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 040646027DBC7F9BF5728B44 /* PrivacyInfo.xcprivacy */; };
 		47B91DC530E946D98F3B2656 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 74F1266BB75C4657B9F5CA6E /* Inter-SemiBold.ttf */; };
 		54325B22D1C745DF82F07F35 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D82BC80CB51248AE9C73424C /* Montserrat-Bold.ttf */; };
 		5C59BBD15DBD4F5D97BF851D /* Inter-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A90E10A9EAF54F70B06062C2 /* Inter-Medium.ttf */; };
@@ -39,6 +40,7 @@
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* TrialApp2Tests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TrialApp2Tests.m; sourceTree = "<group>"; };
 		022CB08E48844E8CBCB61A4B /* Inter-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Regular.ttf"; path = "../src/assets/fonts/Inter-Regular.ttf"; sourceTree = "<group>"; };
+		040646027DBC7F9BF5728B44 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = TrialApp2/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* TrialApp2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TrialApp2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = TrialApp2/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = TrialApp2/AppDelegate.mm; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				040646027DBC7F9BF5728B44 /* PrivacyInfo.xcprivacy */,
 			);
 			name = TrialApp2;
 			sourceTree = "<group>";
@@ -283,6 +286,7 @@
 				AE4C8FDD1C934EB8BC640D41 /* Montserrat-Medium.ttf in Resources */,
 				D9BC5F4B4ABC41ACA8134308 /* Montserrat-Regular.ttf in Resources */,
 				A14133AB4004483690FD234E /* Montserrat-SemiBold.ttf in Resources */,
+				2AE1D175C9A4DB47B186C691 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -624,11 +628,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-Wl",
-					"-ld_classic",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -696,11 +696,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-Wl",
-					"-ld_classic",
-				);
+				OTHER_LDFLAGS = "$(inherited)";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
