@@ -4,14 +4,27 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {OutlinedInput, Text} from '../../../../../../components';
 import {styles} from '../../../styles';
 import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
+import eventEmitter from '../../../../../../utilities/eventEmitter';
+import {TOAST_EVENT_TYPES} from '../../../../../../types/components/Toast';
 
 const ValueInputCard = () => {
   const {onSubmit, recordedValue, item} = useUnrecordedTraits();
+
+  const [value, setValue] = useState('');
+  const {maximumValue, minimumValue} = useMemo(() => {
+    try {
+      const parsedLimits = JSON.parse(item.preDefiendList || '[]');
+      return parsedLimits[0] || {};
+    } catch (error) {
+      return {};
+    }
+  }, [item.preDefiendList]);
+
   const notes =
     item.dataType === 'int' || item.dataType === 'float'
       ? 'Use values separated by * to get the average.'
       : '';
-  const [value, setValue] = useState('');
+
   const rightIcon = (
     <Text style={styles.traitsInputIconText}>{item?.traitUom || ''}</Text>
   );
@@ -42,6 +55,19 @@ const ValueInputCard = () => {
         text.endsWith('*') && validSegments.length < 5
           ? formattedValue + '*'
           : formattedValue;
+
+      // Validate against limits
+      const values = finalValue.split('*').map(parseFloat).filter(v => !isNaN(v));
+      const averageValue =
+        values.reduce((sum, num) => sum + num, 0) / values.length || 0;
+
+      if (values.some(v => v < minimumValue || v > maximumValue)) {
+        eventEmitter.emit(TOAST_EVENT_TYPES.SHOW, {
+          message: `Value must be between ${minimumValue} and ${maximumValue}.`,
+          type: 'ERROR',
+        });
+        return;
+      }
 
       setValue(finalValue);
     } else {
