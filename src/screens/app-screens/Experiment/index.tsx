@@ -1,11 +1,10 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {FlatList, Pressable, View} from 'react-native';
-import {useTranslation} from 'react-i18next';
 import {useIsFocused} from '@react-navigation/native';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {FlatList, Pressable, View} from 'react-native';
+import {useSelector} from 'react-redux';
 
-import {styles} from './styles';
-import Filter from './Filter';
-import ExperimentCard from './ExperimentCard';
+import {Plus, Search} from '../../../assets/icons/svgs';
 import {
   Input,
   Loader,
@@ -13,14 +12,18 @@ import {
   StatusBar,
   Text,
 } from '../../../components';
-import {LOCALES} from '../../../localization/constants';
-import {Plus, Search} from '../../../assets/icons/svgs';
-import NewRecordOptionsModal from './NewRecordOptionsModal';
-import {ExperimentScreenProps} from '../../../types/navigation/appTypes';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
+import {LOCALES} from '../../../localization/constants';
+import {ExperimentScreenProps} from '../../../types/navigation/appTypes'; // Updated import
+import {RootState} from '../../../store';
+import Header from '../Home/Header';
+import ExperimentCard from './ExperimentCard';
+import Filter from './Filter';
+import NewRecordOptionsModal from './NewRecordOptionsModal';
+import {styles} from './styles';
 
-const Experiment = ({navigation}: ExperimentScreenProps) => {
+const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const {t} = useTranslation();
   const isFocused = useIsFocused();
   const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
@@ -31,6 +34,10 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const roleName = useSelector((state: RootState) => {
+    return state.auth?.userDetails?.role?.[0]?.role_name;
+  });
 
   const handleCropChange = useCallback(
     (option: string) => {
@@ -78,9 +85,11 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
   const onNewRecordClick = () => {
     setIsOptionModalVisible(true);
   };
+
   const onCloseOptionsModalClick = () => {
     setIsOptionModalVisible(false);
   };
+
   const onSelectFromList = () => {
     setIsOptionModalVisible(false);
     navigation.navigate('NewRecord');
@@ -173,6 +182,13 @@ const Experiment = ({navigation}: ExperimentScreenProps) => {
     <SafeAreaView
       edges={['top']}
       parentStyle={isOptionModalVisible && styles.modalOpen}>
+      {/* Conditionally render Header */}
+      {roleName?.toLowerCase() !== 'admin' && (
+        <View style={styles.main_header}>
+          <Header navigation={navigation} />
+        </View>
+      )}
+
       <StatusBar />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>

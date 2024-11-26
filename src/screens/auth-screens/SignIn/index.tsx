@@ -1,10 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {Image, View, Animated, Pressable} from 'react-native';
-import {useTranslation} from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Keychain from 'react-native-keychain';
+import {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Animated, Image, Pressable, View} from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import * as Keychain from 'react-native-keychain';
 
+import axios from 'axios';
+import {Eye, EyeSlash, Setting} from '../../../assets/icons/svgs';
+import {APP_LOGO, FARM_BG} from '../../../assets/images';
 import {
   Button,
   Input,
@@ -12,22 +15,19 @@ import {
   StatusBar,
   Text,
 } from '../../../components';
-import {styles} from './styles';
-import {APP_LOGO, FARM_BG} from '../../../assets/images';
-import {LOCALES} from '../../../localization/constants';
+import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
-import {URL, DEFAULT_ENV} from '../../../constants/URLS';
-import {setTokens} from '../../../utilities/token';
+import {useKeyboard} from '../../../hooks/useKeaboard';
+import {LOCALES} from '../../../localization/constants';
+import {useAppDispatch, useAppSelector} from '../../../store';
 import {
   setIsUserSignedIn,
   setOrganizationURL,
   setUserDetails,
 } from '../../../store/slice/authSlice';
-import {useAppDispatch, useAppSelector} from '../../../store';
-import {useKeyboard} from '../../../hooks/useKeaboard';
-import {Eye, EyeSlash, Setting} from '../../../assets/icons/svgs';
-import axios from 'axios';
 import Toast from '../../../utilities/toast';
+import {setTokens} from '../../../utilities/token';
+import {styles} from './styles';
 
 const SignIn = () => {
   const {t} = useTranslation();
@@ -52,10 +52,14 @@ const SignIn = () => {
 
   useEffect(() => {
     const handleLoginData = async () => {
+      console.log({loginData: loginData.data});
       const {
         data: {user, access_token: accessToken, refresh_token: refreshToken},
       } = loginData;
 
+      const {
+        role: {role_name},
+      } = user;
       if (!user || !accessToken) {
         console.log('Login data is incomplete');
         return;

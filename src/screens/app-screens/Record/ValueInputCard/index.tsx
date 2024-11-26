@@ -1,8 +1,14 @@
-import {View, TouchableOpacity, Pressable} from 'react-native';
 import React, {useEffect, useState, useMemo} from 'react';
-
+import {View, Pressable} from 'react-native';
 import {OutlinedInput, Text} from '../../../../components';
 import RecordStyles from '../RecordStyles';
+import eventEmitter from '../../../../utilities/eventEmitter';
+import {TOAST_EVENT_TYPES} from '../../../../types/components/Toast';
+
+const MIN_INITIAL_PLANT_STAND = 1;
+const MAX_INITIAL_PLANT_STAND = 10;
+const MIN_FINAL_PLANT_STAND = 2;
+const MAX_FINAL_PLANT_STAND = 10;
 
 const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
   const [value, setValue] = useState('');
@@ -16,11 +22,42 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
       ? 'Use values separated by * to get the average.'
       : '';
 
+  const showToast = (options: any) => {
+    eventEmitter.emit(TOAST_EVENT_TYPES.SHOW, options);
+  };
+
   const handleSubmit = (text: string) => {
+    const numericValue = parseFloat(text);
+
+    // Validation based on trait name (Initial Plant Stand or Final Plant Stand)
+    if (entry?.traitName === 'Initial Plant Stand') {
+      if (numericValue < MIN_INITIAL_PLANT_STAND || numericValue > MAX_INITIAL_PLANT_STAND) {
+        showToast({
+          type: 'ERROR',
+          message: `Value must be between ${MIN_INITIAL_PLANT_STAND} and ${MAX_INITIAL_PLANT_STAND}.`,
+        });
+        return;
+      }
+    }
+
+    if (entry?.traitName === 'Final Plant Stand') {
+      if (numericValue < MIN_FINAL_PLANT_STAND || numericValue > MAX_FINAL_PLANT_STAND) {
+        showToast({
+          type: 'ERROR',
+          message: `Value must be between ${MIN_FINAL_PLANT_STAND} and ${MAX_FINAL_PLANT_STAND}.`,
+        });
+        return;
+      }
+    }
+
+    // If valid, submit the value
     onSubmit(text);
     setValue('');
     setShowInputCard(null);
     entry.value = text;
+    showToast({
+      type: 'SUCCESS',
+    });
   };
 
   useEffect(() => {
@@ -32,21 +69,12 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
   const handleInputChange = (text: string) => {
     if (entry?.dataType === 'int' || entry?.dataType === 'float') {
       const cleanedText = text.replace(/[^\d.*]/g, '');
-      const segments = cleanedText.split('*');
-      const validSegments = segments
-        .filter(segment => segment !== '')
-        .slice(0, 5);
-      const formattedValue = validSegments.join('*');
-      const finalValue =
-        text.endsWith('*') && validSegments.length < 5
-          ? formattedValue + '*'
-          : formattedValue;
-
-      setValue(finalValue);
+      setValue(cleanedText);
     } else {
       setValue(text);
     }
   };
+
   const keyboardType: any = useMemo(() => {
     if (entry?.dataType === 'float' || entry?.dataType === 'int') {
       return 'number-pad';
@@ -71,10 +99,8 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
                 <OutlinedInput
                   label={entry?.traitName}
                   rightIcon={rightIcon}
-                  // onEndEditing={e => handleSubmit(e.nativeEvent.text)}
-                  // onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
                   value={value}
-                  onChangeText={setValue}
+                  onChangeText={handleInputChange}
                   keyboardType={keyboardType}
                   note={notes}
                 />
@@ -93,13 +119,13 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
             <Text style={{color: '#F7F7F7', fontWeight: '500'}}>Save Record</Text>
           </Pressable>
         </>
-      ) : <View>
-        <Text>
-          No Data found
-        </Text>
-        </View>}
+      ) : (
+        <View>
+          <Text>No Data Found</Text>
+        </View>
+      )}
     </>
   );
-  };
+};
 
 export default ValueInputCard;

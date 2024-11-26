@@ -20,24 +20,7 @@ export type HomeStackParamList = {
   TakeNotes: undefined;
   PlanVisit: undefined;
   Profile: undefined;
-  ChangePassword: undefined;
-};
-export type NoteStackParamList = {
-  TakeNotes: {
-    id: number;
-    user_id: number;
-    content: string;
-    location: number;
-    trial_type: string;
-    experiment_id: number;
-    experiment_name: string;
-  };
-};
-
-type experimentData = {
-  projectId: string;
-  designType: string;
-  season: string;
+  ChangePassword: undefined; // Already defined here
 };
 
 export type ExperimentStackParamList = {
@@ -68,31 +51,27 @@ export type ExperimentStackParamList = {
     data?: any;
   };
   QRScanner: undefined;
+  Profile: undefined;
+  ChangePassword: undefined; // Already defined here as well
 };
+
 export type RecordStackParamList = {
   Record: undefined;
 };
+
 export type NotificationStackParamList = {
   Notification: undefined;
 };
 
+type experimentData = {
+  projectId: string;
+  designType: string;
+  season: string;
+};
+
+// Define props for each screen
 export type HomeScreenProps = CompositeScreenProps<
   NativeStackScreenProps<HomeStackParamList, 'Home'>,
-  NativeStackScreenProps<AppStackParamList>
->;
-
-export type ProfileScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<HomeStackParamList, 'Profile'>,
-  NativeStackScreenProps<AppStackParamList>
->;
-
-export type ChangePasswordScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<HomeStackParamList, 'ChangePassword'>,
-  NativeStackScreenProps<AppStackParamList>
->;
-
-export type NotesScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<NoteStackParamList, 'TakeNotes'>,
   NativeStackScreenProps<AppStackParamList>
 >;
 
@@ -133,5 +112,11 @@ export type RecordScreenProps = CompositeScreenProps<
 
 export type NotificationScreenProps = CompositeScreenProps<
   NativeStackScreenProps<NotificationStackParamList, 'Notification'>,
+  NativeStackScreenProps<AppStackParamList>
+>;
+
+// New type for ChangePassword screen
+export type ChangePasswordScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<HomeStackParamList, 'ChangePassword'>,
   NativeStackScreenProps<AppStackParamList>
 >;
