@@ -93,14 +93,14 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
               title={t(LOCALES.EXPERIMENT.LBL_SAVE)}
               onPress={() => onSaveRecord(false)}
               loading={!hasNextPlot && isTraitsRecordLoading}
-              disabled={isTraitsRecordLoading || !isSaveRecordBtnVisible}
+              disabled={false}
               containerStyle={{width: '45%'}}
             />
             <Button
               title={t(LOCALES.EXPERIMENT.LBL_SAVE_NEXT)}
               onPress={() => onSaveRecord(true)}
               loading={hasNextPlot && isTraitsRecordLoading}
-              disabled={isTraitsRecordLoading || !isSaveRecordBtnVisible}
+              disabled={false}
               containerStyle={{width: '45%'}}
             />
           </View>
