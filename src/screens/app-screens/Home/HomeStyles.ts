@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 import {FONTS} from '../../../theme/fonts';
 
 const styles = StyleSheet.create({
@@ -58,11 +58,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#1A6DD2',
+    backgroundColor: 'rgba(26, 109, 210, 0.6)',
     borderRadius: 16,
     bottom: 8,
     right: 16,
     gap: 8,
+    opacity: 0.6,
+    pointerEvents: 'auto',
   },
   newRecordText: {
     color: '#fff',

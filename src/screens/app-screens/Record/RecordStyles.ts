@@ -1,5 +1,5 @@
-import { StyleSheet } from 'react-native';
-import { FONTS } from '../../../theme/fonts';
+import {StyleSheet} from 'react-native';
+import {FONTS} from '../../../theme/fonts';
 const RecordStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
@@ -252,12 +252,12 @@ const RecordStyles = StyleSheet.create({
     fontFamily: FONTS.MEDIUM,
     fontSize: 14,
   },
-  ScreenTitle : {
-    marginHorizontal:20,
-    marginVertical:15,
+  ScreenTitle: {
+    marginHorizontal: 20,
+    marginVertical: 15,
     fontFamily: FONTS.MEDIUM,
-    fontSize:20,
-    color:'#000'
+    fontSize: 20,
+    color: '#000',
   },
   modalOpen: {
     opacity: 0.2,
@@ -267,18 +267,20 @@ const RecordStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#1A6DD2',
+    backgroundColor: 'rgba(26, 109, 210, 0.6)',
     borderRadius: 16,
     bottom: 8,
     right: 16,
     gap: 8,
+    opacity: 0.6,
+    pointerEvents: 'auto',
   },
+
   newRecordText: {
     color: '#fff',
     fontSize: 14,
     fontFamily: FONTS.MEDIUM,
   },
-
 });
 
 export default RecordStyles;
