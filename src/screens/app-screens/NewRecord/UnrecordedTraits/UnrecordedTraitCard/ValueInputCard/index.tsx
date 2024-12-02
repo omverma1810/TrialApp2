@@ -56,8 +56,10 @@ const ValueInputCard = () => {
           ? formattedValue + '*'
           : formattedValue;
 
-      // Validate against limits
-      const values = finalValue.split('*').map(parseFloat).filter(v => !isNaN(v));
+      const values = finalValue
+        .split('*')
+        .map(parseFloat)
+        .filter(v => !isNaN(v));
       const averageValue =
         values.reduce((sum, num) => sum + num, 0) / values.length || 0;
 

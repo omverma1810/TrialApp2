@@ -29,7 +29,6 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
   const handleSubmit = (text: string) => {
     const numericValue = parseFloat(text);
 
-    // Validation based on trait name (Initial Plant Stand or Final Plant Stand)
     if (entry?.traitName === 'Initial Plant Stand') {
       if (numericValue < MIN_INITIAL_PLANT_STAND || numericValue > MAX_INITIAL_PLANT_STAND) {
         showToast({
@@ -50,7 +49,6 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
       }
     }
 
-    // If valid, submit the value
     onSubmit(text);
     setValue('');
     setShowInputCard(null);
