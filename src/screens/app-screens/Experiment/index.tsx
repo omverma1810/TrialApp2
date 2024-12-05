@@ -15,7 +15,7 @@ import {
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
 import {LOCALES} from '../../../localization/constants';
-import {ExperimentScreenProps} from '../../../types/navigation/appTypes'; // Updated import
+import {ExperimentScreenProps} from '../../../types/navigation/appTypes';
 import {RootState} from '../../../store';
 import Header from '../Home/Header';
 import ExperimentCard from './ExperimentCard';
@@ -182,7 +182,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     <SafeAreaView
       edges={['top']}
       parentStyle={isOptionModalVisible && styles.modalOpen}>
-      {/* Conditionally render Header */}
       {roleName?.toLowerCase() !== 'admin' && (
         <View style={styles.main_header}>
           <Header navigation={navigation} />

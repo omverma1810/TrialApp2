@@ -267,15 +267,12 @@ const RecordStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: 'rgba(26, 109, 210, 0.6)',
+    backgroundColor: '#1A6DD2',
     borderRadius: 16,
     bottom: 8,
     right: 16,
     gap: 8,
-    opacity: 0.6,
-    pointerEvents: 'auto',
   },
-
   newRecordText: {
     color: '#fff',
     fontSize: 14,

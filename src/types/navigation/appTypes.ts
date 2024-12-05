@@ -20,7 +20,7 @@ export type HomeStackParamList = {
   TakeNotes: undefined;
   PlanVisit: undefined;
   Profile: undefined;
-  ChangePassword: undefined; // Already defined here
+  ChangePassword: undefined;
 };
 
 export type ExperimentStackParamList = {
@@ -115,7 +115,6 @@ export type NotificationScreenProps = CompositeScreenProps<
   NativeStackScreenProps<AppStackParamList>
 >;
 
-// New type for ChangePassword screen
 export type ChangePasswordScreenProps = CompositeScreenProps<
   NativeStackScreenProps<HomeStackParamList, 'ChangePassword'>,
   NativeStackScreenProps<AppStackParamList>
