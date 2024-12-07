@@ -199,10 +199,10 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     const {data} = experimentListData;
     const cropList = Object.keys(data);
 
-    let selectedCrop = null;    
+    let selectedCrop = null;
     if (paramsData?.QRData) {
-      selectedCrop = paramsData.QRData.crop
-    }else {
+      selectedCrop = paramsData.QRData.crop;
+    } else {
       selectedCrop = cropList[0];
     }
     const projectList = Object.keys(data[selectedCrop] || {});
@@ -210,7 +210,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
 
     if (paramsData?.QRData) {
       selectedProject = paramsData.QRData.project;
-    }else {
+    } else {
       selectedProject = projectList[0];
     }
 
@@ -275,7 +275,9 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     const paramsData: any = params;
     if (paramsData?.QRData) {
       const data = paramsData?.QRData;
-      const field = fieldList?.find((item: any) => item?.landVillageId === data?.field_id);
+      const field = fieldList?.find(
+        (item: any) => item?.landVillageId === data?.field_id,
+      );
       if (field) {
         handleFieldSelect(field);
       }

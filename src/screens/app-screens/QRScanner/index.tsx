@@ -12,8 +12,8 @@ import {StatusBar, SafeAreaView} from '../../../components';
 import {Back} from '../../../assets/icons/svgs';
 import {QRScannerScreenProps} from '../../../types/navigation/appTypes';
 import Toast from '../../../utilities/toast';
-import { URL } from '../../../constants/URLS';
-import { useApi } from '../../../hooks/useApi'; 
+import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
 
 const QRScanner = ({navigation}: QRScannerScreenProps) => {
   const device = useCameraDevice('back');
@@ -36,27 +36,27 @@ const QRScanner = ({navigation}: QRScannerScreenProps) => {
         try {
           const data: any = codes[0].value;
           const payload = {
-            "plotCode" : data
-          }
+            plotCode: data,
+          };
           const headers = {
             'Content-Type': 'application/json',
-          };      
-          console.log(payload)
-          decodeQr({payload:payload,headers})
+          };
+          console.log(payload);
+          decodeQr({payload: payload, headers});
         } catch (error) {
           Toast.error({message: 'Invalid QR Code!'});
         }
       }
     },
   });
-  useEffect(()=>{
-    if(decodeQrResponse){
+  useEffect(() => {
+    if (decodeQrResponse) {
       const data = decodeQrResponse;
       if (data?.fieldExperimentId && data?.landVillageId && data?.plotId) {
         navigation.replace('NewRecord', {
           QRData: {
             crop: data.crop,
-            project: data.project, 
+            project: data.project,
             experiment_id: data.fieldExperimentId,
             field_id: data.landVillageId,
             plot_id: data.plotId,
@@ -66,7 +66,7 @@ const QRScanner = ({navigation}: QRScannerScreenProps) => {
         throw new Error('Invalid hai bhai!');
       }
     }
-  },[decodeQrResponse])
+  }, [decodeQrResponse]);
 
   return (
     <SafeAreaView edges={['top']}>

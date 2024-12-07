@@ -60,10 +60,17 @@ const ValueInputCard = () => {
         .split('*')
         .map(parseFloat)
         .filter(v => !isNaN(v));
-      const averageValue =
-        values.reduce((sum, num) => sum + num, 0) / values.length || 0;
 
-      if (values.some(v => v < minimumValue || v > maximumValue)) {
+      // Skip restriction logic if limits are unavailable or invalid
+      const hasValidLimits =
+        typeof minimumValue === 'number' &&
+        typeof maximumValue === 'number' &&
+        minimumValue < maximumValue;
+
+      if (
+        hasValidLimits &&
+        values.some(v => v < minimumValue || v > maximumValue)
+      ) {
         eventEmitter.emit(TOAST_EVENT_TYPES.SHOW, {
           message: `Value must be between ${minimumValue} and ${maximumValue}.`,
           type: 'ERROR',

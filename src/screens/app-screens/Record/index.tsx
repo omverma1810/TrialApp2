@@ -32,12 +32,6 @@ interface SelectedFieldData {
   fieldName: string;
   plots: any;
 }
-// interface ProjectData {
-//   [key: string]: {
-//     plot: string;
-//     entries: {date: string; notes: string}[];
-//   }[];
-// }
 interface ProjectData {
   fieldName: string;
 }
@@ -47,7 +41,7 @@ interface Chip {
   CropName: string;
 }
 
-const Record = ({navigation} : any) => {
+const Record = ({navigation}: any) => {
   const {t} = useTranslation();
 
   const [experiment, setExperiment] = useState();
@@ -355,7 +349,9 @@ const Record = ({navigation} : any) => {
   };
 
   return (
-    <SafeAreaView edges={['top']} parentStyle={isOptionModalVisible && RecordStyles.modalOpen}>
+    <SafeAreaView
+      edges={['top']}
+      parentStyle={isOptionModalVisible && RecordStyles.modalOpen}>
       <StatusBar />
       <View>
         <Text style={RecordStyles.ScreenTitle}>Record</Text>
@@ -408,14 +404,17 @@ const Record = ({navigation} : any) => {
                     </Text>
                     <DropdownArrow />
                   </View>
-                  <View style={[TakeNotesStyles.chipCropText,
+                  <View
+                    style={[
+                      TakeNotesStyles.chipCropText,
                       {
-                            backgroundColor: selectedExperiment.experimentType === 'hybrid'
+                        backgroundColor:
+                          selectedExperiment.experimentType === 'hybrid'
                             ? '#fdf8ee'
                             : selectedExperiment.experimentType === 'line'
                             ? '#fcebea'
                             : '#eaf4e7',
-                      }
+                      },
                     ]}>
                     <Text style={TakeNotesStyles.chipCropText1}>
                       {selectedExperiment?.experimentType}
@@ -564,7 +563,7 @@ const Record = ({navigation} : any) => {
           {loading ? (
             <View
               style={{
-                marginTop:'30%'
+                marginTop: '30%',
               }}>
               <Loader />
             </View>
@@ -624,12 +623,11 @@ const Record = ({navigation} : any) => {
                         value={!!selectedFields[field.id]}
                         onChange={() => handleFieldSelect(field.id)}
                       />
-                      <Pressable onPress={()=> handleFieldSelect(field.id)}>
-                      <Text style={RecordStyles.fieldCheckboxText} >
-                        {field.id} - {field.location.villageName}
-                      </Text>
+                      <Pressable onPress={() => handleFieldSelect(field.id)}>
+                        <Text style={RecordStyles.fieldCheckboxText}>
+                          {field.id} - {field.location.villageName}
+                        </Text>
                       </Pressable>
-
                     </View>
                   ))}
                 </View>
@@ -649,7 +647,6 @@ const Record = ({navigation} : any) => {
         closeModal={onCloseOptionsModalClick}
         onSelectFromList={onSelectFromList}
       />
-
     </SafeAreaView>
   );
 };

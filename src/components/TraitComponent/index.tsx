@@ -11,8 +11,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {DropdownArrow, FieldSybol1} from '../../assets/icons/svgs';
 import {FONTS} from '../../theme/fonts';
 
-const TraitComponent = ({projectData, selectedFields,fields}: any) => {
-  // console.log('i'm batman',projectData)
+const TraitComponent = ({projectData, selectedFields, fields}: any) => {
   const [dropdownHeights, setDropdownHeights] = useState(
     Array.from({length: projectData.length}, () => new Animated.Value(0)),
   );
@@ -51,10 +50,11 @@ const TraitComponent = ({projectData, selectedFields,fields}: any) => {
     setIsOpen(newIsOpen);
   };
   const getVillageName = (fieldId: string) => {
-    const field = fields.find((field: any) => String(field.id) === String(fieldId));
+    const field = fields.find(
+      (field: any) => String(field.id) === String(fieldId),
+    );
     return field?.location?.villageName || 'Unknown';
   };
-
 
   return (
     <ScrollView contentContainerStyle={styles.projectContainer}>
@@ -76,23 +76,34 @@ const TraitComponent = ({projectData, selectedFields,fields}: any) => {
                 {trait.locationData.map(
                   (location: any, locationIndex: number) =>
                     selectedFields[location.trialLocationId] && (
-                      <View key={locationIndex} style={styles.locationContainer}>
+                      <View
+                        key={locationIndex}
+                        style={styles.locationContainer}>
                         <View style={styles.projectContainerBackground}>
                           <View style={styles.header}>
                             <Text style={styles.headerText}>
-                            {location.trialLocationId} - {getVillageName(location.trialLocationId)}
-                              </Text>
+                              {location.trialLocationId} -{' '}
+                              {getVillageName(location.trialLocationId)}
+                            </Text>
                             <FieldSybol1 />
                           </View>
                         </View>
 
                         {/* Plot Data */}
-                        {location.plotData.map((plot: any, plotIndex: number) => (
-                          <View key={plotIndex} style={styles.plotContainer}>
-                            <Text style={styles.plotText}>Plot {plot.plotNumber}</Text>
-                            <Text>{`${plot.value ? `${plot.value} ${trait.traitUom || ''}` : 'N/A'}`}</Text>
+                        {location.plotData.map(
+                          (plot: any, plotIndex: number) => (
+                            <View key={plotIndex} style={styles.plotContainer}>
+                              <Text style={styles.plotText}>
+                                Plot {plot.plotNumber}
+                              </Text>
+                              <Text>{`${
+                                plot.value
+                                  ? `${plot.value} ${trait.traitUom || ''}`
+                                  : 'N/A'
+                              }`}</Text>
                             </View>
-                        ))}
+                          ),
+                        )}
                       </View>
                     ),
                 )}
@@ -101,7 +112,6 @@ const TraitComponent = ({projectData, selectedFields,fields}: any) => {
           )}
         </View>
       ))}
-
     </ScrollView>
   );
 };

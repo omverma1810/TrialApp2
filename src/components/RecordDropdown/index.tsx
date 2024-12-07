@@ -7,7 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
+  Pressable,
   View,
   Image,
   Alert,
@@ -232,16 +232,16 @@ const ItemComponent = ({
 
   return (
     <ScrollView style={styles.itemContainer}>
-      <TouchableOpacity onPress={toggleDropdown}>
+      <Pressable onPress={toggleDropdown}>
         <View style={styles.row}>
           <View style={styles.column}>
             <Text style={styles.title}>{title}</Text>
           </View>
-          <TouchableOpacity onPress={toggleDropdown}>
+          <Pressable onPress={toggleDropdown}>
           {dropdownState ? <CardArrowUp /> : <CardArrowDown />}
-          </TouchableOpacity>
+          </Pressable>
         </View>
-      </TouchableOpacity>
+      </Pressable>
 
       <Animated.View style={[styles.dropdown]}>
         {dropdownState && (
@@ -282,7 +282,7 @@ const ItemComponent = ({
                               </View>
                             ) : (
                               <>
-                                <TouchableOpacity
+                                <Pressable
                                   onPress={() => handleEditPress(entry)}>
                                   <View style={styles.entryColumn}>
                                     {/* <Text style={styles.entryLabel}>Value</Text> */}
@@ -290,12 +290,12 @@ const ItemComponent = ({
                                       {entry.value}
                                     </Text>
                                   </View>
-                                </TouchableOpacity>
-                                <TouchableOpacity
+                                </Pressable>
+                                <Pressable
                                   onPress={() => handleEditPress(entry)}
                                   style={styles.editButton}>
                                   <Edit />
-                                </TouchableOpacity>
+                                </Pressable>
                               </>
                             )}
                           </View>
@@ -343,7 +343,7 @@ const ItemComponent = ({
                                   </View>
                                 ) : (
                                   <>
-                                    <TouchableOpacity
+                                    <Pressable
                                       onPress={() => handleEditPress(entry)}>
                                       <View style={styles.entryColumn}>
                                         <Text style={styles.entryLabel}>Value</Text>
@@ -351,12 +351,12 @@ const ItemComponent = ({
                                           {entry.value}
                                         </Text>
                                       </View>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
+                                    </Pressable>
+                                    <Pressable
                                       onPress={() => handleEditPress(entry)}
                                       style={styles.editButton}>
                                   <Edit />
-                                  </TouchableOpacity>
+                                  </Pressable>
                                   </>
                                 )}
                               </View>
