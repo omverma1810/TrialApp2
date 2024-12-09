@@ -1,39 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
-import { SafeAreaView, StatusBar } from '../../../components';
-import { useApi } from '../../../hooks/useApi';
+import React, {useState, useEffect} from 'react';
+import {View, Text, TextInput, Pressable, StyleSheet} from 'react-native';
+import {SafeAreaView, StatusBar} from '../../../components';
+import {useApi} from '../../../hooks/useApi';
 import {URL} from '../../../constants/URLS';
+import Toast from '../../../utilities/toast';
 
-const EditNotes = ({ route, navigation }: any) => {
-  const { content, experimentId, location, trail_type, id } = route.params;
+const EditNotes = ({route, navigation}: any) => {
+  const {content, experimentId, location, trail_type, id} = route.params;
   const [noteContent, setNoteContent] = useState(content);
 
   // Initialize the useApi hook without passing the id initially
-  const [updateNote, updateNoteResponse, updateNoteLoading, updateNoteError] = useApi({
-    url: URL.NOTES, // Base API URL
-    method: 'PUT',
-  });
+  const [updateNote, updateNoteResponse, updateNoteLoading, updateNoteError] =
+    useApi({
+      url: URL.NOTES, // Base API URL
+      method: 'PUT',
+    });
 
   const handleUpdate = () => {
     if (!noteContent) {
-      Alert.alert('Error', 'Please enter content before updating');
+      Toast.error({message: 'Please enter content before updating'});
       return;
     }
 
-    const payload = { content: noteContent };
+    const payload = {content: noteContent};
 
-    // Pass the id dynamically as a pathParam and update the note
-    updateNote({ payload, pathParams: id });
+    updateNote({payload, pathParams: id});
   };
 
   useEffect(() => {
     if (updateNoteResponse) {
-      Alert.alert('Success', 'Note updated successfully');
+      Toast.success({message: 'Note updated successfully'});
       navigation.navigate('Home');
     }
 
     if (updateNoteError) {
-      Alert.alert('Error', updateNoteError?.message || 'Something went wrong while updating the note');
+      Toast.error({
+        message:
+          updateNoteError?.message ||
+          'Something went wrong while updating the note',
+      });
     }
   }, [updateNoteResponse, updateNoteError]);
 
@@ -62,14 +67,18 @@ const EditNotes = ({ route, navigation }: any) => {
             onChangeText={setNoteContent}
           />
         </View>
-        <TouchableOpacity style={EditNotesStyles.submitButton} onPress={handleUpdate} disabled={updateNoteLoading}>
-          <Text style={EditNotesStyles.submitButtonText}>{updateNoteLoading ? 'Updating...' : 'Update Note'}</Text>
-        </TouchableOpacity>
+        <Pressable
+          style={EditNotesStyles.submitButton}
+          onPress={handleUpdate}
+          disabled={updateNoteLoading}>
+          <Text style={EditNotesStyles.submitButtonText}>
+            {updateNoteLoading ? 'Updating...' : 'Update Note'}
+          </Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
 };
-
 
 const EditNotesStyles = StyleSheet.create({
   container: {
@@ -116,6 +125,4 @@ const EditNotesStyles = StyleSheet.create({
   },
 });
 
-
 export default EditNotes;
-

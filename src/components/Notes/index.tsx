@@ -1,67 +1,90 @@
-import React, { useEffect, useRef ,useState} from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {View, Text, Pressable, StyleSheet, Alert} from 'react-native';
 import BottomModal from '../BottomSheetModal';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dots, Trash, DbEdit } from '../../assets/icons/svgs';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { useApi } from '../../hooks/useApi';
-import { URL } from '../../constants/URLS';
-import { FONTS } from '../../theme/fonts';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {Dots, Trash, DbEdit} from '../../assets/icons/svgs';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {useApi} from '../../hooks/useApi';
+import {URL} from '../../constants/URLS';
+import {FONTS} from '../../theme/fonts';
 import Toast from '../../utilities/toast';
 
-const Notes = ({ note, onDelete, navigation, refreshNotes, onEdit }: any) => {
+const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const { bottom } = useSafeAreaInsets();
+  const {bottom} = useSafeAreaInsets();
 
-
+  const [deleteNote, deleteNoteResponse] = useApi({
+    url: URL.NOTES.replace(/\/$/, ''),
+    method: 'DELETE',
+  });
   const onDeleteNote = async () => {
-    onDelete(note.id);
+    deleteNote({pathParams: note.id});
   };
+
+  React.useEffect(() => {
+    if (deleteNoteResponse) {
+      if (deleteNoteResponse.status_code === 204) {
+        Toast.success({
+          message: 'Note deleted successfully',
+        });
+        onDelete(note.id);
+        bottomSheetModalRef.current?.close();
+      } else {
+        Toast.error({
+          message: 'Failed to delete note',
+        });
+      }
+    }
+  }, [deleteNoteResponse]);
 
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => {
-    setIsExpanded(!isExpanded); // Toggle the expanded state
+    setIsExpanded(!isExpanded);
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={toggleExpanded}>
+      <Pressable onPress={toggleExpanded}>
         <View style={styles.noteContainer}>
           <View style={styles.noteContent}>
-            <Text style={styles.noteText} 
-            numberOfLines={isExpanded ? undefined : 2}
-            ellipsizeMode='tail'
-            >
-                {note.content}
+            <Text
+              style={styles.noteText}
+              numberOfLines={isExpanded ? undefined : 2}
+              ellipsizeMode="tail">
+              {note.content}
             </Text>
-            <Text style={styles.noteInfo}>Exp {note.experiment_id} - Field {note.field_id}</Text>
+            <Text style={styles.noteInfo}>
+              Exp {note.experiment_id} - Field {note.field_id}
+            </Text>
           </View>
-          <TouchableOpacity onPress={() => bottomSheetModalRef.current?.present()}>
+          <Pressable onPress={() => bottomSheetModalRef.current?.present()}>
             <Dots />
-          </TouchableOpacity>
+          </Pressable>
         </View>
-      </TouchableOpacity>
+      </Pressable>
 
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
-        containerStyle={[styles.bottomModalContainer, { paddingBottom: bottom, height: 100 }]}
-      >
+        containerStyle={[
+          styles.bottomModalContainer,
+          {paddingBottom: bottom, height: 100},
+        ]}>
         <View style={styles.modalContent}>
-          <TouchableOpacity onPress={onDeleteNote} style={styles.modalButton}>
+          <Pressable onPress={onDeleteNote} style={styles.modalButton}>
             <Trash />
-            <Text style={styles.modalButtonText}>  Delete</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.modalButton}
+            <Text style={styles.modalButtonText}> Delete</Text>
+          </Pressable>
+          <Pressable
+            style={styles.modalButton}
             onPress={() => {
               onEdit(note);
               bottomSheetModalRef.current?.close();
-            }}
-          >
+            }}>
             <DbEdit />
             <Text style={styles.editOptionText}>Edit</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </BottomModal>
     </View>
@@ -116,7 +139,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#161616',
     fontWeight: '400',
-    marginHorizontal: 20
+    marginHorizontal: 20,
   },
   bottomModalContainer: {},
 });

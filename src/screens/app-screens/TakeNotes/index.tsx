@@ -5,7 +5,7 @@ import {
   FlatList,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   View,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -76,7 +76,6 @@ const TakeNotes = ({navigation, route}: any) => {
       setFields([]);
       setExperimentList(experimentData[option][newProjectList[0]] || []);
       setResetExperiment(true);
-
     },
     [experimentData],
   );
@@ -89,7 +88,6 @@ const TakeNotes = ({navigation, route}: any) => {
       setSelectedField(null);
       setChipTitle('Select an Experiment');
       setResetExperiment(true);
-
     },
     [experimentData, selectedCrop],
   );
@@ -201,7 +199,7 @@ const TakeNotes = ({navigation, route}: any) => {
       let data_ = route.params?.data;
       setEditNotesData(data_);
       let {experiment_name} = data_;
-      console.log(data_)
+      console.log(data_);
       for (let crops of cropList) {
         console.log(crops);
         if (crops in data) {
@@ -304,22 +302,21 @@ const TakeNotes = ({navigation, route}: any) => {
     }
   }, [takeNotesResponse]);
 
-  
   const [getFields, getFieldsResponse] = useApi({
     url: URL.EXPERIMENT_DETAILS,
     method: 'GET',
   });
-  
+
   useEffect(() => {
     const experimentId = selectedExperiment?.id || selectedExperimentId;
     let experimentType = 'line';
-    console.log(editNotesData?.trial_type)
+    console.log(editNotesData?.trial_type);
     if (isEdit && editNotesData?.trial_type) {
       experimentType = editNotesData.trial_type;
     } else if (selectedExperiment?.experimentType) {
       experimentType = selectedExperiment.experimentType;
     }
-      if (selectedExperiment || selectedExperimentId) {
+    if (selectedExperiment || selectedExperimentId) {
       const queryParams = `experimentType=${experimentType}`;
       getFields({
         pathParams: experimentId,
@@ -346,7 +343,12 @@ const TakeNotes = ({navigation, route}: any) => {
               return location;
             }
           });
-          console.log('selectedFieldId', selectedFieldId, 'landVillageId', selectedField);
+        console.log(
+          'selectedFieldId',
+          selectedFieldId,
+          'landVillageId',
+          selectedField,
+        );
         const field_name = selectedField?.location.villageName;
         console.log('selectedField', field_name);
         if (selectedField) {
@@ -370,9 +372,9 @@ const TakeNotes = ({navigation, route}: any) => {
           alignItems: 'center',
           marginHorizontal: 20,
         }}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Pressable onPress={() => navigation.goBack()}>
           <Back width={24} height={24} />
-        </TouchableOpacity>
+        </Pressable>
         <Text style={TakeNotesStyles.ScreenTitle}>
           {isEdit ? 'Edit Notes' : 'Take Notes'}
         </Text>
@@ -433,13 +435,13 @@ const TakeNotes = ({navigation, route}: any) => {
                 placeholderTextColor="#636363"
               />
             </View>
-            <TouchableOpacity
+            <Pressable
               style={TakeNotesStyles.submitButton}
               onPress={onTakeNotes}>
               <Text style={TakeNotesStyles.submitButtonText}>
                 {isEdit ? 'Update Note' : 'Save Note'}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
       </View>
