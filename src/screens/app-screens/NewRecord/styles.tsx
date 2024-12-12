@@ -168,6 +168,9 @@ export const styles = StyleSheet.create({
   traitsContainer: {
     padding: 16,
     gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   traitsInputContainer: {
     paddingHorizontal: 8,
@@ -177,11 +180,14 @@ export const styles = StyleSheet.create({
     color: '#161616',
     fontFamily: FONTS.REGULAR,
     fontSize: 14,
+    flex: 1,
+    flexWrap: 'wrap',
   },
   recordButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: '#E8F0FB',
+    flexShrink: 0,
   },
   recordButtonTitle: {
     color: '#0B2E58',

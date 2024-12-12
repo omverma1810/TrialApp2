@@ -118,7 +118,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
   const groupByExperimentName = (array: any[]) => {
     const groupedMap = array.reduce((acc, curr) => {
-      const key = curr.experimentName || 'N/A';
+      const key = curr.experimentName || selectedProject || 'N/A';
       if (!acc.has(key)) {
         acc.set(key, {name: key, data: []});
       }
@@ -173,9 +173,20 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     if (searchQuery === '') {
       return experimentList;
     }
-    return experimentList.filter(experiment =>
-      normalizeString(experiment.name).includes(normalizeString(searchQuery)),
-    );
+
+    const normalizedQuery = normalizeString(searchQuery);
+
+    return experimentList.filter(experiment => {
+      const normalizedExperimentName = normalizeString(experiment.name || '');
+      const normalizedFieldExperimentName = normalizeString(
+        experiment.data[0]?.fieldExperimentName || '',
+      );
+
+      return (
+        normalizedExperimentName.includes(normalizedQuery) ||
+        normalizedFieldExperimentName.includes(normalizedQuery)
+      );
+    });
   }, [experimentList, searchQuery]);
 
   return (

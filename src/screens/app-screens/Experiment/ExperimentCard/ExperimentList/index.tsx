@@ -18,16 +18,6 @@ const ExperimentList = ({experiment, selectedProject}: any) => {
   const handleTraitModalOpen = () => traitModalRef.current?.present();
 
   const experimentInfo = [
-    // {
-    //   id: 0,
-    //   title: t(LOCALES.EXPERIMENT.LBL_EXPERIMENT_TYPE),
-    //   key: 'experimentType',
-    // },
-    // {
-    //   id: 1,
-    //   title: t(LOCALES.EXPERIMENT.LBL_NO_OF_ENTRIES),
-    //   key: 'total_entries',
-    // },
     {
       id: 2,
       title: t(LOCALES.EXPERIMENT.LBL_FIELD_DESIGN),
@@ -53,11 +43,6 @@ const ExperimentList = ({experiment, selectedProject}: any) => {
       title: t(LOCALES.EXPERIMENT.LBL_REPLICATION),
       key: 'noOfReplication',
     },
-    // {
-    //   id: 7,
-    //   title: t(LOCALES.EXPERIMENT.LBL_RANDOMISATION),
-    //   key: 'randomization',
-    // },
     {
       id: 8,
       title: t(LOCALES.EXPERIMENT.LBL_LOCATION_DEPLOYED),
@@ -134,28 +119,32 @@ const ExperimentList = ({experiment, selectedProject}: any) => {
       )}
       {isViewMoreDetails && (
         <View style={styles.experimentDetailsContainer}>
-          {experimentInfo.map((item, index) => (
-            <View
-              style={[
-                styles.experimentDetailsCard,
-                item.key === 'experimentType' && {width: '100%'},
-              ]}
-              key={index}>
-              <Text style={styles.experimentDetailsKeyText}>{item.title}</Text>
-              <Text style={styles.experimentDetailsValueText}>
-                {experiment[item.key]}
-              </Text>
-              {item.key === 'noOfTraits' && (
-                <Pressable
-                  style={styles.viewContainer}
-                  onPress={handleTraitModalOpen}>
-                  <Text style={styles.view}>
-                    {t(LOCALES.EXPERIMENT.LBL_VIEW)}
-                  </Text>
-                </Pressable>
-              )}
-            </View>
-          ))}
+          {experimentInfo
+            .filter(item => item.key !== 'locationReq' || experiment[item.key]) // Exclude if locationReq is null, undefined, or empty
+            .map((item, index) => (
+              <View
+                style={[
+                  styles.experimentDetailsCard,
+                  item.key === 'experimentType' && {width: '100%'},
+                ]}
+                key={index}>
+                <Text style={styles.experimentDetailsKeyText}>
+                  {item.title}
+                </Text>
+                <Text style={styles.experimentDetailsValueText}>
+                  {experiment[item.key]}
+                </Text>
+                {item.key === 'noOfTraits' && (
+                  <Pressable
+                    style={styles.viewContainer}
+                    onPress={handleTraitModalOpen}>
+                    <Text style={styles.view}>
+                      {t(LOCALES.EXPERIMENT.LBL_VIEW)}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            ))}
         </View>
       )}
       {isViewMoreDetails && (
