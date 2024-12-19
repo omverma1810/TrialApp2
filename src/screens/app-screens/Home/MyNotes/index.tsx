@@ -1,10 +1,10 @@
-import React, {useState, useEffect,useCallback} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {View, Text, Alert} from 'react-native';
 import {useApi} from '../../../../hooks/useApi';
 import {URL} from '../../../../constants/URLS';
 import MyNoteStyles from './MyNotesStyles';
 import Notes from '../../../../components/Notes';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import {useIsFocused} from '@react-navigation/native';
 
 import {NavigationProp} from '@react-navigation/native';
@@ -19,7 +19,7 @@ type NoteType = {
   experiment_id: number | null;
 };
 // {navigation: NavigationProp<any>}
-const MyNote = ({navigation,refresh}: any ) => {  
+const MyNote = ({navigation, refresh}: any) => {
   const isFocused = useIsFocused();
 
   useFocusEffect(
@@ -27,9 +27,9 @@ const MyNote = ({navigation,refresh}: any ) => {
       if (refresh) {
         fetchNotes();
         console.log('Refreshing Home screen');
-        navigation.setParams({ refresh: false });
+        navigation.setParams({refresh: false});
       }
-    }, [refresh])
+    }, [refresh]),
   );
 
   const [notes, setNotes] = useState<{id: number}[]>([]);
@@ -48,10 +48,10 @@ const MyNote = ({navigation,refresh}: any ) => {
       // console.log(fetchNotesResponse.data)
     } else if (fetchNotesResponse) {
       Toast.error({
-        message:'Failed to fetch notes'
-      })
+        message: 'Failed to fetch notes',
+      });
     }
-  }, [fetchNotesResponse]); 
+  }, [fetchNotesResponse]);
 
   const handleDeleteNote = (id: any) => {
     setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
@@ -63,7 +63,7 @@ const MyNote = ({navigation,refresh}: any ) => {
   };
 
   return (
-    <View style={{flex: 1, padding: 20}}>
+    <View style={{flex: 1, padding: 5}}>
       {notes.length > 0 && (
         <View style={MyNoteStyles.notesContainer}>
           <Text style={MyNoteStyles.notesTitle}>My Notes</Text>
@@ -75,12 +75,12 @@ const MyNote = ({navigation,refresh}: any ) => {
               navigation={navigation}
               refreshNotes={fetchNotes}
               onEdit={handleEditNote}
-            /> 
+            />
           ))}
         </View>
       )}
     </View>
   );
-}; 
+};
 
 export default MyNote;

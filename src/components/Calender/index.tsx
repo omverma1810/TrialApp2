@@ -10,7 +10,12 @@ import {
 } from 'react-native';
 import {DbEdit} from '../../assets/icons/svgs';
 
-export default function Calender({modalVisible, onCancel, onOk,selectedDate}: any) {
+export default function Calender({
+  modalVisible,
+  onCancel,
+  onOk,
+  selectedDate,
+}: any) {
   const [date, setDate] = useState(dayjs());
   const [textInputValue, setTextInputValue] = useState('');
   useEffect(() => {
@@ -23,14 +28,13 @@ export default function Calender({modalVisible, onCancel, onOk,selectedDate}: an
     }
   }, [selectedDate]);
 
-
   const handleDateChange = (params: any) => {
     setDate(dayjs(params.date));
     setTextInputValue(dayjs(params.date).format('dddd, MMMM D'));
-  }; 
+  };
 
   const handleOk = () => {
-    const formattedDate = date.format('YYYY-MM-DD');
+    const formattedDate = date.format('DD-MM-YYYY');
     onOk(formattedDate);
   };
 

@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useRef, useState } from 'react';
+import {useNavigation} from '@react-navigation/native';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
@@ -12,15 +12,22 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import { CardArrowDown, CardArrowUp, DropdownArrow, Edit, FieldSybol1 } from '../../assets/icons/svgs';
+import {
+  CardArrowDown,
+  CardArrowUp,
+  DropdownArrow,
+  Edit,
+  FieldSybol1,
+} from '../../assets/icons/svgs';
 import Calendar from '../Calender';
-import { projectData } from '../../screens/app-screens/Record/Data';
-import { useApi } from '../../hooks/useApi';
-import { URL } from '../../constants/URLS';
+import {projectData} from '../../screens/app-screens/Record/Data';
+import {useApi} from '../../hooks/useApi';
+import {URL} from '../../constants/URLS';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 import Toast from '../../utilities/toast';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
-import { FONTS } from '../../theme/fonts';
+import {FONTS} from '../../theme/fonts';
+import dayjs from 'dayjs';
 
 type selectedFieldsType = {
   [key: string]: boolean;
@@ -30,7 +37,7 @@ const RecordDropDown = ({
   selectedFields,
   projectData,
   experimentType,
-  fields
+  fields,
 }: {
   selectedFields: selectedFieldsType;
   projectData: any;
@@ -42,9 +49,9 @@ const RecordDropDown = ({
       Object.keys(selectedFields).flatMap(field =>
         projectData.length > 0 && projectData[0]?.plotData
           ? projectData[0].plotData.map((_: any, index: number) => [
-            `${field}_${index}`,
-            false,
-          ])
+              `${field}_${index}`,
+              false,
+            ])
           : [],
       ),
     ),
@@ -65,7 +72,10 @@ const RecordDropDown = ({
             <ProjectContainer
               key={field}
               title={field}
-              heading={`${field} - ${fields.find((f: any) => String(f.id) === String(field))?.location?.villageName || 'Unknown'}`}
+              heading={`${field} - ${
+                fields.find((f: any) => String(f.id) === String(field))
+                  ?.location?.villageName || 'Unknown'
+              }`}
               data={projectData && projectData[0]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
@@ -85,7 +95,7 @@ const ProjectContainer = ({
   toggleDropdown,
   projectData,
   experimentType,
-  heading
+  heading,
 }: {
   title: any;
   data: any;
@@ -93,7 +103,7 @@ const ProjectContainer = ({
   toggleDropdown: any;
   projectData: any;
   experimentType: string | null;
-  heading: any
+  heading: any;
 }) => {
   return (
     <View style={styles.paddingVertical}>
@@ -111,7 +121,6 @@ const ProjectContainer = ({
               <ItemComponent
                 key={index}
                 title={`${item.plotNumber}`}
-                // entries={item.recordedTraitData}
                 notes={item.notes}
                 dropdownState={dropdownStates[`${title}_${index}`]}
                 toggleDropdown={() => toggleDropdown(index)}
@@ -137,13 +146,15 @@ const ItemComponent = ({
   plotId,
   experimentType,
   plotData,
-  imageUrls
+  imageUrls,
 }: any) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [showInputCard, setShowInputCard] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<any>(null);
   const [observedValue, setObservedValue] = useState('');
+  const [calendarVisible, setCalendarVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const optionsModalRef = useRef<any>(null);
   const recordedTraitData = plotData.recordedTraitData;
   const unrecordedTraitData = plotData.unrecordedTraitData;
@@ -177,7 +188,9 @@ const ItemComponent = ({
 
   const handleEditPress = (entry: any) => {
     setCurrentEntry(entry);
-    if (entry.dataType === 'fixed') {
+    if (entry.dataType === 'date') {
+      setCalendarVisible(true);
+    } else if (entry.dataType === 'fixed') {
       setModalVisible(true);
     } else {
       setEditingEntryId(entry.observationId);
@@ -208,7 +221,13 @@ const ItemComponent = ({
     const headers = {
       'Content-Type': 'application/json',
     };
-    updateValue({ payload, headers });
+    updateValue({payload, headers});
+  };
+
+  const handleDateSubmit = (date: Date) => {
+    const formattedDate = dayjs(date).format('DD-MM-YYYY');
+    handleValueSubmit(formattedDate);
+    setCalendarVisible(false);
   };
 
   useEffect(() => {
@@ -238,7 +257,7 @@ const ItemComponent = ({
             <Text style={styles.title}>{title}</Text>
           </View>
           <Pressable onPress={toggleDropdown}>
-          {dropdownState ? <CardArrowUp /> : <CardArrowDown />}
+            {dropdownState ? <CardArrowUp /> : <CardArrowDown />}
           </Pressable>
         </View>
       </Pressable>
@@ -247,25 +266,85 @@ const ItemComponent = ({
         {dropdownState && (
           <>
             <ScrollView>
-              {dropdownState &&
-                recordedTraitData && (
-                  <>
-                    {
-                      recordedTraitData.length > 0 &&
-                      <View style={[styles.projectContainer1, { marginVertical: 10 }]}>
-                        <View style={styles.padding}>
-                          <Text style={styles.recordedTraitsText}>Recorded Traits ({recordedTraitData.length})</Text>
+              {dropdownState && recordedTraitData && (
+                <>
+                  {recordedTraitData.length > 0 && (
+                    <View
+                      style={[styles.projectContainer1, {marginVertical: 10}]}>
+                      <View style={styles.padding}>
+                        <Text style={styles.recordedTraitsText}>
+                          Recorded Traits ({recordedTraitData.length})
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  {recordedTraitData.map((entry: any, index: number) => (
+                    <View style={styles.entryContainer} key={index}>
+                      <View style={styles.borderRadiusOverflow}>
+                        <View style={styles.entryRow}>
+                          <View style={styles.entryColumn}>
+                            <Text style={styles.entryLabel}>
+                              {entry.traitName}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={styles.entryRow}>
+                          {editingEntryId === entry.observationId ? (
+                            <View
+                              style={[styles.entryColumn, {paddingTop: 12}]}>
+                              <ValueInputCard
+                                onSubmit={handleValueSubmit}
+                                entry={currentEntry}
+                                setShowInputCard={setEditingEntryId}
+                              />
+                            </View>
+                          ) : (
+                            <>
+                              <Pressable onPress={() => handleEditPress(entry)}>
+                                <View style={styles.entryColumn}>
+                                  <Text style={styles.entryValue}>
+                                    {entry.value !== null &&
+                                    entry.value !== undefined
+                                      ? entry.value
+                                      : 'No Data Found'}
+                                  </Text>
+                                </View>
+                              </Pressable>
+                              <Pressable
+                                onPress={() => handleEditPress(entry)}
+                                style={styles.editButton}>
+                                <Edit />
+                              </Pressable>
+                            </>
+                          )}
                         </View>
                       </View>
-                    }
-                    {recordedTraitData.map((entry: any, index: number) => (
-                      <View style={styles.entryContainer} key={index}>
-                        {/* <View style={styles.projectContainer1}> */}
+                    </View>
+                  ))}
+                </>
+              )}
+              {dropdownState && unrecordedTraitData && (
+                <>
+                  {unrecordedTraitData.length > 0 && (
+                    <View
+                      style={[styles.projectContainer1, {marginVertical: 10}]}>
+                      <View style={styles.padding}>
+                        <Text style={styles.recordedTraitsText}>
+                          Unrecorded Traits ({unrecordedTraitData?.length})
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  {unrecordedTraitData.map((entry: any, index: number) => (
+                    <View style={styles.entryContainer} key={index}>
+                      <View style={styles.projectContainer1}>
                         <View style={styles.borderRadiusOverflow}>
                           <View style={styles.entryRow}>
                             <View style={styles.entryColumn}>
                               {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
-                              <Text style={styles.entryLabel}>{entry.traitName}</Text>
+                              <Text style={styles.entryLabel}>
+                                {entry.traitName}
+                              </Text>
                               {/* <Text style={styles.entryValue}>
                               {entry.traitName}
                             </Text> */}
@@ -273,7 +352,7 @@ const ItemComponent = ({
                           </View>
                           <View style={styles.entryRow}>
                             {editingEntryId === entry.observationId ? (
-                              <View style={[styles.entryColumn,{paddingTop:12}]}>
+                              <View style={styles.entryColumn}>
                                 <ValueInputCard
                                   onSubmit={handleValueSubmit}
                                   entry={currentEntry}
@@ -285,7 +364,7 @@ const ItemComponent = ({
                                 <Pressable
                                   onPress={() => handleEditPress(entry)}>
                                   <View style={styles.entryColumn}>
-                                    {/* <Text style={styles.entryLabel}>Value</Text> */}
+                                    <Text style={styles.entryLabel}>Value</Text>
                                     <Text style={styles.entryValue}>
                                       {entry.value}
                                     </Text>
@@ -300,74 +379,11 @@ const ItemComponent = ({
                             )}
                           </View>
                         </View>
-                        {/* </View> */}
                       </View>
-                    ))}
-                  </>
-                )}
-              {dropdownState &&
-                unrecordedTraitData && (
-                  <>
-                    {
-                      unrecordedTraitData.length > 0 &&
-                      <View style={[styles.projectContainer1, { marginVertical: 10 }]}>
-                        <View style={styles.padding}>
-                          <Text style={styles.recordedTraitsText}>
-                            Unrecorded Traits ({unrecordedTraitData?.length})
-                          </Text>
-                        </View>
-                      </View>
-                    }
-                    {
-                      unrecordedTraitData.map((entry: any, index: number) => (
-                        <View style={styles.entryContainer} key={index}>
-                          <View style={styles.projectContainer1}>
-                            <View style={styles.borderRadiusOverflow}>
-                            <View style={styles.entryRow}>
-                            <View style={styles.entryColumn}>
-                              {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
-                              <Text style={styles.entryLabel}>{entry.traitName}</Text>
-                              {/* <Text style={styles.entryValue}>
-                              {entry.traitName}
-                            </Text> */}
-                            </View>
-                          </View>
-                              <View style={styles.entryRow}>
-                                {editingEntryId === entry.observationId ? (
-                                  <View style={styles.entryColumn}>
-                                    <ValueInputCard
-                                      onSubmit={handleValueSubmit}
-                                      entry={currentEntry}
-                                      setShowInputCard={setEditingEntryId}
-                                    />
-                                  </View>
-                                ) : (
-                                  <>
-                                    <Pressable
-                                      onPress={() => handleEditPress(entry)}>
-                                      <View style={styles.entryColumn}>
-                                        <Text style={styles.entryLabel}>Value</Text>
-                                        <Text style={styles.entryValue}>
-                                          {entry.value}
-                                        </Text>
-                                      </View>
-                                    </Pressable>
-                                    <Pressable
-                                      onPress={() => handleEditPress(entry)}
-                                      style={styles.editButton}>
-                                  <Edit />
-                                  </Pressable>
-                                  </>
-                                )}
-                              </View>
-                            </View>
-                          </View>
-                        </View>
-                      ))
-                    }
-                  </>
-                )
-              }
+                    </View>
+                  ))}
+                </>
+              )}
               {dropdownState && notes && notes != '' && (
                 <View style={styles.notesContainer}>
                   <Text style={styles.notesTitle}>Notes</Text>
@@ -381,10 +397,12 @@ const ItemComponent = ({
                   {imageUrls.map((image: any) => (
                     <Image
                       key={image.imageName}
-                      source={{ uri: image.url }}
+                      source={{uri: image.url}}
                       style={styles.image}
                       resizeMode="contain"
-                      onError={(e) => console.log("Image Load Error: ", e.nativeEvent.error)}
+                      onError={e =>
+                        console.log('Image Load Error: ', e.nativeEvent.error)
+                      }
                     />
                   ))}
                 </View>
@@ -399,6 +417,25 @@ const ItemComponent = ({
           onSubmit={handleValueSubmit}
           bottomSheetModalRef={optionsModalRef}
         />
+      )}
+      {calendarVisible && (
+        <Modal
+          visible={calendarVisible}
+          transparent
+          onRequestClose={() => setCalendarVisible(false)}>
+          <View style={styles.modalContainer}>
+            <Calendar
+              onOk={(date: string) => handleDateSubmit(new Date(date))}
+              onCancel={() => setCalendarVisible(false)}
+              selectedDate={
+                currentEntry?.value &&
+                dayjs(currentEntry.value, 'DD-MM-YYYY').isValid()
+                  ? currentEntry.value
+                  : dayjs().format('DD-MM-YYYY') // Default to today's date
+              }
+            />
+          </View>
+        </Modal>
       )}
     </ScrollView>
   );
@@ -448,7 +485,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '400',
     color: '#161616',
-    fontFamily:FONTS.MEDIUM
+    fontFamily: FONTS.MEDIUM,
   },
   dropdown: {
     overflow: 'hidden',

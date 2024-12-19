@@ -278,6 +278,47 @@ const RecordStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: FONTS.MEDIUM,
   },
+
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: FONTS.MEDIUM,
+  },
+  inputField: {
+    borderWidth: 1,
+    borderColor: '#B7B7B7',
+    borderRadius: 8,
+    padding: 8,
+    width: '100%',
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+  },
+  errorText: {
+    color: '#E53E3E',
+    fontSize: 12,
+    fontFamily: FONTS.REGULAR,
+    marginVertical: 4,
+  },
+
+  mappedOptionText: {
+    fontSize: 14,
+    color: '#555555',
+    marginVertical: 4,
+    textAlign: 'left',
+  },
+
+  highlightedOption: {
+    backgroundColor: '#e0f7fa',
+    borderColor: '#00838f',
+  },
+
+  saveButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    backgroundColor: '#1A6DD2',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
 });
 
 export default RecordStyles;

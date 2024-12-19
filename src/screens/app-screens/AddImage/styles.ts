@@ -71,11 +71,18 @@ export const styles = StyleSheet.create({
   optionsContainer: {
     paddingHorizontal: 24,
     paddingVertical: 8,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: '#dddddd',
   },
   optionsTitle: {
     color: '#161616',
     fontFamily: FONTS.SEMI_BOLD,
     fontSize: 14,
+    fontWeight: 'bold',
   },
   optionsLabel: {
     color: '#161616',
@@ -92,5 +99,45 @@ export const styles = StyleSheet.create({
     fontFamily: FONTS.SEMI_BOLD,
     fontSize: 14,
     textAlign: 'center',
+  },
+
+  saveButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    backgroundColor: '#1A6DD2',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: FONTS.MEDIUM,
+  },
+  inputField: {
+    borderWidth: 1,
+    borderColor: '#B7B7B7',
+    borderRadius: 8,
+    padding: 8,
+    width: '100%',
+    fontSize: 14,
+    fontFamily: FONTS.REGULAR,
+  },
+  errorText: {
+    color: '#E53E3E',
+    fontSize: 12,
+    fontFamily: FONTS.REGULAR,
+    marginVertical: 4,
+  },
+
+  mappedOptionText: {
+    fontSize: 14,
+    color: '#555555',
+    marginVertical: 4,
+    textAlign: 'left',
+  },
+
+  highlightedOption: {
+    backgroundColor: '#e0f7fa',
+    borderColor: '#00838f',
   },
 });

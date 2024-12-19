@@ -29,10 +29,37 @@ const ValueInputCard = () => {
     <Text style={styles.traitsInputIconText}>{item?.traitUom || ''}</Text>
   );
 
+  const keyboardType: KeyboardTypeOptions =
+    item.dataType === 'int' || item.dataType === 'float'
+      ? 'numeric'
+      : 'default';
+
   const handleSubmit = (text: string) => {
     if (text.trim() === '') {
       return;
     }
+
+    const values = text
+      .split('*')
+      .map(parseFloat)
+      .filter(v => !isNaN(v));
+
+    const hasValidLimits =
+      typeof minimumValue === 'number' &&
+      typeof maximumValue === 'number' &&
+      minimumValue <= maximumValue;
+
+    if (
+      hasValidLimits &&
+      values.some(v => v < minimumValue || v > maximumValue)
+    ) {
+      eventEmitter.emit(TOAST_EVENT_TYPES.SHOW, {
+        message: `Each value must be between ${minimumValue} and ${maximumValue}, inclusive.`,
+        type: 'ERROR',
+      });
+      return;
+    }
+
     onSubmit(text);
     setValue('');
   };
@@ -56,28 +83,6 @@ const ValueInputCard = () => {
           ? formattedValue + '*'
           : formattedValue;
 
-      const values = finalValue
-        .split('*')
-        .map(parseFloat)
-        .filter(v => !isNaN(v));
-
-      // Skip restriction logic if limits are unavailable or invalid
-      const hasValidLimits =
-        typeof minimumValue === 'number' &&
-        typeof maximumValue === 'number' &&
-        minimumValue < maximumValue;
-
-      if (
-        hasValidLimits &&
-        values.some(v => v < minimumValue || v > maximumValue)
-      ) {
-        eventEmitter.emit(TOAST_EVENT_TYPES.SHOW, {
-          message: `Value must be between ${minimumValue} and ${maximumValue}.`,
-          type: 'ERROR',
-        });
-        return;
-      }
-
       setValue(finalValue);
     } else {
       setValue(text);
@@ -89,6 +94,7 @@ const ValueInputCard = () => {
       <OutlinedInput
         label={item.traitName}
         rightIcon={rightIcon}
+        keyboardType={keyboardType}
         onEndEditing={e => handleSubmit(e.nativeEvent.text)}
         onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
         value={value}

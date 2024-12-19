@@ -1,4 +1,3 @@
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import React, {
   createContext,
   useContext,
@@ -8,13 +7,17 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {Modal, StyleSheet, View} from 'react-native';
 import OptionsModal from './UnrecordedTraitCard/OptionsModal';
+import Calendar from '../../../../components/Calender';
+import dayjs from 'dayjs';
 
 export interface TraitItem {
   traitId: number;
   traitName: string;
   traitUom: string;
-  dataType: 'float' | 'fixed' | 'str' | 'int';
+  dataType: 'float' | 'fixed' | 'str' | 'int' | 'date';
   observationStatus: boolean;
   observationId: number | null;
   value: string;
@@ -53,10 +56,13 @@ export const UnrecordedTraitsProvider = ({
   const [isInputActive, setIsInputActive] = useState(false);
   const [isRecorded, setIsRecorded] = useState(false);
   const [recordedValue, setRecordedValue] = useState('');
+  const [isCalendarVisible, setIsCalendarVisible] = useState(false);
 
   const onRecord = () => {
     if (item.dataType === 'fixed') {
       optionsModalRef?.current?.present();
+    } else if (item.dataType === 'date') {
+      setIsCalendarVisible(true);
     } else {
       setIsInputActive(true);
     }
@@ -77,10 +83,23 @@ export const UnrecordedTraitsProvider = ({
   const onEdit = () => {
     if (item.dataType === 'fixed') {
       optionsModalRef?.current?.present();
+    } else if (item.dataType === 'date') {
+      setIsCalendarVisible(true);
     } else {
       setIsRecorded(false);
       setIsInputActive(true);
     }
+  };
+
+  const onDateSelected = (date: string) => {
+    setRecordedValue(date);
+    setIsRecorded(true);
+    setIsCalendarVisible(false);
+    updateRecordData(item?.observationId, item?.traitId, date);
+  };
+
+  const onCancelDate = () => {
+    setIsCalendarVisible(false);
   };
 
   useEffect(() => {
@@ -95,7 +114,11 @@ export const UnrecordedTraitsProvider = ({
   }, [item]);
 
   const getFormattedRecordValue = useMemo(() => {
-    if (item?.traitUom && item.dataType !== 'fixed') {
+    if (
+      item?.traitUom &&
+      item.dataType !== 'fixed' &&
+      item.dataType !== 'date'
+    ) {
       return `${recordedValue} ${item?.traitUom}`;
     } else {
       return String(recordedValue);
@@ -116,6 +139,19 @@ export const UnrecordedTraitsProvider = ({
       }}>
       {children}
       <OptionsModal bottomSheetModalRef={optionsModalRef} />
+      <Modal
+        visible={isCalendarVisible}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setIsCalendarVisible(false)}>
+        <View style={styles.transparentBackground}>
+          <Calendar
+            onCancel={onCancelDate}
+            onOk={onDateSelected}
+            selectedDate={recordedValue}
+          />
+        </View>
+      </Modal>
     </UnrecordedTraitsContext.Provider>
   );
 };
@@ -129,3 +165,12 @@ export const useUnrecordedTraits = () => {
   }
   return context;
 };
+
+const styles = StyleSheet.create({
+  transparentBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+});

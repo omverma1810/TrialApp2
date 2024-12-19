@@ -12,7 +12,15 @@ const MAX_FINAL_PLANT_STAND = 10;
 
 const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
   const [value, setValue] = useState('');
-  const recordedValue = entry?.value;
+
+  useEffect(() => {
+    if (entry) {
+      setValue(entry.value ?? '');
+    } else {
+      setValue('');
+    }
+  }, [entry]);
+
   const rightIcon = (
     <Text style={RecordStyles.traitsInputIconText}>{entry?.traitUom}</Text>
   );
@@ -27,10 +35,21 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
   };
 
   const handleSubmit = (text: string) => {
+    if (!entry) {
+      showToast({
+        type: 'ERROR',
+        message: 'No valid entry found to save the data.',
+      });
+      return;
+    }
+
     const numericValue = parseFloat(text);
 
     if (entry?.traitName === 'Initial Plant Stand') {
-      if (numericValue < MIN_INITIAL_PLANT_STAND || numericValue > MAX_INITIAL_PLANT_STAND) {
+      if (
+        numericValue < MIN_INITIAL_PLANT_STAND ||
+        numericValue > MAX_INITIAL_PLANT_STAND
+      ) {
         showToast({
           type: 'ERROR',
           message: `Value must be between ${MIN_INITIAL_PLANT_STAND} and ${MAX_INITIAL_PLANT_STAND}.`,
@@ -40,7 +59,10 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
     }
 
     if (entry?.traitName === 'Final Plant Stand') {
-      if (numericValue < MIN_FINAL_PLANT_STAND || numericValue > MAX_FINAL_PLANT_STAND) {
+      if (
+        numericValue < MIN_FINAL_PLANT_STAND ||
+        numericValue > MAX_FINAL_PLANT_STAND
+      ) {
         showToast({
           type: 'ERROR',
           message: `Value must be between ${MIN_FINAL_PLANT_STAND} and ${MAX_FINAL_PLANT_STAND}.`,
@@ -52,17 +74,10 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
     onSubmit(text);
     setValue('');
     setShowInputCard(null);
-    entry.value = text;
     showToast({
       type: 'SUCCESS',
     });
   };
-
-  useEffect(() => {
-    if (recordedValue) {
-      setValue(recordedValue);
-    }
-  }, [recordedValue]);
 
   const handleInputChange = (text: string) => {
     if (entry?.dataType === 'int' || entry?.dataType === 'float') {
@@ -81,47 +96,47 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
     }
   }, [entry?.dataType]);
 
+  if (!entry) {
+    return (
+      <View>
+        <Text>No Data Found</Text>
+      </View>
+    );
+  }
+
   return (
     <>
-      {entry?.value ? (
-        <>
-          <View style={[RecordStyles.row]}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                width: '100%',
-                gap: 10,
-              }}>
-              <View style={{width: '100%'}}>
-                <OutlinedInput
-                  label={entry?.traitName}
-                  rightIcon={rightIcon}
-                  value={value}
-                  onChangeText={handleInputChange}
-                  keyboardType={keyboardType}
-                  note={notes}
-                />
-              </View>
-            </View>
+      <View style={[RecordStyles.row]}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            width: '100%',
+            gap: 10,
+          }}>
+          <View style={{width: '100%'}}>
+            <OutlinedInput
+              label={entry?.traitName}
+              rightIcon={rightIcon}
+              value={value}
+              onChangeText={handleInputChange}
+              keyboardType={keyboardType}
+              note={notes}
+            />
           </View>
-          <Pressable
-            style={{
-              backgroundColor: '#1A6DD2',
-              alignItems: 'center',
-              paddingVertical: 13,
-              borderRadius: 8,
-              marginTop: 15,
-            }}
-            onPress={() => handleSubmit(value)}>
-            <Text style={{color: '#F7F7F7', fontWeight: '500'}}>Save Record</Text>
-          </Pressable>
-        </>
-      ) : (
-        <View>
-          <Text>No Data Found</Text>
         </View>
-      )}
+      </View>
+      <Pressable
+        style={{
+          backgroundColor: '#1A6DD2',
+          alignItems: 'center',
+          paddingVertical: 13,
+          borderRadius: 8,
+          marginTop: 15,
+        }}
+        onPress={() => handleSubmit(value)}>
+        <Text style={{color: '#F7F7F7', fontWeight: '500'}}>Save Record</Text>
+      </Pressable>
     </>
   );
 };

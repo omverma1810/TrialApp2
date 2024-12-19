@@ -436,19 +436,15 @@ const Record = ({navigation}: any) => {
                       <View style={RecordStyles.selectedFieldsWrapper}>
                         {Object.keys(selectedFields).map((fieldId, index) => {
                           if (selectedFields[fieldId]) {
-                            // Log the structures for debugging
-                            console.log('Fields:', fields); // Ensure fields array is correct
-                            console.log('Selected fieldId:', fieldId); // Ensure fieldId matches
-
-                            // Ensure that fieldId and field.id are compared correctly (type consistency)
-                            const matchedFieldId = fields.find(
+                            const matchedField = fields.find(
                               field => String(field.id) === String(fieldId),
                             );
 
-                            // Log matchedFieldId to confirm if we are able to find the correct field
-                            console.log('Matched FieldData:', matchedFieldId);
-
-                            if (!matchedFieldId) {
+                            if (!matchedField) {
+                              console.warn(
+                                `Field ID ${fieldId} not found in fields array`,
+                                fields,
+                              );
                               return (
                                 <View
                                   key={fieldId}
@@ -470,7 +466,7 @@ const Record = ({navigation}: any) => {
                                 style={RecordStyles.selectedFieldContainer}>
                                 <Text style={RecordStyles.fieldName}>
                                   {fieldId} -{' '}
-                                  {matchedFieldId.location?.villageName ||
+                                  {matchedField.location?.villageName ||
                                     'Unknown'}
                                 </Text>
                                 <Pressable
