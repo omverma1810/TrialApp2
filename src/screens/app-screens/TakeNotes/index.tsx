@@ -137,7 +137,7 @@ const TakeNotes = ({navigation, route}: any) => {
   };
 
   const handleChipPress = () => {
-    // console.log('Chip pressed');
+    console.log('Chip pressed');
     if (selectedChips.length === 0) {
       handleFirstRightIconClick();
     } else if (!selectedField) {

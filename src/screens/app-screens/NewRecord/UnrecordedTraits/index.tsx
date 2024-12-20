@@ -4,7 +4,6 @@ import {useTranslation} from 'react-i18next';
 
 import {styles} from '../styles';
 import {LOCALES} from '../../../../localization/constants';
-import {Search} from '../../../../assets/icons/svgs';
 import UnrecordedTraitCard from './UnrecordedTraitCard';
 import {UnrecordedTraitsProvider, TraitItem} from './UnrecordedTraitsContext';
 import {useRecord} from '../RecordContext';
@@ -20,7 +19,6 @@ const UnrecordedTraits = () => {
           {t(LOCALES.EXPERIMENT.LBL_UNRECORDED_TRAITS)}
           <Text>{` (${unRecordedTraitList?.length})`}</Text>
         </Text>
-        <Search />
       </View>
       {unRecordedTraitList.map((item: TraitItem) => (
         <UnrecordedTraitsProvider
