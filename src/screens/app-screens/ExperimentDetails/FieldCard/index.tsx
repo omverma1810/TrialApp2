@@ -46,13 +46,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       key: 'noOfColumn',
       uom: null,
     },
-    // {
-    //   id: 2,
-    //   icon: Layout,
-    //   title: t(LOCALES.EXPERIMENT.LBL_ORDER_LAYOUT),
-    //   navigationAction: null,
-    //   key: 'order_layout',
-    // },
+
     {
       id: 3,
       icon: Plots,
@@ -77,17 +71,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       key: 'traits',
       uom: null,
     },
-    // {
-    //   id: 5,
-    //   icon: Location,
-    //   title: t(LOCALES.EXPERIMENT.LBL_LOCATION),
-    //   value: 'Gujrat',
-    //   navigationAction: {
-    //     title: t(LOCALES.EXPERIMENT.LBL_GO_TO_LOCATION),
-    //     onClick: () => {},
-    //   },
-    //   key: 'location',
-    // },
+
     {
       id: 6,
       icon: null,
