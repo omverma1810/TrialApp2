@@ -21,10 +21,18 @@ type OptionType = {
 const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
   const {t} = useTranslation();
   const {item, onSubmit} = useUnrecordedTraits();
-  const data: OptionType[] = JSON.parse(item?.preDefiendList || '[]');
+
+  let data: OptionType[] = [];
+  try {
+    data = item?.preDefiendList ? item.preDefiendList : [];
+  } catch (error) {
+    console.error('Error parsing predefined list JSON:', error);
+    data = [];
+  }
 
   const [inputValue, setInputValue] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
+  const [mappedOption, setMappedOption] = useState('');
 
   const getKeyboardType = (type: string) => {
     if (type === 'int' || type === 'float' || type === 'fixed') {
@@ -33,9 +41,27 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
     return 'default';
   };
 
+  const findMatchingOption = (value: string) => {
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) return '';
+
+    const match = data.find(option =>
+      option.minimumValue !== undefined && option.maximumValue !== undefined
+        ? numericValue >= option.minimumValue &&
+          numericValue <= option.maximumValue
+        : false,
+    );
+
+    return match ? match.name : '';
+  };
+
   const handleSubmit = () => {
     if (inputValue) {
-      const saveValue = `${inputValue} ${item?.traitUom || ''}`;
+      const match = findMatchingOption(inputValue);
+
+      const saveValue = match
+        ? `${inputValue} ${item?.traitUom || ''} (${match})`
+        : `${inputValue} ${item?.traitUom || ''}`;
       onSubmit(saveValue);
     } else if (selectedOption) {
       const saveValue = `${selectedOption}`;
@@ -44,15 +70,10 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
     bottomSheetModalRef?.current?.close();
   };
 
-  const hasMinMax = data.some(
-    option =>
-      option.minimumValue !== undefined && option.maximumValue !== undefined,
-  );
-
   return (
     <BottomSheetModalView
       bottomSheetModalRef={bottomSheetModalRef}
-      type="SCREEN_HEIGHT"
+      type="CONTENT_HEIGHT"
       containerStyle={styles.traitsModal}>
       <View>
         <View style={[styles.traitsModalHeader, styles.row]}>
@@ -62,46 +83,49 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
         </View>
 
         {data.length > 0 ? (
-          data.map((option, index) => (
-            <Pressable
-              key={index}
-              style={[
-                styles.optionsContainer,
-                selectedOption === option.name && styles.highlightedOption,
-              ]}
-              onPress={() => {
-                setSelectedOption(option.name);
-                setInputValue('');
-              }}>
-              <Text style={styles.optionsTitle}>{option?.name}</Text>
-              <Text style={styles.optionsLabel}>
-                {option?.minimumValue ? `Min: ${option?.minimumValue}  ` : ''}
-                {option?.maximumValue ? `Max: ${option?.maximumValue}` : ''}
-              </Text>
-            </Pressable>
-          ))
+          data.map((option: any, index: number) => {
+            const isSelected = selectedOption === option.name;
+            return (
+              <Pressable
+                key={index}
+                style={[
+                  styles.optionsContainer,
+                  isSelected && styles.highlightedOption,
+                ]}
+                onPress={() => {
+                  setSelectedOption(option.name);
+                  setInputValue('');
+                  setMappedOption('');
+                }}>
+                <Text style={styles.optionsTitle}>{option?.name}</Text>
+                <Text style={styles.optionsLabel}>
+                  {option?.minimumValue ? `Min: ${option?.minimumValue}  ` : ''}
+                  {option?.maximumValue ? `Max: ${option?.maximumValue}` : ''}
+                </Text>
+              </Pressable>
+            );
+          })
         ) : (
           <View style={styles.noDataView}>
-            <Text style={styles.noDataText}>NO OPTIONS DEFINED</Text>
+            <Text style={styles.noDataText}>
+              {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
+            </Text>
           </View>
         )}
 
-        {hasMinMax && (
-          <View style={[styles.traitsModalHeader, styles.row]}>
-            <TextInput
-              style={[styles.traitsModalHeaderTitle, styles.inputField]}
-              keyboardType={getKeyboardType(item?.dataType)}
-              value={inputValue}
-              onChangeText={text => {
-                setInputValue(text);
-                setSelectedOption('');
-              }}
-              placeholder={`Enter ${item?.traitName || 'value'} - ${
-                item?.traitUom
-              }`}
-            />
-          </View>
-        )}
+        <View style={[styles.traitsModalHeader, styles.row]}>
+          <TextInput
+            style={[styles.traitsModalHeaderTitle, styles.inputField]}
+            keyboardType={getKeyboardType(item?.dataType)}
+            value={inputValue}
+            placeholder={`Enter value (${item?.traitUom || ''})`}
+            onChangeText={text => {
+              setInputValue(text);
+              setSelectedOption('');
+              setMappedOption(findMatchingOption(text));
+            }}
+          />
+        </View>
 
         <Pressable style={styles.saveButton} onPress={handleSubmit}>
           <Text style={styles.saveButtonText}>

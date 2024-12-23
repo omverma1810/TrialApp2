@@ -289,33 +289,40 @@ const ItemComponent = ({
                           </View>
                         </View>
                         <View style={styles.entryRow}>
-                          {editingEntryId === entry.observationId ? (
-                            <View
-                              style={[styles.entryColumn, {paddingTop: 12}]}>
-                              <ValueInputCard
-                                onSubmit={handleValueSubmit}
-                                entry={currentEntry}
-                                setShowInputCard={setEditingEntryId}
-                              />
-                            </View>
-                          ) : (
+                          {entry.value !== null && entry.value !== undefined ? (
                             <>
-                              <Pressable onPress={() => handleEditPress(entry)}>
-                                <View style={styles.entryColumn}>
-                                  <Text style={styles.entryValue}>
-                                    {entry.value !== null &&
-                                    entry.value !== undefined
-                                      ? entry.value
-                                      : 'No Data Found'}
-                                  </Text>
+                              {editingEntryId === entry.observationId ? (
+                                <View
+                                  style={[
+                                    styles.entryColumn,
+                                    {paddingTop: 12},
+                                  ]}>
+                                  <ValueInputCard
+                                    onSubmit={handleValueSubmit}
+                                    entry={currentEntry}
+                                    setShowInputCard={setEditingEntryId}
+                                  />
                                 </View>
-                              </Pressable>
-                              <Pressable
-                                onPress={() => handleEditPress(entry)}
-                                style={styles.editButton}>
-                                <Edit />
-                              </Pressable>
+                              ) : (
+                                <>
+                                  <Pressable
+                                    onPress={() => handleEditPress(entry)}>
+                                    <View style={styles.entryColumn}>
+                                      <Text style={styles.entryValue}>
+                                        {entry.value}
+                                      </Text>
+                                    </View>
+                                  </Pressable>
+                                  <Pressable
+                                    onPress={() => handleEditPress(entry)}
+                                    style={styles.editButton}>
+                                    <Edit />
+                                  </Pressable>
+                                </>
+                              )}
                             </>
+                          ) : (
+                            <Text style={styles.entryValue}>No Data Found</Text>
                           )}
                         </View>
                       </View>

@@ -13,7 +13,7 @@ const ValueInputCard = () => {
   const [value, setValue] = useState('');
   const {maximumValue, minimumValue} = useMemo(() => {
     try {
-      const parsedLimits = JSON.parse(item.preDefiendList || '[]');
+      const parsedLimits = item.preDefiendList || '[]';
       return parsedLimits[0] || {};
     } catch (error) {
       return {};

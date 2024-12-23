@@ -319,6 +319,13 @@ const RecordStyles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
+
+  mappedOptionView: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 5,
+  },
 });
 
 export default RecordStyles;
