@@ -1,7 +1,6 @@
 import axios, {AxiosRequestConfig, Method} from 'axios';
 import {useCallback, useMemo, useState} from 'react';
 
-// import {BASE_URL} from '../constants/URLS';
 import {getTokens, getVerifiedToken} from '../utilities/token';
 import useCleanUp from './useCleanUp';
 import Toast from '../utilities/toast';
