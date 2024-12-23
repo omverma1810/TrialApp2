@@ -34,7 +34,7 @@ export default function Calender({
   };
 
   const handleOk = () => {
-    const formattedDate = date.format('DD-MM-YYYY');
+    const formattedDate = date.format('YYYY-MM-DD');
     onOk(formattedDate);
   };
 
