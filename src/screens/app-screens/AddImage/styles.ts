@@ -140,4 +140,11 @@ export const styles = StyleSheet.create({
     backgroundColor: '#e0f7fa',
     borderColor: '#00838f',
   },
+
+  scrollView: {
+    flex: 1, // Allows the ScrollView to occupy the available space
+  },
+  scrollViewContent: {
+    paddingBottom: 16, // Ensures padding at the bottom for better UX
+  },
 });

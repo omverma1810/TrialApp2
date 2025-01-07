@@ -1,30 +1,33 @@
-import { useNavigation } from '@react-navigation/native';
-import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState } from 'react';
+import {useNavigation} from '@react-navigation/native';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
-  Image,
   Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  Pressable,
   View,
+  Image,
+  Alert,
 } from 'react-native';
 import {
   CardArrowDown,
   CardArrowUp,
+  DropdownArrow,
   Edit,
   FieldSybol1,
 } from '../../assets/icons/svgs';
-import { URL } from '../../constants/URLS';
-import { useApi } from '../../hooks/useApi';
-import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
-import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
-import { FONTS } from '../../theme/fonts';
-import Toast from '../../utilities/toast';
 import Calendar from '../Calender';
+import {projectData} from '../../screens/app-screens/Record/Data';
+import {useApi} from '../../hooks/useApi';
+import {URL} from '../../constants/URLS';
+import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
+import Toast from '../../utilities/toast';
+import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
+import {FONTS} from '../../theme/fonts';
+import dayjs from 'dayjs';
 
 type selectedFieldsType = {
   [key: string]: boolean;
@@ -118,7 +121,6 @@ const ProjectContainer = ({
               <ItemComponent
                 key={index}
                 title={`${item.plotNumber}`}
-                feild={title}
                 notes={item.notes}
                 dropdownState={dropdownStates[`${title}_${index}`]}
                 toggleDropdown={() => toggleDropdown(index)}
@@ -137,7 +139,6 @@ const ProjectContainer = ({
 
 const ItemComponent = ({
   title,
-  field,
   notes,
   dropdownState,
   toggleDropdown,
@@ -288,8 +289,7 @@ const ItemComponent = ({
                           </View>
                         </View>
                         <View style={styles.entryRow}>
-                          {`${editingEntryId}_${field}` ===
-                          `${entry.observationId}_${field}` ? (
+                          {editingEntryId === entry.observationId ? (
                             <View
                               style={[styles.entryColumn, {paddingTop: 12}]}>
                               <ValueInputCard
@@ -350,7 +350,34 @@ const ItemComponent = ({
                             </Text> */}
                             </View>
                           </View>
-                          <View style={styles.entryRow} />
+                          <View style={styles.entryRow}>
+                            {editingEntryId === entry.observationId ? (
+                              <View style={styles.entryColumn}>
+                                <ValueInputCard
+                                  onSubmit={handleValueSubmit}
+                                  entry={currentEntry}
+                                  setShowInputCard={setEditingEntryId}
+                                />
+                              </View>
+                            ) : (
+                              <>
+                                <Pressable
+                                  onPress={() => handleEditPress(entry)}>
+                                  <View style={styles.entryColumn}>
+                                    <Text style={styles.entryLabel}>Value</Text>
+                                    <Text style={styles.entryValue}>
+                                      {entry.value}
+                                    </Text>
+                                  </View>
+                                </Pressable>
+                                <Pressable
+                                  onPress={() => handleEditPress(entry)}
+                                  style={styles.editButton}>
+                                  <Edit />
+                                </Pressable>
+                              </>
+                            )}
+                          </View>
                         </View>
                       </View>
                     </View>

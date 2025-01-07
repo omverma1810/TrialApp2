@@ -1,21 +1,14 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {
-  Alert,
-  FlatList,
-  Text,
-  TextInput,
-  Pressable,
-  View,
-} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {Back, Search} from '../../../assets/icons/svgs';
-import {Input, Loader, SafeAreaView, StatusBar} from '../../../components';
-import Toast from '../../../utilities/toast';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Back } from '../../../assets/icons/svgs';
+import { Loader, SafeAreaView, StatusBar } from '../../../components';
 import Chip from '../../../components/Chip';
-import {URL} from '../../../constants/URLS';
-import {useApi} from '../../../hooks/useApi';
-import {LOCALES} from '../../../localization/constants';
+import { URL } from '../../../constants/URLS';
+import { useApi } from '../../../hooks/useApi';
+import { LOCALES } from '../../../localization/constants';
+import Toast from '../../../utilities/toast';
 // import {NotesScreenProps} from '../../../types/navigation/appTypes';
 import ExperimentCard from './ExperimentCard';
 import Filter from './Filter';
@@ -104,7 +97,7 @@ const TakeNotes = ({navigation, route}: any) => {
       setSelectedProject('');
       setExperimentList([]);
     }
-  }, [experimentData]);
+  }, [experimentData, isEdit]);
 
   const handleFirstRightIconClick = () => {
     if (bottomSheetModalRef.current) {
@@ -137,7 +130,7 @@ const TakeNotes = ({navigation, route}: any) => {
   };
 
   const handleChipPress = () => {
-    console.log('Chip pressed');
+    // console.log('Chip pressed');
     if (selectedChips.length === 0) {
       handleFirstRightIconClick();
     } else if (!selectedField) {
@@ -180,6 +173,10 @@ const TakeNotes = ({navigation, route}: any) => {
     getExperimentList();
   }, []);
 
+  const [getFields, getFieldsResponse] = useApi({
+    url: URL.EXPERIMENT_DETAILS,
+    method: 'GET',
+  });
   useEffect(() => {
     if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
       return;
@@ -196,28 +193,33 @@ const TakeNotes = ({navigation, route}: any) => {
     setCropList(cropList);
     console.log('params,', route.params);
     if (route.params?.data && route.params?.data.id) {
+      setIsEdit(true);
       let data_ = route.params?.data;
+      console.log({data_});
       setEditNotesData(data_);
       let {experiment_name} = data_;
-      console.log(data_);
       for (let crops of cropList) {
-        console.log(crops);
         if (crops in data) {
           let project = data[crops];
           for (let p in project) {
             for (let field of project[p]) {
               if (
                 field?.fieldExperimentName === experiment_name ||
-                field?.experimentName === experiment_name
+                (field?.experimentName === experiment_name &&
+                  field?.id === data_.experiment_id)
               ) {
+                console.log('field', field);
+                console.log('data_', data_);
+                console.log('project', p);
+                setCropList([crops]);
                 setSelectedCrop(crops);
+                setProjectList([p]);
                 setSelectedProject(p);
-                setProjectList(Object.keys(project));
                 setExperimentList(data[crops][p]);
                 setSelectedChips([experiment_name]);
                 setSelectedExperiment(experiment_name);
                 setSelectedFieldId(data_.field_id);
-                setIsEdit(true);
+
                 setSelectedExperimentId(data_?.experiment_id || field.id);
                 setNoteId(data_.id);
                 setText(data_.content);
@@ -232,7 +234,7 @@ const TakeNotes = ({navigation, route}: any) => {
       setSelectedCrop(selectedCrop);
       setSelectedProject(selectedProject);
     }
-  }, [experimentListData]);
+  }, [experimentListData, getFieldsResponse]);
   const ListEmptyComponent = useMemo(
     () => (
       <View style={TakeNotesStyles.emptyContainer}>
@@ -302,13 +304,9 @@ const TakeNotes = ({navigation, route}: any) => {
     }
   }, [takeNotesResponse]);
 
-  const [getFields, getFieldsResponse] = useApi({
-    url: URL.EXPERIMENT_DETAILS,
-    method: 'GET',
-  });
-
   useEffect(() => {
     const experimentId = selectedExperiment?.id || selectedExperimentId;
+    console.log({getFieldsResponse});
     let experimentType = 'line';
     console.log(editNotesData?.trial_type);
     if (isEdit && editNotesData?.trial_type) {
@@ -372,9 +370,9 @@ const TakeNotes = ({navigation, route}: any) => {
           alignItems: 'center',
           marginHorizontal: 20,
         }}>
-        <Pressable onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Back width={24} height={24} />
-        </Pressable>
+        </TouchableOpacity>
         <Text style={TakeNotesStyles.ScreenTitle}>
           {isEdit ? 'Edit Notes' : 'Take Notes'}
         </Text>
@@ -435,13 +433,13 @@ const TakeNotes = ({navigation, route}: any) => {
                 placeholderTextColor="#636363"
               />
             </View>
-            <Pressable
+            <TouchableOpacity
               style={TakeNotesStyles.submitButton}
               onPress={onTakeNotes}>
               <Text style={TakeNotesStyles.submitButtonText}>
                 {isEdit ? 'Update Note' : 'Save Note'}
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           </View>
         )}
       </View>

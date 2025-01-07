@@ -1,9 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, TextInput, Pressable, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+} from 'react-native';
 import {SafeAreaView, StatusBar} from '../../../components';
 import {useApi} from '../../../hooks/useApi';
 import {URL} from '../../../constants/URLS';
-import Toast from '../../../utilities/toast';
 
 const EditNotes = ({route, navigation}: any) => {
   const {content, experimentId, location, trail_type, id} = route.params;
@@ -18,27 +24,28 @@ const EditNotes = ({route, navigation}: any) => {
 
   const handleUpdate = () => {
     if (!noteContent) {
-      Toast.error({message: 'Please enter content before updating'});
+      Alert.alert('Error', 'Please enter content before updating');
       return;
     }
 
     const payload = {content: noteContent};
 
+    // Pass the id dynamically as a pathParam and update the note
     updateNote({payload, pathParams: id});
   };
 
   useEffect(() => {
     if (updateNoteResponse) {
-      Toast.success({message: 'Note updated successfully'});
+      Alert.alert('Success', 'Note updated successfully');
       navigation.navigate('Home');
     }
 
     if (updateNoteError) {
-      Toast.error({
-        message:
-          updateNoteError?.message ||
+      Alert.alert(
+        'Error',
+        updateNoteError?.message ||
           'Something went wrong while updating the note',
-      });
+      );
     }
   }, [updateNoteResponse, updateNoteError]);
 
@@ -67,14 +74,14 @@ const EditNotes = ({route, navigation}: any) => {
             onChangeText={setNoteContent}
           />
         </View>
-        <Pressable
+        <TouchableOpacity
           style={EditNotesStyles.submitButton}
           onPress={handleUpdate}
           disabled={updateNoteLoading}>
           <Text style={EditNotesStyles.submitButtonText}>
             {updateNoteLoading ? 'Updating...' : 'Update Note'}
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

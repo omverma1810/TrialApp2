@@ -1,6 +1,6 @@
 const DEFAULT_ENV: string = 'STAGING'; // DEVELOPMENT | STAGING
 
-const DEVELOPMENT_BASE_URL = 'https://dev.piatrika.com/';
+const DEVELOPMENT_BASE_URL = 'https://devbe-pbts.piatrika.com/';
 const STAGING_BASE_URL = 'https://stage.piatrika.com/';
 
 const BASE_URL =
