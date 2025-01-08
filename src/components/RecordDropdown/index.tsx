@@ -1,33 +1,30 @@
 import {useNavigation} from '@react-navigation/native';
+import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
+  Image,
   Modal,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  Pressable,
   View,
-  Image,
-  Alert,
 } from 'react-native';
 import {
   CardArrowDown,
   CardArrowUp,
-  DropdownArrow,
   Edit,
   FieldSybol1,
 } from '../../assets/icons/svgs';
-import Calendar from '../Calender';
-import {projectData} from '../../screens/app-screens/Record/Data';
-import {useApi} from '../../hooks/useApi';
 import {URL} from '../../constants/URLS';
-import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
-import Toast from '../../utilities/toast';
+import {useApi} from '../../hooks/useApi';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
+import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 import {FONTS} from '../../theme/fonts';
-import dayjs from 'dayjs';
+import Toast from '../../utilities/toast';
+import Calendar from '../Calender';
 
 type selectedFieldsType = {
   [key: string]: boolean;
@@ -63,11 +60,13 @@ const RecordDropDown = ({
       [`${field}_${index}`]: !prevState[`${field}_${index}`],
     }));
   };
-
+  console.log('~~~~~~~', {
+    p: projectData[1]?.plotData.map(i => [i?.plotNumber, i?.id]),
+  });
   return (
     <ScrollView>
       {Object.keys(selectedFields).map(
-        field =>
+        (field, idx) =>
           selectedFields[field] && (
             <ProjectContainer
               key={field}
@@ -76,7 +75,7 @@ const RecordDropDown = ({
                 fields.find((f: any) => String(f.id) === String(field))
                   ?.location?.villageName || 'Unknown'
               }`}
-              data={projectData && projectData[0]?.plotData}
+              data={projectData && projectData[idx]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
               toggleDropdown={(index: number) => toggleDropdown(field, index)}
@@ -248,7 +247,6 @@ const ItemComponent = ({
     setCurrentEntry(null);
     optionsModalRef.current?.close();
   }, [updateValueResponse]);
-
   return (
     <ScrollView style={styles.itemContainer}>
       <Pressable onPress={toggleDropdown}>
@@ -304,7 +302,8 @@ const ItemComponent = ({
                                 <View style={styles.entryColumn}>
                                   <Text style={styles.entryValue}>
                                     {entry.value !== null &&
-                                    entry.value !== undefined
+                                    entry.value !== undefined &&
+                                    styles.noDataText
                                       ? entry.value
                                       : 'No Data Found'}
                                   </Text>
@@ -335,6 +334,7 @@ const ItemComponent = ({
                       </View>
                     </View>
                   )}
+
                   {unrecordedTraitData.map((entry: any, index: number) => (
                     <View style={styles.entryContainer} key={index}>
                       <View style={styles.projectContainer1}>
@@ -342,14 +342,19 @@ const ItemComponent = ({
                           <View style={styles.entryRow}>
                             <View style={styles.entryColumn}>
                               {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
+
                               <Text style={styles.entryLabel}>
                                 {entry.traitName}
                               </Text>
+
                               {/* <Text style={styles.entryValue}>
-                              {entry.traitName}
-                            </Text> */}
+
+          {entry.traitName}
+
+        </Text> */}
                             </View>
                           </View>
+
                           <View style={styles.entryRow}>
                             {editingEntryId === entry.observationId ? (
                               <View style={styles.entryColumn}>
@@ -365,11 +370,13 @@ const ItemComponent = ({
                                   onPress={() => handleEditPress(entry)}>
                                   <View style={styles.entryColumn}>
                                     <Text style={styles.entryLabel}>Value</Text>
+
                                     <Text style={styles.entryValue}>
                                       {entry.value}
                                     </Text>
                                   </View>
                                 </Pressable>
+
                                 <Pressable
                                   onPress={() => handleEditPress(entry)}
                                   style={styles.editButton}>
@@ -384,14 +391,17 @@ const ItemComponent = ({
                   ))}
                 </>
               )}
+
               {dropdownState && notes && notes != '' && (
                 <View style={styles.notesContainer}>
                   <Text style={styles.notesTitle}>Notes</Text>
+
                   <View style={styles.notesContent}>
                     <Text style={styles.notesText}>{notes}</Text>
                   </View>
                 </View>
               )}
+
               {imageUrls && imageUrls.length > 0 && (
                 <View style={styles.imageContainer}>
                   {imageUrls.map((image: any) => (
@@ -411,6 +421,7 @@ const ItemComponent = ({
           </>
         )}
       </Animated.View>
+
       {modalVisible && (
         <OptionsModal
           item={currentEntry}
@@ -418,6 +429,7 @@ const ItemComponent = ({
           bottomSheetModalRef={optionsModalRef}
         />
       )}
+
       {calendarVisible && (
         <Modal
           visible={calendarVisible}
@@ -593,6 +605,9 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     marginBottom: 10,
+  },
+  noDataText: {
+    color: '#888',
   },
 });
 

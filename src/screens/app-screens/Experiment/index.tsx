@@ -45,7 +45,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       const newProjectList = Object.keys(experimentData[option] || {});
       const experimentList = experimentData[option][newProjectList[0]] || [];
       const formattedExperimentList = groupByExperimentName(experimentList);
-      setProjectList(newProjectList);
+      setProjectList(newProjectList.reverse());
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(formattedExperimentList);
     },
@@ -144,7 +144,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList);
+    setProjectList(projectList.reverse());
     setExperimentList(formattedExperimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);

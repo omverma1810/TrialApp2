@@ -1,32 +1,30 @@
-import React, {useEffect, useRef, useState, useMemo, useCallback} from 'react';
+import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
+  FlatList,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
-  FlatList,
-  Pressable,
 } from 'react-native';
-import {Loader, SafeAreaView, StatusBar} from '../../../components';
-import {Plus} from '../../../assets/icons/svgs';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {DropdownArrow, Search, X} from '../../../assets/icons/svgs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DropdownArrow, Plus } from '../../../assets/icons/svgs';
+import Cancel from '../../../assets/icons/svgs/Cancel';
+import { Loader, SafeAreaView, StatusBar } from '../../../components';
 import BottomModal from '../../../components/BottomSheetModal';
-import NewRecordOptionsModal from '../Experiment/NewRecordOptionsModal';
-import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
 import CheckBox from '../../../components/CheckBox';
 import Chip from '../../../components/Chip';
 import RecordDropDown from '../../../components/RecordDropdown';
-import {URL} from '../../../constants/URLS';
-import {useApi} from '../../../hooks/useApi';
-import RecordStyles from './RecordStyles';
+import TraitSection from '../../../components/TraitComponent';
+import { URL } from '../../../constants/URLS';
+import { useApi } from '../../../hooks/useApi';
+import { LOCALES } from '../../../localization/constants';
+import NewRecordOptionsModal from '../Experiment/NewRecordOptionsModal';
 import TakeNotesStyles from '../TakeNotes/TakeNotesStyle';
 import Filter from './Filter';
-import {LOCALES} from '../../../localization/constants';
-import {useTranslation} from 'react-i18next';
-import TraitSection from '../../../components/TraitComponent';
-import Cancel from '../../../assets/icons/svgs/Cancel';
+import RecordStyles from './RecordStyles';
 
 interface SelectedFieldData {
   fieldName: string;
@@ -61,7 +59,7 @@ const Record = ({navigation}: any) => {
   const [selectedExperiment, setSelectedExperiment] = useState<any | null>(
     null,
   );
-  const [chipTitle, setChipTitle] = useState(`Select an Experiment`);
+  const [chipTitle, setChipTitle] = useState('Select an Experiment');
   const [inputVisible, setInputVisible] = useState(false);
   const bottomSheetModalRef = useRef<BottomSheetModalMethods>(null);
   const secondBottomModalRef = useRef<BottomSheetModalMethods>(null);
@@ -87,7 +85,7 @@ const Record = ({navigation}: any) => {
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData?.[option] || {});
-      setProjectList(newProjectList);
+      setProjectList(newProjectList.reverse());
       setSelectedProject(newProjectList[0] || '');
       setSelectedExperiment(null);
       setSelectedFields({});
@@ -114,7 +112,7 @@ const Record = ({navigation}: any) => {
       const firstCrop = Object.keys(experimentData)[0];
       const newProjectList = Object.keys(experimentData[firstCrop]);
 
-      setProjectList(newProjectList);
+      setProjectList(newProjectList.reverse());
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
@@ -153,7 +151,7 @@ const Record = ({navigation}: any) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList);
+    setProjectList(projectList.reverse());
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
@@ -195,9 +193,10 @@ const Record = ({navigation}: any) => {
   }, [selectedExperiment]);
 
   useEffect(() => {
+    setFields([]);
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {
       setFields(getFieldsResponse.data.locationList);
-      console.log(fields);
+      console.log('~~~~~~~~~~~~', {fields});
     }
   }, [getFieldsResponse]);
 

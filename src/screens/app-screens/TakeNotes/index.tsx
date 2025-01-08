@@ -45,6 +45,7 @@ const TakeNotes = ({navigation, route}: any) => {
   const [experimentList, setExperimentList] = useState<any[]>([]);
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
+  const [staticSelectedProject, setStaticSelectedProject] = useState('');
   const [selectedExperiment, setSelectedExperiment] = useState<any>();
   const [selectedExperimentId, setSelectedExperimentId] = useState<any>();
   const [fields, setFields] = useState([]);
@@ -62,7 +63,7 @@ const TakeNotes = ({navigation, route}: any) => {
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
-      setProjectList(newProjectList);
+      setProjectList(newProjectList.reverse());
       setSelectedProject(newProjectList[0] || '');
       setSelectedExperiment(null);
       setSelectedExperimentId(null);
@@ -85,13 +86,17 @@ const TakeNotes = ({navigation, route}: any) => {
     [experimentData, selectedCrop],
   );
   useEffect(() => {
+    console.log('~~~~~~~~~~~~~', {selectedProject, projectList});
+  }, [selectedProject]);
+  useEffect(() => {
     if (experimentData && Object.keys(experimentData).length > 0) {
       const firstCrop = Object.keys(experimentData)[0];
       const newProjectList = Object.keys(experimentData[firstCrop]);
-
-      setProjectList(newProjectList);
-      setSelectedProject(newProjectList[0] || '');
-      setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
+      if (!isEdit) {
+        setProjectList(newProjectList.reverse());
+        setSelectedProject(newProjectList[0] || '');
+        setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
+      }
     } else {
       setProjectList([]);
       setSelectedProject('');
@@ -146,13 +151,13 @@ const TakeNotes = ({navigation, route}: any) => {
           title={t(LOCALES.EXPERIMENT.LBL_CROP)}
           options={cropList}
           selectedOption={selectedCrop}
-          onPress={handleCropChange}
+          onPress={!isEdit ? handleCropChange : () => {}}
         />
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
           options={projectList}
           selectedOption={selectedProject}
-          onPress={handleProjectChange}
+          onPress={!isEdit ? handleProjectChange : () => {}}
         />
       </View>
     ),
@@ -234,7 +239,7 @@ const TakeNotes = ({navigation, route}: any) => {
       setSelectedCrop(selectedCrop);
       setSelectedProject(selectedProject);
     }
-  }, [experimentListData, getFieldsResponse]);
+  }, [experimentListData]);
   const ListEmptyComponent = useMemo(
     () => (
       <View style={TakeNotesStyles.emptyContainer}>
@@ -306,7 +311,8 @@ const TakeNotes = ({navigation, route}: any) => {
 
   useEffect(() => {
     const experimentId = selectedExperiment?.id || selectedExperimentId;
-    console.log({getFieldsResponse});
+    console.log({selectedExperiment});
+
     let experimentType = 'line';
     console.log(editNotesData?.trial_type);
     if (isEdit && editNotesData?.trial_type) {
@@ -314,7 +320,7 @@ const TakeNotes = ({navigation, route}: any) => {
     } else if (selectedExperiment?.experimentType) {
       experimentType = selectedExperiment.experimentType;
     }
-    if (selectedExperiment || selectedExperimentId) {
+    if (experimentId && experimentType) {
       const queryParams = `experimentType=${experimentType}`;
       getFields({
         pathParams: experimentId,
@@ -353,10 +359,15 @@ const TakeNotes = ({navigation, route}: any) => {
           setDefaultChipTitleField(field_name);
           handleSelectedField(selectedField);
         }
+        setProjectList([selectedProject]);
+        setProjectList([selectedProject]);
+        setSelectedProject(selectedProject);
+      } else {
+        setFields(getFieldsResponse.data.locationList);
       }
-      setFields(getFieldsResponse.data.locationList);
     }
   }, [getFieldsResponse]);
+
   useEffect(() => {
     console.log('fields', fields, selectedField);
   }, []);
@@ -403,7 +414,7 @@ const TakeNotes = ({navigation, route}: any) => {
           <ExperimentCard
             data={experimentList}
             name="experiment"
-            onExperimentSelect={handleSelectedExperiment}
+            onExperimentSelect={!isEdit ? handleSelectedExperiment : () => {}}
             selectedItem={selectedExperiment}
             resetExperiment={resetExperiment}
             onReset={() => setResetExperiment(false)}
@@ -414,7 +425,7 @@ const TakeNotes = ({navigation, route}: any) => {
           <ExperimentCard
             data={fields}
             name={'field'}
-            onExperimentSelect={handleSelectedExperiment}
+            onExperimentSelect={!isEdit ? handleSelectedExperiment : () => {}}
             onFieldSelect={handleSelectedField}
             selectedItem={selectedField}
             isEdit={isEdit}

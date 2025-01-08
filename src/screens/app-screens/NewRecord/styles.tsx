@@ -166,7 +166,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
   },
   traitsContainer: {
-    padding: 16,
+    padding: 12,
     gap: 8,
     flexDirection: 'row',
     alignItems: 'center',

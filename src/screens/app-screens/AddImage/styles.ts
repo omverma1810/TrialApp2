@@ -147,4 +147,11 @@ export const styles = StyleSheet.create({
   scrollViewContent: {
     paddingBottom: 16, // Ensures padding at the bottom for better UX
   },
+
+  matchedOption: {
+    color: '#555', // Visible in both light and dark modes
+    fontSize: 14,
+    fontFamily: 'Arial', // Match your app's font
+    marginTop: 5,
+  },
 });

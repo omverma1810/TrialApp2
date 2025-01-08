@@ -218,7 +218,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList);
+    setProjectList(projectList.reverse());
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
@@ -240,7 +240,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
       const experimentList = experimentData[option][newProjectList[0]] || [];
-      setProjectList(newProjectList);
+      setProjectList(newProjectList.reverse());
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentList);
     },

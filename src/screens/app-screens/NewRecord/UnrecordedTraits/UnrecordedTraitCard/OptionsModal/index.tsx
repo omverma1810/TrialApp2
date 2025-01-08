@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, {useEffect, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 
 import BottomSheetModalView from '../../../../../../components/BottomSheetModal';
-import { LOCALES } from '../../../../../../localization/constants';
-import { BottomSheetModalTypes } from '../../../../../../types/components/BottomSheetModal';
-import { styles } from '../../../../AddImage/styles';
-import { useUnrecordedTraits } from '../../UnrecordedTraitsContext';
+import {LOCALES} from '../../../../../../localization/constants';
+import {BottomSheetModalTypes} from '../../../../../../types/components/BottomSheetModal';
+import {styles} from '../../../../AddImage/styles';
+import {useUnrecordedTraits} from '../../UnrecordedTraitsContext';
 
 type ModalTypes = {
   bottomSheetModalRef: BottomSheetModalTypes['bottomSheetModalRef'];
@@ -34,12 +34,20 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
 
   const [inputValue, setInputValue] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
+  const [matchedOption, setMatchedOption] = useState('');
 
   useEffect(() => {
     if (selectedOption) {
       handleSubmit();
     }
   }, [selectedOption]);
+
+  useEffect(() => {
+    if (inputValue) {
+      const match = mapInputValueToOption(inputValue);
+      setMatchedOption(match || '');
+    }
+  }, [inputValue]);
 
   const getKeyboardType = (type: string) => {
     if (type === 'int' || type === 'float' || type === 'fixed') {
@@ -48,15 +56,33 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
     return 'default';
   };
 
+  const mapInputValueToOption = (value: string) => {
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) return null;
+
+    return data.find(
+      option =>
+        (option.minimumValue === undefined ||
+          numericValue >= option.minimumValue) &&
+        (option.maximumValue === undefined ||
+          numericValue <= option.maximumValue),
+    )?.name;
+  };
+
   const handleSubmit = () => {
+    let saveValue = '';
+
     if (inputValue) {
-      const saveValue = `${inputValue} ${item?.traitUom || ''}`;
-      onSubmit(saveValue);
-    } else if (selectedOption) {
-      const saveValue = `${selectedOption}`;
-      console.log({saveValue});
-      onSubmit(saveValue);
+      saveValue = `${inputValue} ${item?.traitUom || ''}`;
     }
+    if (matchedOption) {
+      saveValue += ` (Matched Option: ${matchedOption})`;
+    } else if (selectedOption) {
+      saveValue = `${selectedOption}`;
+    }
+
+    console.log({saveValue});
+    onSubmit(saveValue);
     bottomSheetModalRef?.current?.close();
   };
 
@@ -95,6 +121,7 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
                   onPress={() => {
                     setSelectedOption(option.name);
                     setInputValue('');
+                    setMatchedOption('');
                   }}>
                   <Text style={styles.optionsTitle}>{option?.name}</Text>
                   <Text style={styles.optionsLabel}>
@@ -112,19 +139,27 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
             )}
 
             {hasMinMax && (
-              <View style={[styles.traitsModalHeader, styles.row]}>
-                <TextInput
-                  style={[styles.traitsModalHeaderTitle, styles.inputField]}
-                  keyboardType={getKeyboardType(item?.dataType)}
-                  value={inputValue}
-                  onChangeText={text => {
-                    setInputValue(text);
-                    setSelectedOption('');
-                  }}
-                  placeholder={`Enter ${item?.traitName || 'value'} - ${
-                    item?.traitUom
-                  }`}
-                />
+              <View>
+                <View style={[styles.traitsModalHeader, styles.row]}>
+                  <TextInput
+                    style={[styles.traitsModalHeaderTitle, styles.inputField]}
+                    keyboardType={getKeyboardType(item?.dataType)}
+                    value={inputValue}
+                    onChangeText={text => {
+                      setInputValue(text);
+                      setSelectedOption('');
+                    }}
+                    placeholder={`Enter ${item?.traitName || 'value'} - ${
+                      item?.traitUom
+                    }`}
+                    placeholderTextColor={'#888'} // Adjust color for visibility in dark mode
+                  />
+                </View>
+                {matchedOption && (
+                  <Text style={styles.matchedOption}>
+                    Matched Option: {matchedOption}
+                  </Text>
+                )}
               </View>
             )}
 

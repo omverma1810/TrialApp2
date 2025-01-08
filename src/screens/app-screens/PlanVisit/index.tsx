@@ -76,7 +76,7 @@ const PlanVisit = ({navigation}: any) => {
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
-      setProjectList(newProjectList);
+      setProjectList(newProjectList.reverse());
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentData[option][newProjectList[0]] || []);
       
@@ -93,7 +93,7 @@ const PlanVisit = ({navigation}: any) => {
       const firstCrop = Object.keys(experimentData)[0];
       const newProjectList = Object.keys(experimentData[firstCrop]);
 
-      setProjectList(newProjectList);
+      setProjectList(newProjectList.reverse());
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
@@ -215,7 +215,7 @@ const PlanVisit = ({navigation}: any) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList);
+    setProjectList(projectList.reverse());
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
