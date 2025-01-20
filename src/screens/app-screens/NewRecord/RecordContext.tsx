@@ -1,27 +1,27 @@
+import { useNavigation, useRoute } from '@react-navigation/native';
 import React, {
   createContext,
-  useContext,
-  useState,
   ReactNode,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from 'react';
-import {useTranslation} from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import ImagePicker from 'react-native-image-crop-picker';
-import {useNavigation, useRoute} from '@react-navigation/native';
 
-import {ImagePlus, Notes} from '../../../assets/icons/svgs';
-import {LOCALES} from '../../../localization/constants';
-import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
-import {useRecordApi} from './RecordApiContext';
-import {UpdateRecordDataFunction} from './UnrecordedTraits/UnrecordedTraitsContext';
-import Toast from '../../../utilities/toast';
+import { ImagePlus, Notes } from '../../../assets/icons/svgs';
+import { LOCALES } from '../../../localization/constants';
+import { NewRecordScreenProps } from '../../../types/navigation/appTypes';
 import {
   formatDateTime,
   getBase64FromUrl,
   getCoordinates,
   getNameFromUrl,
 } from '../../../utilities/function';
+import Toast from '../../../utilities/toast';
+import { useRecordApi } from './RecordApiContext';
+import { UpdateRecordDataFunction } from './UnrecordedTraits/UnrecordedTraitsContext';
 
 type RecordData = {
   [key: string]: {
@@ -95,6 +95,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     plotListData,
     createTraitsRecord,
     trraitsRecordData,
+    updateTraitsRecord,
+    updatedTraitsRecordData,
   } = useRecordApi();
   const navigation = useNavigation<NewRecordScreenProps['navigation']>();
   const {params} = useRoute<NewRecordScreenProps['route']>();
@@ -218,7 +220,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList.reverse());
+    setProjectList(projectList);
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
@@ -240,7 +242,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
       const experimentList = experimentData[option][newProjectList[0]] || [];
-      setProjectList(newProjectList.reverse());
+      setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentList);
     },
@@ -257,7 +259,9 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   );
 
   useEffect(() => {
-    if (!selectedExperiment) return;
+    if (!selectedExperiment) {
+      return;
+    }
     getFieldList({
       pathParams: selectedExperiment?.id,
       queryParams: `experimentType=${selectedExperiment?.experimentType}`,
@@ -285,12 +289,19 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   }, [fieldListData]);
 
   useEffect(() => {
-    if (!selectedField || !selectedExperiment) return;
+    if (!selectedField || !selectedExperiment) {
+      return;
+    }
     getPlotList({
       pathParams: selectedField?.id,
       queryParams: `experimentType=${selectedExperiment?.experimentType}`,
     });
-  }, [selectedField, selectedExperiment]);
+  }, [
+    selectedField,
+    selectedExperiment,
+    updatedTraitsRecordData,
+    trraitsRecordData,
+  ]);
 
   useEffect(() => {
     if (plotListData?.status_code !== 200 || !plotListData?.data) {
@@ -315,6 +326,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     observationId,
     traitId,
     observedValue,
+    shouldUpdate = false,
   ) => {
     setRecordData(prevData => ({
       ...prevData,
@@ -322,6 +334,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
         observationId,
         traitId,
         observedValue: observedValue,
+        shouldUpdate,
       },
     }));
   };
@@ -375,7 +388,12 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       lat: latitude,
       long: longitude,
     };
-    createTraitsRecord({payload, headers});
+    const {shouldUpdate} = recordData;
+    if (!shouldUpdate) {
+      createTraitsRecord({payload, headers});
+    } else {
+      updateTraitsRecord({payload, headers});
+    }
   };
 
   const onSaveNotes = (notes: string) => {

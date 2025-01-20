@@ -1,6 +1,6 @@
-import { BottomSheetModalMethods } from '@gorhom/bottom-sheet/lib/typescript/types';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {BottomSheetModalMethods} from '@gorhom/bottom-sheet/lib/typescript/types';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   FlatList,
   Pressable,
@@ -9,18 +9,18 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DropdownArrow, Plus } from '../../../assets/icons/svgs';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {DropdownArrow, Plus} from '../../../assets/icons/svgs';
 import Cancel from '../../../assets/icons/svgs/Cancel';
-import { Loader, SafeAreaView, StatusBar } from '../../../components';
+import {Loader, SafeAreaView, StatusBar} from '../../../components';
 import BottomModal from '../../../components/BottomSheetModal';
 import CheckBox from '../../../components/CheckBox';
 import Chip from '../../../components/Chip';
 import RecordDropDown from '../../../components/RecordDropdown';
 import TraitSection from '../../../components/TraitComponent';
-import { URL } from '../../../constants/URLS';
-import { useApi } from '../../../hooks/useApi';
-import { LOCALES } from '../../../localization/constants';
+import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
+import {LOCALES} from '../../../localization/constants';
 import NewRecordOptionsModal from '../Experiment/NewRecordOptionsModal';
 import TakeNotesStyles from '../TakeNotes/TakeNotesStyle';
 import Filter from './Filter';
@@ -85,7 +85,7 @@ const Record = ({navigation}: any) => {
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData?.[option] || {});
-      setProjectList(newProjectList.reverse());
+      setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setSelectedExperiment(null);
       setSelectedFields({});
@@ -112,7 +112,7 @@ const Record = ({navigation}: any) => {
       const firstCrop = Object.keys(experimentData)[0];
       const newProjectList = Object.keys(experimentData[firstCrop]);
 
-      setProjectList(newProjectList.reverse());
+      setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
@@ -151,7 +151,7 @@ const Record = ({navigation}: any) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList.reverse());
+    setProjectList(projectList);
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
@@ -620,7 +620,7 @@ const Record = ({navigation}: any) => {
                       />
                       <Pressable onPress={() => handleFieldSelect(field.id)}>
                         <Text style={RecordStyles.fieldCheckboxText}>
-                          {field.id} - {field.location.villageName}
+                          {field.name} - {field.location.villageName}
                         </Text>
                       </Pressable>
                     </View>

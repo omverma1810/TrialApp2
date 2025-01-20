@@ -142,16 +142,16 @@ export const styles = StyleSheet.create({
   },
 
   scrollView: {
-    flex: 1, // Allows the ScrollView to occupy the available space
+    flex: 1,
   },
   scrollViewContent: {
-    paddingBottom: 16, // Ensures padding at the bottom for better UX
+    paddingBottom: 16,
   },
 
   matchedOption: {
-    color: '#555', // Visible in both light and dark modes
+    color: '#555',
     fontSize: 14,
-    fontFamily: 'Arial', // Match your app's font
+    fontFamily: 'Inter-SemiBold',
     marginTop: 5,
   },
 });

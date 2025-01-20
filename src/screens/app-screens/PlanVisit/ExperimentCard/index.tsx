@@ -33,7 +33,7 @@ const ExperimentCard = ({
   onFieldSelect,
   isProjectSelected,
   resetExperiment,
-  onReset
+  onReset,
 }: any) => {
   const bottomSheetModalRef = useRef(null);
   const {bottom} = useSafeAreaInsets();
@@ -173,7 +173,7 @@ const ExperimentCard = ({
                     onPress={() => handleExperimentSelect(item)}
                     style={TakeNotesStyles.modalItemContainer}>
                     <Text style={TakeNotesStyles.modalItemText}>
-                      {name == 'field' ? `${item.id} - ` : null}{' '}
+                      {name == 'field' ? `${item.name} - ` : null}{' '}
                       {item.fieldExperimentName || item.location.villageName}
                     </Text>
                     {name == 'experiment' ? (

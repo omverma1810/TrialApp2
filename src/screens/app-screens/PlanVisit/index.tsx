@@ -76,15 +76,15 @@ const PlanVisit = ({navigation}: any) => {
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
-      setProjectList(newProjectList.reverse());
+      setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentData[option][newProjectList[0]] || []);
-      
+
       setResetExperiment(true);
       setSelectedExperiment(null);
       setSelectedField(null);
       setSelectedDate(null);
-      },
+    },
     [experimentData],
   );
 
@@ -93,7 +93,7 @@ const PlanVisit = ({navigation}: any) => {
       const firstCrop = Object.keys(experimentData)[0];
       const newProjectList = Object.keys(experimentData[firstCrop]);
 
-      setProjectList(newProjectList.reverse());
+      setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
     } else {
@@ -215,7 +215,7 @@ const PlanVisit = ({navigation}: any) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList.reverse());
+    setProjectList(projectList);
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
@@ -331,7 +331,7 @@ const PlanVisit = ({navigation}: any) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100%',
-                    width:'100%',
+                    width: '100%',
                     paddingHorizontal: 20,
                   }
                 : {paddingBottom: 10, height: 105}
@@ -352,7 +352,7 @@ const PlanVisit = ({navigation}: any) => {
             isProjectSelected={!!selectedExperiment}
             resetExperiment={resetExperiment}
             onReset={() => setResetExperiment(false)}
-            />
+          />
         )}
         {selectedCrop && selectedProject && selectedExperiment && (
           <ExperimentCard

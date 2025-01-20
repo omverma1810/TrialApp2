@@ -47,7 +47,7 @@ const SelectField = () => {
         <View style={styles.locationNameContainer}>
           <LocationPin />
           <Text style={styles.locationName}>
-            {item?.id}-{item?.location?.villageName}
+            {item?.name}-{item?.location?.villageName}
           </Text>
         </View>
       </Pressable>
@@ -105,7 +105,7 @@ const SelectField = () => {
             <View style={styles.locationNameContainer}>
               <LocationPin />
               <Text style={styles.locationName}>
-                {selectedField?.id}-{selectedField?.location?.villageName}
+                {selectedField?.name}-{selectedField?.location?.villageName}
               </Text>
             </View>
           </View>

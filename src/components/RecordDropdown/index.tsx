@@ -302,13 +302,13 @@ const ItemComponent = ({
                                 <View style={styles.entryColumn}>
                                   <Text style={styles.entryValue}>
                                     {entry.value !== null &&
-                                    entry.value !== undefined &&
-                                    styles.noDataText
+                                    entry.value !== undefined
                                       ? entry.value
                                       : 'No Data Found'}
                                   </Text>
                                 </View>
                               </Pressable>
+
                               <Pressable
                                 onPress={() => handleEditPress(entry)}
                                 style={styles.editButton}>
@@ -605,9 +605,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 200,
     marginBottom: 10,
-  },
-  noDataText: {
-    color: '#888',
   },
 });
 

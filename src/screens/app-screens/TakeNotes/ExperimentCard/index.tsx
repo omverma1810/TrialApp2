@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Pressable,
   ScrollView,
@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DropdownArrow } from '../../../../assets/icons/svgs';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {DropdownArrow} from '../../../../assets/icons/svgs';
 import BottomModal from '../../../../components/BottomSheetModal';
 import Chip from '../../../../components/Chip';
 import TakeNotesStyles from '../../TakeNotes/TakeNotesStyle';
-import { styles } from './styles';
+import {styles} from './styles';
 
 interface Chip {
   id: number;
@@ -33,10 +33,10 @@ const ExperimentCard = ({
   selectedItem,
   isEdit,
   resetExperiment,
-  onReset
+  onReset,
 }: any) => {
   const bottomSheetModalRef = useRef(null);
-  const { bottom } = useSafeAreaInsets();
+  const {bottom} = useSafeAreaInsets();
   const [selectedExperiment, setSelectedExperiment] = useState<any>(null);
   const [chipTitle, setChipTitle] = useState(`Select ${name}`);
   const [chipVisible, setChipVisible] = useState(true);
@@ -55,7 +55,7 @@ const ExperimentCard = ({
     }
   }, [selectedItem]);
   const handleExperimentSelect = (item: any) => {
-    console.log('=============>', { item });
+    console.log('=============>', {item});
     if (name === 'field' && !isEdit) {
       setSelectedField(item);
       setChipTitle(item.location.villageName);
@@ -134,16 +134,12 @@ const ExperimentCard = ({
                 {name === 'field'
                   ? selectedExperiment.location.villageName
                   : isEdit
-                    ? selectedExperiment
-                    : selectedExperiment.fieldExperimentName}
+                  ? selectedExperiment
+                  : selectedExperiment.fieldExperimentName}
               </Text>
-              {
-                !isEdit &&
-                <DropdownArrow />
-              }
+              {!isEdit && <DropdownArrow />}
             </View>
-            {
-              !isEdit &&
+            {!isEdit && (
               <View
                 style={[
                   TakeNotesStyles.chipCropText,
@@ -157,8 +153,7 @@ const ExperimentCard = ({
                   {selectedExperiment.experimentType}
                 </Text>
               </View>
-            }
-
+            )}
           </View>
         </Pressable>
       )}
@@ -170,10 +165,7 @@ const ExperimentCard = ({
               <Text style={TakeNotesStyles.chipText}>
                 {selectedField?.location?.villageName}
               </Text>
-              {
-                !isEdit &&
-                <DropdownArrow />
-              }
+              {!isEdit && <DropdownArrow />}
             </View>
             {/* <View style={TakeNotesStyles.chipCropText}>
             <Text style={TakeNotesStyles.chipCropText1}>
@@ -186,13 +178,13 @@ const ExperimentCard = ({
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
-        containerStyle={{ paddingBottom: bottom }}>
+        containerStyle={{paddingBottom: bottom}}>
         <View style={TakeNotesStyles.modalContainer}>
           <Text style={TakeNotesStyles.modalTitle}>
             Select an Experiment (or) Field
           </Text>
-          <ScrollView style={{ flexGrow: 1 }}>
-            <View style={{ gap: 30 }}>
+          <ScrollView style={{flexGrow: 1}}>
+            <View style={{gap: 30}}>
               {Array.isArray(data) &&
                 data.map((item: any, index: number) => (
                   <TouchableOpacity
@@ -200,7 +192,7 @@ const ExperimentCard = ({
                     onPress={() => handleExperimentSelect(item)}
                     style={TakeNotesStyles.modalItemContainer}>
                     <Text style={TakeNotesStyles.modalItemText}>
-                      {name == 'field' ? `${item.id} - ` : null}{' '}
+                      {name == 'field' ? `${item.name} - ` : null}{' '}
                       {item.fieldExperimentName || item.location.villageName}
                     </Text>
                     {name == 'experiment' ? (
@@ -212,8 +204,8 @@ const ExperimentCard = ({
                               item.experimentType === 'hybrid'
                                 ? '#fdf8ee'
                                 : item.experimentType === 'line'
-                                  ? '#fcebea'
-                                  : '#eaf4e7',
+                                ? '#fcebea'
+                                : '#eaf4e7',
                           },
                         ]}>
                         {item.experimentType}

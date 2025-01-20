@@ -63,7 +63,7 @@ const TakeNotes = ({navigation, route}: any) => {
     (option: string) => {
       setSelectedCrop(option);
       const newProjectList = Object.keys(experimentData[option] || {});
-      setProjectList(newProjectList.reverse());
+      setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setSelectedExperiment(null);
       setSelectedExperimentId(null);
@@ -93,7 +93,7 @@ const TakeNotes = ({navigation, route}: any) => {
       const firstCrop = Object.keys(experimentData)[0];
       const newProjectList = Object.keys(experimentData[firstCrop]);
       if (!isEdit) {
-        setProjectList(newProjectList.reverse());
+        setProjectList(newProjectList);
         setSelectedProject(newProjectList[0] || '');
         setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
       }

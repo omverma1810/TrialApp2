@@ -45,7 +45,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       const newProjectList = Object.keys(experimentData[option] || {});
       const experimentList = experimentData[option][newProjectList[0]] || [];
       const formattedExperimentList = groupByExperimentName(experimentList);
-      setProjectList(newProjectList.reverse());
+      setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(formattedExperimentList);
     },
@@ -118,7 +118,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
   const groupByExperimentName = (array: any[]) => {
     const groupedMap = array.reduce((acc, curr) => {
-      const key = curr.experimentName || selectedProject || 'N/A';
+      const key = curr.experimentName ||'N/A';
       if (!acc.has(key)) {
         acc.set(key, {name: key, data: []});
       }
@@ -144,7 +144,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
     setExperimentData(data);
     setCropList(cropList);
-    setProjectList(projectList.reverse());
+    setProjectList(projectList);
     setExperimentList(formattedExperimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
