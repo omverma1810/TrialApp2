@@ -1,6 +1,6 @@
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -18,11 +18,11 @@ import {
   Edit,
   FieldSybol1,
 } from '../../assets/icons/svgs';
-import {URL} from '../../constants/URLS';
-import {useApi} from '../../hooks/useApi';
+import { URL } from '../../constants/URLS';
+import { useApi } from '../../hooks/useApi';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
-import {FONTS} from '../../theme/fonts';
+import { FONTS } from '../../theme/fonts';
 import Toast from '../../utilities/toast';
 import Calendar from '../Calender';
 
@@ -151,6 +151,8 @@ const ItemComponent = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [showInputCard, setShowInputCard] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<any>(null);
+  const [updatabaleCurrentEntry, setUpdatableCurrentEntry] =
+    useState<any>(null);
   const [observedValue, setObservedValue] = useState('');
   const [calendarVisible, setCalendarVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -185,8 +187,10 @@ const ItemComponent = ({
     method: 'PUT',
   });
 
-  const handleEditPress = (entry: any) => {
-    setCurrentEntry(entry);
+  const handleEditPress = (entry: any, update: false) => {
+    console.log('~~~~~~~~~~~~', {entry});
+    update ? setUpdatableCurrentEntry(entry) : setCurrentEntry(entry);
+
     if (entry.dataType === 'date') {
       setCalendarVisible(true);
     } else if (entry.dataType === 'fixed') {
@@ -245,6 +249,7 @@ const ItemComponent = ({
     setEditingEntryId(null);
     setModalVisible(false);
     setCurrentEntry(null);
+    setUpdatableCurrentEntry(null);
     optionsModalRef.current?.close();
   }, [updateValueResponse]);
   return (
@@ -288,14 +293,17 @@ const ItemComponent = ({
                         </View>
                         <View style={styles.entryRow}>
                           {editingEntryId === entry.observationId ? (
-                            <View
-                              style={[styles.entryColumn, {paddingTop: 12}]}>
-                              <ValueInputCard
-                                onSubmit={handleValueSubmit}
-                                entry={currentEntry}
-                                setShowInputCard={setEditingEntryId}
-                              />
-                            </View>
+                            <>
+                              <Text>{entry?.observationId}</Text>
+                              <View
+                                style={[styles.entryColumn, {paddingTop: 12}]}>
+                                <ValueInputCard
+                                  onSubmit={handleValueSubmit}
+                                  entry={currentEntry}
+                                  setShowInputCard={setEditingEntryId}
+                                />
+                              </View>
+                            </>
                           ) : (
                             <>
                               <Pressable onPress={() => handleEditPress(entry)}>
@@ -308,7 +316,6 @@ const ItemComponent = ({
                                   </Text>
                                 </View>
                               </Pressable>
-
                               <Pressable
                                 onPress={() => handleEditPress(entry)}
                                 style={styles.editButton}>
@@ -346,12 +353,6 @@ const ItemComponent = ({
                               <Text style={styles.entryLabel}>
                                 {entry.traitName}
                               </Text>
-
-                              {/* <Text style={styles.entryValue}>
-
-          {entry.traitName}
-
-        </Text> */}
                             </View>
                           </View>
 
@@ -365,24 +366,12 @@ const ItemComponent = ({
                                 />
                               </View>
                             ) : (
-                              <>
-                                <Pressable
-                                  onPress={() => handleEditPress(entry)}>
-                                  <View style={styles.entryColumn}>
-                                    <Text style={styles.entryLabel}>Value</Text>
-
-                                    <Text style={styles.entryValue}>
-                                      {entry.value}
-                                    </Text>
-                                  </View>
-                                </Pressable>
-
-                                <Pressable
-                                  onPress={() => handleEditPress(entry)}
-                                  style={styles.editButton}>
-                                  <Edit />
-                                </Pressable>
-                              </>
+                              <Text>
+                                {entry.value !== null &&
+                                entry.value !== undefined
+                                  ? entry.value
+                                  : 'No Data Found'}
+                              </Text>
                             )}
                           </View>
                         </View>

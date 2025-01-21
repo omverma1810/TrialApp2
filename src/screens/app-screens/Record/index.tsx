@@ -141,6 +141,7 @@ const Record = ({navigation}: any) => {
     if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
       return;
     }
+    setFields([]);
 
     const {data} = experimentListData;
     const cropList = Object.keys(data);
@@ -155,6 +156,10 @@ const Record = ({navigation}: any) => {
     setExperimentList(experimentList);
     setSelectedCrop(selectedCrop);
     setSelectedProject(selectedProject);
+    console.log('~~~~~~~~~~~~~~~~', {
+      item: fields,
+    });
+    // setFields([]);
   }, [experimentListData]);
 
   const handleEdit = () => {
@@ -193,10 +198,8 @@ const Record = ({navigation}: any) => {
   }, [selectedExperiment]);
 
   useEffect(() => {
-    setFields([]);
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {
       setFields(getFieldsResponse.data.locationList);
-      console.log('~~~~~~~~~~~~', {fields});
     }
   }, [getFieldsResponse]);
 
@@ -242,6 +245,7 @@ const Record = ({navigation}: any) => {
   );
   useEffect(() => {
     setSelectedFields({});
+    setFields([]);
   }, [selectedExperiment]);
 
   const handleFieldSelect = (id: string) => {
