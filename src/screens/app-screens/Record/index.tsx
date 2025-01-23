@@ -468,7 +468,7 @@ const Record = ({navigation}: any) => {
                                 key={fieldId}
                                 style={RecordStyles.selectedFieldContainer}>
                                 <Text style={RecordStyles.fieldName}>
-                                  {fieldId} -{' '}
+                                  {matchedField.name} -{' '}
                                   {matchedField.location?.villageName ||
                                     'Unknown'}
                                 </Text>

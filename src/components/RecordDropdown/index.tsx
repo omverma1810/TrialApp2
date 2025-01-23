@@ -161,6 +161,7 @@ const ItemComponent = ({
   const unrecordedTraitData = plotData.unrecordedTraitData;
   const [dropdownHeight] = useState(new Animated.Value(0));
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [editingEntryType, setEditingEntryType] = useState<string | null>(null);
   const [changedValue, setChangedValue] = useState<any>(null);
   useEffect(() => {
     const height = recordedTraitData.length + unrecordedTraitData.length;
@@ -187,14 +188,21 @@ const ItemComponent = ({
     method: 'PUT',
   });
 
-  const handleEditPress = (entry: any, update: false) => {
+  const handleEditPress = (entry: any) => {
     console.log('~~~~~~~~~~~~', {entry});
-    update ? setUpdatableCurrentEntry(entry) : setCurrentEntry(entry);
+    setCurrentEntry(entry);
+    setEditingEntryType(entry?.dataType);
 
     if (entry.dataType === 'date') {
       setCalendarVisible(true);
     } else if (entry.dataType === 'fixed') {
-      setModalVisible(true);
+      console.log({modalVisible});
+      if (modalVisible) {
+        setModalVisible(false);
+        setTimeout(() => setModalVisible(true), 1);
+      } else {
+        setModalVisible(true);
+      }
     } else {
       setEditingEntryId(entry.observationId);
     }
@@ -204,7 +212,7 @@ const ItemComponent = ({
     if (modalVisible && optionsModalRef.current) {
       optionsModalRef.current.present();
     }
-  }, [modalVisible, optionsModalRef]);
+  }, [modalVisible, optionsModalRef, currentEntry]);
 
   const handleValueSubmit = (value: any) => {
     const payload = {
@@ -293,31 +301,32 @@ const ItemComponent = ({
                         </View>
                         <View style={styles.entryRow}>
                           {editingEntryId === entry.observationId ? (
-                            <>
-                              <Text>{entry?.observationId}</Text>
-                              <View
-                                style={[styles.entryColumn, {paddingTop: 12}]}>
-                                <ValueInputCard
-                                  onSubmit={handleValueSubmit}
-                                  entry={currentEntry}
-                                  setShowInputCard={setEditingEntryId}
-                                />
-                              </View>
-                            </>
+                            <View style={styles.entryColumn}>
+                              <ValueInputCard
+                                onSubmit={handleValueSubmit}
+                                entry={currentEntry}
+                                setShowInputCard={setEditingEntryId}
+                              />
+                            </View>
                           ) : (
                             <>
-                              <Pressable onPress={() => handleEditPress(entry)}>
+                              <Pressable
+                                onPress={() => {
+                                  setModalVisible(false);
+                                  handleEditPress(entry);
+                                }}>
                                 <View style={styles.entryColumn}>
+                                  <Text style={styles.entryLabel}>Value</Text>
                                   <Text style={styles.entryValue}>
-                                    {entry.value !== null &&
-                                    entry.value !== undefined
-                                      ? entry.value
-                                      : 'No Data Found'}
+                                    {entry.value}
                                   </Text>
                                 </View>
                               </Pressable>
                               <Pressable
-                                onPress={() => handleEditPress(entry)}
+                                onPress={() => {
+                                  setModalVisible(false);
+                                  handleEditPress(entry);
+                                }}
                                 style={styles.editButton}>
                                 <Edit />
                               </Pressable>
@@ -357,22 +366,14 @@ const ItemComponent = ({
                           </View>
 
                           <View style={styles.entryRow}>
-                            {editingEntryId === entry.observationId ? (
-                              <View style={styles.entryColumn}>
-                                <ValueInputCard
-                                  onSubmit={handleValueSubmit}
-                                  entry={currentEntry}
-                                  setShowInputCard={setEditingEntryId}
-                                />
-                              </View>
-                            ) : (
-                              <Text>
+                            <View style={styles.entryColumn}>
+                              <Text style={styles.entryValue}>
                                 {entry.value !== null &&
                                 entry.value !== undefined
                                   ? entry.value
                                   : 'No Data Found'}
                               </Text>
-                            )}
+                            </View>
                           </View>
                         </View>
                       </View>

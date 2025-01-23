@@ -19,7 +19,7 @@ const OptionsModal = ({item, onSubmit, bottomSheetModalRef}: any) => {
   const [mappedOption, setMappedOption] = useState('');
 
   const getKeyboardType = (type: string) => {
-    if (type === 'int' || type === 'float' || type === 'fixed') {
+    if (type === 'int' || type === 'float') {
       return 'numeric';
     }
     return 'default';
@@ -29,12 +29,11 @@ const OptionsModal = ({item, onSubmit, bottomSheetModalRef}: any) => {
     const numericValue = parseFloat(value);
     if (isNaN(numericValue)) return '';
 
-    const match = data.find(option =>
-      option.minimumValue !== undefined && option.maximumValue !== undefined
-        ? numericValue >= option.minimumValue &&
-          numericValue <= option.maximumValue
-        : false,
-    );
+    const match = data.find(option => {
+      const min = option?.minimumValue ?? -Infinity;
+      const max = option?.maximumValue ?? Infinity;
+      return numericValue >= min && numericValue <= max;
+    });
 
     return match ? match.name : '';
   };
@@ -96,6 +95,15 @@ const OptionsModal = ({item, onSubmit, bottomSheetModalRef}: any) => {
             }}
           />
         </View>
+
+        {/* Mapped Option */}
+        {mappedOption && (
+          <View>
+            <Text style={styles.mappedOptionText}>
+              Mapped Option: {mappedOption}
+            </Text>
+          </View>
+        )}
 
         {/* Save Button */}
         <Pressable style={styles.saveButton} onPress={handleSave}>

@@ -50,7 +50,7 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
   }, [inputValue]);
 
   const getKeyboardType = (type: string) => {
-    if (type === 'int' || type === 'float' || type === 'fixed') {
+    if (type === 'int' || type === 'float') {
       return 'numeric';
     }
     return 'default';
