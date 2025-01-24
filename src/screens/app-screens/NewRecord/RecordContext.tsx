@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import React, {
   createContext,
   ReactNode,
@@ -7,12 +7,12 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 import ImagePicker from 'react-native-image-crop-picker';
 
-import { ImagePlus, Notes } from '../../../assets/icons/svgs';
-import { LOCALES } from '../../../localization/constants';
-import { NewRecordScreenProps } from '../../../types/navigation/appTypes';
+import {ImagePlus, Notes} from '../../../assets/icons/svgs';
+import {LOCALES} from '../../../localization/constants';
+import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
 import {
   formatDateTime,
   getBase64FromUrl,
@@ -20,8 +20,8 @@ import {
   getNameFromUrl,
 } from '../../../utilities/function';
 import Toast from '../../../utilities/toast';
-import { useRecordApi } from './RecordApiContext';
-import { UpdateRecordDataFunction } from './UnrecordedTraits/UnrecordedTraitsContext';
+import {useRecordApi} from './RecordApiContext';
+import {UpdateRecordDataFunction} from './UnrecordedTraits/UnrecordedTraitsContext';
 
 type RecordData = {
   [key: string]: {

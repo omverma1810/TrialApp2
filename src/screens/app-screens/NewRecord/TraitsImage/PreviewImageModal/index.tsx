@@ -31,39 +31,60 @@ const PreviewImageModal = ({
 
   const downloadImage = async () => {
     try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'Storage Permission Required',
-            message: 'App needs access to your storage to download images.',
-            buttonPositive: 'OK', // Required in the Rationale object
-            buttonNegative: 'Cancel',
-            buttonNeutral: 'Ask Me Later',
-          },
-        );
+      let hasPermission = true;
 
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      if (Platform.OS === 'android') {
+        if (Platform.Version >= 33) {
+          // Android 13+: READ_MEDIA_IMAGES permission required
+          hasPermission =
+            (await PermissionsAndroid.request(
+              PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+            )) === PermissionsAndroid.RESULTS.GRANTED;
+        } else if (Platform.Version >= 29) {
+          // Android 10-12: Scoped storage, no explicit permission required
+          hasPermission = true;
+        } else {
+          // Android 9 or below: WRITE_EXTERNAL_STORAGE permission required
+          hasPermission =
+            (await PermissionsAndroid.request(
+              PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            )) === PermissionsAndroid.RESULTS.GRANTED;
+        }
+
+        if (!hasPermission) {
           Alert.alert('Permission Denied', 'Cannot save the image.');
           return;
         }
       }
 
-      const downloadDir = RNFS.PicturesDirectoryPath;
+      const downloadDir =
+        Platform.OS === 'android' && Platform.Version >= 29
+          ? RNFS.DownloadDirectoryPath
+          : RNFS.PicturesDirectoryPath;
+
       const fileName = `image_${Date.now()}.jpg`;
       const filePath = `${downloadDir}/${fileName}`;
 
-      const result = await RNFS.downloadFile({
-        fromUrl: selectedImageUrl,
-        toFile: filePath,
-      }).promise;
-
-      if (result.statusCode === 200) {
+      if (selectedImageUrl.startsWith('file://')) {
+        // Local file: Copy the file directly
+        const sourcePath = selectedImageUrl.replace('file://', '');
+        await RNFS.copyFile(sourcePath, filePath);
         Alert.alert('Download Complete', `Image saved to ${filePath}`);
       } else {
-        Alert.alert('Download Failed', 'Please try again.');
+        // Remote URL: Download the file
+        const result = await RNFS.downloadFile({
+          fromUrl: selectedImageUrl,
+          toFile: filePath,
+        }).promise;
+
+        if (result.statusCode === 200) {
+          Alert.alert('Download Complete', `Image saved to ${filePath}`);
+        } else {
+          Alert.alert('Download Failed', 'Please try again.');
+        }
       }
     } catch (error) {
+      console.error('Download Error:', error);
       Alert.alert('Error', 'Unable to download image. Try again later.');
     }
   };

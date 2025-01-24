@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {FlatList, Pressable, ScrollView, View} from 'react-native';
-import {useTranslation} from 'react-i18next';
 import {useIsFocused} from '@react-navigation/native';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {FlatList, Pressable, ScrollView, View} from 'react-native';
 
+import {Back, Search} from '../../../assets/icons/svgs';
 import {
   Input,
   Loader,
@@ -10,13 +11,12 @@ import {
   StatusBar,
   Text,
 } from '../../../components';
-import {styles} from './styles';
-import {Back, Search} from '../../../assets/icons/svgs';
-import {LOCALES} from '../../../localization/constants';
-import FieldCard from './FieldCard';
-import {ExperimentDetailsScreenProps} from '../../../types/navigation/appTypes';
-import {useApi} from '../../../hooks/useApi';
 import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
+import {LOCALES} from '../../../localization/constants';
+import {ExperimentDetailsScreenProps} from '../../../types/navigation/appTypes';
+import FieldCard from './FieldCard';
+import {styles} from './styles';
 
 const ExperimentDetails = ({
   navigation,
@@ -88,6 +88,7 @@ const ExperimentDetails = ({
     ({item, index}: any) => (
       <FieldCard
         fieldData={item}
+        expData={{id, type, filteredLocationList}}
         isFirstIndex={index === 0}
         isLastIndex={index === filteredLocationList.length - 1}
       />

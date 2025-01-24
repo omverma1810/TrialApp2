@@ -1,26 +1,26 @@
-import {Pressable, Text, View} from 'react-native';
-import React, {useCallback, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Pressable, Text, View} from 'react-native';
 
-import {styles} from '../styles';
+import {BottomSheetModal} from '@gorhom/bottom-sheet';
 import {
   CardArrowDown,
   CardArrowUp,
   Columns,
-  Layout,
   Leaf,
-  Location,
   LocationPin,
   Plots,
   Rows,
 } from '../../../../assets/icons/svgs';
+import {URL} from '../../../../constants/URLS';
+import {useApi} from '../../../../hooks/useApi';
 import {LOCALES} from '../../../../localization/constants';
 import {ExperimentDetailsScreenProps} from '../../../../types/navigation/appTypes';
 import TraitModal from '../../Experiment/ExperimentCard/ExperimentList/TraitModal';
-import {BottomSheetModal} from '@gorhom/bottom-sheet';
+import {styles} from '../styles';
 
-const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
+const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
   const {t} = useTranslation();
   const {navigate} =
     useNavigation<ExperimentDetailsScreenProps['navigation']>();
@@ -29,6 +29,25 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
   } = useRoute<ExperimentDetailsScreenProps['route']>();
   const traitModalRef = useRef<BottomSheetModal>(null);
   const handleTraitModalOpen = () => traitModalRef.current?.present();
+
+  const [trialData, setTrialData] = useState({});
+  const [getField, getFieldResponse, isFieldLoading, getFieldError] = useApi({
+    url: URL.PLOT_LIST,
+    method: 'GET',
+  });
+  useEffect(() => {
+    getField({
+      pathParams: fieldData.id,
+      queryParams: `experimentType=${expData.type}`,
+    });
+  }, []);
+
+  useEffect(() => {
+    setTrialData(getFieldResponse?.data);
+    console.log({fieldRes: getFieldResponse?.data});
+  }, [getFieldResponse]);
+
+  console.log('~~~~~~~~~', {fieldData: fieldData});
   const fieldInfo = [
     {
       id: 0,
@@ -46,7 +65,13 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       key: 'noOfColumn',
       uom: null,
     },
-
+    // {
+    //   id: 2,
+    //   icon: Layout,
+    //   title: t(LOCALES.EXPERIMENT.LBL_ORDER_LAYOUT),
+    //   navigationAction: null,
+    //   key: 'order_layout',
+    // },
     {
       id: 3,
       icon: Plots,
@@ -71,7 +96,17 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       key: 'traits',
       uom: null,
     },
-
+    // {
+    //   id: 5,
+    //   icon: Location,
+    //   title: t(LOCALES.EXPERIMENT.LBL_LOCATION),
+    //   value: 'Gujrat',
+    //   navigationAction: {
+    //     title: t(LOCALES.EXPERIMENT.LBL_GO_TO_LOCATION),
+    //     onClick: () => {},
+    //   },
+    //   key: 'location',
+    // },
     {
       id: 6,
       icon: null,
@@ -113,6 +148,10 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       uom: 'm',
     },
   ];
+
+  //   useMemo(() => {
+
+  // }, [getFieldResponse])
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const onViewMoreDetailsClick = () => setIsViewMoreDetails(!isViewMoreDetails);
 
@@ -128,8 +167,10 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
       const value =
         key === 'traits'
           ? `${fieldData[key].recorded} out of ${fieldData[key].total}`
+          : key in trialData
+          ? trialData[key]
           : fieldData[key];
-
+      console.log('#####', {key});
       return (
         <View
           style={[
@@ -155,7 +196,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
         </View>
       );
     },
-    [fieldData],
+    [trialData],
   );
 
   return (
@@ -171,7 +212,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData}: any) => {
         <View style={styles.locationNameContainer}>
           <LocationPin />
           <Text style={styles.locationName}>
-            {fieldData?.id}-{fieldData?.location?.villageName}
+            {fieldData?.name}-{fieldData?.location?.villageName}
           </Text>
         </View>
         {isViewMoreDetails ? <CardArrowUp /> : <CardArrowDown />}

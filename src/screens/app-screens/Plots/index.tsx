@@ -29,6 +29,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
     maxNoOfImages: 0,
     villageName: '',
     trialLocationId: '',
+    name: ',',
   });
 
   const [getPlotList, plotListData, isPlotListLoading, plotListError] = useApi({
@@ -54,6 +55,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       maxNoOfImages: data?.maxNoOfImages || 5,
       villageName: data?.villageName,
       trialLocationId: data?.trialLocationId,
+      name: data?.name,
     });
   }, [plotListData]);
 
@@ -82,7 +84,10 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       return plotList;
     }
     return plotList.filter(plot =>
-      plot.plotNumber.toString().toLowerCase().includes(searchQuery.toLowerCase()),
+      plot.plotNumber
+        .toString()
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()),
     );
   }, [plotList, searchQuery]);
 
@@ -96,7 +101,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
         <View style={styles.plotContainer}>
           {details?.trialLocationId && (
             <Text style={styles.fieldTitle}>
-              {t(LOCALES.EXPERIMENT.LBL_FIELD)} {details?.trialLocationId}-
+              {t(LOCALES.EXPERIMENT.LBL_FIELD)} {details?.name}-
               {details?.villageName}
             </Text>
           )}

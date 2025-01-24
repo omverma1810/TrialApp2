@@ -29,10 +29,9 @@ const ValueInputCard = () => {
     <Text style={styles.traitsInputIconText}>{item?.traitUom || ''}</Text>
   );
 
-  const keyboardType: KeyboardTypeOptions =
-    item.dataType === 'int' || item.dataType === 'float'
-      ? 'numeric'
-      : 'default';
+  const getKeyboardType = (type: string) => {
+    return 'default';
+  };
 
   const handleSubmit = (text: string) => {
     if (text.trim() === '') {
@@ -94,7 +93,6 @@ const ValueInputCard = () => {
       <OutlinedInput
         label={item.traitName}
         rightIcon={rightIcon}
-        keyboardType={keyboardType}
         onEndEditing={e => handleSubmit(e.nativeEvent.text)}
         onSubmitEditing={e => handleSubmit(e.nativeEvent.text)}
         value={value}

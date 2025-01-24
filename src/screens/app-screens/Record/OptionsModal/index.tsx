@@ -19,9 +19,6 @@ const OptionsModal = ({item, onSubmit, bottomSheetModalRef}: any) => {
   const [mappedOption, setMappedOption] = useState('');
 
   const getKeyboardType = (type: string) => {
-    if (type === 'int' || type === 'float') {
-      return 'numeric';
-    }
     return 'default';
   };
 
@@ -86,7 +83,6 @@ const OptionsModal = ({item, onSubmit, bottomSheetModalRef}: any) => {
         <View style={[styles.traitsModalHeader, styles.row]}>
           <TextInput
             style={[styles.traitsModalHeaderTitle, styles.inputField]}
-            keyboardType={getKeyboardType(item?.dataType)}
             value={inputValue}
             placeholder={`Enter value (${item?.traitUom || ''})`}
             onChangeText={text => {

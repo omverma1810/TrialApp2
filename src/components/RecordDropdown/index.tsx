@@ -1,6 +1,6 @@
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
@@ -18,11 +18,11 @@ import {
   Edit,
   FieldSybol1,
 } from '../../assets/icons/svgs';
-import { URL } from '../../constants/URLS';
-import { useApi } from '../../hooks/useApi';
+import {URL} from '../../constants/URLS';
+import {useApi} from '../../hooks/useApi';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
-import { FONTS } from '../../theme/fonts';
+import {FONTS} from '../../theme/fonts';
 import Toast from '../../utilities/toast';
 import Calendar from '../Calender';
 
@@ -71,7 +71,10 @@ const RecordDropDown = ({
             <ProjectContainer
               key={field}
               title={field}
-              heading={`${field} - ${
+              heading={`${
+                fields.find((f: any) => String(f.id) === String(field))?.name ||
+                'Unknown Field'
+              } - ${
                 fields.find((f: any) => String(f.id) === String(field))
                   ?.location?.villageName || 'Unknown'
               }`}

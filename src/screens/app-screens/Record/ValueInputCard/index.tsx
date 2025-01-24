@@ -88,13 +88,9 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
     }
   };
 
-  const keyboardType: any = useMemo(() => {
-    if (entry?.dataType === 'float' || entry?.dataType === 'int') {
-      return 'number-pad';
-    } else {
-      return 'default';
-    }
-  }, [entry?.dataType]);
+  const getKeyboardType = (type: string) => {
+    return 'default';
+  };
 
   if (!entry) {
     return (
@@ -120,7 +116,6 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
               rightIcon={rightIcon}
               value={value}
               onChangeText={handleInputChange}
-              keyboardType={keyboardType}
               note={notes}
             />
           </View>

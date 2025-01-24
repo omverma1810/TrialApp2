@@ -50,9 +50,6 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
   }, [inputValue]);
 
   const getKeyboardType = (type: string) => {
-    if (type === 'int' || type === 'float') {
-      return 'numeric';
-    }
     return 'default';
   };
 
@@ -80,9 +77,10 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
     } else if (selectedOption) {
       saveValue = `${selectedOption}`;
     }
-
-    console.log({saveValue});
-    onSubmit(saveValue);
+    if (saveValue) {
+      console.log({saveValue});
+      onSubmit(saveValue);
+    }
     bottomSheetModalRef?.current?.close();
   };
 
@@ -143,7 +141,6 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
                 <View style={[styles.traitsModalHeader, styles.row]}>
                   <TextInput
                     style={[styles.traitsModalHeaderTitle, styles.inputField]}
-                    keyboardType={getKeyboardType(item?.dataType)}
                     value={inputValue}
                     onChangeText={text => {
                       setInputValue(text);
@@ -152,7 +149,7 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
                     placeholder={`Enter ${item?.traitName || 'value'} - ${
                       item?.traitUom
                     }`}
-                    placeholderTextColor={'#888'} // Adjust color for visibility in dark mode
+                    placeholderTextColor={'#888'}
                   />
                 </View>
                 {matchedOption && (

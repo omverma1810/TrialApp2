@@ -75,9 +75,11 @@ export const UnrecordedTraitsProvider = ({
       let sum: number = numbers.reduce((acc, curr) => acc + Number(curr), 0);
       finalValue = (sum / numbers.length).toFixed(2).toString();
     }
-    setIsRecorded(true);
-    setRecordedValue(finalValue);
-    updateRecordData(item?.observationId, item?.traitId, finalValue);
+    if (finalValue) {
+      setIsRecorded(true);
+      setRecordedValue(finalValue);
+      updateRecordData(item?.observationId, item?.traitId, finalValue);
+    }
   };
 
   const onEdit = () => {
