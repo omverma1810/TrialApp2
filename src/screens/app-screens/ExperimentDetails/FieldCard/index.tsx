@@ -20,6 +20,17 @@ import {ExperimentDetailsScreenProps} from '../../../../types/navigation/appType
 import TraitModal from '../../Experiment/ExperimentCard/ExperimentList/TraitModal';
 import {styles} from '../styles';
 
+type FieldData = {
+  [key: string]: any; 
+  name?: string;
+  location?: {villageName: string};
+  traitList?: any[];
+};
+
+type TrialData = {
+  [key: string]: any;
+};
+
 const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
   const {t} = useTranslation();
   const {navigate} =
@@ -30,11 +41,12 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
   const traitModalRef = useRef<BottomSheetModal>(null);
   const handleTraitModalOpen = () => traitModalRef.current?.present();
 
-  const [trialData, setTrialData] = useState({});
+  const [trialData, setTrialData] = useState<TrialData>({});
   const [getField, getFieldResponse, isFieldLoading, getFieldError] = useApi({
     url: URL.PLOT_LIST,
     method: 'GET',
   });
+
   useEffect(() => {
     getField({
       pathParams: fieldData.id,
@@ -43,7 +55,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
   }, []);
 
   useEffect(() => {
-    setTrialData(getFieldResponse?.data);
+    setTrialData(getFieldResponse?.data || {});
     console.log({fieldRes: getFieldResponse?.data});
   }, [getFieldResponse]);
 
@@ -65,13 +77,6 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
       key: 'noOfColumn',
       uom: null,
     },
-    // {
-    //   id: 2,
-    //   icon: Layout,
-    //   title: t(LOCALES.EXPERIMENT.LBL_ORDER_LAYOUT),
-    //   navigationAction: null,
-    //   key: 'order_layout',
-    // },
     {
       id: 3,
       icon: Plots,
@@ -96,17 +101,6 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
       key: 'traits',
       uom: null,
     },
-    // {
-    //   id: 5,
-    //   icon: Location,
-    //   title: t(LOCALES.EXPERIMENT.LBL_LOCATION),
-    //   value: 'Gujrat',
-    //   navigationAction: {
-    //     title: t(LOCALES.EXPERIMENT.LBL_GO_TO_LOCATION),
-    //     onClick: () => {},
-    //   },
-    //   key: 'location',
-    // },
     {
       id: 6,
       icon: null,
@@ -149,9 +143,6 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
     },
   ];
 
-  //   useMemo(() => {
-
-  // }, [getFieldResponse])
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const onViewMoreDetailsClick = () => setIsViewMoreDetails(!isViewMoreDetails);
 
@@ -166,11 +157,13 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
     }: (typeof fieldInfo)[0]) => {
       const value =
         key === 'traits'
-          ? `${fieldData[key].recorded} out of ${fieldData[key].total}`
-          : key in trialData
+          ? `${fieldData[key]?.recorded} out of ${fieldData[key]?.total}`
+          : trialData && typeof trialData === 'object' && key in trialData
           ? trialData[key]
           : fieldData[key];
+
       console.log('#####', {key});
+
       return (
         <View
           style={[
@@ -196,7 +189,7 @@ const FieldCard = ({isFirstIndex, isLastIndex, fieldData, expData}: any) => {
         </View>
       );
     },
-    [trialData],
+    [trialData, fieldData],
   );
 
   return (
