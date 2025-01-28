@@ -316,7 +316,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     if (paramsData?.QRData) {
       const data = paramsData?.QRData;
       const plot = plotList?.find((item: any) => item?.id === data?.plot_id);
-      if (plot) {
+      if (plot && !selectedPlot) {
         handlePlotSelect(plot);
       }
     }
