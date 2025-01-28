@@ -49,6 +49,12 @@ const TraitComponent = ({projectData, selectedFields, fields}: any) => {
 
     setIsOpen(newIsOpen);
   };
+  const getFieldName = (fieldId: string) => {
+    const field = fields.find(
+      (field: any) => String(field.id) === String(fieldId),
+    );
+    return field?.name || 'Unknown';
+  };
   const getVillageName = (fieldId: string) => {
     const field = fields.find(
       (field: any) => String(field.id) === String(fieldId),
@@ -82,7 +88,7 @@ const TraitComponent = ({projectData, selectedFields, fields}: any) => {
                         <View style={styles.projectContainerBackground}>
                           <View style={styles.header}>
                             <Text style={styles.headerText}>
-                              {location.trialLocationId} -{' '}
+                              {getFieldName(location.trialLocationId)} -{' '}
                               {getVillageName(location.trialLocationId)}
                             </Text>
                             <FieldSybol1 />

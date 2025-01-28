@@ -334,4 +334,16 @@ export const styles = StyleSheet.create({
   deleteBtnLabel: {
     color: '#e53430',
   },
+  noRecordedTraitText: {
+    textAlign: 'center',
+    color: '#999',
+    marginTop: 10,
+    fontSize: 14,
+  },
+  noUnrecordedTraitText: {
+    textAlign: 'center',
+    color: '#999',
+    marginTop: 10,
+    fontSize: 14,
+  },
 });

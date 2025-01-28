@@ -159,7 +159,7 @@ const Record = ({navigation}: any) => {
     console.log('~~~~~~~~~~~~~~~~', {
       item: fields,
     });
-    // setFields([]);
+    setFields([]);
   }, [experimentListData]);
 
   const handleEdit = () => {
@@ -614,21 +614,25 @@ const Record = ({navigation}: any) => {
               <Text style={RecordStyles.modalTitle}>Select a Field</Text>
               <ScrollView>
                 <View style={{gap: 30}}>
-                  {fields.map((field: any) => (
-                    <View
-                      key={field.id}
-                      style={RecordStyles.fieldCheckboxContainer}>
-                      <CheckBox
-                        value={!!selectedFields[field.id]}
-                        onChange={() => handleFieldSelect(field.id)}
-                      />
-                      <Pressable onPress={() => handleFieldSelect(field.id)}>
-                        <Text style={RecordStyles.fieldCheckboxText}>
-                          {field.name} - {field.location.villageName}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  ))}
+                  {fields.length ? (
+                    fields.map((field: any) => (
+                      <View
+                        key={field.id}
+                        style={RecordStyles.fieldCheckboxContainer}>
+                        <CheckBox
+                          value={!!selectedFields[field.id]}
+                          onChange={() => handleFieldSelect(field.id)}
+                        />
+                        <Pressable onPress={() => handleFieldSelect(field.id)}>
+                          <Text style={RecordStyles.fieldCheckboxText}>
+                            {field.name} - {field.location.villageName}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    ))
+                  ) : (
+                    <Loader />
+                  )}
                 </View>
               </ScrollView>
             </View>

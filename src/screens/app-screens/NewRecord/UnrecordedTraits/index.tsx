@@ -30,20 +30,16 @@ const UnrecordedTraits = () => {
     <>
       <View style={styles.unrecordedTraitsContainer}>
         <View style={[styles.unrecordedTraitsTitleContainer, styles.row]}>
-          {recordedTraitData?.length > 0 ? (
-            <>
-              <Text style={styles.unrecordedTraitsTitle}>
-                {t(LOCALES.EXPERIMENT.LBL_RECORDED_TRAITS)}
-                {` (${recordedTraitData?.length})`}
-              </Text>
-            </>
-          ) : (
-            <Text style={styles.unrecordedTraitsTitle}>
-              {t('No Recorded Trait')}
-            </Text>
-          )}
+          <Text style={styles.unrecordedTraitsTitle}>
+            {t(LOCALES.EXPERIMENT.LBL_RECORDED_TRAITS)}
+            {` (${recordedTraitData?.length})`}
+          </Text>
         </View>
-        {recordedTraitData?.length > 0 &&
+        {recordedTraitData?.length === 0 ? (
+          <Text style={styles.noRecordedTraitText}>
+            {t('No Recorded Trait')}
+          </Text>
+        ) : (
           recordedTraitData.map((item: TraitItem) => (
             <UnrecordedTraitsProvider
               key={item.traitId}
@@ -51,24 +47,31 @@ const UnrecordedTraits = () => {
               updateRecordData={updateRecordData}>
               <UnrecordedTraitCard />
             </UnrecordedTraitsProvider>
-          ))}
+          ))
+        )}
       </View>
 
       <View style={styles.unrecordedTraitsContainer}>
         <View style={[styles.unrecordedTraitsTitleContainer, styles.row]}>
           <Text style={styles.unrecordedTraitsTitle}>
             {t(LOCALES.EXPERIMENT.LBL_UNRECORDED_TRAITS)}
-            <Text>{` (${unRecordedTraitList?.length})`}</Text>
+            {` (${unRecordedTraitList?.length})`}
           </Text>
         </View>
-        {unRecordedTraitList.map((item: TraitItem) => (
-          <UnrecordedTraitsProvider
-            key={item.traitId}
-            item={item}
-            updateRecordData={updateRecordData}>
-            <UnrecordedTraitCard />
-          </UnrecordedTraitsProvider>
-        ))}
+        {unRecordedTraitList?.length === 0 ? (
+          <Text style={styles.noUnrecordedTraitText}>
+            {t('All Traits have been recorded')}
+          </Text>
+        ) : (
+          unRecordedTraitList.map((item: TraitItem) => (
+            <UnrecordedTraitsProvider
+              key={item.traitId}
+              item={item}
+              updateRecordData={updateRecordData}>
+              <UnrecordedTraitCard />
+            </UnrecordedTraitsProvider>
+          ))
+        )}
       </View>
     </>
   );

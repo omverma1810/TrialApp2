@@ -434,9 +434,9 @@ const ItemComponent = ({
               onCancel={() => setCalendarVisible(false)}
               selectedDate={
                 currentEntry?.value &&
-                dayjs(currentEntry.value, 'DD-MM-YYYY').isValid()
-                  ? currentEntry.value
-                  : dayjs().format('DD-MM-YYYY') // Default to today's date
+                dayjs(currentEntry.value, 'YYYY-MM-DD').isValid()
+                  ? dayjs(currentEntry.value, 'YYYY-MM-DD').format('YYYY-MM-DD') // Previous Date
+                  : dayjs().format('YYYY-MM-DD') // Fallback Default (Today)
               }
             />
           </View>
