@@ -1,34 +1,34 @@
-import {Pressable, Text, View} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {Pressable, Text, View} from 'react-native';
 import ImagePicker from 'react-native-image-crop-picker';
-import {useNavigation, useRoute} from '@react-navigation/native';
 
 import {
   CardArrowDown,
   CardArrowUp,
-  Notes as NotesIcon,
   ImagePlus,
+  Notes as NotesIcon,
 } from '../../../../assets/icons/svgs';
-import {styles} from '../styles';
-import {LOCALES} from '../../../../localization/constants';
-import RecordedTraits from '../RecordedTraits';
-import Notes from '../../NewRecord/Notes';
-import UnrecordedTraits from '../UnrecordedTraits';
-import TraitsImage from '../../NewRecord/TraitsImage';
-import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
-import NotesModal from '../../NewRecord/NotesModal';
 import {Button} from '../../../../components';
-import {useApi} from '../../../../hooks/useApi';
 import {URL} from '../../../../constants/URLS';
-import Toast from '../../../../utilities/toast';
+import {useApi} from '../../../../hooks/useApi';
+import {LOCALES} from '../../../../localization/constants';
+import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
 import {
   formatDateTime,
   getBase64FromUrl,
   getCoordinates,
   getNameFromUrl,
 } from '../../../../utilities/function';
+import Toast from '../../../../utilities/toast';
+import Notes from '../../NewRecord/Notes';
+import NotesModal from '../../NewRecord/NotesModal';
 import {TraitsImageTypes} from '../../NewRecord/RecordContext';
+import TraitsImage from '../../NewRecord/TraitsImage';
+import RecordedTraits from '../RecordedTraits';
+import {styles} from '../styles';
+import UnrecordedTraits from '../UnrecordedTraits';
 
 const PlotCard = ({
   isFirstIndex,
@@ -63,6 +63,7 @@ const PlotCard = ({
   const [isViewMoreDetails, setIsViewMoreDetails] = useState(false);
   const [isMediaSaveVisible, setIsMediaSaveVisible] = useState(false);
   const [shouldCallOnSave, setShouldCallOnSave] = useState(false);
+  const [recordableData, setRecordableData] = useState({});
   const [recordedTrait, setRecordedTrait] = useState(
     plotData?.recordedTraitData || [],
   );
@@ -122,6 +123,11 @@ const PlotCard = ({
     },
   ];
 
+  const [validateTraitsRecord, validateTraitsResponse] = useApi({
+    url: URL.VALIDATE_TRAITS,
+    method: 'POST',
+  });
+
   const [
     updateTraitsRecord,
     trraitsRecordData,
@@ -131,6 +137,26 @@ const PlotCard = ({
     url: URL.RECORD_TRAITS,
     method: 'POST',
   });
+
+  useEffect(() => {
+    if (validateTraitsResponse?.phenotypes) {
+      const invalid = validateTraitsResponse?.phenotypes?.filter(
+        (i: {validationStatus: boolean; observedValue: string}) =>
+          !i?.validationStatus,
+      );
+
+      console.log({invalid});
+      if (invalid && invalid.length) {
+        invalid?.forEach((item: {observedValue: string}) => {
+          Toast.warning({message: `${item.observedValue} is invalid value`});
+        });
+
+        setRecordableData({});
+        return;
+      }
+      updateTraitsRecord(recordableData);
+    }
+  }, [validateTraitsResponse]);
 
   useEffect(() => {
     if (trraitsRecordData?.status_code !== 200) {
@@ -168,7 +194,8 @@ const PlotCard = ({
       notes,
     };
 
-    updateTraitsRecord({payload, headers});
+    setRecordableData({payload, headers});
+    validateTraitsRecord({payload, headers});
   };
 
   const onDeleteImages = (arr: number[]) => {

@@ -24,7 +24,7 @@ const URL = {
   DASH: 'app/userdashboard/',
   CHANGE_PASSWORD: 'change-password/',
   DECODE_QR: 'decode-qr/',
-  DATA_VALIDATION: 'validate-data/',
+  VALIDATE_TRAITS: 'validate-data/?validationType=appRecordData',
 };
 
 export {API_CONFIG, BASE_URL, URL, DEFAULT_ENV};

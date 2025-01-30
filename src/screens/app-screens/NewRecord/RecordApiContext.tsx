@@ -1,7 +1,7 @@
-import React, {createContext, useContext, ReactNode, useEffect} from 'react';
+import React, {createContext, ReactNode, useContext, useEffect} from 'react';
 
-import {useApi} from '../../../hooks/useApi';
 import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
 
 interface RecordApiContextType {
   experimentListData: any;
@@ -15,6 +15,9 @@ interface RecordApiContextType {
   createTraitsRecord: any;
   trraitsRecordData: any;
   isTraitsRecordLoading: boolean;
+  validateTraitsRecord: any;
+  validatedTrraitsRecordData: any;
+  isValidateTraitsRecordLoading: boolean;
 }
 
 const RecordApiContext = createContext<RecordApiContextType | undefined>(
@@ -49,6 +52,15 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
     },
   );
 
+  const [
+    validateTraitsRecord,
+    validatedTrraitsRecordData,
+    isValidateTraitsRecordLoading,
+  ] = useApi({
+    url: URL.VALIDATE_TRAITS,
+    method: 'POST',
+  });
+
   const value = {
     experimentListData,
     isExperimentListLoading,
@@ -61,6 +73,9 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
     createTraitsRecord,
     trraitsRecordData,
     isTraitsRecordLoading,
+    validateTraitsRecord,
+    validatedTrraitsRecordData,
+    isValidateTraitsRecordLoading,
   };
 
   return (

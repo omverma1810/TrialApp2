@@ -60,9 +60,7 @@ const RecordDropDown = ({
       [`${field}_${index}`]: !prevState[`${field}_${index}`],
     }));
   };
-  console.log('~~~~~~~', {
-    p: projectData[1]?.plotData.map(i => [i?.plotNumber, i?.id]),
-  });
+
   return (
     <ScrollView>
       {Object.keys(selectedFields).map(
@@ -161,6 +159,7 @@ const ItemComponent = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const optionsModalRef = useRef<any>(null);
   const recordedTraitData = plotData.recordedTraitData;
+  const [recordableData, setRecordableData] = useState({});
   const unrecordedTraitData = plotData.unrecordedTraitData;
   const [dropdownHeight] = useState(new Animated.Value(0));
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
@@ -185,6 +184,11 @@ const ItemComponent = ({
     const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   };
+
+  const [validateTraitsRecord, validateTraitsResponse] = useApi({
+    url: URL.VALIDATE_TRAITS,
+    method: 'POST',
+  });
 
   const [updateValue, updateValueResponse] = useApi({
     url: URL.RECORD_TRAITS,
@@ -235,7 +239,8 @@ const ItemComponent = ({
     const headers = {
       'Content-Type': 'application/json',
     };
-    updateValue({payload, headers});
+    setRecordableData({payload, headers});
+    validateTraitsRecord({payload, headers});
   };
 
   const handleDateSubmit = (date: Date) => {
@@ -244,6 +249,24 @@ const ItemComponent = ({
     setCalendarVisible(false);
   };
 
+  useEffect(() => {
+    if (validateTraitsResponse?.phenotypes) {
+      const invalid = validateTraitsResponse?.phenotypes?.filter(
+        (i: {validationStatus: boolean}) => !i.validationStatus,
+      );
+
+      console.log({invalid});
+      if (invalid && invalid.length) {
+        invalid?.forEach((item: {observedValue: string}) => {
+          Toast.warning({message: `${item.observedValue} is invalid value`});
+        });
+        setRecordableData({});
+        return;
+      }
+
+      updateValue(recordableData);
+    }
+  }, [validateTraitsResponse]);
   useEffect(() => {
     if (updateValueResponse && updateValueResponse.status_code === 200) {
       Toast.success({
@@ -513,8 +536,8 @@ const styles = StyleSheet.create({
   },
   recordedTraitsText: {
     color: '#161616',
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 12,
+    fontFamily: FONTS.MEDIUM,
   },
   borderRadiusOverflow: {
     borderRadius: 6,
@@ -532,9 +555,9 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   entryLabel: {
-    color: '#636363',
-    fontWeight: '400',
-    fontSize: 15,
+    color: '#161616',
+    fontFamily: FONTS.REGULAR,
+    fontSize: 14,
   },
   entryValue: {
     color: '#161616',

@@ -97,6 +97,9 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     trraitsRecordData,
     updateTraitsRecord,
     updatedTraitsRecordData,
+    validateTraitsRecord,
+    validatedTrraitsRecordData,
+    isValidateTraitsRecordLoading,
   } = useRecordApi();
   const navigation = useNavigation<NewRecordScreenProps['navigation']>();
   const {params} = useRoute<NewRecordScreenProps['route']>();
@@ -133,6 +136,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const [images, setImages] = useState<TraitsImageTypes[]>([]);
   const [maxNoOfImages, setMaxNoOfImages] = useState(0);
   const [hasNextPlot, setHasNextPlot] = useState(false);
+  const [recordableTraits, setRecordableTraits] = useState({});
   const isSelectExperimentVisible = true;
   const isSelectFieldVisible = !!selectedExperiment;
   const isSelectPlotVisible = !!selectedExperiment && !!selectedField;
@@ -389,12 +393,38 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       long: longitude,
     };
     const {shouldUpdate} = recordData;
-    if (!shouldUpdate) {
-      createTraitsRecord({payload, headers});
-    } else {
-      updateTraitsRecord({payload, headers});
-    }
+    setRecordableTraits({shouldUpdate, payload, headers});
+    validateTraitsRecord({payload, headers});
   };
+
+  useEffect(() => {
+    console.log({
+      validatedTrraitsRecordData,
+    });
+    if (validatedTrraitsRecordData?.phenotypes) {
+      let {shouldUpdate, payload, headers} = recordableTraits;
+      console.log('!!!!!!!!!!!1', {payload: payload?.phenotypes});
+      const invalid = validatedTrraitsRecordData?.phenotypes?.filter(
+        (i: {validationStatus?: boolean; observedValue?: string}) =>
+          !i?.validationStatus,
+      );
+
+      console.log({invalid});
+      if (invalid && invalid.length) {
+        Toast.warning({
+          message: `${invalid[0]?.observedValue} is invalid value`,
+        });
+        setRecordableTraits({});
+        return;
+      }
+      if (!shouldUpdate) {
+        createTraitsRecord({payload, headers});
+      } else {
+        updateTraitsRecord({payload, headers});
+      }
+      setRecordableTraits({});
+    }
+  }, [validatedTrraitsRecordData]);
 
   const onSaveNotes = (notes: string) => {
     setNotes(notes.trim());

@@ -1,22 +1,22 @@
-import {Pressable, Text, View} from 'react-native';
+import {useRoute} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {useRoute} from '@react-navigation/native';
+import {Pressable, Text, View} from 'react-native';
 
+import {Button} from '../../../../components';
+import {URL} from '../../../../constants/URLS';
+import {useApi} from '../../../../hooks/useApi';
 import {LOCALES} from '../../../../localization/constants';
-import {styles} from '../styles';
+import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
+import {formatDateTime, getCoordinates} from '../../../../utilities/function';
+import Toast from '../../../../utilities/toast';
+import UnrecordedTraitCard from '../../NewRecord/UnrecordedTraits/UnrecordedTraitCard';
 import {
   TraitItem,
   UnrecordedTraitsProvider,
   UpdateRecordDataFunction,
 } from '../../NewRecord/UnrecordedTraits/UnrecordedTraitsContext';
-import UnrecordedTraitCard from '../../NewRecord/UnrecordedTraits/UnrecordedTraitCard';
-import {Button} from '../../../../components';
-import {useApi} from '../../../../hooks/useApi';
-import {URL} from '../../../../constants/URLS';
-import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
-import {formatDateTime, getCoordinates} from '../../../../utilities/function';
-import Toast from '../../../../utilities/toast';
+import {styles} from '../styles';
 
 type RecordData = {
   [key: string]: {
@@ -42,6 +42,7 @@ const UnrecordedTraits = ({
     params: {type},
   } = useRoute<PlotsScreenProps['route']>();
   const [recordData, setRecordData] = useState<RecordData>({});
+  const [recordableData, setRecordableData] = useState({});
   const [isShowDetails, setIsShowDetails] = useState(true);
   const buttonTitles =
     t(LOCALES.EXPERIMENT.LBL_SAVE) + ' ' + t(LOCALES.EXPERIMENT.LBL_RECORD);
@@ -62,6 +63,15 @@ const UnrecordedTraits = ({
   const onViewMoreClick = () => setIsShowDetails(state => !state);
 
   const [
+    validateTraitsRecord,
+    validatedTrraitsRecordData,
+    isValidatedTraitsRecordLoading,
+  ] = useApi({
+    url: URL.VALIDATE_TRAITS,
+    method: 'POST',
+  });
+
+  const [
     createTraitsRecord,
     trraitsRecordData,
     isTraitsRecordLoading,
@@ -70,6 +80,26 @@ const UnrecordedTraits = ({
     url: URL.RECORD_TRAITS,
     method: 'POST',
   });
+
+  useEffect(() => {
+    if (validatedTrraitsRecordData?.phenotypes) {
+      const invalid = validatedTrraitsRecordData?.phenotypes?.filter(
+        (i: {validationStatus?: boolean; observedValue?: string}) =>
+          !i?.validationStatus,
+      );
+
+      console.log({invalid});
+      if (invalid && invalid.length) {
+        Toast.warning({
+          message: `${invalid[0]?.observedValue} is invalid value`,
+        });
+        setRecordableData({});
+        return;
+      }
+      createTraitsRecord({...recordableData});
+      setRecordableData({});
+    }
+  }, [validatedTrraitsRecordData]);
 
   useEffect(() => {
     if (trraitsRecordData?.status_code !== 200) {
@@ -95,10 +125,13 @@ const UnrecordedTraits = ({
       long: longitude,
       notes: plotData?.notes || '',
     };
-    createTraitsRecord({payload, headers});
+    setRecordableData({payload, headers});
+    validateTraitsRecord({payload, headers});
   };
 
-  if (data.length === 0) return null;
+  if (data.length === 0) {
+    return null;
+  }
 
   return (
     <View
