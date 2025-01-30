@@ -248,8 +248,8 @@ const Record = ({navigation}: any) => {
     setFields([]);
   }, [selectedExperiment]);
 
-  const handleFieldSelect = (id: string) => {
-    const isSelected = !selectedFields[id];
+  const handleFieldUnSelect = (id: string) => {
+    const isSelected = false;
 
     setSelectedFields(prevState => {
       const updatedFields = {
@@ -259,9 +259,32 @@ const Record = ({navigation}: any) => {
       setTraitData(null);
       setPlotData(null);
       const updatedLocationIds = Object.keys(updatedFields).filter(
+        fieldId => fieldId === id && isSelected && updatedFields[fieldId],
+      );
+      console.log({locationIds, updatedLocationIds});
+      setLocationIds(updatedLocationIds);
+
+      return updatedFields;
+    });
+  };
+
+  const handleFieldSelect = (id: string) => {
+    const isSelected = !selectedFields[id];
+
+    setSelectedFields(prevState => {
+      const updatedFields = {
+        ...prevState,
+        [id]: isSelected,
+      };
+      if (!isSelected && id in selectedFields) {
+        delete updatedFields[id];
+      }
+      setTraitData(null);
+      setPlotData(null);
+      const updatedLocationIds = Object.keys(updatedFields).filter(
         fieldId => updatedFields[fieldId],
       );
-
+      console.log({locationIds, updatedLocationIds, updatedFields});
       setLocationIds(updatedLocationIds);
 
       return updatedFields;
@@ -438,9 +461,12 @@ const Record = ({navigation}: any) => {
                     ) ? (
                       <View style={RecordStyles.selectedFieldsWrapper}>
                         {Object.keys(selectedFields).map((fieldId, index) => {
-                          if (selectedFields[fieldId]) {
+                          if (
+                            fieldId in selectedFields &&
+                            selectedFields[fieldId]
+                          ) {
                             const matchedField = fields.find(
-                              field => String(field.id) === String(fieldId),
+                              field => String(field?.id) === String(fieldId),
                             );
 
                             if (!matchedField) {

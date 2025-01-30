@@ -55,7 +55,7 @@ const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
               {note.content}
             </Text>
             <Text style={styles.noteInfo}>
-              {note.experiment_name} - Field [{note.villageName}]
+              {note.experiment_name} - [{note.villageName}]
             </Text>
           </View>
           <Pressable onPress={() => bottomSheetModalRef.current?.present()}>

@@ -1,11 +1,5 @@
 import React, {useRef, useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, Modal} from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
@@ -48,18 +42,21 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
   useEffect(() => {
     const visitDate = new Date(visit.date);
     const difference = differenceInDays(visitDate, currentDate);
-    
+
     if (isToday(visitDate)) {
       setdaysLeft('Today');
     } else if (isTomorrow(visitDate)) {
       setdaysLeft('Tomorrow');
     } else if (isYesterday(visitDate)) {
       setdaysLeft('Yesterday');
+    } else if (difference < 0) {
+      setdaysLeft(`${Math.abs(difference)} Days Ago`);
     } else {
-      setdaysLeft(difference);
+      setdaysLeft(`Days Left: ${difference}`);
     }
   }, [visit.date]);
-    useEffect(() => {
+
+  useEffect(() => {
     if (deleteVisitResponse) {
       if (deleteVisitResponse.status_code === 204) {
         Toast.success({
@@ -78,7 +75,6 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
     url: `${URL.VISITS}${visit.id}/`,
     method: 'PUT',
   });
-
 
   const onUpdate = async (dateSelected: any) => {
     const payload = {
@@ -129,29 +125,28 @@ const UpcomingVisits = ({visit, onDelete, navigation, refreshVisits}: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <TouchableOpacity onPress = {() => bottomSheetModalRef.current?.present()}>
-        <View style={styles.row}>
-          <View style={styles.iconRow}>
-            <Field />
-            <View style={styles.textColumn}>
-              <Text style={styles.fieldName}>{visit.experiment_name}</Text>
-              <Text style={styles.description}>{visit.trial_type}</Text>
+        <TouchableOpacity
+          onPress={() => bottomSheetModalRef.current?.present()}>
+          <View style={styles.row}>
+            <View style={styles.iconRow}>
+              <Field />
+              <View style={styles.textColumn}>
+                <Text style={styles.fieldName}>{visit.experiment_name}</Text>
+                <Text style={styles.description}>{visit.trial_type}</Text>
+              </View>
             </View>
+            <TouchableOpacity
+              onPress={() => bottomSheetModalRef.current?.present()}>
+              <Dots />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            onPress={() => bottomSheetModalRef.current?.present()}>
-            <Dots />
-          </TouchableOpacity>
-        </View>
         </TouchableOpacity>
         <View style={styles.row}>
           <View style={styles.iconRow}>
             <Calendar />
             <View style={styles.textColumn}>
               <Text style={styles.date}>{visit.date}</Text>
-              <Text style={styles.daysLeft}>
-                Days left: {daysLeft ? daysLeft : 'N/A'}
-              </Text>
+              <Text style={styles.daysLeft}>{daysLeft ? daysLeft : 'N/A'}</Text>
             </View>
           </View>
           <ButtonNavigation />
