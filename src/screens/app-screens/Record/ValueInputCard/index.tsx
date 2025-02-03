@@ -1,24 +1,30 @@
-import React, {useEffect, useState, useMemo} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Pressable} from 'react-native';
 import {OutlinedInput, Text} from '../../../../components';
 import RecordStyles from '../RecordStyles';
 import eventEmitter from '../../../../utilities/eventEmitter';
 import {TOAST_EVENT_TYPES} from '../../../../types/components/Toast';
 
-const MIN_INITIAL_PLANT_STAND = 1;
-const MAX_INITIAL_PLANT_STAND = 10;
-const MIN_FINAL_PLANT_STAND = 2;
-const MAX_FINAL_PLANT_STAND = 10;
+interface ValueInputCardProps {
+  entry: {
+    value?: string;
+    traitName: string;
+    traitUom?: string;
+    dataType: string;
+  };
+  onSubmit: (value: string) => void;
+  setShowInputCard: (value: null) => void;
+}
 
-const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
-  const [value, setValue] = useState('');
+const ValueInputCard: React.FC<ValueInputCardProps> = ({
+  entry,
+  onSubmit,
+  setShowInputCard,
+}) => {
+  const [value, setValue] = useState<string>('');
 
   useEffect(() => {
-    if (entry) {
-      setValue(entry.value ?? '');
-    } else {
-      setValue('');
-    }
+    setValue(entry?.value ?? '');
   }, [entry]);
 
   const rightIcon = (
@@ -30,8 +36,17 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
       ? 'Use values separated by * to get the average.'
       : '';
 
-  const showToast = (options: any) => {
+  const showToast = (options: {type: string; message: string}) => {
     eventEmitter.emit(TOAST_EVENT_TYPES.SHOW, options);
+  };
+
+  const calculateAverage = (text: string): number | null => {
+    const values = text
+      .split('*')
+      .map(parseFloat)
+      .filter(v => !isNaN(v));
+    if (values.length === 0) return null;
+    return values.reduce((acc, curr) => acc + curr, 0) / values.length;
   };
 
   const handleSubmit = (text: string) => {
@@ -43,40 +58,16 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
       return;
     }
 
-    const numericValue = parseFloat(text);
-
-    if (entry?.traitName === 'Initial Plant Stand') {
-      if (
-        numericValue < MIN_INITIAL_PLANT_STAND ||
-        numericValue > MAX_INITIAL_PLANT_STAND
-      ) {
-        showToast({
-          type: 'ERROR',
-          message: `Value must be between ${MIN_INITIAL_PLANT_STAND} and ${MAX_INITIAL_PLANT_STAND}.`,
-        });
-        return;
-      }
+    const averageValue = calculateAverage(text);
+    if (averageValue === null) {
+      showToast({type: 'ERROR', message: 'Please enter valid numbers.'});
+      return;
     }
 
-    if (entry?.traitName === 'Final Plant Stand') {
-      if (
-        numericValue < MIN_FINAL_PLANT_STAND ||
-        numericValue > MAX_FINAL_PLANT_STAND
-      ) {
-        showToast({
-          type: 'ERROR',
-          message: `Value must be between ${MIN_FINAL_PLANT_STAND} and ${MAX_FINAL_PLANT_STAND}.`,
-        });
-        return;
-      }
-    }
-
-    onSubmit(text);
+    onSubmit(averageValue.toFixed(2));
     setValue('');
     setShowInputCard(null);
-    showToast({
-      type: 'SUCCESS',
-    });
+    showToast({type: 'SUCCESS', message: 'Record saved successfully.'});
   };
 
   const handleInputChange = (text: string) => {
@@ -86,10 +77,6 @@ const ValueInputCard = ({entry, onSubmit, setShowInputCard}: any) => {
     } else {
       setValue(text);
     }
-  };
-
-  const getKeyboardType = (type: string) => {
-    return 'default';
   };
 
   if (!entry) {

@@ -35,16 +35,13 @@ const PreviewImageModal = ({
 
       if (Platform.OS === 'android') {
         if (Platform.Version >= 33) {
-          // Android 13+: READ_MEDIA_IMAGES permission required
           hasPermission =
             (await PermissionsAndroid.request(
               PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
             )) === PermissionsAndroid.RESULTS.GRANTED;
         } else if (Platform.Version >= 29) {
-          // Android 10-12: Scoped storage, no explicit permission required
           hasPermission = true;
         } else {
-          // Android 9 or below: WRITE_EXTERNAL_STORAGE permission required
           hasPermission =
             (await PermissionsAndroid.request(
               PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -66,12 +63,10 @@ const PreviewImageModal = ({
       const filePath = `${downloadDir}/${fileName}`;
 
       if (selectedImageUrl.startsWith('file://')) {
-        // Local file: Copy the file directly
         const sourcePath = selectedImageUrl.replace('file://', '');
         await RNFS.copyFile(sourcePath, filePath);
         Alert.alert('Download Complete', `Image saved to ${filePath}`);
       } else {
-        // Remote URL: Download the file
         const result = await RNFS.downloadFile({
           fromUrl: selectedImageUrl,
           toFile: filePath,

@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   entryLabel: {
     color: '#161616',
     fontFamily: FONTS.REGULAR,
-    fontSize: 14,
+    fontSize: 12,
   },
   entryValue: {
     color: '#161616',
