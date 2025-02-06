@@ -14,6 +14,8 @@ interface RecordApiContextType {
   isPlotListLoading: boolean;
   createTraitsRecord: any;
   trraitsRecordData: any;
+  updateTraitsRecord: any;
+  updatedTraitsRecordData: any;
   isTraitsRecordLoading: boolean;
   validateTraitsRecord: any;
   validatedTrraitsRecordData: any;
@@ -52,6 +54,11 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
     },
   );
 
+  const [updateTraitsRecord, updatedTraitsRecordData] = useApi({
+    url: URL.RECORD_TRAITS,
+    method: 'PUT',
+  });
+
   const [
     validateTraitsRecord,
     validatedTrraitsRecordData,
@@ -72,6 +79,8 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
     isPlotListLoading,
     createTraitsRecord,
     trraitsRecordData,
+    updateTraitsRecord,
+    updatedTraitsRecordData,
     isTraitsRecordLoading,
     validateTraitsRecord,
     validatedTrraitsRecordData,

@@ -12,6 +12,7 @@ const UnrecordedTraits = () => {
   const {t} = useTranslation();
   const {
     unRecordedTraitList,
+    createRecordData,
     updateRecordData,
     selectedPlot,
     selectedExperiment,
@@ -67,7 +68,7 @@ const UnrecordedTraits = () => {
             <UnrecordedTraitsProvider
               key={item.traitId}
               item={item}
-              updateRecordData={updateRecordData}>
+              updateRecordData={createRecordData}>
               <UnrecordedTraitCard />
             </UnrecordedTraitsProvider>
           ))

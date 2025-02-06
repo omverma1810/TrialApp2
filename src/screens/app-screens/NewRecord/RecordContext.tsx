@@ -76,6 +76,7 @@ interface RecordContextType {
   closeNotesModal: () => void;
   handleCropChange: (option: string) => void;
   handleProjectChange: (option: string) => void;
+  createRecordData: UpdateRecordDataFunction;
   updateRecordData: UpdateRecordDataFunction;
   onSaveRecord: (hasNextPlot: boolean) => void;
   onSaveNotes: (notes: string) => void;
@@ -326,11 +327,27 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     }
   }, [plotListData]);
 
-  const updateRecordData: UpdateRecordDataFunction = (
+  const createRecordData: UpdateRecordDataFunction = (
     observationId,
     traitId,
     observedValue,
     shouldUpdate = false,
+  ) => {
+    setRecordData(prevData => ({
+      ...prevData,
+      [traitId]: {
+        observationId,
+        traitId,
+        observedValue: observedValue,
+        shouldUpdate,
+      },
+    }));
+  };
+  const updateRecordData: UpdateRecordDataFunction = (
+    observationId,
+    traitId,
+    observedValue,
+    shouldUpdate = true,
   ) => {
     setRecordData(prevData => ({
       ...prevData,
@@ -365,6 +382,20 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     }
   }, [trraitsRecordData, hasNextPlot]);
 
+  useEffect(() => {
+    if (updatedTraitsRecordData?.status_code === 200) {
+      Toast.success({
+        message:
+          updatedTraitsRecordData?.message || 'Data updated successfully',
+      });
+    } else if (updatedTraitsRecordData?.status_code) {
+      Toast.error({
+        message: updatedTraitsRecordData?.message || 'Failed to update data',
+      });
+    }
+  }, [updatedTraitsRecordData]);
+
+
   const onSaveRecord = async (hasNextPlot: boolean) => {
     setHasNextPlot(hasNextPlot);
     const headers = {'Content-Type': 'application/json'};
@@ -380,6 +411,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
         base64Data: imagesBase64Arr[index],
       };
     });
+    console.log({recordData});
     const payload = {
       plotId: selectedPlot?.id,
       date: formatDateTime(new Date()),
@@ -392,38 +424,55 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       lat: latitude,
       long: longitude,
     };
-    const {shouldUpdate} = recordData;
-    setRecordableTraits({shouldUpdate, payload, headers});
+
+    setRecordableTraits({payload, headers});
     validateTraitsRecord({payload, headers});
   };
 
   useEffect(() => {
     console.log({
-      validatedTrraitsRecordData,
+      validatedTrraitsRecordData: validatedTrraitsRecordData?.phenotypes,
     });
-    if (validatedTrraitsRecordData?.phenotypes) {
-      let {shouldUpdate, payload, headers} = recordableTraits;
-      console.log('!!!!!!!!!!!1', {payload: payload?.phenotypes});
-      const invalid = validatedTrraitsRecordData?.phenotypes?.filter(
-        (i: {validationStatus?: boolean; observedValue?: string}) =>
-          !i?.validationStatus,
-      );
 
-      console.log({invalid});
-      if (invalid && invalid.length) {
-        Toast.warning({
-          message: `${invalid[0]?.observedValue} is invalid value`,
-        });
-        setRecordableTraits({});
-        return;
-      }
-      if (!shouldUpdate) {
-        createTraitsRecord({payload, headers});
-      } else {
-        updateTraitsRecord({payload, headers});
-      }
+    let {payload, headers} = recordableTraits;
+
+    const invalid = validatedTrraitsRecordData?.phenotypes?.filter(
+      i => !i?.validationStatus,
+    );
+    // console.log({invalid, payload});
+    if (invalid && invalid.length) {
+      invalid.forEach(item => {
+        Toast.warning({message: `${item?.observedValue} is invalid value`});
+        setRecordData(prevData => ({
+          ...prevData,
+          [item?.traitId]: {
+            observationId: item?.observedId,
+            traitId: item?.traitId,
+            observedValue: null,
+            shouldUpdate: item?.shouldUpdate,
+          },
+        }));
+      });
       setRecordableTraits({});
+      return;
     }
+    let creatableTraits: any = payload?.phenotypes.filter(
+      i => !i?.shouldUpdate,
+    );
+    let updatableTraits: any = payload?.phenotypes.filter(i => i?.shouldUpdate);
+
+    if (creatableTraits && creatableTraits.length) {
+      let createTraits = {...payload, phenotypes: creatableTraits};
+
+      createTraitsRecord({payload: createTraits, headers});
+    }
+    if (updatableTraits && updatableTraits.length) {
+      let updateTraits = {...payload, phenotypes: updatableTraits};
+
+      updateTraitsRecord({payload: updateTraits, headers});
+    }
+
+    setRecordableTraits({});
   }, [validatedTrraitsRecordData]);
 
   const onSaveNotes = (notes: string) => {
@@ -477,6 +526,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     closeNotesModal,
     handleCropChange,
     handleProjectChange,
+    createRecordData,
     updateRecordData,
     onSaveRecord,
     onSaveNotes,
