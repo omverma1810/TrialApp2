@@ -16,4 +16,6 @@ const SOCIAL_LOGIN = {
   },
 };
 
-export {REGEX, SOCIAL_LOGIN};
+const ONESIGNAL_KEY = '793ff2be-beca-4b50-aaed-f30e2c414b9c';
+
+export {REGEX, SOCIAL_LOGIN, ONESIGNAL_KEY};
