@@ -96,7 +96,7 @@ const SignIn = () => {
     return (
       <>
         <View style={styles.loginLabelContainer}>
-          <Text style={styles.welcome}>Trials App 2.0</Text>
+          <Text style={styles.welcome}>Trial Genie</Text>
           <Text style={styles.loginToContinue}>Login to continue!</Text>
         </View>
         <Input
@@ -149,7 +149,7 @@ const SignIn = () => {
     return (
       <>
         <View style={styles.loginLabelContainer}>
-          <Text style={styles.welcome}>Trials App 2.0</Text>
+          <Text style={styles.welcome}>Trial Genie</Text>
           <Text style={[styles.loginToContinue, {fontSize: 16, marginTop: 10}]}>
             Enter your organization URL to continue!
           </Text>
