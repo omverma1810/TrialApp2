@@ -8,6 +8,7 @@ import {useApi} from '../../hooks/useApi';
 import {URL} from '../../constants/URLS';
 import {FONTS} from '../../theme/fonts';
 import Toast from '../../utilities/toast';
+import dayjs from 'dayjs';
 
 const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -55,7 +56,8 @@ const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
               {note.content}
             </Text>
             <Text style={styles.noteInfo}>
-              {note.experiment_name} - [{note.villageName}]
+              {note.experiment_name} - [{note.villageName}] On {''}
+              {dayjs(note.created_on).format('DD-MM-YYYY HH:mm')}
             </Text>
           </View>
           <Pressable onPress={() => bottomSheetModalRef.current?.present()}>
