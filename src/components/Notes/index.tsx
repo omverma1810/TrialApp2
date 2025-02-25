@@ -56,8 +56,8 @@ const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
               {note.content}
             </Text>
             <Text style={styles.noteInfo}>
-              {note.experiment_name} - [{note.villageName}] On {''}
-              {dayjs(note.created_on).format('DD-MM-YYYY HH:mm')}
+              {note.experiment_name} - [{note.villageName}] On{' '}
+              {dayjs(note.created_on).format('DD-MM-YYYY hh:mm A')}
             </Text>
           </View>
           <Pressable onPress={() => bottomSheetModalRef.current?.present()}>
