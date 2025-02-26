@@ -116,7 +116,7 @@ const MyNote = ({navigation, refresh}: any) => {
                 </Svg>
               )}
               <Text style={{color: '#1A6DD2', marginLeft: 4}}>
-                {sortOrder === 'asc' ? 'Sort Descending' : 'Sort Ascending'}
+                {sortOrder === 'asc' ? 'Sort by Newest' : 'Sort by Oldest'}
               </Text>
             </TouchableOpacity>
           </View>
