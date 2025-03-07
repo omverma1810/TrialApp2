@@ -318,6 +318,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     });
   };
   console.log('selectedFilters in', selectedFilters);
+  console.log(JSON.stringify(filtersData, null , 2) , "filterDATA")
 
   return (
     <SafeAreaView
@@ -351,7 +352,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
             <Adfilter />
           </Pressable>
         </View>
-        <FlatList
+        {/* <FlatList
           data={finalExperimentList}
           contentContainerStyle={
             finalExperimentList?.length === 0
@@ -372,8 +373,35 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
           }}
           keyExtractor={(_, index) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
-        />
-        {/* <ExperimentCard item={fina} selectedProject={selectedProject} /> */}
+        /> */}
+        {isFilterApplied && Object.keys(filtersData).length === 0 ? (
+          <View style={{flex: 1,justifyContent:'center', alignItems:'center' }}>
+            <Text style={{color: 'black' , fontFamily: FONTS.SEMI_BOLD}}>No Data Found!</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={finalExperimentList}
+            contentContainerStyle={
+              finalExperimentList?.length === 0
+                ? {flexGrow: 1}
+                : {paddingBottom: 80}
+            }
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={ListHeaderComponent}
+            renderItem={({item, index}) => {
+              // Hide ExperimentCard when filters are applied
+              if (isFilterApplied) {
+                return null; // This will hide ExperimentCard
+              }
+
+              return (
+                <ExperimentCard item={item} selectedProject={selectedProject} />
+              );
+            }}
+            keyExtractor={(_, index) => index.toString()}
+            ListEmptyComponent={ListEmptyComponent}
+          />
+        )}
       </View>
       {!isOptionModalVisible && (
         <Pressable style={styles.newRecord} onPress={onNewRecordClick}>

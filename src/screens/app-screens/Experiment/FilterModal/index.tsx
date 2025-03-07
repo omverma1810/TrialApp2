@@ -22,7 +22,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
   // States to manage selected filters
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<string[]>();
+  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<
     'Locations' | 'Seasons' | 'Years' | ''
@@ -56,7 +56,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
     onFilterSelect(filterType, updatedSelection);
   };
 
-  console.log('years',selectedYear)
+  console.log('years', selectedYear);
 
   const clearAllSelections = () => {
     setSelectedYear([]);
@@ -134,7 +134,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                             selectedLocation.includes(option.value)) ||
                           (selectedFilter === 'Years' &&
                             selectedYear.includes(option.value))
-                            ? '#E32636'
+                            ? '#1A6DD2'
                             : 'black'
                         }
                       />
@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
   dropdownItem: {
     backgroundColor: '#fff',
     padding: 10,
-    borderBottomWidth: 0.3,
-    borderBottomColor: '#999',
+    // borderBottomWidth: 0.3,
+    // borderBottomColor: '#999',
     flexDirection: 'row',
     gap: 10,
   },
