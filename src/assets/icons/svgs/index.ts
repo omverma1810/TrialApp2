@@ -52,6 +52,8 @@ import EyeSlash from './EyeSlash';
 import SelectIcon from './SelectIcon';
 import DbLeaf from './DbLeaf';
 import Setting from './Setting';
+import Tick from './Tick';
+import Adfilter from './Adfilters';
 
 export {
   Back,
@@ -108,4 +110,6 @@ export {
   EyeSlash,
   SelectIcon,
   Setting,
+  Tick,
+  Adfilter,
 };
