@@ -64,6 +64,23 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const [filtersData, setFiltersData] = useState<any>([]);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
 
+  const buildFiltersPayload = () => {
+    const filters = [];
+    if (selectedFilters.Locations && selectedFilters.Locations.length > 0) {
+      filters.push({key: 'locations', value: selectedFilters.Locations});
+    }
+    if (selectedFilters.Years && selectedFilters.Years.length > 0) {
+      filters.push({key: 'years', value: selectedFilters.Years});
+    }
+    if (selectedFilters.Crops && selectedFilters.Crops.length > 0) {
+      filters.push({key: 'crops', value: selectedFilters.Crops});
+    }
+    if (selectedFilters.Seasons && selectedFilters.Seasons.length > 0) {
+      filters.push({key: 'seasons', value: selectedFilters.Seasons});
+    }
+    return filters;
+  };
+
   const roleName = useSelector(
     (state: RootState) => state.auth?.userDetails?.role?.[0]?.role_name,
   );
@@ -92,7 +109,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   useEffect(() => {
     if (filtersApiData?.status_code === 200 && filtersApiData?.filters) {
       setExperimentFilters(filtersApiData.filters);
-      console.log('Crops from API:', filtersApiData.filters.Crops);
       if (Array.isArray(filtersApiData.filters.Crops)) {
         setCropOptions(filtersApiData.filters.Crops);
         setCropList(
@@ -157,13 +173,12 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const handleCropSelection = (optionLabel: string) => {
     const selectedObj = cropOptions.find(item => item.label === optionLabel);
     if (selectedObj) {
-      console.log('Selected Crop:', selectedObj);
       setSelectedCrop(selectedObj);
       const payload = {
         cropId: selectedObj.value,
         page: 1,
         perPage: 10,
-        filters: [],
+        filters: buildFiltersPayload(),
       };
       console.log('Payload being sent:', payload);
       postFiltered({
@@ -202,9 +217,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       </View>
     );
   }, [cropList, selectedCrop, projectList, selectedProject, t]);
-
-  console.log('finalExperimentList:', finalExperimentList);
-  console.log('selectedProject:', selectedProject);
 
   const onNewRecordClick = () => {
     setIsOptionModalVisible(true);
@@ -308,6 +320,12 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       <FilterModal
         isVisible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
+        onApply={() => {
+          // Only call handleCropSelection if a crop is selected.
+          if (selectedCrop) {
+            handleCropSelection(selectedCrop.label);
+          }
+        }}
         onFilterSelect={handleFilterUpdate}
         filterData={experimentFilters}
       />

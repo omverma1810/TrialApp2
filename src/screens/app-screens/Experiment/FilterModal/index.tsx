@@ -22,6 +22,7 @@ type FilterDataType = {
 type FilterModalProps = {
   isVisible: boolean;
   onClose: () => void;
+  onApply: () => void; // new prop
   onFilterSelect: (
     filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
     selectedOptions: string[],
@@ -32,6 +33,7 @@ type FilterModalProps = {
 const FilterModal: React.FC<FilterModalProps> = ({
   isVisible,
   onClose,
+  onApply,
   onFilterSelect,
   filterData,
 }) => {
@@ -100,6 +102,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
     onFilterSelect('Locations', []);
     onFilterSelect('Years', []);
     onFilterSelect('Crops', []);
+    onApply(); // trigger re-fetch/update with cleared filters
+    onClose(); // close the modal
   };
 
   return (
@@ -196,7 +200,12 @@ const FilterModal: React.FC<FilterModalProps> = ({
           <Pressable onPress={onClose} style={styles.footerButton}>
             <Text style={styles.footerButtonText}>Close</Text>
           </Pressable>
-          <Pressable onPress={onClose} style={styles.footerButton}>
+          <Pressable
+            onPress={() => {
+              onApply(); // trigger re-fetch with the new filters
+              onClose();
+            }}
+            style={styles.footerButton}>
             <Text style={styles.footerButtonText}>Apply</Text>
           </Pressable>
         </View>
