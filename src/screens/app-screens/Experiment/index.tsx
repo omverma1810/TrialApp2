@@ -43,9 +43,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const [cropOptions, setCropOptions] = useState<
     Array<{label: string; value: number}>
   >([]);
-
   const [cropList, setCropList] = useState<string[]>([]);
-
   const [projectList, setProjectList] = useState<string[]>([]);
   const [filteredExperiments, setFilteredExperiments] = useState<any>({});
 
@@ -126,8 +124,11 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       const projects = Object.keys(projectsData);
       setProjectList(projects);
 
-      if (!selectedProject && projects.length > 0) {
+      // Always set the first project as default whenever a new crop is loaded
+      if (projects.length > 0) {
         setSelectedProject(projects[0]);
+      } else {
+        setSelectedProject('');
       }
     }
   }, [postFilteredData]);
@@ -217,14 +218,12 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const ListHeaderComponent = useMemo(() => {
     return (
       <View style={styles.filter}>
-        {/* Crop Filter */}
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_CROP)}
           options={cropList}
           selectedOption={selectedCrop ? selectedCrop.label : ''}
           onPress={(option: string) => handleCropSelection(option)}
         />
-        {/* Project Filter displayed in the same way as the crop filter */}
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
           options={projectList}
@@ -243,6 +242,18 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     }
   }, [cropList, selectedCrop]);
 
+  useEffect(() => {
+    // If a crop is selected and all filters are cleared, re-fetch data.
+    if (
+      selectedCrop &&
+      selectedFilters.Seasons.length === 0 &&
+      selectedFilters.Locations.length === 0 &&
+      selectedFilters.Years.length === 0
+    ) {
+      handleCropSelection(selectedCrop.label);
+    }
+  }, [selectedFilters]);
+
   const onNewRecordClick = () => {
     setIsOptionModalVisible(true);
   };
@@ -257,7 +268,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   };
 
   const groupedExperiments = useMemo(() => {
-    // Group experiments by experimentName (or use fieldExperimentName if more appropriate)
     const groups = finalExperimentList.reduce((acc: any, experiment: any) => {
       const groupKey = experiment.experimentName || 'N/A';
       if (!acc[groupKey]) {
@@ -266,93 +276,111 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       acc[groupKey].push(experiment);
       return acc;
     }, {});
-    // Convert to an array with structure: { name: groupKey, data: [experiments...] }
     return Object.keys(groups).map(key => ({
       name: key,
       data: groups[key],
     }));
   }, [finalExperimentList]);
 
+  // Combine loading flags for both filters and POST API.
+  const isLoading = isFiltersLoading || isPostLoading;
+
   return (
     <SafeAreaView
       edges={['top']}
       parentStyle={isOptionModalVisible && styles.modalOpen}>
-      {roleName?.toLowerCase() !== 'admin' && (
-        <View style={styles.main_header}>
-          <Header navigation={navigation} />
+      {isLoading ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Loader />
         </View>
-      )}
+      ) : (
+        <>
+          {roleName?.toLowerCase() !== 'admin' && (
+            <View style={styles.main_header}>
+              <Header navigation={navigation} />
+            </View>
+          )}
 
-      <StatusBar />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          {t(LOCALES.EXPERIMENT.LBL_EXPERIMENT)}
-        </Text>
-      </View>
-      <View style={styles.container}>
-        <View style={additionalStyles.searchContainer}>
-          <Input
-            placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
-            leftIcon={Search}
-            customLeftIconStyle={{marginRight: 10}}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <Pressable
-            onPress={() => setIsFilterModalVisible(true)}
-            style={additionalStyles.filterIconContainer}>
-            <Adfilter />
-          </Pressable>
-        </View>
-        {ListHeaderComponent}
-        {finalExperimentList.length === 0 ? (
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text style={{color: 'black', fontFamily: FONTS.SEMI_BOLD}}>
-              No Data Found!
+          <StatusBar />
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>
+              {t(LOCALES.EXPERIMENT.LBL_EXPERIMENT)}
             </Text>
           </View>
-        ) : (
-          <FlatList
-            data={groupedExperiments}
-            contentContainerStyle={
-              groupedExperiments.length === 0
-                ? {flexGrow: 1}
-                : {paddingBottom: 80}
-            }
-            showsVerticalScrollIndicator={false}
-            renderItem={({item}) => (
-              <ExperimentCard item={item} selectedProject={selectedProject} />
+          <View style={styles.container}>
+            <View style={additionalStyles.searchContainer}>
+              <Input
+                placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
+                leftIcon={Search}
+                customLeftIconStyle={{marginRight: 10}}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              <Pressable
+                onPress={() => setIsFilterModalVisible(true)}
+                style={additionalStyles.filterIconContainer}>
+                <Adfilter />
+              </Pressable>
+            </View>
+            {ListHeaderComponent}
+            {finalExperimentList.length === 0 ? (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text style={{color: 'black', fontFamily: FONTS.SEMI_BOLD}}>
+                  No Data Found!
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={groupedExperiments}
+                contentContainerStyle={
+                  groupedExperiments.length === 0
+                    ? {flexGrow: 1}
+                    : {paddingBottom: 80}
+                }
+                showsVerticalScrollIndicator={false}
+                renderItem={({item}) => (
+                  <ExperimentCard
+                    item={item}
+                    selectedProject={selectedProject}
+                  />
+                )}
+                keyExtractor={(_, index) => index.toString()}
+              />
             )}
-            keyExtractor={(_, index) => index.toString()}
-          />
-        )}
-      </View>
+          </View>
 
-      {!isOptionModalVisible && (
-        <Pressable style={styles.newRecord} onPress={onNewRecordClick}>
-          <Plus />
-          <Text style={styles.newRecordText}>
-            {t(LOCALES.EXPERIMENT.NEW_RECORD)}
-          </Text>
-        </Pressable>
+          {!isOptionModalVisible && (
+            <Pressable style={styles.newRecord} onPress={onNewRecordClick}>
+              <Plus />
+              <Text style={styles.newRecordText}>
+                {t(LOCALES.EXPERIMENT.NEW_RECORD)}
+              </Text>
+            </Pressable>
+          )}
+          <NewRecordOptionsModal
+            isModalVisible={isOptionModalVisible}
+            closeModal={onCloseOptionsModalClick}
+            onSelectFromList={onSelectFromList}
+          />
+          <FilterModal
+            isVisible={isFilterModalVisible}
+            onClose={() => setIsFilterModalVisible(false)}
+            onApply={() => {
+              if (selectedCrop) {
+                handleCropSelection(selectedCrop.label);
+              }
+            }}
+            onFilterSelect={handleFilterUpdate}
+            filterData={experimentFilters}
+            selectedFilters={selectedFilters} // <-- pass parent's state here
+          />
+        </>
       )}
-      <NewRecordOptionsModal
-        isModalVisible={isOptionModalVisible}
-        closeModal={onCloseOptionsModalClick}
-        onSelectFromList={onSelectFromList}
-      />
-      <FilterModal
-        isVisible={isFilterModalVisible}
-        onClose={() => setIsFilterModalVisible(false)}
-        onApply={() => {
-          if (selectedCrop) {
-            handleCropSelection(selectedCrop.label);
-          }
-        }}
-        onFilterSelect={handleFilterUpdate}
-        filterData={experimentFilters}
-      />
     </SafeAreaView>
   );
 };

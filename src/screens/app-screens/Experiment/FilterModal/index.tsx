@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Modal,
   StyleSheet,
@@ -19,15 +19,22 @@ type FilterDataType = {
   Locations: {value: number | string; label: string}[];
 };
 
+type SelectedFiltersType = {
+  Seasons: string[];
+  Locations: string[];
+  Years: string[];
+};
+
 type FilterModalProps = {
   isVisible: boolean;
   onClose: () => void;
   onApply: () => void; // new prop
   onFilterSelect: (
-    filterType: 'Seasons' | 'Locations' | 'Years', // Removed Crops here
+    filterType: 'Seasons' | 'Locations' | 'Years',
     selectedOptions: string[],
   ) => void;
   filterData: FilterDataType | null;
+  selectedFilters: SelectedFiltersType; // new prop to pass parent's state
 };
 
 const FilterModal: React.FC<FilterModalProps> = ({
@@ -36,6 +43,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
   onApply,
   onFilterSelect,
   filterData,
+  selectedFilters,
 }) => {
   const {t} = useTranslation();
 
@@ -47,13 +55,22 @@ const FilterModal: React.FC<FilterModalProps> = ({
     Locations: [],
   };
 
+  // Local state to track selections
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
-  // Removed selectedCrop state since we won't display "Crops"
   const [selectedFilter, setSelectedFilter] = useState<
     'Locations' | 'Seasons' | 'Years' | ''
   >('');
+
+  // When the modal opens, update the local state with parent's selectedFilters
+  useEffect(() => {
+    if (isVisible) {
+      setSelectedYear(selectedFilters.Years);
+      setSelectedLocation(selectedFilters.Locations);
+      setSelectedSeason(selectedFilters.Seasons);
+    }
+  }, [isVisible, selectedFilters]);
 
   const handleSelection = (
     filterType: 'Seasons' | 'Locations' | 'Years',
@@ -78,12 +95,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       setSelectedYear(updatedSelection);
     }
 
-    console.log('Selected Filters:', {
-      Seasons: selectedSeason,
-      Locations: selectedLocation,
-      Years: selectedYear,
-    });
-
+    // Send updated selection to parent
     onFilterSelect(filterType, updatedSelection);
   };
 
@@ -91,12 +103,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
     setSelectedYear([]);
     setSelectedLocation([]);
     setSelectedSeason([]);
-    // Removed setSelectedCrop as it's no longer used
     onFilterSelect('Seasons', []);
     onFilterSelect('Locations', []);
     onFilterSelect('Years', []);
-    onApply(); // trigger re-fetch/update with cleared filters
-    onClose(); // close the modal
+    // No need to call onApply here since the parent's effect will trigger handleCropSelection.
+    onClose(); // Close the modal immediately.
   };
 
   return (
