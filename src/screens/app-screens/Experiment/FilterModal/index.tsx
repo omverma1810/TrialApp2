@@ -14,7 +14,7 @@ import {FONTS} from '../../../../theme/fonts';
 
 type FilterDataType = {
   Years: {value: number | string; label: string}[];
-  Crops: {value: number | string; label: string}[];
+  Crops: {value: number | string; label: string}[]; // still part of the type, but won't be displayed
   Seasons: {value: string; label: string}[];
   Locations: {value: number | string; label: string}[];
 };
@@ -24,7 +24,7 @@ type FilterModalProps = {
   onClose: () => void;
   onApply: () => void; // new prop
   onFilterSelect: (
-    filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
+    filterType: 'Seasons' | 'Locations' | 'Years', // Removed Crops here
     selectedOptions: string[],
   ) => void;
   filterData: FilterDataType | null;
@@ -50,13 +50,13 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
-  const [selectedCrop, setSelectedCrop] = useState<string[]>([]);
+  // Removed selectedCrop state since we won't display "Crops"
   const [selectedFilter, setSelectedFilter] = useState<
-    'Locations' | 'Seasons' | 'Years' | 'Crops' | ''
+    'Locations' | 'Seasons' | 'Years' | ''
   >('');
 
   const handleSelection = (
-    filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
+    filterType: 'Seasons' | 'Locations' | 'Years',
     value: string,
   ) => {
     let updatedSelection: string[] = [];
@@ -76,18 +76,12 @@ const FilterModal: React.FC<FilterModalProps> = ({
         ? selectedYear.filter(year => year !== value)
         : [...selectedYear, value];
       setSelectedYear(updatedSelection);
-    } else if (filterType === 'Crops') {
-      updatedSelection = selectedCrop.includes(value)
-        ? selectedCrop.filter(crop => crop !== value)
-        : [...selectedCrop, value];
-      setSelectedCrop(updatedSelection);
     }
 
     console.log('Selected Filters:', {
       Seasons: selectedSeason,
       Locations: selectedLocation,
       Years: selectedYear,
-      Crops: selectedCrop,
     });
 
     onFilterSelect(filterType, updatedSelection);
@@ -97,11 +91,10 @@ const FilterModal: React.FC<FilterModalProps> = ({
     setSelectedYear([]);
     setSelectedLocation([]);
     setSelectedSeason([]);
-    setSelectedCrop([]);
+    // Removed setSelectedCrop as it's no longer used
     onFilterSelect('Seasons', []);
     onFilterSelect('Locations', []);
     onFilterSelect('Years', []);
-    onFilterSelect('Crops', []);
     onApply(); // trigger re-fetch/update with cleared filters
     onClose(); // close the modal
   };
@@ -126,29 +119,31 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
         <View style={styles.twoColumnContainer}>
           <View style={styles.sidebarContainer}>
-            {Object.entries(safeFilterData).map(([filterKey]) => (
-              <Pressable
-                key={filterKey}
-                style={[
-                  styles.sidebarItem,
-                  selectedFilter === filterKey && styles.sidebarItemActive,
-                ]}
-                onPress={() =>
-                  setSelectedFilter(
-                    filterKey as 'Seasons' | 'Locations' | 'Years' | 'Crops',
-                  )
-                }>
-                <Text
+            {Object.entries(safeFilterData)
+              .filter(([filterKey]) => filterKey !== 'Crops')
+              .map(([filterKey]) => (
+                <Pressable
+                  key={filterKey}
                   style={[
-                    styles.sidebarItemText,
-                    selectedFilter === filterKey &&
-                      styles.sidebarItemTextActive,
-                  ]}>
-                  {t(filterKey) ||
-                    filterKey.charAt(0).toUpperCase() + filterKey.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
+                    styles.sidebarItem,
+                    selectedFilter === filterKey && styles.sidebarItemActive,
+                  ]}
+                  onPress={() =>
+                    setSelectedFilter(
+                      filterKey as 'Seasons' | 'Locations' | 'Years',
+                    )
+                  }>
+                  <Text
+                    style={[
+                      styles.sidebarItemText,
+                      selectedFilter === filterKey &&
+                        styles.sidebarItemTextActive,
+                    ]}>
+                    {t(filterKey) ||
+                      filterKey.charAt(0).toUpperCase() + filterKey.slice(1)}
+                  </Text>
+                </Pressable>
+              ))}
           </View>
 
           <ScrollView>
@@ -160,11 +155,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                       key={option.value.toString()}
                       onPress={() =>
                         handleSelection(
-                          selectedFilter as
-                            | 'Seasons'
-                            | 'Locations'
-                            | 'Years'
-                            | 'Crops',
+                          selectedFilter as 'Seasons' | 'Locations' | 'Years',
                           option.value.toString(),
                         )
                       }
@@ -177,8 +168,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
                             selectedLocation.includes(
                               option.value.toString(),
                             )) ||
-                          (selectedFilter === 'Crops' &&
-                            selectedCrop.includes(option.value.toString())) ||
                           (selectedFilter === 'Years' &&
                             selectedYear.includes(option.value.toString()))
                             ? '#1A6DD2'

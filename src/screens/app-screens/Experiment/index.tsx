@@ -132,6 +132,23 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     }
   }, [postFilteredData]);
 
+  // useEffect(() => {
+  //   if (postFilteredData && postFilteredData.projects) {
+  //     const projectsData = postFilteredData.projects;
+  //     setFilteredExperiments(projectsData);
+
+  //     const projects = Object.keys(projectsData);
+  //     setProjectList(projects);
+
+  //     // Always set the first project as default when the crop changes
+  //     if (projects.length > 0) {
+  //       setSelectedProject(projects[0]);
+  //     } else {
+  //       setSelectedProject('');
+  //     }
+  //   }
+  // }, [postFilteredData]);
+
   const finalExperimentList = useMemo(() => {
     let experimentsArray: any[] = [];
     if (selectedProject && filteredExperiments[selectedProject]) {
@@ -217,6 +234,14 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       </View>
     );
   }, [cropList, selectedCrop, projectList, selectedProject, t]);
+
+  useEffect(() => {
+    // When the crop list is updated and no crop is selected,
+    // automatically select the first crop and call handleCropSelection.
+    if (cropList.length > 0 && !selectedCrop) {
+      handleCropSelection(cropList[0]);
+    }
+  }, [cropList, selectedCrop]);
 
   const onNewRecordClick = () => {
     setIsOptionModalVisible(true);
@@ -321,7 +346,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
         isVisible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
         onApply={() => {
-          // Only call handleCropSelection if a crop is selected.
           if (selectedCrop) {
             handleCropSelection(selectedCrop.label);
           }
@@ -385,7 +409,7 @@ const additionalStyles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
-  /* LEFT SIDEBAR */
+
   sidebarContainer: {
     width: '35%',
     backgroundColor: '#F5F5F5',
@@ -447,7 +471,7 @@ const additionalStyles = StyleSheet.create({
     color: '#1A6DD2',
     fontSize: 16,
   },
-  /* Footer with CLOSE & APPLY */
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
