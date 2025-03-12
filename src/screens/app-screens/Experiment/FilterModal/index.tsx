@@ -12,6 +12,23 @@ import {useTranslation} from 'react-i18next';
 import {Tick} from '../../../../assets/icons/svgs';
 import {FONTS} from '../../../../theme/fonts';
 
+type FilterDataType = {
+  Years: {value: number | string; label: string}[];
+  Crops: {value: number | string; label: string}[];
+  Seasons: {value: string; label: string}[];
+  Locations: {value: number | string; label: string}[];
+};
+
+type FilterModalProps = {
+  isVisible: boolean;
+  onClose: () => void;
+  onFilterSelect: (
+    filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
+    selectedOptions: string[],
+  ) => void;
+  filterData: FilterDataType | null;
+};
+
 const FilterModal: React.FC<FilterModalProps> = ({
   isVisible,
   onClose,
@@ -20,25 +37,32 @@ const FilterModal: React.FC<FilterModalProps> = ({
 }) => {
   const {t} = useTranslation();
 
-  // States to manage selected filters
+  // Provide a safe default in case filterData is null
+  const safeFilterData: FilterDataType = filterData || {
+    Years: [],
+    Crops: [],
+    Seasons: [],
+    Locations: [],
+  };
+
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
+  const [selectedCrop, setSelectedCrop] = useState<string[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<
-    'Locations' | 'Seasons' | 'Years' | ''
+    'Locations' | 'Seasons' | 'Years' | 'Crops' | ''
   >('');
 
-  // Function to handle selection updates
   const handleSelection = (
-    filterType: 'Seasons' | 'Locations' | 'Years',
+    filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
     value: string,
   ) => {
-    let updatedSelection: string[];
+    let updatedSelection: string[] = [];
 
     if (filterType === 'Seasons') {
       updatedSelection = selectedSeason.includes(value)
-        ? selectedSeason.filter(season => season !== value) // Remove
-        : [...selectedSeason, value]; // Add
+        ? selectedSeason.filter(season => season !== value)
+        : [...selectedSeason, value];
       setSelectedSeason(updatedSelection);
     } else if (filterType === 'Locations') {
       updatedSelection = selectedLocation.includes(value)
@@ -50,21 +74,32 @@ const FilterModal: React.FC<FilterModalProps> = ({
         ? selectedYear.filter(year => year !== value)
         : [...selectedYear, value];
       setSelectedYear(updatedSelection);
+    } else if (filterType === 'Crops') {
+      updatedSelection = selectedCrop.includes(value)
+        ? selectedCrop.filter(crop => crop !== value)
+        : [...selectedCrop, value];
+      setSelectedCrop(updatedSelection);
     }
 
-    // Send updated selection array instead of just `value`
+    console.log('Selected Filters:', {
+      Seasons: selectedSeason,
+      Locations: selectedLocation,
+      Years: selectedYear,
+      Crops: selectedCrop,
+    });
+
     onFilterSelect(filterType, updatedSelection);
   };
-
-  console.log('years', selectedYear);
 
   const clearAllSelections = () => {
     setSelectedYear([]);
     setSelectedLocation([]);
     setSelectedSeason([]);
+    setSelectedCrop([]);
     onFilterSelect('Seasons', []);
     onFilterSelect('Locations', []);
     onFilterSelect('Years', []);
+    onFilterSelect('Crops', []);
   };
 
   return (
@@ -86,56 +121,64 @@ const FilterModal: React.FC<FilterModalProps> = ({
         </View>
 
         <View style={styles.twoColumnContainer}>
-          {/* Sidebar */}
           <View style={styles.sidebarContainer}>
-            {filterData &&
-              Object.entries(filterData).map(([filterKey, filterValues]) => (
-                <Pressable
-                  key={filterKey}
+            {Object.entries(safeFilterData).map(([filterKey]) => (
+              <Pressable
+                key={filterKey}
+                style={[
+                  styles.sidebarItem,
+                  selectedFilter === filterKey && styles.sidebarItemActive,
+                ]}
+                onPress={() =>
+                  setSelectedFilter(
+                    filterKey as 'Seasons' | 'Locations' | 'Years' | 'Crops',
+                  )
+                }>
+                <Text
                   style={[
-                    styles.sidebarItem,
-                    selectedFilter === filterKey && styles.sidebarItemActive,
-                  ]}
-                  onPress={() =>
-                    setSelectedFilter(
-                      filterKey as 'Seasons' | 'Locations' | 'Years',
-                    )
-                  }>
-                  <Text
-                    style={[
-                      styles.sidebarItemText,
-                      selectedFilter === filterKey &&
-                        styles.sidebarItemTextActive,
-                    ]}>
-                    {t(filterKey) ||
-                      filterKey.charAt(0).toUpperCase() + filterKey.slice(1)}
-                  </Text>
-                </Pressable>
-              ))}
+                    styles.sidebarItemText,
+                    selectedFilter === filterKey &&
+                      styles.sidebarItemTextActive,
+                  ]}>
+                  {t(filterKey) ||
+                    filterKey.charAt(0).toUpperCase() + filterKey.slice(1)}
+                </Text>
+              </Pressable>
+            ))}
           </View>
 
-          {/* Right Pane */}
           <ScrollView>
             <View style={styles.rightPane}>
-              {selectedFilter && filterData[selectedFilter] && (
+              {selectedFilter && safeFilterData[selectedFilter] && (
                 <View style={{marginTop: 16}}>
-                  {filterData[selectedFilter].map(option => (
+                  {safeFilterData[selectedFilter].map(option => (
                     <Pressable
-                      key={option.value}
+                      key={option.value.toString()}
                       onPress={() =>
-                        handleSelection(selectedFilter, option.value)
+                        handleSelection(
+                          selectedFilter as
+                            | 'Seasons'
+                            | 'Locations'
+                            | 'Years'
+                            | 'Crops',
+                          option.value.toString(),
+                        )
                       }
                       style={styles.dropdownItem}>
                       <Tick
                         color={
                           (selectedFilter === 'Seasons' &&
-                            selectedSeason.includes(option.value)) ||
+                            selectedSeason.includes(option.value.toString())) ||
                           (selectedFilter === 'Locations' &&
-                            selectedLocation.includes(option.value)) ||
+                            selectedLocation.includes(
+                              option.value.toString(),
+                            )) ||
+                          (selectedFilter === 'Crops' &&
+                            selectedCrop.includes(option.value.toString())) ||
                           (selectedFilter === 'Years' &&
-                            selectedYear.includes(option.value))
+                            selectedYear.includes(option.value.toString()))
                             ? '#1A6DD2'
-                            : 'black'
+                            : '#D3D3D3'
                         }
                       />
                       <Text style={styles.dropdownItemText}>
@@ -149,7 +192,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </ScrollView>
         </View>
 
-        {/* Footer */}
         <View style={styles.footer}>
           <Pressable onPress={onClose} style={styles.footerButton}>
             <Text style={styles.footerButtonText}>Close</Text>
@@ -163,7 +205,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   filterModalContainer: {flex: 1, backgroundColor: '#fff'},
   filterModalHeader: {
@@ -195,8 +236,6 @@ const styles = StyleSheet.create({
   dropdownItem: {
     backgroundColor: '#fff',
     padding: 10,
-    // borderBottomWidth: 0.3,
-    // borderBottomColor: '#999',
     flexDirection: 'row',
     gap: 10,
   },
@@ -214,7 +253,11 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: '#1A6DD2',
   },
-  footerButtonText: {fontSize: 14, color: '#fff', fontFamily: FONTS.MEDIUM},
+  footerButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: FONTS.MEDIUM,
+  },
 });
 
 export default FilterModal;

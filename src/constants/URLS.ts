@@ -25,6 +25,8 @@ const URL = {
   CHANGE_PASSWORD: 'change-password/',
   DECODE_QR: 'decode-qr/',
   VALIDATE_TRAITS: 'validate-data/?validationType=appRecordData',
+  GET_FILTERS: 'app/get-filters/',
+  EXPERIMENT_LIST_FILTERED: 'app/experiment-list-filtered/',
 };
 
 export {API_CONFIG, BASE_URL, URL, DEFAULT_ENV};

@@ -1,8 +1,7 @@
 import {useIsFocused} from '@react-navigation/native';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {FlatList, Pressable, View} from 'react-native';
-import {Modal, StyleSheet} from 'react-native';
+import {FlatList, Pressable, View, StyleSheet, ScrollView} from 'react-native';
 import {useSelector} from 'react-redux';
 
 import {Plus, Search, Adfilter} from '../../../assets/icons/svgs';
@@ -20,7 +19,6 @@ import {ExperimentScreenProps} from '../../../types/navigation/appTypes';
 import {RootState} from '../../../store';
 import Header from '../Home/Header';
 import ExperimentCard from './ExperimentCard';
-import ExperimentList from './ExperimentCard/ExperimentList';
 import Filter from './Filter';
 import NewRecordOptionsModal from './NewRecordOptionsModal';
 import {styles} from './styles';
@@ -31,77 +29,182 @@ import index from '../../../components/KeyboardAvoidingView';
 const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const {t} = useTranslation();
   const isFocused = useIsFocused();
+
   const [isOptionModalVisible, setIsOptionModalVisible] = useState(false);
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
-  const [experimentData, setExperimentData] = useState<any>(null);
-  const [experimentFilters, setExperimentFilters] = useState<any>(null);
+
+  const [experimentFilters, setExperimentFilters] = useState({
+    Years: [],
+    Crops: [],
+    Seasons: [],
+    Locations: [],
+  });
+
+  const [cropOptions, setCropOptions] = useState<
+    Array<{label: string; value: number}>
+  >([]);
+
   const [cropList, setCropList] = useState<string[]>([]);
+
   const [projectList, setProjectList] = useState<string[]>([]);
-  const [experimentList, setExperimentList] = useState<any[]>([]);
-  const [selectedCrop, setSelectedCrop] = useState('');
+  const [filteredExperiments, setFilteredExperiments] = useState<any>({});
+
+  const [selectedCrop, setSelectedCrop] = useState<{
+    label: string;
+    value: number;
+  } | null>(null);
   const [selectedProject, setSelectedProject] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState({
     Seasons: [],
     Locations: [],
     Years: [],
+    Crops: [],
   });
   const [filtersData, setFiltersData] = useState<any>([]);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
 
-  const roleName = useSelector((state: RootState) => {
-    return state.auth?.userDetails?.role?.[0]?.role_name;
+  const roleName = useSelector(
+    (state: RootState) => state.auth?.userDetails?.role?.[0]?.role_name,
+  );
+
+  const [postFiltered, postFilteredData, isPostLoading, postError] = useApi({
+    url: URL.EXPERIMENT_LIST_FILTERED,
+    method: 'POST',
   });
 
-  const handleCropChange = useCallback(
-    (option: string) => {
-      setSelectedCrop(option);
-      if (!filtersData[option]) return; // Prevent selecting disabled crops
-      const newProjectList = Object.keys(filtersData[option] || {});
-      const experimentList = filtersData[option][newProjectList[0]] || [];
-      const formattedExperimentList = groupByExperimentName(experimentList);
-      setProjectList(newProjectList);
-      setSelectedProject(newProjectList[0] || '');
-      setExperimentList(formattedExperimentList);
-      setIsFilterApplied(false);
-    },
-    [filtersData],
-  );
+  const [getFilters, filtersApiData, isFiltersLoading, filtersError] = useApi({
+    url: URL.GET_FILTERS,
+    method: 'GET',
+  });
 
-  const handleProjectChange = useCallback(
-    (option: string) => {
-      setSelectedProject(option);
-      if (!filtersData[selectedCrop]?.[option]) return; // Prevent selecting disabled projects
-      const experimentList = filtersData[selectedCrop][option] || [];
-      const formattedExperimentList = groupByExperimentName(experimentList);
-      setExperimentList(formattedExperimentList);
-    },
-    [filtersData, selectedCrop],
-  );
+  useEffect(() => {
+    if (isFocused) {
+      getFilters();
+      setSelectedCrop(null);
+      setSelectedProject('');
+      setCropList([]);
+      setProjectList([]);
+      setFilteredExperiments({});
+    }
+  }, [isFocused]);
+
+  useEffect(() => {
+    if (filtersApiData?.status_code === 200 && filtersApiData?.filters) {
+      setExperimentFilters(filtersApiData.filters);
+      console.log('Crops from API:', filtersApiData.filters.Crops);
+      if (Array.isArray(filtersApiData.filters.Crops)) {
+        setCropOptions(filtersApiData.filters.Crops);
+        setCropList(
+          filtersApiData.filters.Crops.map(item => item.label || item.name),
+        );
+      }
+    }
+  }, [filtersApiData]);
+
+  useEffect(() => {
+    if (postFilteredData && postFilteredData.projects) {
+      const projectsData = postFilteredData.projects;
+      setFilteredExperiments(projectsData);
+
+      const projects = Object.keys(projectsData);
+      setProjectList(projects);
+
+      if (!selectedProject && projects.length > 0) {
+        setSelectedProject(projects[0]);
+      }
+    }
+  }, [postFilteredData]);
+
+  const finalExperimentList = useMemo(() => {
+    let experimentsArray: any[] = [];
+    if (selectedProject && filteredExperiments[selectedProject]) {
+      experimentsArray = filteredExperiments[selectedProject];
+    }
+    if (searchQuery === '') {
+      return experimentsArray;
+    }
+    const normalizedQuery = searchQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return experimentsArray.filter(experiment => {
+      const normalizedExpName = (experiment.experimentName || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+      const normalizedFieldExpName = (experiment.fieldExperimentName || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+      return (
+        normalizedExpName.includes(normalizedQuery) ||
+        normalizedFieldExpName.includes(normalizedQuery)
+      );
+    });
+  }, [filteredExperiments, searchQuery, selectedProject]);
+
+  useEffect(() => {
+    const hasFilters =
+      selectedFilters.Seasons.length > 0 ||
+      selectedFilters.Locations.length > 0 ||
+      selectedFilters.Years.length > 0;
+    setIsFilterApplied(hasFilters);
+  }, [selectedFilters]);
+
+  const handleFilterUpdate = (filterType, updatedValues) => {
+    setSelectedFilters(prevFilters => ({
+      ...prevFilters,
+      [filterType]: updatedValues,
+    }));
+  };
+
+  const handleCropSelection = (optionLabel: string) => {
+    const selectedObj = cropOptions.find(item => item.label === optionLabel);
+    if (selectedObj) {
+      console.log('Selected Crop:', selectedObj);
+      setSelectedCrop(selectedObj);
+      const payload = {
+        cropId: selectedObj.value,
+        page: 1,
+        perPage: 10,
+        filters: [],
+      };
+      console.log('Payload being sent:', payload);
+      postFiltered({
+        payload,
+        headers: {'Content-Type': 'application/json'},
+      });
+    } else {
+      console.log('No matching crop found for:', optionLabel);
+    }
+  };
+
+  useEffect(() => {
+    console.log('POST API response:', postFilteredData);
+    if (postError) {
+      console.log('POST API error:', postError);
+    }
+  }, [postFilteredData, postError]);
 
   const ListHeaderComponent = useMemo(() => {
-    const filteredCropList = cropList.filter(crop => filtersData[crop]);
-    const filteredProjectList = projectList.filter(
-      project => filtersData[selectedCrop]?.[project],
-    );
-
     return (
       <View style={styles.filter}>
+        {/* Crop Filter */}
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_CROP)}
-          options={filteredCropList}
-          selectedOption={selectedCrop}
-          onPress={handleCropChange}
+          options={cropList}
+          selectedOption={selectedCrop ? selectedCrop.label : ''}
+          onPress={(option: string) => handleCropSelection(option)}
         />
+        {/* Project Filter displayed in the same way as the crop filter */}
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={filteredProjectList}
+          options={projectList}
           selectedOption={selectedProject}
-          onPress={handleProjectChange}
+          onPress={(option: string) => setSelectedProject(option)}
         />
       </View>
     );
-  }, [filtersData, cropList, projectList, selectedCrop, selectedProject]);
+  }, [cropList, selectedCrop, projectList, selectedProject, t]);
+
+  console.log('finalExperimentList:', finalExperimentList);
+  console.log('selectedProject:', selectedProject);
 
   const onNewRecordClick = () => {
     setIsOptionModalVisible(true);
@@ -116,209 +219,22 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     navigation.navigate('NewRecord');
   };
 
-  const [
-    getExperimentList,
-    experimentListData,
-    isExperimentListLoading,
-    experimentListError,
-  ] = useApi({
-    url: URL.EXPERIMENT_LIST,
-    method: 'GET',
-  });
-
-  useEffect(() => {
-    if (isFocused) {
-      getExperimentList();
-      setSelectedCrop('');
-      setSelectedProject('');
-      setCropList([]);
-      setProjectList([]);
-      setExperimentList([]);
-    }
-  }, [isFocused]);
-
-  const groupByExperimentName = (array: any[]) => {
-    const groupedMap = array.reduce((acc, curr) => {
-      const key = curr.experimentName || 'N/A';
-      if (!acc.has(key)) {
-        acc.set(key, {name: key, data: []});
+  const groupedExperiments = useMemo(() => {
+    // Group experiments by experimentName (or use fieldExperimentName if more appropriate)
+    const groups = finalExperimentList.reduce((acc: any, experiment: any) => {
+      const groupKey = experiment.experimentName || 'N/A';
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
       }
-      acc.get(key).data.push(curr);
+      acc[groupKey].push(experiment);
       return acc;
-    }, new Map());
-
-    return Array.from(groupedMap.values());
-  };
-
-  useEffect(() => {
-    if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
-      return;
-    }
-
-    // Original lines: setting up experiment data
-    const {data, filters} = experimentListData; // Extract filters separately
-    const cropList = Object.keys(data);
-    const selectedCrop = cropList[0];
-    const projectList = Object.keys(data[selectedCrop] || {});
-    const selectedProject = projectList[0];
-    const experimentList = data[selectedCrop][selectedProject] || [];
-    const formattedExperimentList = groupByExperimentName(experimentList);
-
-    setExperimentData(data);
-    setCropList(cropList);
-    setProjectList(projectList);
-    setExperimentList(formattedExperimentList);
-    setSelectedCrop(selectedCrop);
-    setSelectedProject(selectedProject);
-
-    setExperimentFilters(filters || null);
-  }, [experimentListData]);
-
-  const filterExperiments = (data = {}, selectedFilters) => {
-    // Normalize filter keys and provide default values
-    const {
-      Locations = [], // Expected to be an array of numbers or strings
-      Seasons = [], // Expected to be an array of strings
-      Years = [], // Expected to be an array of numbers
-    } = selectedFilters;
-
-    // Extract actual experiment data (in case it's nested under `data`)
-    const experimentData = data.data || data;
-
-    const filteredData = {};
-
-    Object.keys(experimentData).forEach(cropName => {
-      const cropExperiments = experimentData[cropName];
-
-      Object.keys(cropExperiments).forEach(experimentKey => {
-        const experiments = cropExperiments[experimentKey].filter(
-          experiment => {
-            // Convert locations to strings if necessary (to match selectedFilters format)
-            const experimentLocations = experiment.locations.map(loc =>
-              loc.toString(),
-            );
-
-            // Apply filters
-            const matchLocation =
-              Locations.length === 0 || // No location filter applied, allow all
-              experimentLocations.some(loc =>
-                Locations.includes(loc.toString()),
-              );
-
-            const matchSeason =
-              Seasons.length === 0 || // No season filter applied, allow all
-              Seasons.includes(experiment.season); // Convert to lowercase for consistency
-
-            const matchYear =
-              Years.length === 0 || // No year filter applied, allow all
-              Years.includes(experiment.Year);
-
-            return matchLocation && matchSeason && matchYear;
-          },
-        );
-
-        if (experiments.length > 0) {
-          if (!filteredData[cropName]) filteredData[cropName] = {};
-          filteredData[cropName][experimentKey] = experiments;
-        }
-      });
-    });
-
-    return filteredData;
-  };
-
-  useEffect(() => {
-    const results = filterExperiments(
-      experimentListData?.data || {},
-      selectedFilters,
-    );
-    setFiltersData(results);
-  }, [experimentListData, selectedFilters]);
-
-  const ListEmptyComponent = useMemo(
-    () => (
-      <View style={styles.emptyContainer}>
-        {isExperimentListLoading ? (
-          <Loader />
-        ) : (
-          <Text style={styles.emptyText}>
-            {t(LOCALES.COMMON.LBL_NO_DATA_FOUND)}
-          </Text>
-        )}
-      </View>
-    ),
-    [isExperimentListLoading],
-  );
-
-  const normalizeString = (str: string) => {
-    return str.toLowerCase().replace(/[^a-z0-9]/g, '');
-  };
-
-  useEffect(() => {
-    const hasFilters =
-      selectedFilters.Seasons.length > 0 ||
-      selectedFilters.Locations.length > 0 ||
-      selectedFilters.Years.length > 0;
-
-    setIsFilterApplied(hasFilters); // ✅ Set true when filters exist
-  }, [selectedFilters]);
-  const finalExperimentList = useMemo(() => {
-    // const dataToUse = isFilterApplied ? filtersData : experimentList;
-
-    const dataToUse = experimentList;
-
-    console.log(dataToUse, 'check which data');
-
-    if (searchQuery === '') {
-      return dataToUse;
-    }
-
-    const normalizedQuery = normalizeString(searchQuery);
-
-    return dataToUse.filter(experiment => {
-      const normalizedExperimentName = normalizeString(experiment.name || '');
-      const normalizedFieldExperimentName = normalizeString(
-        experiment.data[0]?.fieldExperimentName || '',
-      );
-
-      return (
-        normalizedExperimentName.includes(normalizedQuery) ||
-        normalizedFieldExperimentName.includes(normalizedQuery)
-      );
-    });
-  }, [experimentList, filtersData, selectedFilters, searchQuery]);
-
-  const handleFilterUpdate = (filterType, updatedValues) => {
-    setSelectedFilters(prevFilters => ({
-      ...prevFilters,
-      [filterType]: updatedValues, // Store full updated array
+    }, {});
+    // Convert to an array with structure: { name: groupKey, data: [experiments...] }
+    return Object.keys(groups).map(key => ({
+      name: key,
+      data: groups[key],
     }));
-  };
-
-  const handleFilterSelect = (
-    filterType: 'Season' | 'Location' | 'Year',
-    selectedOption: string,
-  ) => {
-    setSelectedFilters(prev => {
-      // Ensure prev is properly structured
-      if (!prev) {
-        prev = {Season: [], Location: [], Year: []}; // Provide a default structure
-      }
-
-      const currentFilter = prev[filterType] || []; // Ensure it's an array
-
-      const isSelected = currentFilter.includes(selectedOption);
-
-      return {
-        ...prev,
-        [filterType]: isSelected
-          ? currentFilter.filter(item => item !== selectedOption) // Remove if selected
-          : [...currentFilter, selectedOption], // Add if not selected
-      };
-    });
-  };
-  console.log('selectedFilters in', selectedFilters);
-  console.log(JSON.stringify(filtersData, null , 2) , "filterDATA")
+  }, [finalExperimentList]);
 
   return (
     <SafeAreaView
@@ -337,7 +253,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
         </Text>
       </View>
       <View style={styles.container}>
-        {/* Search bar with filter icon container */}
         <View style={additionalStyles.searchContainer}>
           <Input
             placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
@@ -352,57 +267,31 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
             <Adfilter />
           </Pressable>
         </View>
-        {/* <FlatList
-          data={finalExperimentList}
-          contentContainerStyle={
-            finalExperimentList?.length === 0
-              ? {flexGrow: 1}
-              : {paddingBottom: 80}
-          }
-          showsVerticalScrollIndicator={false}
-          ListHeaderComponent={ListHeaderComponent}
-          renderItem={({item, index}) => {
-            // Hide ExperimentCard when filters are applied
-            if (isFilterApplied) {
-              return null; // This will hide ExperimentCard
-            }
-
-            return (
-              <ExperimentCard item={item} selectedProject={selectedProject} />
-            );
-          }}
-          keyExtractor={(_, index) => index.toString()}
-          ListEmptyComponent={ListEmptyComponent}
-        /> */}
-        {isFilterApplied && Object.keys(filtersData).length === 0 ? (
-          <View style={{flex: 1,justifyContent:'center', alignItems:'center' }}>
-            <Text style={{color: 'black' , fontFamily: FONTS.SEMI_BOLD}}>No Data Found!</Text>
+        {ListHeaderComponent}
+        {finalExperimentList.length === 0 ? (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <Text style={{color: 'black', fontFamily: FONTS.SEMI_BOLD}}>
+              No Data Found!
+            </Text>
           </View>
         ) : (
           <FlatList
-            data={finalExperimentList}
+            data={groupedExperiments}
             contentContainerStyle={
-              finalExperimentList?.length === 0
+              groupedExperiments.length === 0
                 ? {flexGrow: 1}
                 : {paddingBottom: 80}
             }
             showsVerticalScrollIndicator={false}
-            ListHeaderComponent={ListHeaderComponent}
-            renderItem={({item, index}) => {
-              // Hide ExperimentCard when filters are applied
-              if (isFilterApplied) {
-                return null; // This will hide ExperimentCard
-              }
-
-              return (
-                <ExperimentCard item={item} selectedProject={selectedProject} />
-              );
-            }}
+            renderItem={({item}) => (
+              <ExperimentCard item={item} selectedProject={selectedProject} />
+            )}
             keyExtractor={(_, index) => index.toString()}
-            ListEmptyComponent={ListEmptyComponent}
           />
         )}
       </View>
+
       {!isOptionModalVisible && (
         <Pressable style={styles.newRecord} onPress={onNewRecordClick}>
           <Plus />
@@ -416,12 +305,11 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
         closeModal={onCloseOptionsModalClick}
         onSelectFromList={onSelectFromList}
       />
-      {/* Render the full-screen filter modal */}
       <FilterModal
         isVisible={isFilterModalVisible}
         onClose={() => setIsFilterModalVisible(false)}
-        onFilterSelect={handleFilterUpdate} // Pass the function that tracks selections
-        filterData={experimentFilters} // <-- NEW: pass the filters from the API
+        onFilterSelect={handleFilterUpdate}
+        filterData={experimentFilters}
       />
     </SafeAreaView>
   );
@@ -431,7 +319,7 @@ interface FilterModalProps {
   isVisible: boolean;
   onClose: () => void;
   onFilterSelect: (
-    filterType: 'season' | 'location' | 'year',
+    filterType: 'season' | 'location' | 'year' | 'crop',
     selectedOption: string,
   ) => void;
   filterData?: {
@@ -511,12 +399,12 @@ const additionalStyles = StyleSheet.create({
     color: '#EAF4E7',
     fontWeight: 'bold',
   },
-  /* RIGHT PANE */
+
   rightPane: {
     flex: 1,
     padding: 16,
   },
-  /* Existing dropdown styles */
+
   dropdownHeader: {
     backgroundColor: '#1A6DD2',
     padding: 12,
@@ -562,4 +450,5 @@ const additionalStyles = StyleSheet.create({
     fontFamily: FONTS.MEDIUM,
   },
 });
+
 export default Experiment;
