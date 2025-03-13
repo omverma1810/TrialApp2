@@ -1,6 +1,5 @@
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-
 import {FONTS} from '../../../../theme/fonts';
 
 type FilterType = {
@@ -8,6 +7,7 @@ type FilterType = {
   options: string[];
   selectedOption: string;
   onPress: (option: string) => void;
+  onScroll?: (event: any) => void; // New optional prop for scroll events
 };
 
 const Filter = ({
@@ -15,6 +15,7 @@ const Filter = ({
   options = [],
   selectedOption = '',
   onPress = () => {},
+  onScroll, // receive onScroll prop if provided
 }: FilterType) => {
   if (options.length === 0) return null;
   return (
@@ -23,7 +24,10 @@ const Filter = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.scrollView}>
+        style={styles.scrollView}
+        onScroll={onScroll} // pass the event to the parent if provided
+        scrollEventThrottle={16} // ensures onScroll events fire frequently enough
+      >
         {options.map((option, index) => (
           <Pressable
             onPress={() => onPress(option)}

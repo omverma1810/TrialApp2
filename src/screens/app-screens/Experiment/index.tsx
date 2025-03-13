@@ -1,9 +1,7 @@
 import {useIsFocused} from '@react-navigation/native';
-import {useEffect, useMemo, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import {useEffect, useMemo, useState, useCallback} from 'react';
 import {FlatList, Pressable, View, StyleSheet, ScrollView} from 'react-native';
-import {useSelector} from 'react-redux';
-
+import {useTranslation} from 'react-i18next';
 import {Plus, Search, Adfilter} from '../../../assets/icons/svgs';
 import {
   Input,
@@ -25,6 +23,7 @@ import {styles} from './styles';
 import FilterModal from './FilterModal';
 import {FONTS} from '../../../theme/fonts';
 import index from '../../../components/KeyboardAvoidingView';
+import {useSelector} from 'react-redux';
 
 const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const {t} = useTranslation();
@@ -44,7 +43,9 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     Array<{label: string; value: number}>
   >([]);
   const [cropList, setCropList] = useState<string[]>([]);
+  // projectList will hold the keys from the projects object returned by the API.
   const [projectList, setProjectList] = useState<string[]>([]);
+  // filteredExperiments holds the full projects object.
   const [filteredExperiments, setFilteredExperiments] = useState<any>({});
 
   const [selectedCrop, setSelectedCrop] = useState<{
@@ -61,6 +62,10 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   });
   const [filtersData, setFiltersData] = useState<any>([]);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
+
+  // New state variables for pagination
+  const [projectPage, setProjectPage] = useState(1);
+  const [totalProjects, setTotalProjects] = useState(0);
 
   const buildFiltersPayload = () => {
     const filters = [];
@@ -101,6 +106,8 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       setCropList([]);
       setProjectList([]);
       setFilteredExperiments({});
+      setProjectPage(1);
+      setTotalProjects(0);
     }
   }, [isFocused]);
 
@@ -110,7 +117,9 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
       if (Array.isArray(filtersApiData.filters.Crops)) {
         setCropOptions(filtersApiData.filters.Crops);
         setCropList(
-          filtersApiData.filters.Crops.map(item => item.label || item.name),
+          filtersApiData.filters.Crops.map(
+            (item: {label: string; name: string}) => item.label || item.name,
+          ),
         );
       }
     }
@@ -118,60 +127,39 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     if (postFilteredData && postFilteredData.projects) {
-      const projectsData = postFilteredData.projects;
-      setFilteredExperiments(projectsData);
+      const newProjectsData = postFilteredData.projects; // object mapping project names to experiments
+      const newProjectKeys = Object.keys(newProjectsData);
 
-      const projects = Object.keys(projectsData);
-      setProjectList(projects);
+      // Update totalProjects from API response.
+      setTotalProjects(postFilteredData.totalProjects);
 
-      // Always set the first project as default whenever a new crop is loaded
-      if (projects.length > 0) {
-        setSelectedProject(projects[0]);
+      if (projectPage === 1) {
+        // For the initial page, set the projects normally.
+        setFilteredExperiments(newProjectsData);
+        setProjectList(newProjectKeys);
+        if (newProjectKeys.length > 0) {
+          setSelectedProject(newProjectKeys[0]);
+        } else {
+          setSelectedProject('');
+        }
       } else {
-        setSelectedProject('');
+        // For subsequent pages, merge the new projects with the existing ones.
+        setFilteredExperiments((prev: Record<string, any>) => ({
+          ...prev,
+          ...newProjectsData,
+        }));
+        setProjectList(prev => {
+          const merged = [...prev];
+          newProjectKeys.forEach(key => {
+            if (!merged.includes(key)) {
+              merged.push(key);
+            }
+          });
+          return merged;
+        });
       }
     }
-  }, [postFilteredData]);
-
-  // useEffect(() => {
-  //   if (postFilteredData && postFilteredData.projects) {
-  //     const projectsData = postFilteredData.projects;
-  //     setFilteredExperiments(projectsData);
-
-  //     const projects = Object.keys(projectsData);
-  //     setProjectList(projects);
-
-  //     // Always set the first project as default when the crop changes
-  //     if (projects.length > 0) {
-  //       setSelectedProject(projects[0]);
-  //     } else {
-  //       setSelectedProject('');
-  //     }
-  //   }
-  // }, [postFilteredData]);
-
-  const finalExperimentList = useMemo(() => {
-    let experimentsArray: any[] = [];
-    if (selectedProject && filteredExperiments[selectedProject]) {
-      experimentsArray = filteredExperiments[selectedProject];
-    }
-    if (searchQuery === '') {
-      return experimentsArray;
-    }
-    const normalizedQuery = searchQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
-    return experimentsArray.filter(experiment => {
-      const normalizedExpName = (experiment.experimentName || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
-      const normalizedFieldExpName = (experiment.fieldExperimentName || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '');
-      return (
-        normalizedExpName.includes(normalizedQuery) ||
-        normalizedFieldExpName.includes(normalizedQuery)
-      );
-    });
-  }, [filteredExperiments, searchQuery, selectedProject]);
+  }, [postFilteredData, projectPage]);
 
   useEffect(() => {
     const hasFilters =
@@ -181,7 +169,17 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     setIsFilterApplied(hasFilters);
   }, [selectedFilters]);
 
-  const handleFilterUpdate = (filterType, updatedValues) => {
+  interface FilterUpdateHandler {
+    (
+      filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
+      updatedValues: string[],
+    ): void;
+  }
+
+  const handleFilterUpdate: FilterUpdateHandler = (
+    filterType,
+    updatedValues,
+  ) => {
     setSelectedFilters(prevFilters => ({
       ...prevFilters,
       [filterType]: updatedValues,
@@ -192,6 +190,10 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     const selectedObj = cropOptions.find(item => item.label === optionLabel);
     if (selectedObj) {
       setSelectedCrop(selectedObj);
+      // Reset pagination state when a new crop is selected.
+      setProjectPage(1);
+      setProjectList([]);
+      setFilteredExperiments({});
       const payload = {
         cropId: selectedObj.value,
         page: 1,
@@ -215,6 +217,52 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     }
   }, [postFilteredData, postError]);
 
+  // onScroll handler for the project list Filter
+  interface ScrollEvent {
+    nativeEvent: {
+      contentOffset: {x: number; y: number};
+      layoutMeasurement: {width: number; height: number};
+      contentSize: {width: number; height: number};
+    };
+  }
+
+  const handleProjectScroll = useCallback(
+    (event: ScrollEvent) => {
+      const {contentOffset, layoutMeasurement, contentSize} = event.nativeEvent;
+      const threshold = 100; // Adjust threshold if needed.
+      if (
+        contentOffset.x + layoutMeasurement.width + threshold >=
+          contentSize.width &&
+        projectList.length < totalProjects &&
+        !isPostLoading
+      ) {
+        const nextPage = projectPage + 1;
+        setProjectPage(nextPage);
+        if (selectedCrop) {
+          const payload = {
+            cropId: selectedCrop.value,
+            page: nextPage,
+            perPage: 10,
+            filters: buildFiltersPayload(),
+          };
+          console.log('Loading more projects with payload:', payload);
+          postFiltered({
+            payload,
+            headers: {'Content-Type': 'application/json'},
+          });
+        }
+      }
+    },
+    [
+      projectList,
+      totalProjects,
+      projectPage,
+      selectedCrop,
+      isPostLoading,
+      buildFiltersPayload,
+    ],
+  );
+
   const ListHeaderComponent = useMemo(() => {
     return (
       <View style={styles.filter}>
@@ -229,10 +277,42 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
           options={projectList}
           selectedOption={selectedProject}
           onPress={(option: string) => setSelectedProject(option)}
+          // Pass the onScroll prop to enable infinite scrolling for the project filter
+          onScroll={handleProjectScroll}
         />
       </View>
     );
-  }, [cropList, selectedCrop, projectList, selectedProject, t]);
+  }, [
+    cropList,
+    selectedCrop,
+    projectList,
+    selectedProject,
+    t,
+    handleProjectScroll,
+  ]);
+
+  const finalExperimentList = useMemo(() => {
+    let experimentsArray: any[] = [];
+    if (selectedProject && filteredExperiments[selectedProject]) {
+      experimentsArray = filteredExperiments[selectedProject];
+    }
+    if (searchQuery === '') {
+      return experimentsArray;
+    }
+    const normalizedQuery = searchQuery.toLowerCase().replace(/[^a-z0-9]/g, '');
+    return experimentsArray.filter(experiment => {
+      const normalizedExpName = (experiment.experimentName || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+      const normalizedFieldExpName = (experiment.fieldExperimentName || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+      return (
+        normalizedExpName.includes(normalizedQuery) ||
+        normalizedFieldExpName.includes(normalizedQuery)
+      );
+    });
+  }, [filteredExperiments, searchQuery, selectedProject]);
 
   useEffect(() => {
     // When the crop list is updated and no crop is selected,
