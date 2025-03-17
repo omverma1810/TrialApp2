@@ -1,5 +1,5 @@
 import {useIsFocused} from '@react-navigation/native';
-import {useEffect, useMemo, useState, useCallback} from 'react';
+import {useEffect, useMemo, useState, useCallback, useRef} from 'react';
 import {FlatList, Pressable, View, StyleSheet, ScrollView} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Plus, Search, Adfilter} from '../../../assets/icons/svgs';
@@ -98,16 +98,36 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     method: 'GET',
   });
 
+
+// useEffect(() => {
+//     if (isFocused) {
+//       getFilters();
+//       setSelectedCrop(null);
+//       setSelectedProject('');
+//       setCropList([]);
+//       setProjectList([]);
+//       setFilteredExperiments({});
+//       setProjectPage(1);
+//       setTotalProjects(0);
+//     }
+//   }, [isFocused]);
+
+
+  const isFirstLoad = useRef(true);
   useEffect(() => {
     if (isFocused) {
       getFilters();
-      setSelectedCrop(null);
-      setSelectedProject('');
-      setCropList([]);
-      setProjectList([]);
-      setFilteredExperiments({});
-      setProjectPage(1);
-      setTotalProjects(0);
+      // Reset state only on the initial load.
+      if (isFirstLoad.current) {
+        setSelectedCrop(null);
+        setSelectedProject('');
+        setCropList([]);
+        setProjectList([]);
+        setFilteredExperiments({});
+        setProjectPage(1);
+        setTotalProjects(0);
+        isFirstLoad.current = false;
+      }
     }
   }, [isFocused]);
 
