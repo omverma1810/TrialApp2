@@ -43,9 +43,9 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     Array<{label: string; value: number}>
   >([]);
   const [cropList, setCropList] = useState<string[]>([]);
-  // projectList will hold the keys from the projects object returned by the API.
+
   const [projectList, setProjectList] = useState<string[]>([]);
-  // filteredExperiments holds the full projects object.
+
   const [filteredExperiments, setFilteredExperiments] = useState<any>({});
 
   const [selectedCrop, setSelectedCrop] = useState<{
@@ -63,7 +63,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const [filtersData, setFiltersData] = useState<any>([]);
   const [isFilterApplied, setIsFilterApplied] = useState(false);
 
-  // New state variables for pagination
   const [projectPage, setProjectPage] = useState(1);
   const [totalProjects, setTotalProjects] = useState(0);
 
@@ -115,7 +114,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   useEffect(() => {
     if (isFocused) {
       getFilters();
-      // Reset state only on the initial load.
+
       if (isFirstLoad.current) {
         setSelectedCrop(null);
         setSelectedProject('');
@@ -145,12 +144,11 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     if (postFilteredData && postFilteredData.projects) {
-      const newProjectsData = postFilteredData.projects; // Object mapping project names to experiments
+      const newProjectsData = postFilteredData.projects;
       const newProjectKeys = Object.keys(newProjectsData);
-      // Update totalProjects from API response.
+
       setTotalProjects(postFilteredData.totalProjects);
       if (projectPage === 1) {
-        // For the initial page, set the projects normally.
         setFilteredExperiments(newProjectsData);
         setProjectList(newProjectKeys);
         if (newProjectKeys.length > 0) {
@@ -159,7 +157,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
           setSelectedProject('');
         }
       } else {
-        // For subsequent pages, merge the new projects with the existing ones.
         setFilteredExperiments((prev: Record<string, any>) => ({
           ...prev,
           ...newProjectsData,
@@ -206,7 +203,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     const selectedObj = cropOptions.find(item => item.label === optionLabel);
     if (selectedObj) {
       setSelectedCrop(selectedObj);
-      // Reset pagination state when a new crop is selected.
       setProjectPage(1);
       setProjectList([]);
       setFilteredExperiments({});
@@ -215,7 +211,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
         page: 1,
         perPage: 10,
         filters: buildFiltersPayload(),
-        searchKeyword: searchQuery, // <-- NEW: sending the search query
+        searchKeyword: searchQuery,
       };
       console.log('Payload being sent:', payload);
       postFiltered({
@@ -234,7 +230,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     }
   }, [postFilteredData, postError]);
 
-  // onScroll handler for the project list Filter
   interface ScrollEvent {
     nativeEvent: {
       contentOffset: {x: number; y: number};
@@ -246,7 +241,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   const handleProjectScroll = useCallback(
     (event: ScrollEvent) => {
       const {contentOffset, layoutMeasurement, contentSize} = event.nativeEvent;
-      const threshold = 100; // Adjust threshold if needed.
+      const threshold = 100;
       if (
         contentOffset.x + layoutMeasurement.width + threshold >=
           contentSize.width &&
@@ -294,7 +289,6 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
           options={projectList}
           selectedOption={selectedProject}
           onPress={(option: string) => setSelectedProject(option)}
-          // Pass the onScroll prop to enable infinite scrolling for the project filter
           onScroll={handleProjectScroll}
         />
       </View>
@@ -332,15 +326,12 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   }, [filteredExperiments, searchQuery, selectedProject]);
 
   useEffect(() => {
-    // When the crop list is updated and no crop is selected,
-    // automatically select the first crop and call handleCropSelection.
     if (cropList.length > 0 && !selectedCrop) {
       handleCropSelection(cropList[0]);
     }
   }, [cropList, selectedCrop]);
 
   useEffect(() => {
-    // If a crop is selected and all filters are cleared, re-fetch data.
     if (
       selectedCrop &&
       selectedFilters.Seasons.length === 0 &&
@@ -379,18 +370,21 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     }));
   }, [finalExperimentList]);
 
-  // Combine loading flags for both filters and POST API.
   const isLoading = isFiltersLoading || isPostLoading;
 
   const handleSearch = () => {
     if (selectedCrop) {
-      // If a crop is already selected, re-trigger the API call with the current search query.
       handleCropSelection(selectedCrop.label);
     } else if (cropList.length > 0) {
-      // Otherwise, if there are crops available, select the first one.
       handleCropSelection(cropList[0]);
     }
   };
+
+  useEffect(() => {
+    if (searchQuery === '' && cropList.length > 0) {
+      handleCropSelection(cropList[0]);
+    }
+  }, [searchQuery, cropList]);
 
   return (
     <SafeAreaView
@@ -418,11 +412,15 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
             <View style={additionalStyles.searchContainer}>
               <Input
                 placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_EXPERIMENT)}
-                leftIcon={Search}
+                rightIcon={
+                  <Pressable onPress={handleSearch}>
+                    <Search />
+                  </Pressable>
+                }
                 customLeftIconStyle={{marginRight: 10}}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                onSubmitEditing={handleSearch} // <-- triggers search when submitted
+                onSubmitEditing={handleSearch}
               />
               <Pressable
                 onPress={() => setIsFilterModalVisible(true)}
@@ -486,7 +484,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
             }}
             onFilterSelect={handleFilterUpdate}
             filterData={experimentFilters}
-            selectedFilters={selectedFilters} // <-- pass parent's state here
+            selectedFilters={selectedFilters}
           />
         </>
       )}

@@ -7,6 +7,7 @@ import {
   ScrollView,
   Text,
   SafeAreaView,
+  useColorScheme,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Tick} from '../../../../assets/icons/svgs';
@@ -37,6 +38,76 @@ type FilterModalProps = {
   selectedFilters: SelectedFiltersType; // new prop to pass parent's state
 };
 
+const getStyles = (isDarkMode: boolean) =>
+  StyleSheet.create({
+    filterModalContainer: {flex: 1, backgroundColor: '#fff'},
+    filterModalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderColor: '#ccc',
+    },
+    filterModalTitle: {
+      fontSize: 14,
+      fontFamily: FONTS.SEMI_BOLD,
+      // Force text color to black even in dark mode
+      color: '#000',
+    },
+    filterModalCloseText: {
+      fontSize: 14,
+      fontFamily: FONTS.SEMI_BOLD,
+      color: '#007AFF',
+    },
+    twoColumnContainer: {flex: 1, flexDirection: 'row'},
+    sidebarContainer: {width: '35%', backgroundColor: '#F5F5F6'},
+    sidebarItem: {
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      borderBottomWidth: 0.3,
+      borderBottomColor: '#999',
+    },
+    sidebarItemActive: {backgroundColor: '#fff'},
+    sidebarItemText: {
+      fontSize: 14,
+      fontFamily: FONTS.MEDIUM,
+      // Set text color to black for readability
+      color: '#000',
+    },
+    sidebarItemTextActive: {fontFamily: FONTS.SEMI_BOLD},
+    rightPane: {flex: 1, paddingHorizontal: 16},
+    dropdownItem: {
+      backgroundColor: '#fff',
+      padding: 10,
+      flexDirection: 'row',
+      gap: 10,
+    },
+    dropdownItemText: {
+      fontFamily: FONTS.MEDIUM,
+      // Ensure dropdown text is visible in dark mode
+      color: '#000',
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 16,
+      borderTopWidth: 0.3,
+      borderTopColor: '#e5e5e5',
+    },
+    footerButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 4,
+      backgroundColor: '#1A6DD2',
+    },
+    footerButtonText: {
+      fontSize: 14,
+      color: '#fff',
+      fontFamily: FONTS.MEDIUM,
+    },
+  });
+
 const FilterModal: React.FC<FilterModalProps> = ({
   isVisible,
   onClose,
@@ -46,6 +117,10 @@ const FilterModal: React.FC<FilterModalProps> = ({
   selectedFilters,
 }) => {
   const {t} = useTranslation();
+  // Although we're not changing the modal's background, we use this to conditionally style text if needed
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  const styles = getStyles(isDarkMode);
 
   // Provide a safe default in case filterData is null
   const safeFilterData: FilterDataType = filterData || {
@@ -95,7 +170,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
       setSelectedYear(updatedSelection);
     }
 
-    // Send updated selection to parent
     onFilterSelect(filterType, updatedSelection);
   };
 
@@ -106,8 +180,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
     onFilterSelect('Seasons', []);
     onFilterSelect('Locations', []);
     onFilterSelect('Years', []);
-    // No need to call onApply here since the parent's effect will trigger handleCropSelection.
-    onClose(); // Close the modal immediately.
+    onClose();
   };
 
   return (
@@ -202,7 +275,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
           </Pressable>
           <Pressable
             onPress={() => {
-              onApply(); // trigger re-fetch with the new filters
+              onApply();
               onClose();
             }}
             style={styles.footerButton}>
