@@ -98,20 +98,18 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     method: 'GET',
   });
 
-
-// useEffect(() => {
-//     if (isFocused) {
-//       getFilters();
-//       setSelectedCrop(null);
-//       setSelectedProject('');
-//       setCropList([]);
-//       setProjectList([]);
-//       setFilteredExperiments({});
-//       setProjectPage(1);
-//       setTotalProjects(0);
-//     }
-//   }, [isFocused]);
-
+  // useEffect(() => {
+  //     if (isFocused) {
+  //       getFilters();
+  //       setSelectedCrop(null);
+  //       setSelectedProject('');
+  //       setCropList([]);
+  //       setProjectList([]);
+  //       setFilteredExperiments({});
+  //       setProjectPage(1);
+  //       setTotalProjects(0);
+  //     }
+  //   }, [isFocused]);
 
   const isFirstLoad = useRef(true);
   useEffect(() => {
@@ -147,12 +145,10 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
   useEffect(() => {
     if (postFilteredData && postFilteredData.projects) {
-      const newProjectsData = postFilteredData.projects; // object mapping project names to experiments
+      const newProjectsData = postFilteredData.projects; // Object mapping project names to experiments
       const newProjectKeys = Object.keys(newProjectsData);
-
       // Update totalProjects from API response.
       setTotalProjects(postFilteredData.totalProjects);
-
       if (projectPage === 1) {
         // For the initial page, set the projects normally.
         setFilteredExperiments(newProjectsData);
@@ -219,6 +215,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
         page: 1,
         perPage: 10,
         filters: buildFiltersPayload(),
+        searchKeyword: searchQuery, // <-- NEW: sending the search query
       };
       console.log('Payload being sent:', payload);
       postFiltered({
@@ -385,6 +382,16 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
   // Combine loading flags for both filters and POST API.
   const isLoading = isFiltersLoading || isPostLoading;
 
+  const handleSearch = () => {
+    if (selectedCrop) {
+      // If a crop is already selected, re-trigger the API call with the current search query.
+      handleCropSelection(selectedCrop.label);
+    } else if (cropList.length > 0) {
+      // Otherwise, if there are crops available, select the first one.
+      handleCropSelection(cropList[0]);
+    }
+  };
+
   return (
     <SafeAreaView
       edges={['top']}
@@ -415,6 +422,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
                 customLeftIconStyle={{marginRight: 10}}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
+                onSubmitEditing={handleSearch} // <-- triggers search when submitted
               />
               <Pressable
                 onPress={() => setIsFilterModalVisible(true)}
@@ -422,6 +430,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
                 <Adfilter />
               </Pressable>
             </View>
+
             {ListHeaderComponent}
             {finalExperimentList.length === 0 ? (
               <View
