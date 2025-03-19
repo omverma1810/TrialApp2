@@ -15,7 +15,7 @@ import {FONTS} from '../../../../theme/fonts';
 
 type FilterDataType = {
   Years: {value: number | string; label: string}[];
-  Crops: {value: number | string; label: string}[]; // still part of the type, but won't be displayed
+  Crops: {value: number | string; label: string}[];
   Seasons: {value: string; label: string}[];
   Locations: {value: number | string; label: string}[];
 };
@@ -29,13 +29,13 @@ type SelectedFiltersType = {
 type FilterModalProps = {
   isVisible: boolean;
   onClose: () => void;
-  onApply: () => void; // new prop
+  onApply: () => void;
   onFilterSelect: (
     filterType: 'Seasons' | 'Locations' | 'Years',
     selectedOptions: string[],
   ) => void;
   filterData: FilterDataType | null;
-  selectedFilters: SelectedFiltersType; // new prop to pass parent's state
+  selectedFilters: SelectedFiltersType;
 };
 
 const getStyles = (isDarkMode: boolean) =>
@@ -52,7 +52,6 @@ const getStyles = (isDarkMode: boolean) =>
     filterModalTitle: {
       fontSize: 14,
       fontFamily: FONTS.SEMI_BOLD,
-      // Force text color to black even in dark mode
       color: '#000',
     },
     filterModalCloseText: {
@@ -72,7 +71,6 @@ const getStyles = (isDarkMode: boolean) =>
     sidebarItemText: {
       fontSize: 14,
       fontFamily: FONTS.MEDIUM,
-      // Set text color to black for readability
       color: '#000',
     },
     sidebarItemTextActive: {fontFamily: FONTS.SEMI_BOLD},
@@ -85,7 +83,6 @@ const getStyles = (isDarkMode: boolean) =>
     },
     dropdownItemText: {
       fontFamily: FONTS.MEDIUM,
-      // Ensure dropdown text is visible in dark mode
       color: '#000',
     },
     footer: {
@@ -117,12 +114,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
   selectedFilters,
 }) => {
   const {t} = useTranslation();
-  // Although we're not changing the modal's background, we use this to conditionally style text if needed
+
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const styles = getStyles(isDarkMode);
 
-  // Provide a safe default in case filterData is null
   const safeFilterData: FilterDataType = filterData || {
     Years: [],
     Crops: [],
@@ -130,7 +126,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
     Locations: [],
   };
 
-  // Local state to track selections
   const [selectedYear, setSelectedYear] = useState<string[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
@@ -138,7 +133,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
     'Locations' | 'Seasons' | 'Years' | ''
   >('');
 
-  // When the modal opens, update the local state with parent's selectedFilters
   useEffect(() => {
     if (isVisible) {
       setSelectedYear(selectedFilters.Years);

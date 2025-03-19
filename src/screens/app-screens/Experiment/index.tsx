@@ -199,9 +199,16 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
     }));
   };
 
-  const handleCropSelection = (optionLabel: string) => {
+  // Modified handleCropSelection accepts a flag to clear the search query.
+  const handleCropSelection = (
+    optionLabel: string,
+    shouldClearSearch: boolean = false,
+  ) => {
     const selectedObj = cropOptions.find(item => item.label === optionLabel);
     if (selectedObj) {
+      if (shouldClearSearch) {
+        setSearchQuery(''); // Clear the search query when switching crops.
+      }
       setSelectedCrop(selectedObj);
       setProjectPage(1);
       setProjectList([]);
@@ -211,7 +218,8 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
         page: 1,
         perPage: 10,
         filters: buildFiltersPayload(),
-        searchKeyword: searchQuery,
+        // Use an empty searchKeyword if shouldClearSearch is true
+        searchKeyword: shouldClearSearch ? '' : searchQuery,
       };
       console.log('Payload being sent:', payload);
       postFiltered({
@@ -282,8 +290,10 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
           title={t(LOCALES.EXPERIMENT.LBL_CROP)}
           options={cropList}
           selectedOption={selectedCrop ? selectedCrop.label : ''}
-          onPress={(option: string) => handleCropSelection(option)}
+          // Pass "true" to clear the search when switching crops.
+          onPress={(option: string) => handleCropSelection(option, true)}
         />
+
         <Filter
           title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
           options={projectList}
@@ -374,9 +384,10 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation}) => {
 
   const handleSearch = () => {
     if (selectedCrop) {
-      handleCropSelection(selectedCrop.label);
+      // Here, we don't clear the search query because the user is actively searching.
+      handleCropSelection(selectedCrop.label, false);
     } else if (cropList.length > 0) {
-      handleCropSelection(cropList[0]);
+      handleCropSelection(cropList[0], false);
     }
   };
 

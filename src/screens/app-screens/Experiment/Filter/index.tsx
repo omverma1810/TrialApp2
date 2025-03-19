@@ -1,5 +1,5 @@
+import React, {useRef, useState, useEffect} from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
 import {FONTS} from '../../../../theme/fonts';
 
 type FilterType = {
@@ -7,7 +7,7 @@ type FilterType = {
   options: string[];
   selectedOption: string;
   onPress: (option: string) => void;
-  onScroll?: (event: any) => void; // New optional prop for scroll events
+  onScroll?: (event: any) => void;
 };
 
 const Filter = ({
@@ -15,27 +15,53 @@ const Filter = ({
   options = [],
   selectedOption = '',
   onPress = () => {},
-  onScroll, // receive onScroll prop if provided
+  onScroll,
 }: FilterType) => {
   if (options.length === 0) return null;
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [itemLayouts, setItemLayouts] = useState<{
+    [key: string]: {x: number; width: number};
+  }>({});
+  const [scrollViewWidth, setScrollViewWidth] = useState(0);
+
+  useEffect(() => {
+    if (
+      selectedOption &&
+      scrollViewRef.current &&
+      itemLayouts[selectedOption] &&
+      scrollViewWidth > 0
+    ) {
+      const {x, width} = itemLayouts[selectedOption];
+      // Calculate offset to roughly center the selected item
+      const offset = x + width / 2 - scrollViewWidth / 2;
+      scrollViewRef.current.scrollTo({x: offset, animated: true});
+    }
+  }, [selectedOption, itemLayouts, scrollViewWidth]);
+
   return (
     <View style={[styles.row, styles.filter]}>
       <Text style={styles.filterTitle}>{title}</Text>
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.scrollView}
-        onScroll={onScroll} // pass the event to the parent if provided
-        scrollEventThrottle={16} // ensures onScroll events fire frequently enough
-      >
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onLayout={e => setScrollViewWidth(e.nativeEvent.layout.width)}>
         {options.map((option, index) => (
           <Pressable
+            key={index}
             onPress={() => onPress(option)}
             style={[
               styles.filterOptions,
               option === selectedOption && styles.selectedOptions,
             ]}
-            key={index}>
+            onLayout={e => {
+              const layout = e.nativeEvent.layout;
+              setItemLayouts(prev => ({...prev, [option]: layout}));
+            }}>
             <Text
               style={[
                 styles.filterOptionsText,
@@ -60,7 +86,9 @@ const styles = StyleSheet.create({
     color: '#949494',
     paddingHorizontal: 8,
   },
-  scrollView: {flexGrow: 0},
+  scrollView: {
+    flexGrow: 0,
+  },
   filterOptions: {
     justifyContent: 'center',
     alignItems: 'center',
