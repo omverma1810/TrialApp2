@@ -399,18 +399,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const onSaveRecord = async (hasNextPlot: boolean) => {
     setHasNextPlot(hasNextPlot);
     const headers = {'Content-Type': 'application/json'};
-    const imagesNameArr = images.map(item => getNameFromUrl(item.url));
-    const base64Promises = images.map(item => getBase64FromUrl(item.url));
-    const imagesBase64Arr = await Promise.all(base64Promises);
     const {latitude, longitude} = await getCoordinates();
-    const imageData = images.map((image, index) => {
-      return {
-        url: image.imagePath ? image.url : null,
-        imagePath: image.imagePath,
-        imageName: imagesNameArr[index],
-        base64Data: imagesBase64Arr[index],
-      };
-    });
+
     console.log({recordData});
     const payload = {
       plotId: selectedPlot?.id,
@@ -418,7 +408,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       fieldExperimentId: selectedExperiment?.id,
       experimentType: selectedExperiment?.experimentType,
       phenotypes: Object.values(recordData),
-      imageData: imageData,
       notes,
       applications: null,
       lat: latitude,
