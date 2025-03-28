@@ -13,12 +13,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import {ImagePlus, Notes} from '../../../assets/icons/svgs';
 import {LOCALES} from '../../../localization/constants';
 import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
-import {
-  formatDateTime,
-  getBase64FromUrl,
-  getCoordinates,
-  getNameFromUrl,
-} from '../../../utilities/function';
+import {formatDateTime, getCoordinates} from '../../../utilities/function';
 import Toast from '../../../utilities/toast';
 import {useRecordApi} from './RecordApiContext';
 import {UpdateRecordDataFunction} from './UnrecordedTraits/UnrecordedTraitsContext';
@@ -101,6 +96,10 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     validateTraitsRecord,
     validatedTrraitsRecordData,
     isValidateTraitsRecordLoading,
+    generatePreSignedUrl,
+    preSignedUrlData,
+    uploadImage,
+    uploadImageData,
   } = useRecordApi();
   const navigation = useNavigation<NewRecordScreenProps['navigation']>();
   const {params} = useRoute<NewRecordScreenProps['route']>();
@@ -165,7 +164,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setNotes(item?.notes || '');
     setImages(item?.imageUrls || []);
   };
-  const pickImageFromCamera = () => {
+  const pickImageFromCamera = (plotId: any = {}) => {
     if (images.length >= maxNoOfImages) {
       Toast.info({
         message: `Maximum number (${maxNoOfImages}) of trait image uploads exceeded.`,
@@ -176,6 +175,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       navigation.navigate('AddImage', {
         imageUrl: image.path,
         screen: 'NewRecord',
+        data: {plotId: selectedPlot?.id, experiment: selectedExperiment},
       });
     });
   };
@@ -394,7 +394,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       });
     }
   }, [updatedTraitsRecordData]);
-
 
   const onSaveRecord = async (hasNextPlot: boolean) => {
     setHasNextPlot(hasNextPlot);

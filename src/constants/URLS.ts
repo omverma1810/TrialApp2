@@ -28,6 +28,7 @@ const URL = {
   GET_FILTERS: 'app/get-filters/',
   EXPERIMENT_LIST_FILTERED: 'app/experiment-list-filtered/',
   GENERATE_PRE_SIGNED: 'generate-presigned-url/',
+  UPLOAD_IMAGE: 'upload-image/',
 };
 
-export {API_CONFIG, BASE_URL, URL, DEFAULT_ENV};
+export {API_CONFIG, BASE_URL, DEFAULT_ENV, URL};

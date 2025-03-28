@@ -20,6 +20,10 @@ interface RecordApiContextType {
   validateTraitsRecord: any;
   validatedTrraitsRecordData: any;
   isValidateTraitsRecordLoading: boolean;
+  generatePreSignedUrl: any;
+  preSignedUrlData: any;
+  uploadImage: any;
+  uploadImageData: any;
 }
 
 const RecordApiContext = createContext<RecordApiContextType | undefined>(
@@ -68,6 +72,16 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
     method: 'POST',
   });
 
+  const [generatePreSignedUrl, preSignedUrlData] = useApi({
+    url: URL.GENERATE_PRE_SIGNED,
+    method: 'GET',
+  });
+
+  const [uploadImage, uploadImageData] = useApi({
+    url: URL.GENERATE_PRE_SIGNED,
+    method: 'POST',
+  });
+
   const value = {
     experimentListData,
     isExperimentListLoading,
@@ -85,6 +99,10 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
     validateTraitsRecord,
     validatedTrraitsRecordData,
     isValidateTraitsRecordLoading,
+    generatePreSignedUrl,
+    preSignedUrlData,
+    uploadImage,
+    uploadImageData,
   };
 
   return (

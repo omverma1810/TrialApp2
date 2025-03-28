@@ -3,6 +3,8 @@ import {useTranslation} from 'react-i18next';
 import {ActivityIndicator, Image, Pressable, Text, View} from 'react-native';
 
 import axios from 'axios';
+import {Buffer} from 'buffer';
+import rnfs from 'react-native-fs';
 import ImageResizer from 'react-native-image-resizer';
 import {Back, Check, X} from '../../../assets/icons/svgs';
 import {SafeAreaView, StatusBar} from '../../../components';
@@ -21,14 +23,9 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   const {imageUrl, screen, data} = route?.params;
   const [imageURI, setImageURI] = useState(imageUrl);
 
-  interface ImageSize {
-    width: number;
-    height: number;
-  }
-
-  async function convertToJPEG(uri: string): Promise<string> {
+  async function convertToJPEG(uri) {
     try {
-      const originalSize: ImageSize = await new Promise((resolve, reject) => {
+      const originalSize = await new Promise((resolve, reject) => {
         Image.getSize(
           uri,
           (width, height) => resolve({width, height}),
@@ -68,13 +65,14 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
     console.log('----------', {data, imageUrl});
     try {
       let {plotId} = data;
-      const JPEGImageUri = await convertToJPEG(imageUrl);
+      let JPEGImageUri = await convertToJPEG(imageUrl);
+      // JPEGImageUri = imageUrl;
 
       setImageURI(JPEGImageUri);
       generatePreSignedUrl({
-        queryParams: `plot_id=${plotId}&image_name=${JPEGImageUri.split(
-          '/',
-        ).pop()}`,
+        queryParams: `plot_id=${plotId}&image_name=${JPEGImageUri.split('/')
+          .pop()
+          .toLowerCase()}`,
       });
       const {latitude, longitude} = await getCoordinates();
       setLocation({lat: latitude, long: longitude});
@@ -94,28 +92,45 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
       }
       console.log('////', {s3_path, imageURI});
 
-      axios
-        .put(preSignedUrlData.data.presigned_url, imageURI, {
-          headers: {
-            'Content-Type': 'image/jpeg',
-            'Content-Encoding': 'binary',
-          },
-        })
-        .then(res => {
-          // console.log('s3 response', res);
-          uploadImage({
-            // console.log({
-            payload: {
-              s3_path,
-              plotId: data.plotId,
-              experimentType: data.experiment.experimentType,
-              ...location,
-            },
-          });
-        })
-        .catch(err => {
-          console.log('s3 error', err);
-          Toast.error({message: 'Failed to upload image', duration: 3000});
+      const fileType = imageURI.split('/').pop()?.split('.').pop();
+      rnfs
+        .readFile(
+          imageURI.startsWith('file://')
+            ? imageURI.replace('file://', '')
+            : imageURI,
+          'base64',
+        )
+        .then(binary => {
+          const binaryData = Buffer.from(binary, 'base64');
+          const blob = new Blob([binaryData], {type: `image/${fileType}`});
+
+          console.log({blob: blob.text, data: blob.arrayBuffer});
+          axios
+            .put(preSignedUrlData.data.presigned_url, binaryData, {
+              headers: {
+                'Content-Type': 'image/jpeg',
+                // 'Content-Encoding': 'binary',
+              },
+            })
+            .then(res => {
+              // console.log('s3 response', res);
+              uploadImage({
+                // console.log({
+                payload: {
+                  s3_path,
+                  plotId: data.plotId,
+                  experimentType: data.experiment.experimentType,
+                  ...location,
+                },
+              });
+            })
+            .catch(err => {
+              console.log('s3 error', err);
+              Toast.error({
+                message: 'Failed to upload image',
+                duration: 3000,
+              });
+            });
         });
     }
   }, [preSignedUrlData]);
@@ -123,6 +138,11 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   useEffect(() => {
     if (uploadImageData) {
       console.log({uploadImageData});
+      if (uploadImageData.status_code !== 200) {
+        Toast.error({message: 'Failed to upload image', duration: 3000});
+      } else {
+        Toast.success({message: 'Image uploaded successfully', duration: 3000});
+      }
       if (screen === 'NewRecord') {
         navigation.navigate('NewRecord', {imageUrl});
       } else if (screen === 'Plots') {
