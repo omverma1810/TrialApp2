@@ -1,4 +1,4 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {FONTS} from '../../../../theme/fonts';
 
@@ -17,25 +17,40 @@ const Filter = ({
   onPress = () => {},
   onScroll,
 }: FilterType) => {
-  if (options.length === 0) return null;
-
   const scrollViewRef = useRef<ScrollView>(null);
+  if (options.length === 0) {
+    return null;
+  }
+
   const [itemLayouts, setItemLayouts] = useState<{
     [key: string]: {x: number; width: number};
   }>({});
   const [scrollViewWidth, setScrollViewWidth] = useState(0);
+  const [updatedScroll, setUpdatedScroll] = useState(0);
 
   useEffect(() => {
+    console.log({
+      selectedOption,
+      scrollRef: scrollViewRef.current,
+      itemLayout: itemLayouts[selectedOption],
+      scrollViewWidth,
+      updatedScroll,
+      current: itemLayouts[selectedOption],
+    });
     if (
       selectedOption &&
       scrollViewRef.current &&
       itemLayouts[selectedOption] &&
-      scrollViewWidth > 0
+      scrollViewWidth > 0 &&
+      updatedScroll !== selectedOption
     ) {
       const {x, width} = itemLayouts[selectedOption];
       // Calculate offset to roughly center the selected item
-      const offset = x + width / 2 - scrollViewWidth / 2;
+      const offsetx = x + width / 2;
+      const scrollWidthCenter = scrollViewWidth / 2;
+      const offset = offsetx - scrollWidthCenter;
       scrollViewRef.current.scrollTo({x: offset, animated: true});
+      setUpdatedScroll(selectedOption);
     }
   }, [selectedOption, itemLayouts, scrollViewWidth]);
 

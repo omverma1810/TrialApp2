@@ -52,7 +52,7 @@ const PlotCard = ({
       id: 1,
       name: t(LOCALES.EXPERIMENT.LBL_ADD_IMAGE),
       icon: <ImagePlus />,
-      onPress: () => pickImageFromCamera(),
+      onPress: () => pickImageFromCamera(plotId, type),
     },
   ];
   const [notes, setNotes] = useState(plotData?.notes || '');
@@ -81,13 +81,14 @@ const PlotCard = ({
     setIsNotesModalVisible(false);
     setIsMediaSaveVisible(true);
   };
-  const pickImageFromCamera = () => {
+  const pickImageFromCamera = (plotId: any = {}, type: String = null) => {
     if (images.length >= details?.maxNoOfImages) {
       Toast.info({
         message: `Maximum number (${details?.maxNoOfImages}) of trait image uploads exceeded.`,
       });
       return;
     }
+
     ImagePicker.openCamera({cropping: true}).then(image => {
       navigation.navigate('AddImage', {
         imageUrl: image.path,

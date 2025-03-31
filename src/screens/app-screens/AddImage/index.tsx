@@ -113,13 +113,14 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
               },
             })
             .then(res => {
-              // console.log('s3 response', res);
               uploadImage({
                 // console.log({
                 payload: {
                   s3_path,
                   plotId: data.plotId,
-                  experimentType: data.experiment.experimentType,
+                  experimentType:
+                    (data?.experiment && data.experiment.experimentType) ||
+                    data?.type,
                   ...location,
                 },
               });
