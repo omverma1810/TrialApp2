@@ -1,7 +1,8 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {FlatList, Pressable, ScrollView, View} from 'react-native';
 import {useTranslation} from 'react-i18next';
+import {FlatList, Pressable, ScrollView, View} from 'react-native';
 
+import {Back, Search} from '../../../assets/icons/svgs';
 import {
   Input,
   Loader,
@@ -9,13 +10,12 @@ import {
   StatusBar,
   Text,
 } from '../../../components';
-import {Back, Search} from '../../../assets/icons/svgs';
+import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
 import {LOCALES} from '../../../localization/constants';
+import {PlotsScreenProps} from '../../../types/navigation/appTypes';
 import PlotCard from './PlotCard';
 import {styles} from './styles';
-import {PlotsScreenProps} from '../../../types/navigation/appTypes';
-import {useApi} from '../../../hooks/useApi';
-import {URL} from '../../../constants/URLS';
 
 const Plots = ({navigation, route}: PlotsScreenProps) => {
   const {t} = useTranslation();
@@ -29,7 +29,6 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
     maxNoOfImages: 0,
     villageName: '',
     trialLocationId: '',
-    name: ',',
   });
 
   const [getPlotList, plotListData, isPlotListLoading, plotListError] = useApi({
@@ -52,7 +51,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       cropName: data?.cropName,
       fieldExperimentId: data?.fieldExperimentId,
       fieldExperimentName: data?.fieldExperimentName,
-      maxNoOfImages: data?.maxNoOfImages || 5,
+      maxNoOfImages: 5,
       villageName: data?.villageName,
       trialLocationId: data?.trialLocationId,
       name: data?.name,
@@ -101,7 +100,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
         <View style={styles.plotContainer}>
           {details?.trialLocationId && (
             <Text style={styles.fieldTitle}>
-              {t(LOCALES.EXPERIMENT.LBL_FIELD)} {details?.name}-
+              {t(LOCALES.EXPERIMENT.LBL_FIELD)} {details?.trialLocationId}-
               {details?.villageName}
             </Text>
           )}

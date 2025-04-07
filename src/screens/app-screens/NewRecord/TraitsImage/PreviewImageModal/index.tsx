@@ -1,33 +1,39 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
+  Alert,
   Image,
+  PermissionsAndroid,
   Platform,
   Pressable,
   StatusBar,
   StyleSheet,
-  View,
   Text,
-  Alert,
+  View,
 } from 'react-native';
 import RNFS from 'react-native-fs';
-import Share from 'react-native-share';
-import {PermissionsAndroid} from 'react-native';
-import {Modal} from '../../../../../components';
-import {Close} from '../../../../../assets/icons/svgs';
+
+import {format} from 'date-fns';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import Share from 'react-native-share';
+import {Close} from '../../../../../assets/icons/svgs';
+import {Modal} from '../../../../../components';
 
 type ModalTypes = {
   isModalVisible: boolean;
   closeModal: () => void;
-  selectedImageUrl: string;
+  selectedImage: any;
+  metadata: any;
 };
 
 const PreviewImageModal = ({
   isModalVisible,
-  selectedImageUrl,
+  selectedImage,
+  metadata,
   closeModal = () => {},
 }: ModalTypes) => {
   const {top} = useSafeAreaInsets();
+
+  console.log({selectedImage, metadata});
 
   const downloadImage = async () => {
     try {
@@ -62,13 +68,13 @@ const PreviewImageModal = ({
       const fileName = `image_${Date.now()}.jpg`;
       const filePath = `${downloadDir}/${fileName}`;
 
-      if (selectedImageUrl.startsWith('file://')) {
-        const sourcePath = selectedImageUrl.replace('file://', '');
+      if (selectedImage?.imagePath.startsWith('file://')) {
+        const sourcePath = selectedImage?.imagePath.replace('file://', '');
         await RNFS.copyFile(sourcePath, filePath);
         Alert.alert('Download Complete', `Image saved to ${filePath}`);
       } else {
         const result = await RNFS.downloadFile({
-          fromUrl: selectedImageUrl,
+          fromUrl: selectedImage?.url,
           toFile: filePath,
         }).promise;
 
@@ -87,7 +93,7 @@ const PreviewImageModal = ({
   const shareImage = async () => {
     try {
       await Share.open({
-        url: selectedImageUrl,
+        url: selectedImage.url,
         title: 'Share Image',
         message: 'Check out this image!',
       });
@@ -95,7 +101,9 @@ const PreviewImageModal = ({
       console.error('Error sharing image:', error);
     }
   };
-
+  useEffect(() => {
+    console.log({selectedImage});
+  }, [selectedImage]);
   return (
     <Modal isModalVisible={isModalVisible}>
       <View style={styles.container}>
@@ -107,7 +115,21 @@ const PreviewImageModal = ({
           onPress={closeModal}>
           <Close />
         </Pressable>
-        <Image source={{uri: selectedImageUrl}} style={styles.image} />
+        <Image source={{uri: selectedImage.url}} style={styles.image} />
+        <View style={styles.metadata}>
+          {selectedImage?.uploadedOn && (
+            <Text style={{color: '#FFF', fontWeight: 'bold'}}>
+              Uploaded On:{' '}
+              {format(
+                new Date(selectedImage?.uploadedOn),
+                'dd MMM yyyy, hh:mm a',
+              )}{' '}
+            </Text>
+          )}
+          <Text style={{color: '#FFF', fontWeight: 'bold'}}>
+            Location: {metadata?.field}
+          </Text>
+        </View>
         <View style={styles.buttonContainer}>
           <Pressable style={styles.button} onPress={downloadImage}>
             <Text style={styles.buttonText}>Download</Text>
@@ -140,6 +162,19 @@ const styles = StyleSheet.create({
     width: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  metadata: {
+    flexDirection: 'column',
+    justifyContent: 'space-evenly',
+    marginBottom: 30,
+    marginLeft: 10,
+    // backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    padding: 20,
+    width: '80%',
+    // borderRadius: 10,
+    // borderWidth: 2,
+    // borderColor: '#aaa',
+    gap: 6,
   },
   buttonContainer: {
     flexDirection: 'row',

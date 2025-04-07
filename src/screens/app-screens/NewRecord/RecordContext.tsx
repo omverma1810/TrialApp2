@@ -13,7 +13,12 @@ import ImagePicker from 'react-native-image-crop-picker';
 import {ImagePlus, Notes} from '../../../assets/icons/svgs';
 import {LOCALES} from '../../../localization/constants';
 import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
-import {formatDateTime, getCoordinates} from '../../../utilities/function';
+import {
+  formatDateTime,
+  getBase64FromUrl,
+  getCoordinates,
+  getNameFromUrl,
+} from '../../../utilities/function';
 import Toast from '../../../utilities/toast';
 import {useRecordApi} from './RecordApiContext';
 import {UpdateRecordDataFunction} from './UnrecordedTraits/UnrecordedTraitsContext';
@@ -38,6 +43,7 @@ export interface TraitsImageTypes {
   imagePath: string | null;
   imageName: string | null;
   base64Data: string | null;
+  uploadedOn: string | null;
 }
 
 interface RecordContextType {
@@ -71,7 +77,6 @@ interface RecordContextType {
   closeNotesModal: () => void;
   handleCropChange: (option: string) => void;
   handleProjectChange: (option: string) => void;
-  createRecordData: UpdateRecordDataFunction;
   updateRecordData: UpdateRecordDataFunction;
   onSaveRecord: (hasNextPlot: boolean) => void;
   onSaveNotes: (notes: string) => void;
@@ -91,15 +96,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     plotListData,
     createTraitsRecord,
     trraitsRecordData,
-    updateTraitsRecord,
-    updatedTraitsRecordData,
-    validateTraitsRecord,
-    validatedTrraitsRecordData,
-    isValidateTraitsRecordLoading,
-    generatePreSignedUrl,
-    preSignedUrlData,
-    uploadImage,
-    uploadImageData,
   } = useRecordApi();
   const navigation = useNavigation<NewRecordScreenProps['navigation']>();
   const {params} = useRoute<NewRecordScreenProps['route']>();
@@ -136,7 +132,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const [images, setImages] = useState<TraitsImageTypes[]>([]);
   const [maxNoOfImages, setMaxNoOfImages] = useState(0);
   const [hasNextPlot, setHasNextPlot] = useState(false);
-  const [recordableTraits, setRecordableTraits] = useState({});
   const isSelectExperimentVisible = true;
   const isSelectFieldVisible = !!selectedExperiment;
   const isSelectPlotVisible = !!selectedExperiment && !!selectedField;
@@ -164,7 +159,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setNotes(item?.notes || '');
     setImages(item?.imageUrls || []);
   };
-  const pickImageFromCamera = (plotId: any = {}) => {
+  const pickImageFromCamera = () => {
     if (images.length >= maxNoOfImages) {
       Toast.info({
         message: `Maximum number (${maxNoOfImages}) of trait image uploads exceeded.`,
@@ -172,10 +167,21 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       return;
     }
     ImagePicker.openCamera({cropping: true}).then(image => {
+      console.log('-/-/-/', {
+        image,
+        selectedPlot,
+        selectedField,
+        selectedExperiment,
+      });
       navigation.navigate('AddImage', {
         imageUrl: image.path,
         screen: 'NewRecord',
-        data: {plotId: selectedPlot?.id, experiment: selectedExperiment},
+        data: {
+          id: selectedPlot.id,
+          type: selectedExperiment?.experimentType,
+          plotId: selectedPlot?.id,
+          field: selectedField?.location?.villageName,
+        },
       });
     });
   };
@@ -192,6 +198,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
           imagePath: null,
           base64Data: null,
           imageName: null,
+          uploadedOn: data?.uploadedOn,
         },
         ...images,
       ]);
@@ -301,12 +308,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       pathParams: selectedField?.id,
       queryParams: `experimentType=${selectedExperiment?.experimentType}`,
     });
-  }, [
-    selectedField,
-    selectedExperiment,
-    updatedTraitsRecordData,
-    trraitsRecordData,
-  ]);
+  }, [selectedField, selectedExperiment]);
 
   useEffect(() => {
     if (plotListData?.status_code !== 200 || !plotListData?.data) {
@@ -316,38 +318,21 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     const {data} = plotListData;
     const plotList = data?.plotData;
     setPlotList(plotList);
-    setMaxNoOfImages(data?.maxNoOfImages || 5);
+    setMaxNoOfImages(5);
     const paramsData: any = params;
     if (paramsData?.QRData) {
       const data = paramsData?.QRData;
       const plot = plotList?.find((item: any) => item?.id === data?.plot_id);
-      if (plot && !selectedPlot) {
+      if (plot) {
         handlePlotSelect(plot);
       }
     }
   }, [plotListData]);
 
-  const createRecordData: UpdateRecordDataFunction = (
-    observationId,
-    traitId,
-    observedValue,
-    shouldUpdate = false,
-  ) => {
-    setRecordData(prevData => ({
-      ...prevData,
-      [traitId]: {
-        observationId,
-        traitId,
-        observedValue: observedValue,
-        shouldUpdate,
-      },
-    }));
-  };
   const updateRecordData: UpdateRecordDataFunction = (
     observationId,
     traitId,
     observedValue,
-    shouldUpdate = true,
   ) => {
     setRecordData(prevData => ({
       ...prevData,
@@ -355,7 +340,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
         observationId,
         traitId,
         observedValue: observedValue,
-        shouldUpdate,
       },
     }));
   };
@@ -382,86 +366,35 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     }
   }, [trraitsRecordData, hasNextPlot]);
 
-  useEffect(() => {
-    if (updatedTraitsRecordData?.status_code === 200) {
-      Toast.success({
-        message:
-          updatedTraitsRecordData?.message || 'Data updated successfully',
-      });
-    } else if (updatedTraitsRecordData?.status_code) {
-      Toast.error({
-        message: updatedTraitsRecordData?.message || 'Failed to update data',
-      });
-    }
-  }, [updatedTraitsRecordData]);
-
   const onSaveRecord = async (hasNextPlot: boolean) => {
     setHasNextPlot(hasNextPlot);
     const headers = {'Content-Type': 'application/json'};
+    const imagesNameArr = images.map(item => getNameFromUrl(item.url));
+    const base64Promises = images.map(item => getBase64FromUrl(item.url));
+    const imagesBase64Arr = await Promise.all(base64Promises);
     const {latitude, longitude} = await getCoordinates();
-
-    console.log({recordData});
+    const imageData = images.map((image, index) => {
+      return {
+        url: image.imagePath ? image.url : null,
+        imagePath: image.imagePath,
+        imageName: imagesNameArr[index],
+        base64Data: imagesBase64Arr[index],
+      };
+    });
     const payload = {
       plotId: selectedPlot?.id,
       date: formatDateTime(new Date()),
       fieldExperimentId: selectedExperiment?.id,
       experimentType: selectedExperiment?.experimentType,
       phenotypes: Object.values(recordData),
+      imageData: imageData,
       notes,
       applications: null,
       lat: latitude,
       long: longitude,
     };
-
-    setRecordableTraits({payload, headers});
-    validateTraitsRecord({payload, headers});
+    createTraitsRecord({payload, headers});
   };
-
-  useEffect(() => {
-    console.log({
-      validatedTrraitsRecordData: validatedTrraitsRecordData?.phenotypes,
-    });
-
-    let {payload, headers} = recordableTraits;
-
-    const invalid = validatedTrraitsRecordData?.phenotypes?.filter(
-      i => !i?.validationStatus,
-    );
-    // console.log({invalid, payload});
-    if (invalid && invalid.length) {
-      invalid.forEach(item => {
-        Toast.warning({message: `${item?.observedValue} is invalid value`});
-        setRecordData(prevData => ({
-          ...prevData,
-          [item?.traitId]: {
-            observationId: item?.observedId,
-            traitId: item?.traitId,
-            observedValue: null,
-            shouldUpdate: item?.shouldUpdate,
-          },
-        }));
-      });
-      setRecordableTraits({});
-      return;
-    }
-    let creatableTraits: any = payload?.phenotypes.filter(
-      i => !i?.shouldUpdate,
-    );
-    let updatableTraits: any = payload?.phenotypes.filter(i => i?.shouldUpdate);
-
-    if (creatableTraits && creatableTraits.length) {
-      let createTraits = {...payload, phenotypes: creatableTraits};
-
-      createTraitsRecord({payload: createTraits, headers});
-    }
-    if (updatableTraits && updatableTraits.length) {
-      let updateTraits = {...payload, phenotypes: updatableTraits};
-
-      updateTraitsRecord({payload: updateTraits, headers});
-    }
-
-    setRecordableTraits({});
-  }, [validatedTrraitsRecordData]);
 
   const onSaveNotes = (notes: string) => {
     setNotes(notes.trim());
@@ -514,7 +447,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     closeNotesModal,
     handleCropChange,
     handleProjectChange,
-    createRecordData,
     updateRecordData,
     onSaveRecord,
     onSaveNotes,

@@ -7,7 +7,6 @@ type FilterType = {
   options: string[];
   selectedOption: string;
   onPress: (option: string) => void;
-  onScroll?: (event: any) => void;
 };
 
 const Filter = ({
@@ -15,8 +14,10 @@ const Filter = ({
   options = [],
   selectedOption = '',
   onPress = () => {},
-  onScroll,
 }: FilterType) => {
+  if (options.length === 0) {
+    return null;
+  }
   const scrollViewRef = useRef<ScrollView>(null);
   if (options.length === 0) {
     return null;
@@ -25,32 +26,19 @@ const Filter = ({
   const [itemLayouts, setItemLayouts] = useState<{
     [key: string]: {x: number; width: number};
   }>({});
-  const [scrollViewWidth, setScrollViewWidth] = useState(0);
+  const [scrollViewWidth, setScrollViewWidth] = useState(
+    scrollViewRef.current?.width || 0,
+  );
   const [updatedScroll, setUpdatedScroll] = useState(0);
-
   useEffect(() => {
-    console.log({
-      selectedOption,
-      scrollRef: scrollViewRef.current,
-      itemLayout: itemLayouts[selectedOption],
-      scrollViewWidth,
-      updatedScroll,
-      current: itemLayouts[selectedOption],
-    });
     if (
       selectedOption &&
       scrollViewRef.current &&
-      itemLayouts[selectedOption] &&
-      scrollViewWidth > 0 &&
-      updatedScroll !== selectedOption
+      itemLayouts[selectedOption]
     ) {
       const {x, width} = itemLayouts[selectedOption];
-      // Calculate offset to roughly center the selected item
-      const offsetx = x + width / 2;
-      const scrollWidthCenter = scrollViewWidth / 2;
-      const offset = offsetx - scrollWidthCenter;
+      const offset = Math.max(0, x - (scrollViewWidth - width) / 2);
       scrollViewRef.current.scrollTo({x: offset, animated: true});
-      setUpdatedScroll(selectedOption);
     }
   }, [selectedOption, itemLayouts, scrollViewWidth]);
 
@@ -58,16 +46,17 @@ const Filter = ({
     <View style={[styles.row, styles.filter]}>
       <Text style={styles.filterTitle}>{title}</Text>
       <ScrollView
-        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.scrollView}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        onLayout={e => setScrollViewWidth(e.nativeEvent.layout.width)}>
+        ref={scrollViewRef}
+        onLayout={e =>
+          !scrollViewWidth
+            ? setScrollViewWidth(e.nativeEvent.layout.width)
+            : null
+        }>
         {options.map((option, index) => (
           <Pressable
-            key={index}
             onPress={() => onPress(option)}
             style={[
               styles.filterOptions,
@@ -76,7 +65,8 @@ const Filter = ({
             onLayout={e => {
               const layout = e.nativeEvent.layout;
               setItemLayouts(prev => ({...prev, [option]: layout}));
-            }}>
+            }}
+            key={index}>
             <Text
               style={[
                 styles.filterOptionsText,
@@ -101,9 +91,7 @@ const styles = StyleSheet.create({
     color: '#949494',
     paddingHorizontal: 8,
   },
-  scrollView: {
-    flexGrow: 0,
-  },
+  scrollView: {flexGrow: 0},
   filterOptions: {
     justifyContent: 'center',
     alignItems: 'center',

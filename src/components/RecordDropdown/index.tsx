@@ -1,15 +1,12 @@
 import {useNavigation} from '@react-navigation/native';
-import dayjs from 'dayjs';
 import React, {useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
-  Image,
-  Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {
@@ -20,11 +17,11 @@ import {
 } from '../../assets/icons/svgs';
 import {URL} from '../../constants/URLS';
 import {useApi} from '../../hooks/useApi';
+import TraitsImage from '../../screens/app-screens/NewRecord/TraitsImage';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 import {FONTS} from '../../theme/fonts';
 import Toast from '../../utilities/toast';
-import Calendar from '../Calender';
 
 type selectedFieldsType = {
   [key: string]: boolean;
@@ -64,19 +61,16 @@ const RecordDropDown = ({
   return (
     <ScrollView>
       {Object.keys(selectedFields).map(
-        (field, idx) =>
+        field =>
           selectedFields[field] && (
             <ProjectContainer
               key={field}
               title={field}
-              heading={`${
-                fields.find((f: any) => String(f.id) === String(field))?.name ||
-                'Unknown Field'
-              } - ${
+              heading={`${field} - ${
                 fields.find((f: any) => String(f.id) === String(field))
                   ?.location?.villageName || 'Unknown'
               }`}
-              data={projectData && projectData[idx]?.plotData}
+              data={projectData && projectData[0]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
               toggleDropdown={(index: number) => toggleDropdown(field, index)}
@@ -121,6 +115,7 @@ const ProjectContainer = ({
               <ItemComponent
                 key={index}
                 title={`${item.plotNumber}`}
+                // entries={item.recordedTraitData}
                 notes={item.notes}
                 dropdownState={dropdownStates[`${title}_${index}`]}
                 toggleDropdown={() => toggleDropdown(index)}
@@ -128,6 +123,7 @@ const ProjectContainer = ({
                 plotId={item.id}
                 experimentType={experimentType}
                 plotData={item}
+                heading={heading}
                 imageUrls={item.imageUrls}
               />
             ))}
@@ -147,23 +143,18 @@ const ItemComponent = ({
   experimentType,
   plotData,
   imageUrls,
+  heading,
 }: any) => {
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [showInputCard, setShowInputCard] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<any>(null);
-  const [updatabaleCurrentEntry, setUpdatableCurrentEntry] =
-    useState<any>(null);
   const [observedValue, setObservedValue] = useState('');
-  const [calendarVisible, setCalendarVisible] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const optionsModalRef = useRef<any>(null);
   const recordedTraitData = plotData.recordedTraitData;
-  const [recordableData, setRecordableData] = useState({});
   const unrecordedTraitData = plotData.unrecordedTraitData;
   const [dropdownHeight] = useState(new Animated.Value(0));
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
-  const [editingEntryType, setEditingEntryType] = useState<string | null>(null);
   const [changedValue, setChangedValue] = useState<any>(null);
   useEffect(() => {
     const height = recordedTraitData.length + unrecordedTraitData.length;
@@ -185,31 +176,15 @@ const ItemComponent = ({
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   };
 
-  const [validateTraitsRecord, validateTraitsResponse] = useApi({
-    url: URL.VALIDATE_TRAITS,
-    method: 'POST',
-  });
-
   const [updateValue, updateValueResponse] = useApi({
     url: URL.RECORD_TRAITS,
     method: 'PUT',
   });
 
   const handleEditPress = (entry: any) => {
-    console.log('~~~~~~~~~~~~', {entry});
     setCurrentEntry(entry);
-    setEditingEntryType(entry?.dataType);
-
-    if (entry.dataType === 'date') {
-      setCalendarVisible(true);
-    } else if (entry.dataType === 'fixed') {
-      console.log({modalVisible});
-      if (modalVisible) {
-        setModalVisible(false);
-        setTimeout(() => setModalVisible(true), 1);
-      } else {
-        setModalVisible(true);
-      }
+    if (entry.dataType === 'fixed') {
+      setModalVisible(true);
     } else {
       setEditingEntryId(entry.observationId);
     }
@@ -219,7 +194,7 @@ const ItemComponent = ({
     if (modalVisible && optionsModalRef.current) {
       optionsModalRef.current.present();
     }
-  }, [modalVisible, optionsModalRef, currentEntry]);
+  }, [modalVisible, optionsModalRef]);
 
   const handleValueSubmit = (value: any) => {
     const payload = {
@@ -239,34 +214,9 @@ const ItemComponent = ({
     const headers = {
       'Content-Type': 'application/json',
     };
-    setRecordableData({payload, headers});
-    validateTraitsRecord({payload, headers});
+    updateValue({payload, headers});
   };
 
-  const handleDateSubmit = (date: Date) => {
-    const formattedDate = dayjs(date).format('DD-MM-YYYY');
-    handleValueSubmit(formattedDate);
-    setCalendarVisible(false);
-  };
-
-  useEffect(() => {
-    if (validateTraitsResponse?.phenotypes) {
-      const invalid = validateTraitsResponse?.phenotypes?.filter(
-        (i: {validationStatus: boolean}) => !i.validationStatus,
-      );
-
-      console.log({invalid});
-      if (invalid && invalid.length) {
-        invalid?.forEach((item: {observedValue: string}) => {
-          Toast.warning({message: `${item.observedValue} is invalid value`});
-        });
-        setRecordableData({});
-        return;
-      }
-
-      updateValue(recordableData);
-    }
-  }, [validateTraitsResponse]);
   useEffect(() => {
     if (updateValueResponse && updateValueResponse.status_code === 200) {
       Toast.success({
@@ -283,21 +233,28 @@ const ItemComponent = ({
     setEditingEntryId(null);
     setModalVisible(false);
     setCurrentEntry(null);
-    setUpdatableCurrentEntry(null);
     optionsModalRef.current?.close();
   }, [updateValueResponse]);
+
+  useEffect(() => {
+    console.log({
+      imageUrls: imageUrls && imageUrls.length ? imageUrls[0] : '-',
+      heading,
+      plotData,
+    });
+  }, [imageUrls, heading, plotData]);
   return (
     <ScrollView style={styles.itemContainer}>
-      <Pressable onPress={toggleDropdown}>
+      <TouchableOpacity onPress={toggleDropdown}>
         <View style={styles.row}>
           <View style={styles.column}>
             <Text style={styles.title}>{title}</Text>
           </View>
-          <Pressable onPress={toggleDropdown}>
+          <TouchableOpacity onPress={toggleDropdown}>
             {dropdownState ? <CardArrowUp /> : <CardArrowDown />}
-          </Pressable>
+          </TouchableOpacity>
         </View>
-      </Pressable>
+      </TouchableOpacity>
 
       <Animated.View style={[styles.dropdown]}>
         {dropdownState && (
@@ -315,19 +272,32 @@ const ItemComponent = ({
                       </View>
                     </View>
                   )}
+                  {imageUrls && imageUrls.length && (
+                    <TraitsImage
+                      images={imageUrls}
+                      onDeleteImages={() => {}}
+                      metadata={{field: heading.split('-')[1]}}
+                    />
+                  )}
                   {recordedTraitData.map((entry: any, index: number) => (
                     <View style={styles.entryContainer} key={index}>
+                      {/* <View style={styles.projectContainer1}> */}
                       <View style={styles.borderRadiusOverflow}>
                         <View style={styles.entryRow}>
                           <View style={styles.entryColumn}>
+                            {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
                             <Text style={styles.entryLabel}>
                               {entry.traitName}
                             </Text>
+                            {/* <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text> */}
                           </View>
                         </View>
                         <View style={styles.entryRow}>
                           {editingEntryId === entry.observationId ? (
-                            <View style={styles.entryColumn}>
+                            <View
+                              style={[styles.entryColumn, {paddingTop: 12}]}>
                               <ValueInputCard
                                 onSubmit={handleValueSubmit}
                                 entry={currentEntry}
@@ -336,30 +306,25 @@ const ItemComponent = ({
                             </View>
                           ) : (
                             <>
-                              <Pressable
-                                onPress={() => {
-                                  setModalVisible(false);
-                                  handleEditPress(entry);
-                                }}>
+                              <TouchableOpacity
+                                onPress={() => handleEditPress(entry)}>
                                 <View style={styles.entryColumn}>
-                                  <Text style={styles.entryLabel}>Value</Text>
+                                  {/* <Text style={styles.entryLabel}>Value</Text> */}
                                   <Text style={styles.entryValue}>
                                     {entry.value}
                                   </Text>
                                 </View>
-                              </Pressable>
-                              <Pressable
-                                onPress={() => {
-                                  setModalVisible(false);
-                                  handleEditPress(entry);
-                                }}
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                onPress={() => handleEditPress(entry)}
                                 style={styles.editButton}>
                                 <Edit />
-                              </Pressable>
+                              </TouchableOpacity>
                             </>
                           )}
                         </View>
                       </View>
+                      {/* </View> */}
                     </View>
                   ))}
                 </>
@@ -376,7 +341,6 @@ const ItemComponent = ({
                       </View>
                     </View>
                   )}
-
                   {unrecordedTraitData.map((entry: any, index: number) => (
                     <View style={styles.entryContainer} key={index}>
                       <View style={styles.projectContainer1}>
@@ -384,22 +348,41 @@ const ItemComponent = ({
                           <View style={styles.entryRow}>
                             <View style={styles.entryColumn}>
                               {/* <Text style={styles.entryLabel}>Trait Name</Text> */}
-
                               <Text style={styles.entryLabel}>
                                 {entry.traitName}
                               </Text>
+                              {/* <Text style={styles.entryValue}>
+                              {entry.traitName}
+                            </Text> */}
                             </View>
                           </View>
-
                           <View style={styles.entryRow}>
-                            <View style={styles.entryColumn}>
-                              <Text style={styles.entryValue}>
-                                {entry.value !== null &&
-                                entry.value !== undefined
-                                  ? entry.value
-                                  : 'No Data Found'}
-                              </Text>
-                            </View>
+                            {editingEntryId === entry.observationId ? (
+                              <View style={styles.entryColumn}>
+                                <ValueInputCard
+                                  onSubmit={handleValueSubmit}
+                                  entry={currentEntry}
+                                  setShowInputCard={setEditingEntryId}
+                                />
+                              </View>
+                            ) : (
+                              <>
+                                <TouchableOpacity
+                                  onPress={() => handleEditPress(entry)}>
+                                  <View style={styles.entryColumn}>
+                                    <Text style={styles.entryLabel}>Value</Text>
+                                    <Text style={styles.entryValue}>
+                                      {entry.value}
+                                    </Text>
+                                  </View>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => handleEditPress(entry)}
+                                  style={styles.editButton}>
+                                  <Edit />
+                                </TouchableOpacity>
+                              </>
+                            )}
                           </View>
                         </View>
                       </View>
@@ -407,63 +390,24 @@ const ItemComponent = ({
                   ))}
                 </>
               )}
-
               {dropdownState && notes && notes != '' && (
                 <View style={styles.notesContainer}>
                   <Text style={styles.notesTitle}>Notes</Text>
-
                   <View style={styles.notesContent}>
                     <Text style={styles.notesText}>{notes}</Text>
                   </View>
-                </View>
-              )}
-
-              {imageUrls && imageUrls.length > 0 && (
-                <View style={styles.imageContainer}>
-                  {imageUrls.map((image: any) => (
-                    <Image
-                      key={image.imageName}
-                      source={{uri: image.url}}
-                      style={styles.image}
-                      resizeMode="contain"
-                      onError={e =>
-                        console.log('Image Load Error: ', e.nativeEvent.error)
-                      }
-                    />
-                  ))}
                 </View>
               )}
             </ScrollView>
           </>
         )}
       </Animated.View>
-
       {modalVisible && (
         <OptionsModal
           item={currentEntry}
           onSubmit={handleValueSubmit}
           bottomSheetModalRef={optionsModalRef}
         />
-      )}
-
-      {calendarVisible && (
-        <Modal
-          visible={calendarVisible}
-          transparent
-          onRequestClose={() => setCalendarVisible(false)}>
-          <View style={styles.modalContainer}>
-            <Calendar
-              onOk={(date: string) => handleDateSubmit(new Date(date))}
-              onCancel={() => setCalendarVisible(false)}
-              selectedDate={
-                currentEntry?.value &&
-                dayjs(currentEntry.value, 'YYYY-MM-DD').isValid()
-                  ? dayjs(currentEntry.value, 'YYYY-MM-DD').format('YYYY-MM-DD') // Previous Date
-                  : dayjs().format('YYYY-MM-DD') // Fallback Default (Today)
-              }
-            />
-          </View>
-        </Modal>
       )}
     </ScrollView>
   );
@@ -520,7 +464,7 @@ const styles = StyleSheet.create({
   },
   entryContainer: {
     gap: 16,
-    paddingVertical: 15,
+    paddingVertical: 5,
   },
   projectContainer1: {
     borderRadius: 6,
@@ -536,8 +480,8 @@ const styles = StyleSheet.create({
   },
   recordedTraitsText: {
     color: '#161616',
-    fontSize: 12,
-    fontFamily: FONTS.MEDIUM,
+    fontSize: 14,
+    fontWeight: '500',
   },
   borderRadiusOverflow: {
     borderRadius: 6,
@@ -555,9 +499,9 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   entryLabel: {
-    color: '#161616',
-    fontFamily: FONTS.REGULAR,
-    fontSize: 12,
+    color: '#636363',
+    fontWeight: '400',
+    fontSize: 15,
   },
   entryValue: {
     color: '#161616',

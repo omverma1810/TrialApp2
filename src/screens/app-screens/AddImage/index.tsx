@@ -1,16 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import {useTranslation} from 'react-i18next';
-import {ActivityIndicator, Image, Pressable, Text, View} from 'react-native';
+import {ActivityIndicator, Image, Pressable, View} from 'react-native';
 
 import axios from 'axios';
 import {Buffer} from 'buffer';
 import rnfs from 'react-native-fs';
 import ImageResizer from 'react-native-image-resizer';
-import {Back, Check, X} from '../../../assets/icons/svgs';
+import {Check, X} from '../../../assets/icons/svgs';
 import {SafeAreaView, StatusBar} from '../../../components';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
-import {LOCALES} from '../../../localization/constants';
 import {AddImageScreenProps} from '../../../types/navigation/appTypes';
 import {getCoordinates} from '../../../utilities/function';
 import Toast from '../../../utilities/toast';
@@ -85,6 +84,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
 
   useEffect(() => {
     if (preSignedUrlData) {
+      console.log({preSignedUrlData});
       const {s3_path, status_code} = preSignedUrlData;
       setLoader(false);
       if (status_code !== 200) {
@@ -145,23 +145,23 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
         Toast.success({message: 'Image uploaded successfully', duration: 3000});
       }
       if (screen === 'NewRecord') {
-        navigation.navigate('NewRecord', {imageUrl});
+        navigation.navigate('NewRecord', {
+          imageUrl,
+          uploadedOn: new Date().toISOString(),
+        });
       } else if (screen === 'Plots') {
-        navigation.navigate('Plots', {imageUrl, ...data});
+        navigation.navigate('Plots', {
+          imageUrl,
+          uploadedOn: new Date().toISOString(),
+          ...data,
+        });
       }
     }
   }, [uploadImageData]);
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
-      <Pressable
-        onPress={navigation.goBack}
-        style={[styles.header, styles.row]}>
-        <Back />
-        <Text style={styles.headerTitle}>
-          {t(LOCALES.EXPERIMENT.LBL_ADD_IMAGE)}
-        </Text>
-      </Pressable>
+
       <View style={styles.container}>
         <View style={styles.imageContainer}>
           <Image style={styles.image} source={{uri: imageUrl}} />

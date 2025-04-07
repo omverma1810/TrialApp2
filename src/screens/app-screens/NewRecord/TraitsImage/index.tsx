@@ -1,20 +1,23 @@
-import {Image, Pressable, Text, View} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import {useTranslation} from 'react-i18next';
+import {ActivityIndicator, Pressable, Text, View} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 
-import {styles} from '../styles';
 import {ImagePlus, SelectIcon} from '../../../../assets/icons/svgs';
-import {LOCALES} from '../../../../localization/constants';
 import {Button} from '../../../../components';
-import PreviewImageModal from './PreviewImageModal';
+import ImageWithLoader from '../../../../components/ImageLoader';
+import {LOCALES} from '../../../../localization/constants';
 import {TraitsImageTypes} from '../RecordContext';
+import {styles} from '../styles';
+import PreviewImageModal from './PreviewImageModal';
 
 const TraitsImage = ({
   images,
+  metadata,
   onDeleteImages = () => {},
 }: {
   images: TraitsImageTypes[];
+  metadata: any;
   onDeleteImages: (arr: number[]) => void;
 }) => {
   const {t} = useTranslation();
@@ -46,13 +49,16 @@ const TraitsImage = ({
           }
         });
       } else {
+        console.log({selectedImage_: image});
         setIsImagePreviewVisible(true);
         setSelectedImageUrl(image);
       }
     };
 
     const handleLongPressImage = (index: number) => {
-      if (!isMultiImageSelectEnabled) setSelectedImageList([{id: index}]);
+      if (!isMultiImageSelectEnabled) {
+        setSelectedImageList([{id: index}]);
+      }
       setIsMultiImageSelectEnabled(true);
     };
 
@@ -64,26 +70,32 @@ const TraitsImage = ({
 
     return (
       <View style={styles.imageViewContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{flexGrow: 1}}>
-          <View style={styles.imageContainer}>
-            {images.map((image, index) => (
-              <Pressable
-                key={index}
-                onPress={() => handleImagePress(index, image.url)}
-                onLongPress={() => handleLongPressImage(index)}>
-                <Image source={{uri: image.url}} style={styles.image} />
-                {selectedImageList?.find(i => i?.id === index) && (
-                  <View style={styles.selectedImage}>
-                    <SelectIcon />
-                  </View>
-                )}
-              </Pressable>
-            ))}
+        {images.length ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{flexGrow: 1}}>
+            <View style={styles.imageContainer}>
+              {images.map((image, index) => (
+                <Pressable
+                  key={index}
+                  onPress={() => handleImagePress(index, image)}
+                  onLongPress={() => handleLongPressImage(index)}>
+                  <ImageWithLoader uri={image.url} style={styles.image} />
+                  {selectedImageList?.find(i => i?.id === index) && (
+                    <View style={styles.selectedImage}>
+                      <SelectIcon />
+                    </View>
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
+        ) : (
+          <View style={styles.loaderOverlay}>
+            <ActivityIndicator size="large" color="#ffffff" />
           </View>
-        </ScrollView>
+        )}
         {selectedImageList.length > 0 && (
           <Button
             onPress={handleDeleteImages}
@@ -94,7 +106,8 @@ const TraitsImage = ({
         )}
         <PreviewImageModal
           isModalVisible={isImagePreviewVisible}
-          selectedImageUrl={selectedImageUrl}
+          selectedImage={selectedImageUrl}
+          metadata={metadata}
           closeModal={() => setIsImagePreviewVisible(false)}
         />
       </View>

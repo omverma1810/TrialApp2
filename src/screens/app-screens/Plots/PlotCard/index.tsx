@@ -10,7 +10,6 @@ import {
   ImagePlus,
   Notes as NotesIcon,
 } from '../../../../assets/icons/svgs';
-import {Button} from '../../../../components';
 import {URL} from '../../../../constants/URLS';
 import {useApi} from '../../../../hooks/useApi';
 import {LOCALES} from '../../../../localization/constants';
@@ -126,6 +125,7 @@ const PlotCard = ({
 
   const [validateTraitsRecord, validateTraitsResponse] = useApi({
     url: URL.VALIDATE_TRAITS,
+
     method: 'POST',
   });
 
@@ -147,14 +147,17 @@ const PlotCard = ({
       );
 
       console.log({invalid});
+
       if (invalid && invalid.length) {
         invalid?.forEach((item: {observedValue: string}) => {
           Toast.warning({message: `${item.observedValue} is invalid value`});
         });
 
         setRecordableData({});
+
         return;
       }
+
       updateTraitsRecord(recordableData);
     }
   }, [validateTraitsResponse]);
@@ -194,8 +197,8 @@ const PlotCard = ({
       imageData: imageData,
       notes,
     };
-
     setRecordableData({payload, headers});
+
     validateTraitsRecord({payload, headers});
   };
 
@@ -249,15 +252,10 @@ const PlotCard = ({
           </View>
           {notes && <Notes notes={notes} />}
           {images && images.length > 0 && (
-            <TraitsImage images={images} onDeleteImages={onDeleteImages} />
-          )}
-          {isMediaSaveVisible && (
-            <Button
-              title={t(LOCALES.EXPERIMENT.LBL_SAVE)}
-              containerStyle={styles.saveRecord}
-              onPress={onSave}
-              loading={isTraitsRecordLoading}
-              disabled={isTraitsRecordLoading}
+            <TraitsImage
+              images={images}
+              metadata={{field: details?.villageName}}
+              onDeleteImages={onDeleteImages}
             />
           )}
           <RecordedTraits
