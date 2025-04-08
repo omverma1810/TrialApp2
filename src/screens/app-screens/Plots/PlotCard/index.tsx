@@ -80,7 +80,10 @@ const PlotCard = ({
     setIsNotesModalVisible(false);
     setIsMediaSaveVisible(true);
   };
-  const pickImageFromCamera = (plotId: any = {}, type: String = null) => {
+  const pickImageFromCamera = (
+    plotId: any = {},
+    type: string | null = null,
+  ) => {
     if (images.length >= details?.maxNoOfImages) {
       Toast.info({
         message: `Maximum number (${details?.maxNoOfImages}) of trait image uploads exceeded.`,
@@ -99,7 +102,13 @@ const PlotCard = ({
   useEffect(() => {
     if (imageUrl && plotData?.id === plotId) {
       setImages([
-        {url: imageUrl, imagePath: null, base64Data: null, imageName: null},
+        {
+          url: imageUrl,
+          imagePath: null,
+          base64Data: null,
+          imageName: null,
+          uploadedOn: null,
+        },
         ...images,
       ]);
       setIsMediaSaveVisible(true);

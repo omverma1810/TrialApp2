@@ -22,18 +22,23 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   const {imageUrl, screen, data} = route?.params;
   const [imageURI, setImageURI] = useState(imageUrl);
 
-  async function convertToJPEG(uri) {
+  interface ImageSize {
+    width: number;
+    height: number;
+  }
+
+  async function convertToJPEG(uri: string): Promise<string> {
     try {
-      const originalSize = await new Promise((resolve, reject) => {
+      const originalSize: ImageSize = await new Promise((resolve, reject) => {
         Image.getSize(
           uri,
-          (width, height) => resolve({width, height}),
-          error => reject(error),
+          (width: number, height: number) => resolve({width, height}),
+          (error: any) => reject(error),
         );
       });
 
       const {width, height} = originalSize;
-      const newImage = await ImageResizer.createResizedImage(
+      const newImage: {uri: string} = await ImageResizer.createResizedImage(
         uri,
         width,
         height,

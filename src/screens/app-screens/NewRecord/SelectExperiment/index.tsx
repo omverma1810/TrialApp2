@@ -5,7 +5,7 @@ import {useTranslation} from 'react-i18next';
 import {styles} from '../styles';
 import {CardArrowDown, Close, Search} from '../../../../assets/icons/svgs';
 import {LOCALES} from '../../../../localization/constants';
-import Filter from '../../Experiment/Filter';
+import Filter from '../Filter';
 import {useRecord} from '../RecordContext';
 import {useRecordApi} from '../RecordApiContext';
 import {Input, Loader} from '../../../../components';

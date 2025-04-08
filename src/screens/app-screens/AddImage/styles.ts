@@ -147,11 +147,16 @@ export const styles = StyleSheet.create({
   scrollViewContent: {
     paddingBottom: 16,
   },
-
   matchedOption: {
     color: '#555',
     fontSize: 14,
     fontFamily: 'Inter-SemiBold',
     marginTop: 5,
+  },
+  loaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
