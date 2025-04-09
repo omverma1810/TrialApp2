@@ -1,5 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  LayoutChangeEvent,
+} from 'react-native';
 import {FONTS} from '../../../../theme/fonts';
 
 type FilterType = {
@@ -15,44 +22,50 @@ const Filter = ({
   selectedOption = '',
   onPress = () => {},
 }: FilterType) => {
-  if (options.length === 0) {
-    return null;
-  }
+  // Reference for the horizontal ScrollView.
   const scrollViewRef = useRef<ScrollView>(null);
-  if (options.length === 0) {
-    return null;
-  }
-
-  const [itemLayouts, setItemLayouts] = useState<{
-    [key: string]: {x: number; width: number};
-  }>({});
+  // Record the layout (x offset and width) of each option.
+  const optionLayouts = useRef<{[key: string]: {x: number; width: number}}>({});
+  // Store the width of the ScrollView container.
   const [scrollViewWidth, setScrollViewWidth] = useState(0);
-  const [updatedScroll, setUpdatedScroll] = useState(0);
+
+  // Trigger scrolling to the selected option whenever it changes.
   useEffect(() => {
     if (
-      selectedOption &&
-      scrollViewRef.current &&
-      itemLayouts[selectedOption]
-    ) {
-      const {x, width} = itemLayouts[selectedOption];
-      const offset = Math.max(0, x - (scrollViewWidth - width) / 2);
-      scrollViewRef.current.scrollTo({x: offset, animated: true});
-    }
-  }, [selectedOption, itemLayouts, scrollViewWidth]);
+      !selectedOption ||
+      !scrollViewRef.current ||
+      !optionLayouts.current[selectedOption]
+    )
+      return;
+
+    const {x, width} = optionLayouts.current[selectedOption];
+    // Calculate target scroll offset; here we try to center the selected item.
+    const targetScrollX = Math.max(x - scrollViewWidth / 2 + width / 2, 0);
+    scrollViewRef.current.scrollTo({x: targetScrollX, animated: true});
+  }, [selectedOption, scrollViewWidth]);
+
+  // Handler to capture layout info for each option.
+  const handleOptionLayout = (option: string, event: LayoutChangeEvent) => {
+    const {x, width} = event.nativeEvent.layout;
+    optionLayouts.current[option] = {x, width};
+  };
+
+  // Handler to capture the overall width of the ScrollView.
+  const handleScrollViewLayout = (event: LayoutChangeEvent) => {
+    setScrollViewWidth(event.nativeEvent.layout.width);
+  };
+
+  if (options.length === 0) return null;
 
   return (
     <View style={[styles.row, styles.filter]}>
       <Text style={styles.filterTitle}>{title}</Text>
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.scrollView}
-        ref={scrollViewRef}
-        onLayout={e =>
-          !scrollViewWidth
-            ? setScrollViewWidth(e.nativeEvent.layout.width)
-            : null
-        }>
+        onLayout={handleScrollViewLayout}>
         {options.map((option, index) => (
           <Pressable
             onPress={() => onPress(option)}
@@ -60,11 +73,8 @@ const Filter = ({
               styles.filterOptions,
               option === selectedOption && styles.selectedOptions,
             ]}
-            onLayout={e => {
-              const layout = e.nativeEvent.layout;
-              setItemLayouts(prev => ({...prev, [option]: layout}));
-            }}
-            key={index}>
+            key={index}
+            onLayout={event => handleOptionLayout(option, event)}>
             <Text
               style={[
                 styles.filterOptionsText,

@@ -67,23 +67,25 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
 
   const onDone = async () => {
     console.log('----------', {data, imageUrl});
+    setLoader(true); // ✅ Show loader immediately
+
     try {
       let {plotId} = data;
       let JPEGImageUri = await convertToJPEG(imageUrl);
-      // JPEGImageUri = imageUrl;
-
       setImageURI(JPEGImageUri);
+
       generatePreSignedUrl({
         queryParams: `plot_id=${plotId}&image_name=${JPEGImageUri.split('/')
           .pop()
           .toLowerCase()}`,
       });
+
       const {latitude, longitude} = await getCoordinates();
       setLocation({lat: latitude, long: longitude});
-      setLoader(true);
     } catch (error) {
       console.log('error', error);
       Toast.error({message: 'Failed to upload image', duration: 3000});
+      setLoader(false); // hide loader in case of error
     }
   };
 
@@ -144,11 +146,14 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   useEffect(() => {
     if (uploadImageData) {
       console.log({uploadImageData});
+      setLoader(false);
+
       if (uploadImageData.status_code !== 200) {
         Toast.error({message: 'Failed to upload image', duration: 3000});
       } else {
         Toast.success({message: 'Image uploaded successfully', duration: 3000});
       }
+
       if (screen === 'NewRecord') {
         navigation.navigate('NewRecord', {
           imageUrl,
@@ -163,6 +168,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
       }
     }
   }, [uploadImageData]);
+
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
