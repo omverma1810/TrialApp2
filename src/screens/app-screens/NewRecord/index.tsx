@@ -79,6 +79,7 @@ const NewRecord = ({navigation}: NewRecordScreenProps) => {
                 {isTraitsImageVisible && (
                   <TraitsImage
                     images={images}
+                    metadata={{}} // Provide appropriate metadata here
                     onDeleteImages={onDeleteImages}
                   />
                 )}
