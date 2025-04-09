@@ -346,4 +346,10 @@ export const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 14,
   },
+  loaderOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
 });

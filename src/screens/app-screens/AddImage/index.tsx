@@ -55,7 +55,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
     }
   }
 
-  const [generatePreSignedUrl, preSignedUrlData, preSignedUrlLoader] = useApi({
+  const [generatePreSignedUrl, preSignedUrlData] = useApi({
     url: URL.GENERATE_PRE_SIGNED,
     method: 'GET',
   });
@@ -67,7 +67,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
 
   const onDone = async () => {
     console.log('----------', {data, imageUrl});
-    setLoader(true); // ✅ Show loader immediately
+    setLoader(true); // Show loader immediately
 
     try {
       let {plotId} = data;
@@ -85,7 +85,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
     } catch (error) {
       console.log('error', error);
       Toast.error({message: 'Failed to upload image', duration: 3000});
-      setLoader(false); // hide loader in case of error
+      setLoader(false); // hide loader on error
     }
   };
 
@@ -93,11 +93,12 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
     if (preSignedUrlData) {
       console.log({preSignedUrlData});
       const {s3_path, status_code} = preSignedUrlData;
-      setLoader(false);
+
       if (status_code !== 200) {
         Toast.error({message: 'Failed to upload image', duration: 3000});
+        setLoader(false);
+        return;
       }
-      console.log('////', {s3_path, imageURI});
 
       const fileType = imageURI.split('/').pop()?.split('.').pop();
       rnfs
@@ -109,19 +110,15 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
         )
         .then(binary => {
           const binaryData = Buffer.from(binary, 'base64');
-          const blob = new Blob([binaryData], {type: `image/${fileType}`});
 
-          console.log({blob: blob.text, data: blob.arrayBuffer});
           axios
             .put(preSignedUrlData.data.presigned_url, binaryData, {
               headers: {
                 'Content-Type': 'image/jpeg',
-                // 'Content-Encoding': 'binary',
               },
             })
             .then(res => {
               uploadImage({
-                // console.log({
                 payload: {
                   s3_path,
                   plotId: data.plotId,
@@ -138,6 +135,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
                 message: 'Failed to upload image',
                 duration: 3000,
               });
+              setLoader(false); // hide loader on error
             });
         });
     }
@@ -146,7 +144,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   useEffect(() => {
     if (uploadImageData) {
       console.log({uploadImageData});
-      setLoader(false);
+      setLoader(false); // ✅ hide loader only after full upload finishes
 
       if (uploadImageData.status_code !== 200) {
         Toast.error({message: 'Failed to upload image', duration: 3000});
@@ -172,7 +170,6 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   return (
     <SafeAreaView edges={['top']}>
       <StatusBar />
-
       <View style={styles.container}>
         <View style={styles.imageContainer}>
           <Image style={styles.image} source={{uri: imageUrl}} />
