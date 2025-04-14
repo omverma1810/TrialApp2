@@ -54,6 +54,11 @@ import DbLeaf from './DbLeaf';
 import Setting from './Setting';
 import Tick from './Tick';
 import Adfilter from './Adfilters';
+import arrowLeft from './arrowLeft';
+import arrowRight from './arrowRight';
+import PlotArrowRight from './PlotArrowRight';
+import PlotArrowLeft from './PlotArrowLeft';
+import theLine from './theLine';
 
 export {
   Back,
@@ -112,4 +117,9 @@ export {
   Setting,
   Tick,
   Adfilter,
+  arrowLeft,
+  arrowRight,
+  PlotArrowRight,
+  PlotArrowLeft,
+  theLine,
 };

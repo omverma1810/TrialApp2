@@ -52,7 +52,7 @@ export type ExperimentStackParamList = {
   };
   QRScanner: undefined;
   Profile: undefined;
-  ChangePassword: undefined; // Already defined here as well
+  ChangePassword: undefined;
 };
 
 export type RecordStackParamList = {

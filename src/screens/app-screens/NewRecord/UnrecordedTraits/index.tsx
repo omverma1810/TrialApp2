@@ -68,7 +68,7 @@ const UnrecordedTraits = () => {
             <UnrecordedTraitsProvider
               key={item.traitId}
               item={item}
-              updateRecordData={createRecordData}>
+              updateRecordData={updateRecordData}>
               <UnrecordedTraitCard />
             </UnrecordedTraitsProvider>
           ))
