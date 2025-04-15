@@ -44,6 +44,9 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   const [currentPlotIndex, setCurrentPlotIndex] = useState(0);
   const [selectedFixedValue, setSelectedFixedValue] = useState('');
   const [traits, setTraits] = useState([]);
+  const [recordedData, setRecordedData] = useState<Record<string, TraitData[]>>(
+    {},
+  );
 
   interface TraitData {
     traitName: string;
@@ -76,6 +79,19 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
 
     return recorded || unrecorded;
   }, [selectedPlot, currentTrait]);
+
+  const syncSelectedFixedValue = () => {
+    if (!selectedPlot || !currentTrait) return;
+
+    const plotNumber = selectedPlot.plotNumber;
+    const traits = recordedData[plotNumber] || [];
+
+    const matchingTrait = traits.find(
+      trait => trait.traitName === currentTrait,
+    );
+
+    setSelectedFixedValue(matchingTrait?.value || '');
+  };
 
   useEffect(() => {
     const selectedFixedTrait = selectedPlot?.recordedTraitData?.find(
@@ -118,6 +134,8 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
       p => p.plotNumber === plot.plotNumber,
     );
     if (index !== -1) setCurrentPlotIndex(index);
+
+    setTimeout(syncSelectedFixedValue, 0);
   };
 
   const handlePrevTrait = () => {
@@ -147,6 +165,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
 
   const selectTrait = (trait: string) => {
     setCurrentTrait(trait);
+    syncSelectedFixedValue();
     bottomSheetModalRef.current?.dismiss();
   };
 
@@ -232,17 +251,18 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   // Compute total plots and recorded plots for the status bar.
   const totalPlots = plotList.length;
   const recordedPlots = useMemo(() => {
-    // For example, consider a plot "recorded" if it has non-empty recordedTraitData.
-    return plotList.filter(
-      plot => plot.recordedTraitData && plot.recordedTraitData.length > 0,
-    ).length;
-  }, [plotList]);
+    return Object.keys(recordedData).length;
+  }, [recordedData]);
 
   useEffect(() => {
     if (filteredPlotList.length > 0) {
       setSelectedPlot(filteredPlotList[currentPlotIndex]);
     }
   }, [currentPlotIndex, filteredPlotList]);
+
+  useEffect(() => {
+    syncSelectedFixedValue();
+  }, [selectedPlot, currentTrait, recordedData]);
 
   return (
     <SafeAreaView edges={['top']}>
@@ -314,38 +334,6 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                 </View>
               </ScrollView>
             </View>
-            {/* Uncomment the search input if needed */}
-            {/*
-            <Input
-              placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_PLOT)}
-              leftIcon={Search}
-              containerStyle={styles.search}
-              customLeftIconStyle={styles.searchIcon}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            */}
-            {/* <Text style={styles.plotText}>
-              {filteredPlotList.length}{' '}
-              <Text>{t(LOCALES.EXPERIMENT.LBL_PLOTS)}</Text>
-            </Text> */}
-            {/* <FlatList
-              ListEmptyComponent={ListEmptyComponent}
-              contentContainerStyle={
-                filteredPlotList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 20}
-              }
-              showsVerticalScrollIndicator={false}
-              data={filteredPlotList}
-              renderItem={({item, index}) => (
-                <PlotCard
-                  plotData={item}
-                  details={details}
-                  handleRecordedTraits={handleRecordedTraits}
-                  isFirstIndex={index === 0}
-                  isLastIndex={filteredPlotList.length - 1 === index}
-                />
-              )}
-            /> */}
 
             <TraitDisplay
               traitName={currentTrait}
@@ -381,7 +369,28 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                 onSelect={(option: string) => {
                   console.log('🟢 Selected fixed option:', option);
                   setSelectedFixedValue(option);
-                  // TODO: Add logic to persist this selection to the backend if needed
+
+                  if (!selectedPlot || !currentTrait) return;
+
+                  setRecordedData(prev => {
+                    const currentPlotNumber = selectedPlot.plotNumber;
+                    const existingTraits = prev[currentPlotNumber] || [];
+
+                    const updatedTraits = existingTraits.filter(
+                      trait => trait.traitName !== currentTrait,
+                    );
+
+                    updatedTraits.push({
+                      traitName: currentTrait,
+                      dataType: 'fixed',
+                      value: option,
+                    });
+
+                    return {
+                      ...prev,
+                      [currentPlotNumber]: updatedTraits,
+                    };
+                  });
                 }}
               />
             ) : (
@@ -403,7 +412,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
               </View>
             )}
 
-             {/* Recording status bar */}
+            {/* Recording status bar */}
             <RecordingStatusBar recorded={recordedPlots} total={totalPlots} />
 
             <BottomSheetModalView
