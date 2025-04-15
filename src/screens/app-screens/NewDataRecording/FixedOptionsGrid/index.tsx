@@ -59,7 +59,7 @@ const FixedOptionsGrid: React.FC<FixedOptionsGridProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 25,
+    paddingVertical: 35,
   },
   title: {
     fontSize: 16,

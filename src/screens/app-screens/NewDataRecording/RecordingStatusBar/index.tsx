@@ -32,7 +32,7 @@ export default RecordingStatusBar;
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 8,
+    marginVertical: 20,
     marginHorizontal: 16,
   },
   progressBar: {

@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginHorizontal: 16,
     marginVertical: 12,
-    paddingVertical: 25,
+    paddingVertical: 30,
     paddingHorizontal: 12,
     marginRight: -12,
     // borderWidth: 1,

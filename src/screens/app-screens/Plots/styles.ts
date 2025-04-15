@@ -237,4 +237,13 @@ export const styles = StyleSheet.create({
     gap: 10,
     marginTop: 10,
   },
+  saveRecordBtnContainer: {
+    position: 'absolute',
+    left: 120,
+    right: 45,
+    bottom: 120,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
 });

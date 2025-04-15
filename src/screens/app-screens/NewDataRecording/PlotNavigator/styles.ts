@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    marginTop: 10,
+    marginTop: 15,
     // elevation: 2,
     // shadowColor: '#000',
     // shadowOpacity: 0.08,

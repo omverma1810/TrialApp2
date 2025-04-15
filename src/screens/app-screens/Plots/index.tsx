@@ -5,6 +5,7 @@ import {FONTS} from '../../../theme/fonts';
 
 import {Back, Search} from '../../../assets/icons/svgs';
 import {
+  Button,
   Input,
   Loader,
   SafeAreaView,
@@ -346,7 +347,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
               style={{
                 height: 1,
                 backgroundColor: '#ccc',
-                marginVertical: 8,
+                marginVertical: 12,
               }}
             />
 
@@ -414,6 +415,13 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
 
             {/* Recording status bar */}
             <RecordingStatusBar recorded={recordedPlots} total={totalPlots} />
+
+            <View style={styles.saveRecordBtnContainer}>
+              <Button
+                title={t(LOCALES.EXPERIMENT.LBL_SAVE_ALL_THE_DATA)}
+                containerStyle={{width: '75%'}}
+              />
+            </View>
 
             <BottomSheetModalView
               bottomSheetModalRef={bottomSheetModalRef}
