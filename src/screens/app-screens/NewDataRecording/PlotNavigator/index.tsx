@@ -51,7 +51,7 @@ const PlotNavigator: React.FC<PlotNavigatorProps> = ({
         onPress={onNext}
         style={{
           padding: 12,
-          marginRight: -25,
+          marginRight: -30,
           borderRadius: 24,
         }}
         hitSlop={10}>

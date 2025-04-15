@@ -23,6 +23,7 @@ import BottomSheetModalView from '../../../components/BottomSheetModal';
 import PlotNavigator from '../NewDataRecording/PlotNavigator';
 import RecordedInputCard from '../NewDataRecording/RecordInputCard';
 import FixedOptionsGrid from '../NewDataRecording/FixedOptionsGrid';
+import RecordingStatusBar from '../NewDataRecording/RecordingStatusBar';
 
 const Plots = ({navigation, route}: PlotsScreenProps) => {
   const {t} = useTranslation();
@@ -41,19 +42,14 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   const [currentTrait, setCurrentTrait] = useState('');
   const [selectedPlot, setSelectedPlot] = useState<any>(null);
   const [currentPlotIndex, setCurrentPlotIndex] = useState(0);
-
-  const [traits, setTraits] = useState([
-    'Color of Stigma',
-    'Plant Height',
-    'Leaf Width',
-    'Stem Thickness',
-    'Flowering Time',
-  ]);
+  const [selectedFixedValue, setSelectedFixedValue] = useState('');
+  const [traits, setTraits] = useState([]);
 
   interface TraitData {
     traitName: string;
     dataType?: string;
     preDefinedList?: string[];
+    value?: string; // Assuming you have a value field for fixed traits
   }
 
   interface PlotData {
@@ -65,18 +61,30 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   }
 
   const currentTraitData: TraitData | undefined = useMemo(() => {
-    return (
-      selectedPlot?.recordedTraitData?.find(
-        (t: TraitData) => t.traitName === currentTrait,
-      ) ||
-      selectedPlot?.unrecordedTraitData?.find(
-        (t: TraitData) => t.traitName === currentTrait,
-      )
+    console.log('🟢 selectedPlot:', selectedPlot);
+    console.log('🟢 currentTrait:', currentTrait);
+
+    const recorded = selectedPlot?.recordedTraitData?.find(
+      (t: TraitData) => t.traitName === currentTrait,
     );
+    const unrecorded = selectedPlot?.unrecordedTraitData?.find(
+      (t: TraitData) => t.traitName === currentTrait,
+    );
+
+    console.log('🟢 matched recorded:', recorded);
+    console.log('🟢 matched unrecorded:', unrecorded);
+
+    return recorded || unrecorded;
+  }, [selectedPlot, currentTrait]);
+
+  useEffect(() => {
+    const selectedFixedTrait = selectedPlot?.recordedTraitData?.find(
+      (t: TraitData) => t.traitName === currentTrait,
+    );
+    setSelectedFixedValue(selectedFixedTrait?.value || '');
   }, [selectedPlot, currentTrait]);
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
   const plotModalRef = useRef<BottomSheetModal>(null);
 
   const openPlotModal = () => {
@@ -176,17 +184,15 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
         plots[0].recordedTraitData?.map(
           (trait: {traitName: any}) => trait.traitName,
         ) || [];
-
       const unrecordedTraits =
         plots[0].unrecordedTraitData?.map(
           (trait: {traitName: any}) => trait.traitName,
         ) || [];
-
       const allTraits = [...recordedTraits, ...unrecordedTraits];
       const uniqueTraits = Array.from(new Set(allTraits));
       setTraits(uniqueTraits);
 
-      // ✅ Set first trait as default
+      // Set the first trait as default
       setCurrentTrait(uniqueTraits[0] || '');
     }
   }, [plotListData]);
@@ -222,6 +228,15 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
         .includes(searchQuery.toLowerCase()),
     );
   }, [plotList, searchQuery]);
+
+  // Compute total plots and recorded plots for the status bar.
+  const totalPlots = plotList.length;
+  const recordedPlots = useMemo(() => {
+    // For example, consider a plot "recorded" if it has non-empty recordedTraitData.
+    return plotList.filter(
+      plot => plot.recordedTraitData && plot.recordedTraitData.length > 0,
+    ).length;
+  }, [plotList]);
 
   useEffect(() => {
     if (filteredPlotList.length > 0) {
@@ -260,9 +275,6 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                   <Text style={styles.experimentTitle}>
                     {details?.fieldExperimentName} ({type})
                   </Text>
-                  {/* <View style={styles.cropTitleContainer}>
-                <Text style={styles.cropTitle}>{details?.cropName}</Text>
-              </View> */}
                 </View>
               )}
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -302,38 +314,40 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                 </View>
               </ScrollView>
             </View>
-            {/* <Input
-          placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_PLOT)}
-          leftIcon={Search}
-          containerStyle={styles.search}
-          customLeftIconStyle={styles.searchIcon}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        /> */}
-            {/* <Text style={styles.plotText}>
-          {filteredPlotList.length}{' '}
-          <Text>{t(LOCALES.EXPERIMENT.LBL_PLOTS)}</Text>
-        </Text> */}
-            {/* <FlatList
-          ListEmptyComponent={ListEmptyComponent}
-          contentContainerStyle={
-            filteredPlotList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 20}
-          }
-          showsVerticalScrollIndicator={false}
-          data={filteredPlotList}
-          renderItem={({item, index}) => (
-            <PlotCard
-              plotData={item}
-              details={details}
-              handleRecordedTraits={handleRecordedTraits}
-              isFirstIndex={index === 0}
-              isLastIndex={filteredPlotList.length - 1 === index}
+            {/* Uncomment the search input if needed */}
+            {/*
+            <Input
+              placeholder={t(LOCALES.EXPERIMENT.LBL_SEARCH_PLOT)}
+              leftIcon={Search}
+              containerStyle={styles.search}
+              customLeftIconStyle={styles.searchIcon}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
-            PB-OS-2022.1-07.7.1
-          )}
-        /> */}
-            {/* <View style={marginBottom: 16}} />  */}
-            {/* <TraitDisplay
+            */}
+            {/* <Text style={styles.plotText}>
+              {filteredPlotList.length}{' '}
+              <Text>{t(LOCALES.EXPERIMENT.LBL_PLOTS)}</Text>
+            </Text> */}
+            {/* <FlatList
+              ListEmptyComponent={ListEmptyComponent}
+              contentContainerStyle={
+                filteredPlotList?.length === 0 ? {flexGrow: 1} : {paddingBottom: 20}
+              }
+              showsVerticalScrollIndicator={false}
+              data={filteredPlotList}
+              renderItem={({item, index}) => (
+                <PlotCard
+                  plotData={item}
+                  details={details}
+                  handleRecordedTraits={handleRecordedTraits}
+                  isFirstIndex={index === 0}
+                  isLastIndex={filteredPlotList.length - 1 === index}
+                />
+              )}
+            /> */}
+
+            <TraitDisplay
               traitName={currentTrait}
               onPrev={handlePrevTrait}
               onNext={handleNextTrait}
@@ -357,34 +371,40 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
               onPressNavigator={openPlotModal}
             />
 
-            {/* Divider */}
-            {/* <View
-              style={{height: 1, backgroundColor: '#ccc', marginVertical: 8}}
-            /> */}
-
-            {/* <FixedOptionsGrid
-              options={['A', 'B', 'C']}
-              selected={'A'}
-              onSelect={val => console.log('🟢 Selected option:', val)}
-            /> */}
-
+            {/* Fixed Options Grid for fixed traits */}
             {currentTraitData?.dataType === 'fixed' &&
-              Array.isArray(currentTraitData?.preDefinedList) &&
-              currentTraitData.preDefinedList.length > 0 && (
-                <FixedOptionsGrid
-                  options={currentTraitData.preDefinedList}
-                  selected={
-                    selectedPlot?.recordedTraitData?.find(
-                      (t: TraitData) => t.traitName === currentTrait,
-                    )?.value || ''
-                  }
-                  onSelect={(option: string) => {
-                    console.log('Selected fixed option:', option);
+            Array.isArray(currentTraitData?.preDefiendList) &&
+            currentTraitData.preDefiendList.length > 0 ? (
+              <FixedOptionsGrid
+                options={currentTraitData.preDefiendList.map(item => item.name)}
+                selected={selectedFixedValue}
+                onSelect={(option: string) => {
+                  console.log('🟢 Selected fixed option:', option);
+                  setSelectedFixedValue(option);
+                  // TODO: Add logic to persist this selection to the backend if needed
+                }}
+              />
+            ) : (
+              <View
+                style={{
+                  margin: 16,
+                  padding: 12,
+                  borderWidth: 1,
+                  borderColor: '#ddd',
+                  borderRadius: 8,
+                  backgroundColor: '#fffbe6',
+                }}>
+                <Text style={{fontSize: 14, color: '#444'}}>
+                  ⚠️ No fixed options available for trait: {currentTrait}
+                </Text>
+                <Text style={{fontSize: 12, color: '#666'}}>
+                  {JSON.stringify(currentTraitData, null, 2)}
+                </Text>
+              </View>
+            )}
 
-                    // Optional: Update selectedPlot locally or handle API call
-                  }}
-                />
-              )}
+             {/* Recording status bar */}
+            <RecordingStatusBar recorded={recordedPlots} total={totalPlots} />
 
             <BottomSheetModalView
               bottomSheetModalRef={bottomSheetModalRef}

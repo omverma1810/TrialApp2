@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, Pressable, StyleSheet} from 'react-native';
+//import Icon from 'react-native-vector-icons/MaterialIcons'; // make sure to install this if not present
 import {FONTS} from '../../../../theme/fonts';
 
 interface FixedOptionsGridProps {
@@ -13,28 +14,43 @@ const FixedOptionsGrid: React.FC<FixedOptionsGridProps> = ({
   selected,
   onSelect,
 }) => {
-  console.log('📥 FixedOptionsGrid Props:', {options, selected});
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Select an Option:</Text>
+      {/* <Text style={styles.title}>Select an Option:</Text> */}
       <View style={styles.grid}>
-        {options.map((option, index) => (
-          <Pressable
-            key={index}
-            style={[
-              styles.option,
-              selected === option && styles.selectedOption,
-            ]}
-            onPress={() => onSelect(option)}>
-            <Text
+        {options.map((option, index) => {
+          const isSelected = selected === option;
+          return (
+            <Pressable
+              key={index}
               style={[
-                styles.optionText,
-                selected === option && styles.selectedText,
-              ]}>
-              {option}
-            </Text>
-          </Pressable>
-        ))}
+                styles.option,
+                {
+                  borderColor: isSelected ? '#1976D2' : '#BDBDBD',
+                  backgroundColor: '#fff',
+                },
+              ]}
+              onPress={() => onSelect(option)}>
+              <Text
+                style={[
+                  styles.optionText,
+                  {
+                    color: isSelected ? '#1976D2' : '#000',
+                  },
+                ]}>
+                {option}
+              </Text>
+              {/* {isSelected && (
+                // <Icon
+                //   name="check"
+                //   size={18}
+                //   color="#1976D2"
+                //   style={styles.checkIcon}
+                // />
+              )} */}
+            </Pressable>
+          );
+        })}
       </View>
     </View>
   );
@@ -43,7 +59,7 @@ const FixedOptionsGrid: React.FC<FixedOptionsGridProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 25,
   },
   title: {
     fontSize: 16,
@@ -53,26 +69,26 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
+    rowGap: 12,
   },
   option: {
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 8,
-  },
-  selectedOption: {
-    backgroundColor: '#1976D2',
+    width: '48%',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   optionText: {
-    fontFamily: FONTS.REGULAR,
-    fontSize: 14,
-    color: '#000',
-  },
-  selectedText: {
-    color: '#fff',
     fontFamily: FONTS.MEDIUM,
+    fontSize: 14,
   },
+  // checkIcon: {
+  //   marginLeft: 8,
+  // },
 });
 
 export default FixedOptionsGrid;

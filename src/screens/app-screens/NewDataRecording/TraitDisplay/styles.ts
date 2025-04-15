@@ -10,6 +10,7 @@ export const styles = StyleSheet.create({
     marginVertical: 12,
     paddingVertical: 25,
     paddingHorizontal: 12,
+    marginRight: -12,
     // borderWidth: 1,
     // borderColor: '#ccc',
     // borderRadius: 8,
