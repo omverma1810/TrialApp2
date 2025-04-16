@@ -256,7 +256,10 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   }, [recordedData]);
 
   useEffect(() => {
-    if (filteredPlotList.length > 0) {
+    if (
+      filteredPlotList.length > 0 &&
+      currentPlotIndex < filteredPlotList.length
+    ) {
       setSelectedPlot(filteredPlotList[currentPlotIndex]);
     }
   }, [currentPlotIndex, filteredPlotList]);
@@ -335,14 +338,12 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                 </View>
               </ScrollView>
             </View>
-
             <TraitDisplay
               traitName={currentTrait}
               onPrev={handlePrevTrait}
               onNext={handleNextTrait}
               onTraitPress={openTraitModal}
             />
-
             <View
               style={{
                 height: 1,
@@ -350,7 +351,6 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                 marginVertical: 12,
               }}
             />
-
             <PlotNavigator
               row={selectedPlot?.rowNumber || 0}
               col={selectedPlot?.columnNumber || 0}
@@ -360,7 +360,7 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
               onPressNavigator={openPlotModal}
             />
 
-            {/* Fixed Options Grid for fixed traits */}
+            {/* Trait Input Section */}
             {currentTraitData?.dataType === 'fixed' &&
             Array.isArray(currentTraitData?.preDefiendList) &&
             currentTraitData.preDefiendList.length > 0 ? (
@@ -394,6 +394,47 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                   });
                 }}
               />
+            ) : ['str', 'int', 'float'].includes(
+                currentTraitData?.dataType || '',
+              ) ? (
+              <RecordedInputCard
+                traitName={currentTrait}
+                uom={currentTraitData?.uom || ''}
+                value={
+                  recordedData[selectedPlot?.plotNumber]?.find(
+                    trait => trait.traitName === currentTrait,
+                  )?.value || ''
+                }
+                onValueChange={(value: string) => {
+                  if (!selectedPlot || !currentTrait) return;
+
+                  setRecordedData(prev => {
+                    const currentPlotNumber = selectedPlot.plotNumber;
+                    const existingTraits = prev[currentPlotNumber] || [];
+
+                    const updatedTraits = existingTraits.filter(
+                      trait => trait.traitName !== currentTrait,
+                    );
+
+                    updatedTraits.push({
+                      traitName: currentTrait,
+                      dataType: currentTraitData?.dataType,
+                      value: value,
+                    });
+
+                    return {
+                      ...prev,
+                      [currentPlotNumber]: updatedTraits,
+                    };
+                  });
+                }}
+                keyboardType={
+                  currentTraitData?.dataType === 'int' ||
+                  currentTraitData?.dataType === 'float'
+                    ? 'numeric'
+                    : 'default'
+                }
+              />
             ) : (
               <View
                 style={{
@@ -405,24 +446,22 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                   backgroundColor: '#fffbe6',
                 }}>
                 <Text style={{fontSize: 14, color: '#444'}}>
-                  ⚠️ No fixed options available for trait: {currentTrait}
+                  ⚠️ Unsupported trait type for: {currentTrait}
                 </Text>
                 <Text style={{fontSize: 12, color: '#666'}}>
                   {JSON.stringify(currentTraitData, null, 2)}
                 </Text>
               </View>
             )}
-
             {/* Recording status bar */}
             <RecordingStatusBar recorded={recordedPlots} total={totalPlots} />
-
             <View style={styles.saveRecordBtnContainer}>
               <Button
                 title={t(LOCALES.EXPERIMENT.LBL_SAVE_ALL_THE_DATA)}
                 containerStyle={{width: '75%'}}
+                disabled={recordedPlots === 0}
               />
             </View>
-
             <BottomSheetModalView
               bottomSheetModalRef={bottomSheetModalRef}
               type="SCREEN_HEIGHT">
@@ -444,7 +483,6 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
                 ))}
               </BottomSheetScrollView>
             </BottomSheetModalView>
-
             <BottomSheetModalView
               bottomSheetModalRef={plotModalRef}
               type="SCREEN_HEIGHT">

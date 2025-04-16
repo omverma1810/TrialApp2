@@ -1,124 +1,98 @@
 import React from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, TextInput, StyleSheet} from 'react-native';
 
-type PreDefinedItem = {
-  name: string;
-  maximumValue?: number;
-  minimumValue?: number;
-};
-
-type RecordedInputCardProps = {
+interface RecordedInputCardProps {
   traitName: string;
-  dataType: 'float' | 'fixed' | 'str' | 'int' | 'date';
-  value: any;
-  onValueChange: (val: any) => void;
-  preDefiendList?: PreDefinedItem[];
-  plotData: any;
-  traitType: string;
-  onSave: () => void;
-  options?: string[]; // Added the missing 'options' property
-};
+  uom: string;
+  value?: string;
+  onValueChange?: (value: string) => void;
+  keyboardType?: 'default' | 'numeric';
+}
 
-const RecordedInputCard: React.FC<RecordedInputCardProps> = ({
+const RecordedInputCard = ({
   traitName,
-  dataType,
-  value,
+  uom,
+  value = '',
   onValueChange,
-  preDefiendList = [],
-}) => {
-  const renderFixedTiles = () => {
-    return (
-      <FlatList
-        data={preDefiendList}
-        keyExtractor={(item, index) => item.name + index}
-        numColumns={3}
-        scrollEnabled={false}
-        columnWrapperStyle={styles.row}
-        renderItem={({item}) => {
-          const isSelected = value === item.name;
-          return (
-            <TouchableOpacity
-              style={[styles.tile, isSelected && styles.selectedTile]}
-              onPress={() => onValueChange(item.name)}>
-              <Text
-                style={[styles.tileText, isSelected && styles.selectedText]}>
-                {item.name || 'N/A'}
-              </Text>
-            </TouchableOpacity>
-          );
-        }}
-      />
-    );
-  };
-
-  const renderByType = () => {
-    switch (dataType) {
-      case 'fixed':
-        return renderFixedTiles();
-      // You can add more types below with appropriate inputs
-      case 'float':
-      case 'int':
-      case 'str':
-      case 'date':
-        return (
-          <Text style={styles.placeholder}>
-            [Input for {dataType} will go here]
-          </Text>
-        );
-      default:
-        return null;
-    }
-  };
-
+}: RecordedInputCardProps) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{traitName}</Text>
-      {renderByType()}
+      <View style={styles.inputContainer}>
+        <View style={styles.labelContainer}>
+          <Text style={styles.traitName}>{traitName}</Text>
+          <Text style={styles.uom}>{uom}</Text>
+        </View>
+        <TextInput
+          style={styles.input}
+          value={value}
+          onChangeText={onValueChange}
+          keyboardType="numeric"
+          placeholder="Enter value"
+          placeholderTextColor="#A0A0A0"
+        />
+      </View>
+      <Text style={styles.helperText}>
+        Use values separated by * to get the average.
+      </Text>
     </View>
   );
 };
 
-export default RecordedInputCard;
-
 const styles = StyleSheet.create({
   container: {
-    margin: 10,
-    paddingVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 16,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 6,
-    color: '#333',
-  },
-  row: {
+  inputContainer: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  tile: {
-    backgroundColor: '#f2f2f2',
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 10,
-    marginHorizontal: 4,
     alignItems: 'center',
-    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  labelContainer: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginRight: 12,
   },
-  selectedTile: {
-    backgroundColor: '#0057FF',
+  traitName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333333',
   },
-  tileText: {
-    color: '#333',
+  uom: {
     fontSize: 14,
+    color: '#666666',
+    marginLeft: 8,
   },
-  selectedText: {
-    color: '#fff',
-    fontWeight: '600',
+  input: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    color: '#333333',
+    backgroundColor: '#F8F8F8',
   },
-  placeholder: {
-    fontStyle: 'italic',
-    color: '#aaa',
-    paddingVertical: 10,
+  helperText: {
+    fontSize: 12,
+    color: '#888888',
+    marginTop: 4,
   },
 });
+
+export default RecordedInputCard;

@@ -42,9 +42,9 @@ const PlotNavigator: React.FC<PlotNavigatorProps> = ({
       </Pressable>
 
       <Pressable onPress={onPressNavigator} style={styles.details}>
+        <Text style={styles.plotCode}>{plotCode}</Text>
         <Text style={styles.rowColText}>row: {row}</Text>
         <Text style={styles.rowColText}>col: {col}</Text>
-        <Text style={styles.plotCode}>{plotCode}</Text>
       </Pressable>
 
       <Pressable
