@@ -31,9 +31,9 @@ const RecordedInputCard = ({
           placeholderTextColor="#A0A0A0"
         />
       </View>
-      <Text style={styles.helperText}>
+      {/* <Text style={styles.helperText}>
         Use values separated by * to get the average.
-      </Text>
+      </Text> */}
     </View>
   );
 };

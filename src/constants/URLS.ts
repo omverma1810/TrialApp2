@@ -29,6 +29,7 @@ const URL = {
   EXPERIMENT_LIST_FILTERED: 'app/experiment-list-filtered/',
   GENERATE_PRE_SIGNED: 'generate-presigned-url/',
   UPLOAD_IMAGE: 'upload-image/',
+  BULK_UPLOAD: 'trials/getfieldbook/',
 };
 
 export {API_CONFIG, BASE_URL, DEFAULT_ENV, URL};

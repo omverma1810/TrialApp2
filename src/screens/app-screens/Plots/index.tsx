@@ -12,6 +12,7 @@ import {
   StatusBar,
   Text,
 } from '../../../components';
+import CalendarModal from '../../../components/Calender';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
 import {LOCALES} from '../../../localization/constants';
@@ -48,12 +49,13 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
   const [recordedData, setRecordedData] = useState<Record<string, TraitData[]>>(
     {},
   );
+  const [selectedDate, setSelectedDate] = useState(new Date()); // New state for date selection
 
   interface TraitData {
     traitName: string;
     dataType?: string;
     preDefinedList?: string[];
-    value?: string; // Assuming you have a value field for fixed traits
+    value?: string; // For fixed traits or date string values
   }
 
   interface PlotData {
@@ -361,107 +363,154 @@ const Plots = ({navigation, route}: PlotsScreenProps) => {
             />
 
             {/* Trait Input Section */}
-            {currentTraitData?.dataType === 'fixed' &&
-            Array.isArray(currentTraitData?.preDefiendList) &&
-            currentTraitData.preDefiendList.length > 0 ? (
-              <FixedOptionsGrid
-                options={currentTraitData.preDefiendList.map(item => item.name)}
-                selected={selectedFixedValue}
-                onSelect={(option: string) => {
-                  console.log('🟢 Selected fixed option:', option);
-                  setSelectedFixedValue(option);
+            <ScrollView
+              style={{flex: 1}}
+              contentContainerStyle={{
+                paddingBottom: 40,
+                paddingHorizontal: 16,
+                flexGrow: 1,
+              }}
+              keyboardShouldPersistTaps="handled">
+              {currentTraitData?.dataType === 'fixed' &&
+              Array.isArray(currentTraitData?.preDefiendList) &&
+              currentTraitData.preDefiendList.length > 0 ? (
+                <FixedOptionsGrid
+                  options={currentTraitData.preDefiendList.map(
+                    item => item.name,
+                  )}
+                  selected={selectedFixedValue}
+                  onSelect={(option: string) => {
+                    setSelectedFixedValue(option);
 
-                  if (!selectedPlot || !currentTrait) return;
+                    if (!selectedPlot || !currentTrait) return;
 
-                  setRecordedData(prev => {
-                    const currentPlotNumber = selectedPlot.plotNumber;
-                    const existingTraits = prev[currentPlotNumber] || [];
+                    setRecordedData(prev => {
+                      const currentPlotNumber = selectedPlot.plotNumber;
+                      const existingTraits = prev[currentPlotNumber] || [];
 
-                    const updatedTraits = existingTraits.filter(
-                      trait => trait.traitName !== currentTrait,
-                    );
+                      const updatedTraits = existingTraits.filter(
+                        trait => trait.traitName !== currentTrait,
+                      );
 
-                    updatedTraits.push({
-                      traitName: currentTrait,
-                      dataType: 'fixed',
-                      value: option,
+                      updatedTraits.push({
+                        traitName: currentTrait,
+                        dataType: 'fixed',
+                        value: option,
+                      });
+
+                      return {
+                        ...prev,
+                        [currentPlotNumber]: updatedTraits,
+                      };
                     });
-
-                    return {
-                      ...prev,
-                      [currentPlotNumber]: updatedTraits,
-                    };
-                  });
-                }}
-              />
-            ) : ['str', 'int', 'float'].includes(
-                currentTraitData?.dataType || '',
-              ) ? (
-              <RecordedInputCard
-                traitName={currentTrait}
-                uom={currentTraitData?.uom || ''}
-                value={
-                  recordedData[selectedPlot?.plotNumber]?.find(
-                    trait => trait.traitName === currentTrait,
-                  )?.value || ''
-                }
-                onValueChange={(value: string) => {
-                  if (!selectedPlot || !currentTrait) return;
-
-                  setRecordedData(prev => {
-                    const currentPlotNumber = selectedPlot.plotNumber;
-                    const existingTraits = prev[currentPlotNumber] || [];
-
-                    const updatedTraits = existingTraits.filter(
-                      trait => trait.traitName !== currentTrait,
-                    );
-
-                    updatedTraits.push({
-                      traitName: currentTrait,
-                      dataType: currentTraitData?.dataType,
-                      value: value,
+                  }}
+                />
+              ) : currentTraitData?.dataType === 'date' ? (
+                <CalendarModal
+                  initialDate={selectedDate}
+                  visible={isCalendarVisible}
+                  onCancel={() => setIsCalendarVisible(false)}
+                  onOk={() => setIsCalendarVisible(false)}
+                  onDateSelect={(date: Date) => {
+                    setSelectedDate(date);
+                    if (!selectedPlot || !currentTrait) return;
+                    setRecordedData(prev => {
+                      const currentPlotNumber = selectedPlot.plotNumber;
+                      const existingTraits = prev[currentPlotNumber] || [];
+                      const updatedTraits = existingTraits.filter(
+                        trait => trait.traitName !== currentTrait,
+                      );
+                      updatedTraits.push({
+                        traitName: currentTrait,
+                        dataType: 'date',
+                        value: date.toISOString(),
+                      });
+                      return {
+                        ...prev,
+                        [currentPlotNumber]: updatedTraits,
+                      };
                     });
+                  }}
+                />
+              ) : ['str', 'int', 'float'].includes(
+                  currentTraitData?.dataType || '',
+                ) ? (
+                <RecordedInputCard
+                  traitName={currentTrait}
+                  uom={currentTraitData?.uom || ''}
+                  value={
+                    recordedData[selectedPlot?.plotNumber]?.find(
+                      trait => trait.traitName === currentTrait,
+                    )?.value || ''
+                  }
+                  onValueChange={(value: string) => {
+                    if (!selectedPlot || !currentTrait) return;
 
-                    return {
-                      ...prev,
-                      [currentPlotNumber]: updatedTraits,
-                    };
-                  });
-                }}
-                keyboardType={
-                  currentTraitData?.dataType === 'int' ||
-                  currentTraitData?.dataType === 'float'
-                    ? 'numeric'
-                    : 'default'
-                }
-              />
-            ) : (
-              <View
-                style={{
-                  margin: 16,
-                  padding: 12,
-                  borderWidth: 1,
-                  borderColor: '#ddd',
-                  borderRadius: 8,
-                  backgroundColor: '#fffbe6',
-                }}>
-                <Text style={{fontSize: 14, color: '#444'}}>
-                  ⚠️ Unsupported trait type for: {currentTrait}
-                </Text>
-                <Text style={{fontSize: 12, color: '#666'}}>
-                  {JSON.stringify(currentTraitData, null, 2)}
-                </Text>
-              </View>
-            )}
+                    setRecordedData(prev => {
+                      const currentPlotNumber = selectedPlot.plotNumber;
+                      const existingTraits = prev[currentPlotNumber] || [];
+
+                      const updatedTraits = existingTraits.filter(
+                        trait => trait.traitName !== currentTrait,
+                      );
+
+                      updatedTraits.push({
+                        traitName: currentTrait,
+                        dataType: currentTraitData?.dataType,
+                        value: value,
+                      });
+
+                      return {
+                        ...prev,
+                        [currentPlotNumber]: updatedTraits,
+                      };
+                    });
+                  }}
+                  keyboardType={
+                    currentTraitData?.dataType === 'int' ||
+                    currentTraitData?.dataType === 'float'
+                      ? 'numeric'
+                      : 'default'
+                  }
+                />
+              ) : (
+                <View
+                  style={{
+                    margin: 16,
+                    padding: 12,
+                    borderWidth: 1,
+                    borderColor: '#ddd',
+                    borderRadius: 8,
+                    backgroundColor: '#fffbe6',
+                  }}>
+                  <Text style={{fontSize: 14, color: '#444'}}>
+                    ⚠️ Unsupported trait type for: {currentTrait}
+                  </Text>
+                  <Text style={{fontSize: 12, color: '#666'}}>
+                    {JSON.stringify(currentTraitData, null, 2)}
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+
             {/* Recording status bar */}
             <RecordingStatusBar recorded={recordedPlots} total={totalPlots} />
-            <View style={styles.saveRecordBtnContainer}>
+
+            <View
+              style={[
+                styles.saveRecordBtnContainer,
+                {
+                  marginTop: 50,
+                  alignItems: 'center',
+                },
+              ]}>
               <Button
                 title={t(LOCALES.EXPERIMENT.LBL_SAVE_ALL_THE_DATA)}
                 containerStyle={{width: '75%'}}
                 disabled={recordedPlots === 0}
               />
             </View>
+
             <BottomSheetModalView
               bottomSheetModalRef={bottomSheetModalRef}
               type="SCREEN_HEIGHT">
