@@ -9,6 +9,7 @@ import {
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Keychain from 'react-native-keychain';
+import NetInfo from '@react-native-community/netinfo';
 
 import AuthRoutes from './auth-routes';
 import AppRoutes from './app-routes';
@@ -23,6 +24,7 @@ import {
 import useCleanUp from '../hooks/useCleanUp';
 import SplashScreen from '../screens/auth-screens/Splash';
 import {TabBarStackParamList} from '../types/navigation/appTypes';
+import {getAllOfflineLocationIds} from '../services/DbQueries';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -60,6 +62,49 @@ const RootNavigator = () => {
           throw new Error('Missing credentials or user details');
         }
       } catch (error) {
+        // Check if we're offline and have cached data
+        const networkState = await NetInfo.fetch();
+        const isOffline = !(
+          networkState.isConnected === true &&
+          networkState.isInternetReachable !== false
+        );
+
+        if (isOffline) {
+          // Check if user has offline data cached
+          try {
+            const offlineLocations = await getAllOfflineLocationIds();
+
+            if (offlineLocations.length > 0) {
+              console.log(
+                `✅ Found ${offlineLocations.length} offline locations - bypassing authentication`,
+              );
+
+              // Set minimal user details to allow app navigation
+              dispatch(setIsUserSignedIn(true));
+              if (organizationURL) {
+                dispatch(setOrganizationURL(organizationURL));
+              }
+
+              // Set guest user details for offline mode
+              dispatch(
+                setUserDetails({
+                  firstName: 'Offline',
+                  lastName: 'User',
+                  role: [{role_name: 'User'}],
+                }),
+              );
+
+              setTimeout(() => {
+                setIsSplashScreenVisible(false);
+              }, 2000);
+              return;
+            }
+          } catch (dbError) {
+            console.error('Error checking offline data:', dbError);
+          }
+        }
+
+        // No offline data or online - show login
         logoutUser();
         if (organizationURL) {
           dispatch(setOrganizationURL(organizationURL));

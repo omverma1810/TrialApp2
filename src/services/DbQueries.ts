@@ -124,24 +124,32 @@ export async function deletePayloads(id: Number) {
 export function fetchOfflineExperimentList(projectKey: string): Promise<any[]> {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
-      // if (projectKey) {
-      //   query += ' WHERE project = ?';
-      // }
       tx.executeSql(
-        'SELECT rawPayload FROM experiment_list;',
+        'SELECT id, project, rawPayload FROM experiment_list;',
         [],
         (_, {rows}) => {
           const result = {
             projects: {},
-            totalProjects: rows.length,
+            totalProjects: 0,
           };
 
           for (let i = 0; i < rows.length; i++) {
             try {
-              let rawPayload = JSON.parse(rows.item(i).rawPayload);
-              if (rawPayload?.experimentName) {
-                result.projects[rawPayload?.experimentName] = [rawPayload];
+              const row = rows.item(i);
+              const rawPayload = JSON.parse(row.rawPayload);
+
+              // Use the project column from DB, fallback to JSON fields
+              const projectKey =
+                row.project ||
+                rawPayload?.projectKey ||
+                rawPayload?.experimentName ||
+                'default';
+
+              if (!result.projects[projectKey]) {
+                result.projects[projectKey] = [];
               }
+              result.projects[projectKey].push(rawPayload);
+              result.totalProjects++;
             } catch {
               /* skip bad JSON */
             }
@@ -229,97 +237,100 @@ export function fetchOfflineFilters(): Promise<{
   Seasons: any[];
 }> {
   return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      const result: {
-        filters: {Years: any[]; Crops: any[]; Locations: any[]; Seasons: any[]};
-      } = {
-        filters: {
-          Years: [],
-          Crops: [],
-          Locations: [],
-          Seasons: [],
-        },
-      };
-      let completed = 0;
-      const checkDone = () => {
-        completed++;
-        if (completed === 4) {
-          resolve(result);
-        }
-      };
-
-      tx.executeSql(
-        'SELECT value,label FROM filters_years;',
-        [],
-        (_, {rows}) => {
-          for (let i = 0; i < rows.length; i++) {
-            result.filters.Years.push({
-              value: rows.item(i)?.value,
-              label: rows.item(i)?.label,
-            });
+    db.transaction(
+      tx => {
+        const result: {
+          filters: {Years: any[]; Crops: any[]; Locations: any[]; Seasons: any[]};
+        } = {
+          filters: {
+            Years: [],
+            Crops: [],
+            Locations: [],
+            Seasons: [],
+          },
+        };
+        let completed = 0;
+        const checkDone = () => {
+          completed++;
+          if (completed === 4) {
+            resolve(result);
           }
-          checkDone();
-        },
-        (_, err) => {
-          reject(err);
-          return false;
-        },
-      );
+        };
 
-      tx.executeSql(
-        'SELECT value,label FROM filters_crops;',
-        [],
-        (_, {rows}) => {
-          for (let i = 0; i < rows.length; i++) {
-            result.filters.Crops.push({
-              value: rows.item(i)?.value,
-              label: rows.item(i)?.label,
-            });
-          }
-          checkDone();
-        },
-        (_, err) => {
-          reject(err);
-          return false;
-        },
-      );
+        tx.executeSql(
+          'SELECT value, label FROM filters_years;',
+          [],
+          (_, {rows}) => {
+            for (let i = 0; i < rows.length; i++) {
+              result.filters.Years.push({
+                value: rows.item(i)?.value,
+                label: rows.item(i)?.label,
+              });
+            }
+            checkDone();
+          },
+          (_, err) => {
+            reject(err);
+            return false;
+          },
+        );
 
-      tx.executeSql(
-        'SELECT value,label FROM filters_locations;',
-        [],
-        (_, {rows}) => {
-          for (let i = 0; i < rows.length; i++) {
-            result.filters.Locations.push({
-              value: rows.item(i)?.value,
-              label: rows.item(i)?.label,
-            });
-          }
-          checkDone();
-        },
-        (_, err) => {
-          reject(err);
-          return false;
-        },
-      );
+        tx.executeSql(
+          'SELECT value, label FROM filters_crops;',
+          [],
+          (_, {rows}) => {
+            for (let i = 0; i < rows.length; i++) {
+              result.filters.Crops.push({
+                value: rows.item(i)?.value,
+                label: rows.item(i)?.label,
+              });
+            }
+            checkDone();
+          },
+          (_, err) => {
+            reject(err);
+            return false;
+          },
+        );
 
-      tx.executeSql(
-        'SELECT value,label FROM filters_seasons;',
-        [],
-        (_, {rows}) => {
-          for (let i = 0; i < rows.length; i++) {
-            result.filters.Seasons.push({
-              value: rows.item(i)?.value,
-              label: rows.item(i)?.label,
-            });
-          }
-          checkDone();
-        },
-        (_, err) => {
-          reject(err);
-          return false;
-        },
-      );
-    });
+        tx.executeSql(
+          'SELECT value, label FROM filters_locations;',
+          [],
+          (_, {rows}) => {
+            for (let i = 0; i < rows.length; i++) {
+              result.filters.Locations.push({
+                value: rows.item(i)?.value,
+                label: rows.item(i)?.label,
+              });
+            }
+            checkDone();
+          },
+          (_, err) => {
+            reject(err);
+            return false;
+          },
+        );
+
+        tx.executeSql(
+          'SELECT value, label FROM filters_seasons;',
+          [],
+          (_, {rows}) => {
+            for (let i = 0; i < rows.length; i++) {
+              result.filters.Seasons.push({
+                value: rows.item(i)?.value,
+                label: rows.item(i)?.label,
+              });
+            }
+            checkDone();
+          },
+          (_, err) => {
+            reject(err);
+            return false;
+          },
+        );
+      },
+      error => reject(error),
+    );
   });
 }
 
