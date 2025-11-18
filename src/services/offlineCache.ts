@@ -8,6 +8,7 @@ import {TOAST_EVENT_TYPES} from '../types/components/Toast';
 import eventEmitter from '../utilities/eventEmitter';
 import Toast from '../utilities/toast';
 import {db} from './db';
+import {saveOfflineLocationState} from './DbQueries';
 
 export interface ExperimentParams {
   id: number; // fieldExperimentId
@@ -480,17 +481,37 @@ export function useOfflineCache() {
     });
   };
 
-  const handleCacheSuccess = () => {
+  const handleCacheSuccess = async () => {
     const experiment = currentExperimentRef.current;
     if (!experiment) {
       return;
+    }
+
+    // ✅ CRITICAL FIX: Save offline location states to database
+    // This is what offlineDataRetrieval.ts looks for on app restart!
+    const locations = locationListRef.current || [];
+
+    try {
+      // Save each location to offline_locations table
+      for (const location of locations) {
+        await saveOfflineLocationState(
+          experiment.id,           // experimentId
+          location.id,             // locationId
+          experiment.experimentType,
+          experiment.cropId,
+          true                     // isOffline = true
+        );
+      }
+
+      console.log(`✅ Saved ${locations.length} locations to offline_locations table`);
+    } catch (error) {
+      console.error('❌ Failed to save offline location states:', error);
     }
 
     // Update offline IDs
     setOfflineIds(ids =>
       ids.includes(experiment.id) ? ids : [...ids, experiment.id],
     );
-
 
     setCurrentStep(CacheStep.IDLE);
     setIsCaching(false);
@@ -555,6 +576,10 @@ export function useOfflineCache() {
         {sql: 'DELETE FROM experiment_list WHERE id = ?;', params: [exp.id]},
         {
           sql: 'DELETE FROM experiment_details WHERE trialLocationId = ?;',
+          params: [exp.id],
+        },
+        {
+          sql: 'DELETE FROM offline_locations WHERE experimentId = ?;',
           params: [exp.id],
         },
         ...locationIds.map(locationId => ({
