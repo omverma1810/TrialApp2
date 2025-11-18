@@ -1,10 +1,56 @@
 import Geolocation from '@react-native-community/geolocation';
-import Toast from './toast';
+import DeviceInfo from 'react-native-device-info';
 
 interface Coordinates {
   latitude: number;
   longitude: number;
 }
+
+export const LOCATION_DISABLED_ERROR_CODE = 'LOCATION_DISABLED';
+
+const createLocationDisabledError = (message?: string) => {
+  const error: any = new Error(
+    message ||
+      'Location services are disabled. Please enable them to continue.',
+  );
+  error.code = LOCATION_DISABLED_ERROR_CODE;
+  return error;
+};
+
+const ensureLocationServicesEnabled = async () => {
+  try {
+    const enabled = await DeviceInfo.isLocationEnabled();
+
+    if (enabled === false) {
+      throw createLocationDisabledError();
+    }
+  } catch (error: any) {
+    if (error?.code === LOCATION_DISABLED_ERROR_CODE) {
+      throw error;
+    }
+    // Swallow errors from DeviceInfo check so we can fall back to geolocation attempt.
+  }
+};
+
+const normalizeGeolocationError = (error: any) => {
+  if (!error) {
+    return new Error('Unable to determine location');
+  }
+
+  const message = String(error?.message || '').toLowerCase();
+
+  if (
+    error?.code === 2 &&
+    (message.includes('disabled') ||
+      message.includes('provider') ||
+      message.includes('location provider') ||
+      message.includes('location services'))
+  ) {
+    return createLocationDisabledError();
+  }
+
+  return error;
+};
 
 const formatDateTime = (date: Date) => {
   const year = date.getFullYear();
@@ -49,12 +95,13 @@ const getBase64FromUrl = async (url: string): Promise<string> => {
       reader.readAsDataURL(blob);
     });
   } catch (error) {
-    console.error('Error fetching or converting to base64:', error);
     throw error;
   }
 };
 
-const getCoordinates = (): Promise<Coordinates> => {
+const getCoordinates = async (): Promise<Coordinates> => {
+  await ensureLocationServicesEnabled();
+
   return new Promise((resolve, reject) => {
     Geolocation.getCurrentPosition(
       position => {
@@ -62,8 +109,12 @@ const getCoordinates = (): Promise<Coordinates> => {
         resolve({latitude, longitude});
       },
       error => {
-        Toast.error({message: error.message || 'Something went wrong!'});
-        reject(error);
+        reject(normalizeGeolocationError(error));
+      },
+      {
+        enableHighAccuracy: true, // Request high accuracy location
+        timeout: 20000, // Increased timeout to 20 seconds for slower devices
+        maximumAge: 10000, // Accept cached location up to 10 seconds old
       },
     );
   });

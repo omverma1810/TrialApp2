@@ -142,7 +142,6 @@ const deleteFile = async () => {
   }
 };
 
-console.log = (...args) => {
   log(...args);
   let newLogStr = '';
   args.map(item => {

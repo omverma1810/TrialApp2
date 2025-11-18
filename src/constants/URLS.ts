@@ -25,11 +25,14 @@ const URL = {
   CHANGE_PASSWORD: 'change-password/',
   DECODE_QR: 'decode-qr/',
   VALIDATE_TRAITS: 'validate-data/?validationType=appRecordData',
+  VALIDATE_TRAITS_BULK: 'validate-data/?validationType=bulkAppDataUpload',
   GET_FILTERS: 'app/get-filters/',
   EXPERIMENT_LIST_FILTERED: 'app/experiment-list-filtered/',
   GENERATE_PRE_SIGNED: 'generate-presigned-url/',
   UPLOAD_IMAGE: 'upload-image/',
-  BULK_UPLOAD: 'trials/getfieldbook/',
+  DELETE_TRAIT_RECORD: 'app/delete-attachments/',
+  AGRONOMY_PROTOCOL: 'trial-protocols/',
+  TASK_STATUS: 'task-status',
 };
 
 export {API_CONFIG, BASE_URL, DEFAULT_ENV, URL};

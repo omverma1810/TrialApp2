@@ -1,7 +1,6 @@
 import {useCallback} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import * as Keychain from 'react-native-keychain';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {LoginManager} from 'react-native-fbsdk-next';
 
@@ -10,6 +9,8 @@ import {setClearAuthData} from '../store/slice/authSlice';
 
 const useCleanUp = () => {
   const ORGANIZATION_URL_STORAGE_KEY = 'ORGANIZATION_URL';
+  const BIOMETRIC_ENABLED_KEY = 'BIOMETRIC_ENABLED';
+  const BIOMETRIC_CREDENTIALS_KEY = 'BIOMETRIC_CREDENTIALS_STORED';
   const dispatch = useAppDispatch();
   const logoutUser = useCallback(async () => {
     try {
@@ -17,28 +18,41 @@ const useCleanUp = () => {
       const organizationURL = await AsyncStorage.getItem(
         ORGANIZATION_URL_STORAGE_KEY,
       );
+      // Preserve biometric settings BEFORE clearing
+      const biometricEnabled = await AsyncStorage.getItem(
+        BIOMETRIC_ENABLED_KEY,
+      );
+      const hasBiometricCredentials = await AsyncStorage.getItem(
+        BIOMETRIC_CREDENTIALS_KEY,
+      );
+
+      // Clear all AsyncStorage except what we want to preserve
       const asyncStorageKeys = await AsyncStorage.getAllKeys();
-      if (asyncStorageKeys.length > 0) {
-        await AsyncStorage.clear();
+      const keysToRemove = asyncStorageKeys.filter(
+        key =>
+          key !== ORGANIZATION_URL_STORAGE_KEY &&
+          key !== BIOMETRIC_ENABLED_KEY &&
+          key !== BIOMETRIC_CREDENTIALS_KEY,
+      );
+
+      if (keysToRemove.length > 0) {
+        await AsyncStorage.multiRemove(keysToRemove);
       }
-      if (organizationURL) {
-        await AsyncStorage.setItem(
-          ORGANIZATION_URL_STORAGE_KEY,
-          organizationURL,
-        );
-      }
-      await EncryptedStorage.clear();
-      await Keychain.resetGenericPassword();
+
+      // Clear stored tokens without wiping other keychain data
+      await EncryptedStorage.removeItem('API_TOKENS');
+
+      // IMPORTANT: Keep Keychain credentials for biometric login
+      // Don't call Keychain.resetGenericPassword() as it will remove saved credentials
+
       const isSignedInWithGoogle = await GoogleSignin.isSignedIn();
       if (isSignedInWithGoogle) {
         await GoogleSignin.revokeAccess();
         await GoogleSignin.signOut();
       }
       LoginManager.logOut();
-    } catch (error) {
-      console.log('Error while logging out...', error);
-    }
-  }, []);
+    } catch (error) {}
+  }, [dispatch]);
   return [logoutUser];
 };
 

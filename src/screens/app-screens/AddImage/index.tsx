@@ -11,7 +11,7 @@ import {SafeAreaView, StatusBar} from '../../../components';
 import {URL} from '../../../constants/URLS';
 import {useApi} from '../../../hooks/useApi';
 import {AddImageScreenProps} from '../../../types/navigation/appTypes';
-import {getCoordinates} from '../../../utilities/function';
+import {validateLocationForAPI} from '../../../utilities/locationValidation';
 import Toast from '../../../utilities/toast';
 import {styles} from './styles';
 
@@ -19,7 +19,7 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   const {t} = useTranslation();
   const [loader, setLoader] = useState(false);
   const [location, setLocation] = useState<any>(null);
-  const {imageUrl, screen, data} = route?.params;
+  const {imageUrl, screen, data} = route.params;
   const [imageURI, setImageURI] = useState(imageUrl);
 
   interface ImageSize {
@@ -32,13 +32,13 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
       const originalSize: ImageSize = await new Promise((resolve, reject) => {
         Image.getSize(
           uri,
-          (width: number, height: number) => resolve({width, height}),
-          (error: any) => reject(error),
+          (width, height) => resolve({width, height}),
+          error => reject(error),
         );
       });
 
       const {width, height} = originalSize;
-      const newImage: {uri: string} = await ImageResizer.createResizedImage(
+      const newImage = await ImageResizer.createResizedImage(
         uri,
         width,
         height,
@@ -46,11 +46,9 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
         100,
         0,
       );
-      console.log('JPEG Image URI:', newImage.uri);
 
       return newImage.uri;
     } catch (err) {
-      console.error(err);
       return '';
     }
   }
@@ -66,32 +64,38 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
   });
 
   const onDone = async () => {
-    console.log('----------', {data, imageUrl});
-    setLoader(true); // Show loader immediately
+    setLoader(true); // lock buttons immediately
 
     try {
-      let {plotId} = data;
-      let JPEGImageUri = await convertToJPEG(imageUrl);
+      const locationData = await validateLocationForAPI(true, true);
+      if (!locationData) {
+        setLoader(false);
+        return;
+      }
+
+      const {plotId} = data;
+
+      const JPEGImageUri = await convertToJPEG(imageUrl);
+      if (!JPEGImageUri) {
+        throw new Error('Failed to process image');
+      }
+
       setImageURI(JPEGImageUri);
+      setLocation({lat: locationData.latitude, long: locationData.longitude});
 
       generatePreSignedUrl({
         queryParams: `plot_id=${plotId}&image_name=${JPEGImageUri.split('/')
           .pop()
-          .toLowerCase()}`,
+          ?.toLowerCase()}`,
       });
-
-      const {latitude, longitude} = await getCoordinates();
-      setLocation({lat: latitude, long: longitude});
     } catch (error) {
-      console.log('error', error);
       Toast.error({message: 'Failed to upload image', duration: 3000});
-      setLoader(false); // hide loader on error
+      setLoader(false);
     }
   };
 
   useEffect(() => {
     if (preSignedUrlData) {
-      console.log({preSignedUrlData});
       const {s3_path, status_code} = preSignedUrlData;
 
       if (status_code !== 200) {
@@ -100,7 +104,6 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
         return;
       }
 
-      const fileType = imageURI.split('/').pop()?.split('.').pop();
       rnfs
         .readFile(
           imageURI.startsWith('file://')
@@ -110,14 +113,11 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
         )
         .then(binary => {
           const binaryData = Buffer.from(binary, 'base64');
-
           axios
             .put(preSignedUrlData.data.presigned_url, binaryData, {
-              headers: {
-                'Content-Type': 'image/jpeg',
-              },
+              headers: {'Content-Type': 'image/jpeg'},
             })
-            .then(res => {
+            .then(() => {
               uploadImage({
                 payload: {
                   s3_path,
@@ -130,12 +130,11 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
               });
             })
             .catch(err => {
-              console.log('s3 error', err);
               Toast.error({
                 message: 'Failed to upload image',
                 duration: 3000,
               });
-              setLoader(false); // hide loader on error
+              setLoader(false);
             });
         });
     }
@@ -143,27 +142,26 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
 
   useEffect(() => {
     if (uploadImageData) {
-      console.log({uploadImageData});
-      setLoader(false); // ✅ hide loader only after full upload finishes
+      setLoader(false);
 
       if (uploadImageData.status_code !== 200) {
         Toast.error({message: 'Failed to upload image', duration: 3000});
       } else {
-        Toast.success({message: 'Image uploaded successfully', duration: 3000});
+        Toast.success({
+          message: 'Image uploaded successfully',
+          duration: 3000,
+        });
       }
 
-      if (screen === 'NewRecord') {
-        navigation.navigate('NewRecord', {
-          imageUrl,
-          uploadedOn: new Date().toISOString(),
-        });
-      } else if (screen === 'Plots') {
-        navigation.navigate('Plots', {
-          imageUrl,
-          uploadedOn: new Date().toISOString(),
-          ...data,
-        });
-      }
+      const navParams =
+        screen === 'NewRecord'
+          ? {imageUrl, uploadedOn: new Date().toISOString()}
+          : {imageUrl, uploadedOn: new Date().toISOString(), ...data};
+
+      navigation.navigate(
+        screen === 'NewRecord' ? 'NewRecord' : 'Plots',
+        navParams,
+      );
     }
   }, [uploadImageData]);
 
@@ -180,10 +178,24 @@ const AddImage = ({navigation, route}: AddImageScreenProps) => {
           )}
         </View>
         <View style={styles.buttonContainer}>
-          <Pressable style={styles.button} onPress={navigation.goBack}>
+          <Pressable
+            disabled={loader}
+            onPress={navigation.goBack}
+            style={({pressed}) => [
+              styles.button,
+              loader && {opacity: 0.5},
+              pressed && !loader && {opacity: 0.7},
+            ]}>
             <X />
           </Pressable>
-          <Pressable style={styles.button} onPress={onDone}>
+          <Pressable
+            disabled={loader}
+            onPress={onDone}
+            style={({pressed}) => [
+              styles.button,
+              loader && {opacity: 0.5},
+              pressed && !loader && {opacity: 0.7},
+            ]}>
             <Check />
           </Pressable>
         </View>

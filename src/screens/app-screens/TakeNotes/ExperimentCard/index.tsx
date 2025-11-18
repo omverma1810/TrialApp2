@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Pressable,
   ScrollView,
@@ -12,15 +12,9 @@ import BottomModal from '../../../../components/BottomSheetModal';
 import Chip from '../../../../components/Chip';
 import TakeNotesStyles from '../../TakeNotes/TakeNotesStyle';
 import {styles} from './styles';
-
-interface Chip {
-  id: number;
-  ExperientName: string;
-  CropName: string;
-  fieldName?: string;
-  Location?: string;
-  Fieldno?: string;
-}
+import {useTranslation} from 'react-i18next';
+import {LOCALES} from '../../../../localization/constants';
+import {formatExperimentTypeForDisplay} from '../../../../utilities/experimentTypeUtils';
 
 const ExperimentCard = ({
   data,
@@ -35,56 +29,78 @@ const ExperimentCard = ({
   resetExperiment,
   onReset,
 }: any) => {
-  const bottomSheetModalRef = useRef(null);
+  const {t, i18n} = useTranslation();
+  const language = i18n.language;
+  const bottomSheetModalRef = useRef<any>(null);
   const {bottom} = useSafeAreaInsets();
   const [selectedExperiment, setSelectedExperiment] = useState<any>(null);
-  const [chipTitle, setChipTitle] = useState(`Select ${name}`);
+  const getDefaultTitle = useCallback(() => {
+    if (name === 'field') {
+      return t(LOCALES.EXPERIMENT.LBL_SELECT_FIELD);
+    }
+    return t(LOCALES.EXPERIMENT.LBL_SELECT_EXPERIMENT);
+  }, [name, t]);
+
+  const [chipTitle, setChipTitle] = useState(getDefaultTitle);
   const [chipVisible, setChipVisible] = useState(true);
-  const secondBottomSheetRef = useRef(null);
   const [selectedField, setSelectedField] = useState<any>(null);
 
+  // Synchronize incoming selectedItem into internal state and update chip title
   useEffect(() => {
     if (selectedItem) {
       if (name === 'field') {
         setSelectedField(selectedItem);
-        setChipTitle(selectedItem.location.villageName);
+        setChipTitle(selectedItem.location?.fieldLabel || getDefaultTitle());
       } else if (name === 'experiment') {
         setSelectedExperiment(selectedItem);
-        setChipTitle(selectedItem);
+        setChipTitle(
+          selectedItem.fieldExperimentName ||
+            selectedItem.experimentName ||
+            getDefaultTitle(),
+        );
       }
     }
-  }, [selectedItem]);
+  }, [selectedItem, name, getDefaultTitle]);
+
+  // Handle both experiment and field selection
   const handleExperimentSelect = (item: any) => {
-    console.log('=============>', {item});
     if (name === 'field' && !isEdit) {
       setSelectedField(item);
-      setChipTitle(item.location.villageName);
+      setChipTitle(item.location?.fieldLabel || getDefaultTitle());
       onFieldSelect(item);
     } else {
       setSelectedExperiment(item);
-      setChipTitle(item.fieldExperimentName);
+      const title =
+        item.fieldExperimentName || item.experimentName || getDefaultTitle();
+      setChipTitle(title);
       onExperimentSelect(item);
     }
-    console.log(selectedExperiment);
-    (bottomSheetModalRef.current as any).dismiss();
+    bottomSheetModalRef.current?.dismiss();
   };
 
-  const handleFirstRightIconClick = () => {
-    if (bottomSheetModalRef.current) {
-      (bottomSheetModalRef.current as any).present();
-    }
-  };
-
+  // Present modal
   const handleChipPress = () => {
-    console.log('Chip pressed');
-    handleFirstRightIconClick();
+    if (isEdit) return; // disable opening in edit mode
+    bottomSheetModalRef.current?.present();
   };
+
+  // Reset state when requested
+  useEffect(() => {
+    if (resetExperiment) {
+      setSelectedExperiment(null);
+      setSelectedField(null);
+      setChipTitle(getDefaultTitle());
+      onReset();
+    }
+  }, [resetExperiment, onReset, name, getDefaultTitle]);
 
   useEffect(() => {
-    if (defaultChipTitle) {
-      setChipTitle(defaultChipTitle);
+    if (!selectedExperiment && !selectedField) {
+      setChipTitle(getDefaultTitle());
     }
-  }, [defaultChipTitle]);
+  }, [language, selectedExperiment, selectedField, getDefaultTitle]);
+
+  // Background color for experiment type badge
   const getBackgroundColor = (experimentType: any) => {
     switch (experimentType) {
       case 'hybrid':
@@ -95,14 +111,6 @@ const ExperimentCard = ({
         return '#eaf4e7';
     }
   };
-  useEffect(() => {
-    if (resetExperiment) {
-      setSelectedExperiment(null); // Reset the selected experiment
-      setSelectedField(null); // If needed, reset the selected field as well
-      setChipTitle(`Select ${name}`); // Reset chip title
-      onReset(); // Reset the flag in the parent component
-    }
-  }, [resetExperiment, onReset]);
 
   return (
     <View
@@ -110,6 +118,7 @@ const ExperimentCard = ({
         isFirstIndex && styles.firstIndex,
         isLastIndex && styles.lastIndex,
       ]}>
+      {/* Initial placeholder chip */}
       {!selectedExperiment && chipVisible && !selectedField && (
         <Chip
           onPress={handleChipPress}
@@ -124,18 +133,18 @@ const ExperimentCard = ({
           isSelected={false}
         />
       )}
-      {selectedExperiment && (
-        <Pressable onPress={!isEdit ? handleChipPress : null}>
-          <View style={TakeNotesStyles.chipItem}>
-            <Text style={TakeNotesStyles.chipTitle}>Experiment</Text>
 
+      {/* Selected Experiment Chip */}
+      {selectedExperiment && name === 'experiment' && (
+        <Pressable onPress={!isEdit ? handleChipPress : undefined}>
+          <View style={TakeNotesStyles.chipItem}>
+            <Text style={TakeNotesStyles.chipTitle}>
+              {t(LOCALES.EXPERIMENT.LBL_EXPERIMENT)}
+            </Text>
             <View style={TakeNotesStyles.chipTextRow}>
               <Text style={TakeNotesStyles.chipText}>
-                {name === 'field'
-                  ? selectedExperiment.location.villageName
-                  : isEdit
-                  ? selectedExperiment
-                  : selectedExperiment.fieldExperimentName}
+                {selectedExperiment.fieldExperimentName ||
+                  selectedExperiment.experimentName}
               </Text>
               {!isEdit && <DropdownArrow />}
             </View>
@@ -150,67 +159,73 @@ const ExperimentCard = ({
                   },
                 ]}>
                 <Text style={TakeNotesStyles.chipCropText1}>
-                  {selectedExperiment.experimentType}
+                  {formatExperimentTypeForDisplay(
+                    selectedExperiment.experimentType,
+                  )}
                 </Text>
               </View>
             )}
           </View>
         </Pressable>
       )}
-      {selectedField && (
-        <Pressable onPress={!isEdit ? handleChipPress : null}>
+
+      {/* Selected Field Chip */}
+      {selectedField && name === 'field' && (
+        <Pressable onPress={!isEdit ? handleChipPress : undefined}>
           <View style={TakeNotesStyles.chipItem}>
-            <Text style={TakeNotesStyles.chipTitle}>Field</Text>
+            <Text style={TakeNotesStyles.chipTitle}>
+              {t(LOCALES.EXPERIMENT.LBL_FIELD)}
+            </Text>
             <View style={TakeNotesStyles.chipTextRow}>
               <Text style={TakeNotesStyles.chipText}>
-                {selectedField?.location?.villageName}
+                {selectedField.location?.fieldLabel}
               </Text>
               {!isEdit && <DropdownArrow />}
             </View>
-            {/* <View style={TakeNotesStyles.chipCropText}>
-            <Text style={TakeNotesStyles.chipCropText1}>
-              {selectedExperiment.cropName}
-            </Text>
-          </View> */}
           </View>
         </Pressable>
       )}
+
+      {/* Modal for selection list */}
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
-        containerStyle={{paddingBottom: bottom}}>
+        containerStyle={{paddingBottom: bottom}}
+        // Do not show modal content in edit mode
+      >
         <View style={TakeNotesStyles.modalContainer}>
           <Text style={TakeNotesStyles.modalTitle}>
-            Select an Experiment (or) Field
+            {name === 'field'
+              ? t(LOCALES.EXPERIMENT.LBL_SELECT_FIELD)
+              : t(LOCALES.EXPERIMENT.LBL_SELECT_EXPERIMENT)}
           </Text>
           <ScrollView style={{flexGrow: 1}}>
             <View style={{gap: 30}}>
-              {Array.isArray(data) &&
+              {!isEdit &&
+                Array.isArray(data) &&
                 data.map((item: any, index: number) => (
                   <TouchableOpacity
                     key={`${item.id}-${index}`}
                     onPress={() => handleExperimentSelect(item)}
                     style={TakeNotesStyles.modalItemContainer}>
                     <Text style={TakeNotesStyles.modalItemText}>
-                      {name == 'field' ? `${item.name} - ` : null}{' '}
-                      {item.fieldExperimentName || item.location.villageName}
+                      {name === 'field'
+                        ? item.location?.fieldLabel
+                        : item.fieldExperimentName || item.experimentName}
                     </Text>
-                    {name == 'experiment' ? (
+                    {name === 'experiment' && (
                       <Text
                         style={[
                           TakeNotesStyles.modalItemCropText,
                           {
-                            backgroundColor:
-                              item.experimentType === 'hybrid'
-                                ? '#fdf8ee'
-                                : item.experimentType === 'line'
-                                ? '#fcebea'
-                                : '#eaf4e7',
+                            backgroundColor: getBackgroundColor(
+                              item.experimentType,
+                            ),
                           },
                         ]}>
-                        {item.experimentType}
+                        {formatExperimentTypeForDisplay(item.experimentType)}
                       </Text>
-                    ) : null}
+                    )}
                   </TouchableOpacity>
                 ))}
             </View>

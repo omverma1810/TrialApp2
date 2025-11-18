@@ -49,9 +49,7 @@ const SocialLogin = () => {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      console.log('SignIn with google successful...', userInfo);
     } catch (error) {
-      console.log('Error while google signIn...', error);
     }
   }, []);
 
@@ -66,13 +64,8 @@ const SocialLogin = () => {
         appleAuthRequestResponse.user,
       );
       if (credentialState === appleAuth.State.AUTHORIZED) {
-        console.log(
-          'SignIn with apple successful...',
-          appleAuthRequestResponse,
-        );
       }
     } catch (error) {
-      console.log('Error while apple signIn...', error);
     }
   }, []);
 
@@ -92,13 +85,9 @@ const SocialLogin = () => {
       if (!userInfo.isCancelled) {
         const token = await AccessToken.getCurrentAccessToken();
         if (token?.accessToken) {
-          console.log('SignIn with facebook successful...');
-          console.log({userInfo});
-          console.log({token});
         }
       }
     } catch (error) {
-      console.log('Error while facebook signIn...', error);
     }
   };
 

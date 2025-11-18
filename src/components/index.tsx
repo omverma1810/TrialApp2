@@ -18,6 +18,26 @@ import Picker from './Picker';
 import OverlayLoader from './OverlayLoader';
 import OutlinedInput from './OutlinedInput';
 import Calender from './Calender';
+import ImageCarouselModal from './ImageCarouselModal';
+import NotesViewModal from './NotesViewModal';
+import ValidationErrorModal from './ValidationErrorModal';
+import BiometricButton from './BiometricButton';
+import BiometricSettings from './BiometricSettings';
+import ProtocolInfo from './ProtocolInfo';
+import LastUpdatedInfo from './LastUpdatedInfo';
+import IndividualPlantsManager from './IndividualPlantsManager';
+import MapView from './MapView';
+import FieldLayoutModal from './FieldLayoutModal';
+import OfflineSyncTest from './OfflineSyncTest';
+import AgronomyProtocol from './AgronomyProtocol';
+import ProtocolProgress from './ProtocolProgress';
+import ProtocolQuickFilters from './ProtocolQuickFilters';
+import ProtocolAccordion from './ProtocolAccordion';
+import ProtocolStageGroup from './ProtocolStageGroup';
+import VoiceNoteRecorder from './VoiceNoteRecorder';
+import InlineVoiceRecorder from './InlineVoiceRecorder';
+import MultiVoiceNoteManager from './MultiVoiceNoteManager';
+import VoiceNotePlayerModal from './VoiceNotePlayerModal';
 
 export {
   Text,
@@ -40,4 +60,24 @@ export {
   OverlayLoader,
   OutlinedInput,
   Calender,
+  ImageCarouselModal,
+  NotesViewModal,
+  ValidationErrorModal,
+  BiometricButton,
+  BiometricSettings,
+  ProtocolInfo,
+  LastUpdatedInfo,
+  IndividualPlantsManager,
+  MapView,
+  FieldLayoutModal,
+  OfflineSyncTest,
+  AgronomyProtocol,
+  ProtocolProgress,
+  ProtocolQuickFilters,
+  ProtocolAccordion,
+  ProtocolStageGroup,
+  VoiceNoteRecorder,
+  InlineVoiceRecorder,
+  MultiVoiceNoteManager,
+  VoiceNotePlayerModal,
 };

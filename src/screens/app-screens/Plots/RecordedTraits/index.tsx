@@ -8,7 +8,8 @@ import {URL} from '../../../../constants/URLS';
 import {useApi} from '../../../../hooks/useApi';
 import {LOCALES} from '../../../../localization/constants';
 import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
-import {formatDateTime, getCoordinates} from '../../../../utilities/function';
+import {formatDateTime} from '../../../../utilities/function';
+import {validateLocationForAPI} from '../../../../utilities/locationValidation';
 import Toast from '../../../../utilities/toast';
 import UnrecordedTraitCard from '../../NewRecord/UnrecordedTraits/UnrecordedTraitCard';
 import {
@@ -86,7 +87,6 @@ const RecordedTraits = ({
         (i: {validationStatus: boolean; observedValue: string}) =>
           !i?.validationStatus,
       );
-      console.log({invalid});
       if (invalid && invalid.length) {
         Toast.warning({
           message: `${invalid[0]?.observedValue} is invalid value`,
@@ -111,7 +111,12 @@ const RecordedTraits = ({
 
   const onSaveRecord = async () => {
     const headers = {'Content-Type': 'application/json'};
-    const {latitude, longitude} = await getCoordinates();
+    const locationData = await validateLocationForAPI(true, true);
+    if (!locationData) {
+      return;
+    }
+
+    const {latitude, longitude} = locationData;
     const payload = {
       plotId: plotData?.id,
       date: formatDateTime(new Date()),

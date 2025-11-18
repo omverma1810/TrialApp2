@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   Modal,
   StyleSheet,
@@ -6,12 +6,13 @@ import {
   View,
   ScrollView,
   Text,
-  SafeAreaView,
   useColorScheme,
 } from 'react-native';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import {Tick} from '../../../../assets/icons/svgs';
 import {FONTS} from '../../../../theme/fonts';
+import {LOCALES} from '../../../../localization/constants';
 
 type FilterDataType = {
   Years: {value: number | string; label: string}[];
@@ -24,84 +25,177 @@ type SelectedFiltersType = {
   Seasons: string[];
   Locations: string[];
   Years: string[];
+  Crops: string[];
 };
+
+type FilterType = 'Seasons' | 'Locations' | 'Years' | 'Crops';
 
 type FilterModalProps = {
   isVisible: boolean;
   onClose: () => void;
   onApply: () => void;
-  onFilterSelect: (
-    filterType: 'Seasons' | 'Locations' | 'Years',
-    selectedOptions: string[],
-  ) => void;
+  onClearAll: () => void;
+  onFilterSelect: (filterType: FilterType, selectedOptions: string[]) => void;
   filterData: FilterDataType | null;
   selectedFilters: SelectedFiltersType;
 };
 
-const getStyles = (isDarkMode: boolean) =>
+const FILTER_SIDEBAR_LABELS: Record<FilterType, string> = {
+  Seasons: LOCALES.FILTER.LBL_SEASON,
+  Locations: LOCALES.FILTER.LBL_LOCATION,
+  Years: LOCALES.FILTER.LBL_YEAR,
+  Crops: LOCALES.FILTER.LBL_CROP,
+};
+
+const COLORS = {
+  white: '#FFFFFF',
+  black: '#000000',
+  primary: '#1A6DD2',
+  secondary: '#007AFF',
+  background: '#F5F5F6',
+  border: '#E5E5E5',
+  borderDark: '#CCCCCC',
+  borderLight: '#999999',
+  text: '#000000',
+  placeholder: '#D3D3D3',
+} as const;
+
+const getStyles = (isDarkMode: boolean, insets: any) =>
   StyleSheet.create({
-    filterModalContainer: {flex: 1, backgroundColor: '#fff'},
-    filterModalHeader: {
+    modalContainer: {
+      flex: 1,
+      backgroundColor: COLORS.white,
+    },
+    safeAreaContainer: {
+      flex: 1,
+    },
+    header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: 16,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      minHeight: 56,
       borderBottomWidth: 1,
-      borderColor: '#ccc',
+      borderBottomColor: COLORS.borderDark,
+      backgroundColor: COLORS.white,
+      // Proper safe area handling for header
+      paddingTop: Math.max(insets.top + 12, 12),
     },
-    filterModalTitle: {
+    headerTitle: {
+      fontSize: 16,
+      fontFamily: FONTS.SEMI_BOLD,
+      color: COLORS.text,
+      flex: 1,
+      textAlign: 'left',
+    },
+    clearAllButton: {
+      paddingLeft: 8,
+      paddingVertical: 4,
+      paddingHorizontal: 4,
+    },
+    clearAllText: {
       fontSize: 14,
       fontFamily: FONTS.SEMI_BOLD,
-      color: '#000',
+      color: COLORS.secondary,
     },
-    filterModalCloseText: {
-      fontSize: 14,
-      fontFamily: FONTS.SEMI_BOLD,
-      color: '#007AFF',
+    contentContainer: {
+      flex: 1,
+      flexDirection: 'row',
     },
-    twoColumnContainer: {flex: 1, flexDirection: 'row'},
-    sidebarContainer: {width: '35%', backgroundColor: '#F5F5F6'},
+    sidebar: {
+      width: '35%',
+      backgroundColor: COLORS.background,
+    },
     sidebarItem: {
       paddingVertical: 12,
       paddingHorizontal: 8,
       borderBottomWidth: 0.3,
-      borderBottomColor: '#999',
+      borderBottomColor: COLORS.borderLight,
     },
-    sidebarItemActive: {backgroundColor: '#fff'},
+    sidebarItemActive: {
+      backgroundColor: COLORS.white,
+    },
     sidebarItemText: {
       fontSize: 14,
       fontFamily: FONTS.MEDIUM,
-      color: '#000',
+      color: COLORS.text,
     },
-    sidebarItemTextActive: {fontFamily: FONTS.SEMI_BOLD},
-    rightPane: {flex: 1, paddingHorizontal: 16},
-    dropdownItem: {
-      backgroundColor: '#fff',
-      padding: 10,
+    sidebarItemTextActive: {
+      fontFamily: FONTS.SEMI_BOLD,
+    },
+    rightContent: {
+      flex: 1,
+    },
+    scrollContainer: {
+      flex: 1,
+    },
+    optionsList: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    optionItem: {
+      backgroundColor: COLORS.white,
+      paddingVertical: 12,
+      paddingHorizontal: 10,
       flexDirection: 'row',
+      alignItems: 'center',
       gap: 10,
+      borderBottomWidth: 0.3,
+      borderBottomColor: COLORS.border,
+      minHeight: 44, // Better touch target
     },
-    dropdownItemText: {
+    optionText: {
       fontFamily: FONTS.MEDIUM,
-      color: '#000',
+      color: COLORS.text,
+      fontSize: 14,
+      flex: 1,
     },
     footer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      padding: 16,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      // Critical fix: Add proper bottom padding to prevent overlap
+      paddingBottom: Math.max(insets.bottom + 16, 16),
       borderTopWidth: 0.3,
-      borderTopColor: '#e5e5e5',
+      borderTopColor: COLORS.border,
+      backgroundColor: COLORS.white,
     },
     footerButton: {
-      paddingVertical: 8,
-      paddingHorizontal: 16,
-      borderRadius: 4,
-      backgroundColor: '#1A6DD2',
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+      borderRadius: 6,
+      backgroundColor: COLORS.primary,
+      minWidth: 80,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    closeButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: COLORS.primary,
     },
     footerButtonText: {
       fontSize: 14,
-      color: '#fff',
+      color: COLORS.white,
       fontFamily: FONTS.MEDIUM,
+    },
+    closeButtonText: {
+      color: COLORS.primary,
+    },
+    // Loading states and empty states
+    emptyStateContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 32,
+    },
+    emptyStateText: {
+      fontSize: 16,
+      fontFamily: FONTS.MEDIUM,
+      color: COLORS.borderLight,
+      textAlign: 'center',
     },
   });
 
@@ -109,231 +203,307 @@ const FilterModal: React.FC<FilterModalProps> = ({
   isVisible,
   onClose,
   onApply,
+  onClearAll,
   onFilterSelect,
   filterData,
   selectedFilters,
 }) => {
   const {t} = useTranslation();
+  const isDarkMode = useColorScheme() === 'dark';
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(
+    () => getStyles(isDarkMode, insets),
+    [isDarkMode, insets],
+  );
 
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
-  const styles = getStyles(isDarkMode);
+  // Safe fallback for filter data
+  const safeFilterData: FilterDataType = useMemo(
+    () =>
+      filterData || {
+        Years: [],
+        Crops: [],
+        Seasons: [],
+        Locations: [],
+      },
+    [filterData],
+  );
 
-  const safeFilterData: FilterDataType = filterData || {
+  // Local state for temporary selections (using consolidated state)
+  const [localSelections, setLocalSelections] = useState<SelectedFiltersType>({
     Years: [],
     Crops: [],
     Seasons: [],
     Locations: [],
-  };
+  });
 
-  const [selectedYear, setSelectedYear] = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<string[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
-  const [selectedFilter, setSelectedFilter] = useState<
-    'Locations' | 'Seasons' | 'Years' | ''
-  >('');
+  const [activeFilter, setActiveFilter] = useState<FilterType | ''>('');
 
+  // Initialize local selections when modal opens
   useEffect(() => {
     if (isVisible) {
-      setSelectedYear(selectedFilters.Years);
-      setSelectedLocation(selectedFilters.Locations);
-      setSelectedSeason(selectedFilters.Seasons);
+      setLocalSelections({
+        Years: selectedFilters.Years ? [...selectedFilters.Years] : [],
+        Crops: selectedFilters.Crops ? [...selectedFilters.Crops] : [],
+        Seasons: selectedFilters.Seasons ? [...selectedFilters.Seasons] : [],
+        Locations: selectedFilters.Locations
+          ? [...selectedFilters.Locations]
+          : [],
+      });
+
+      // Set the first available filter with data as active
+      const firstKeyWithData = (Object.keys(safeFilterData) as FilterType[])
+        .filter(key => safeFilterData[key] && safeFilterData[key].length > 0)
+        .shift();
+
+      if (firstKeyWithData) {
+        setActiveFilter(firstKeyWithData);
+      }
     }
-  }, [isVisible, selectedFilters]);
+  }, [isVisible, selectedFilters, safeFilterData]);
 
-  const handleSelection = (
-    filterType: 'Seasons' | 'Locations' | 'Years',
-    value: string,
-  ) => {
-    let updatedSelection: string[] = [];
+  // Get the value to use for comparison
+  const getComparisonValue = useCallback(
+    (filterType: FilterType, option: any): string => {
+      // For Seasons and Crops, use label; for others, use value
+      const comparisonValue =
+        filterType === 'Seasons' || filterType === 'Crops'
+          ? option.label
+          : option.value.toString();
 
-    if (filterType === 'Seasons') {
-      updatedSelection = selectedSeason.includes(value)
-        ? selectedSeason.filter(season => season !== value)
-        : [...selectedSeason, value];
-      setSelectedSeason(updatedSelection);
-    } else if (filterType === 'Locations') {
-      updatedSelection = selectedLocation.includes(value)
-        ? selectedLocation.filter(location => location !== value)
-        : [...selectedLocation, value];
-      setSelectedLocation(updatedSelection);
-    } else if (filterType === 'Years') {
-      updatedSelection = selectedYear.includes(value)
-        ? selectedYear.filter(year => year !== value)
-        : [...selectedYear, value];
-      setSelectedYear(updatedSelection);
-    }
+      return comparisonValue;
+    },
+    [],
+  );
 
-    onFilterSelect(filterType, updatedSelection);
-  };
+  // Check if an option is selected
+  const isOptionSelected = useCallback(
+    (filterType: FilterType, option: any): boolean => {
+      const comparisonValue = getComparisonValue(filterType, option);
+      return localSelections[filterType].includes(comparisonValue);
+    },
+    [localSelections, getComparisonValue],
+  );
 
-  const clearAllSelections = () => {
-    setSelectedYear([]);
-    setSelectedLocation([]);
-    setSelectedSeason([]);
-    onFilterSelect('Seasons', []);
-    onFilterSelect('Locations', []);
-    onFilterSelect('Years', []);
+  // Handle option selection with proper logic for single vs multi-select
+  const handleOptionSelect = useCallback(
+    (filterType: FilterType, option: any) => {
+      const value = getComparisonValue(filterType, option);
+
+      setLocalSelections(prev => {
+        const currentSelections = prev[filterType];
+        let newSelections: string[];
+
+        if (
+          filterType === 'Crops' ||
+          filterType === 'Years' ||
+          filterType === 'Seasons'
+        ) {
+          // Single-select for Crops, Years, and Seasons - toggle on/off
+          newSelections = currentSelections.includes(value) ? [] : [value];
+        } else {
+          // Multi-select for Locations
+          newSelections = currentSelections.includes(value)
+            ? currentSelections.filter(item => item !== value)
+            : [...currentSelections, value];
+        }
+
+        return {
+          ...prev,
+          [filterType]: newSelections,
+        };
+      });
+    },
+    [getComparisonValue],
+  );
+
+  // Handle clear all filters
+  const handleClearAll = useCallback(() => {
+    setLocalSelections({
+      Years: [],
+      Crops: [],
+      Seasons: [],
+      Locations: [],
+    });
+
+    onClearAll();
+  }, [onClearAll]);
+
+  // Handle apply filters
+  const handleApply = useCallback(() => {
+    // Apply all selections to parent component at once
+    // Call onFilterSelect for each filter type to update the parent's state
+    (Object.entries(localSelections) as [FilterType, string[]][]).forEach(
+      ([filterType, selections]) => {
+        onFilterSelect(filterType, selections);
+      },
+    );
+
+    // Wait for state updates to complete, then trigger the API call
+    // The onApply callback will trigger the API call with all updated filters
+    onApply();
     onClose();
-  };
+  }, [localSelections, onFilterSelect, onApply, onClose]);
+
+  // Render sidebar items
+  const renderSidebarItems = useMemo(() => {
+    return (Object.keys(safeFilterData) as FilterType[])
+      .filter(key => safeFilterData[key] && safeFilterData[key].length > 0)
+      .map(filterKey => {
+        const isActive = activeFilter === filterKey;
+        const label = t(FILTER_SIDEBAR_LABELS[filterKey]);
+
+        return (
+          <Pressable
+            key={filterKey}
+            style={[styles.sidebarItem, isActive && styles.sidebarItemActive]}
+            onPress={() => setActiveFilter(filterKey)}
+            accessibilityRole="tab"
+            accessibilityState={{selected: isActive}}
+            accessibilityLabel={t(LOCALES.FILTER.A11Y_SELECT_FILTER, {
+              filter: label,
+            })}>
+            <Text
+              style={[
+                styles.sidebarItemText,
+                isActive && styles.sidebarItemTextActive,
+              ]}>
+              {label}
+            </Text>
+          </Pressable>
+        );
+      });
+  }, [safeFilterData, activeFilter, styles, t]);
+
+  // Render options for active filter
+  const renderOptions = useMemo(() => {
+    if (
+      !activeFilter ||
+      !safeFilterData[activeFilter] ||
+      safeFilterData[activeFilter].length === 0
+    ) {
+      return (
+        <View style={styles.emptyStateContainer}>
+          <Text style={styles.emptyStateText}>
+            {t(LOCALES.FILTER.MSG_NO_OPTIONS)}
+          </Text>
+        </View>
+      );
+    }
+
+    return safeFilterData[activeFilter].map(option => {
+      const isSelected = isOptionSelected(activeFilter, option);
+      const optionLabel = option.label;
+      const optionAccessibilityLabel = isSelected
+        ? t(LOCALES.FILTER.A11Y_DESELECT_OPTION, {option: optionLabel})
+        : t(LOCALES.FILTER.A11Y_SELECT_OPTION, {option: optionLabel});
+
+      return (
+        <Pressable
+          key={`${activeFilter}-${option.value.toString()}`}
+          style={styles.optionItem}
+          onPress={() => handleOptionSelect(activeFilter, option)}
+          accessibilityRole="checkbox"
+          accessibilityState={{checked: isSelected}}
+          accessibilityLabel={optionAccessibilityLabel}>
+          <Tick color={isSelected ? COLORS.primary : COLORS.placeholder} />
+          <Text style={styles.optionText} numberOfLines={2}>
+            {optionLabel}
+          </Text>
+        </Pressable>
+      );
+    });
+  }, [
+    activeFilter,
+    safeFilterData,
+    isOptionSelected,
+    handleOptionSelect,
+    styles,
+    t,
+  ]);
+
+  // Calculate if there are any active selections
+  const hasActiveSelections = useMemo(() => {
+    return Object.values(localSelections).some(
+      selections => selections.length > 0,
+    );
+  }, [localSelections]);
 
   return (
     <Modal
       animationType="slide"
       transparent={false}
+      statusBarTranslucent={true}
+      presentationStyle="fullScreen"
       visible={isVisible}
       onRequestClose={onClose}>
-      <SafeAreaView style={styles.filterModalContainer}>
-        <View style={styles.filterModalHeader}>
-          <Text style={styles.filterModalTitle}>
-            {t('Filters') || 'Filters'}
-          </Text>
-          <Pressable onPress={clearAllSelections}>
-            <Text style={styles.filterModalCloseText}>
-              {t('CLEAR ALL') || 'CLEAR ALL'}
+      <View style={styles.modalContainer}>
+        <SafeAreaView style={styles.safeAreaContainer} edges={[]}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.headerTitle} numberOfLines={1}>
+              {t(LOCALES.FILTER.TITLE_FILTERS)}
             </Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.twoColumnContainer}>
-          <View style={styles.sidebarContainer}>
-            {Object.entries(safeFilterData)
-              .filter(([filterKey]) => filterKey !== 'Crops')
-              .map(([filterKey]) => (
-                <Pressable
-                  key={filterKey}
-                  style={[
-                    styles.sidebarItem,
-                    selectedFilter === filterKey && styles.sidebarItemActive,
-                  ]}
-                  onPress={() =>
-                    setSelectedFilter(
-                      filterKey as 'Seasons' | 'Locations' | 'Years',
-                    )
-                  }>
-                  <Text
-                    style={[
-                      styles.sidebarItemText,
-                      selectedFilter === filterKey &&
-                        styles.sidebarItemTextActive,
-                    ]}>
-                    {t(filterKey) ||
-                      filterKey.charAt(0).toUpperCase() + filterKey.slice(1)}
-                  </Text>
-                </Pressable>
-              ))}
+            <Pressable
+              onPress={handleClearAll}
+              hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
+              style={styles.clearAllButton}
+              accessibilityRole="button"
+              accessibilityState={{disabled: !hasActiveSelections}}
+              accessibilityLabel={t(LOCALES.FILTER.A11Y_CLEAR_ALL)}
+              disabled={!hasActiveSelections}>
+              <Text
+                style={[
+                  styles.clearAllText,
+                  !hasActiveSelections && {opacity: 0.5},
+                ]}
+                numberOfLines={1}>
+                {t(LOCALES.FILTER.BTN_CLEAR_ALL)}
+              </Text>
+            </Pressable>
           </View>
 
-          <ScrollView>
-            <View style={styles.rightPane}>
-              {selectedFilter && safeFilterData[selectedFilter] && (
-                <View style={{marginTop: 16}}>
-                  {safeFilterData[selectedFilter].map(option => (
-                    <Pressable
-                      key={option.value.toString()}
-                      onPress={() =>
-                        handleSelection(
-                          selectedFilter as 'Seasons' | 'Locations' | 'Years',
-                          option.value.toString(),
-                        )
-                      }
-                      style={styles.dropdownItem}>
-                      <Tick
-                        color={
-                          (selectedFilter === 'Seasons' &&
-                            selectedSeason.includes(option.value.toString())) ||
-                          (selectedFilter === 'Locations' &&
-                            selectedLocation.includes(
-                              option.value.toString(),
-                            )) ||
-                          (selectedFilter === 'Years' &&
-                            selectedYear.includes(option.value.toString()))
-                            ? '#1A6DD2'
-                            : '#D3D3D3'
-                        }
-                      />
-                      <Text style={styles.dropdownItemText}>
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
-            </View>
-          </ScrollView>
-        </View>
+          {/* Content */}
+          <View style={styles.contentContainer}>
+            {/* Sidebar */}
+            <View style={styles.sidebar}>{renderSidebarItems}</View>
 
-        <View style={styles.footer}>
-          <Pressable onPress={onClose} style={styles.footerButton}>
-            <Text style={styles.footerButtonText}>Close</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              onApply();
-              onClose();
-            }}
-            style={styles.footerButton}>
-            <Text style={styles.footerButtonText}>Apply</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
+            {/* Right content */}
+            <View style={styles.rightContent}>
+              <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.optionsList}
+                showsVerticalScrollIndicator={true}
+                keyboardShouldPersistTaps="handled">
+                {renderOptions}
+              </ScrollView>
+            </View>
+          </View>
+
+          {/* Footer - Fixed to prevent overlap */}
+          <View style={styles.footer}>
+            <Pressable
+              onPress={onClose}
+              style={[styles.footerButton, styles.closeButton]}
+              accessibilityRole="button"
+              accessibilityLabel={t(LOCALES.FILTER.A11Y_CLOSE_MODAL)}>
+              <Text style={[styles.footerButtonText, styles.closeButtonText]}>
+                {t(LOCALES.FILTER.BTN_CLOSE)}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={handleApply}
+              style={styles.footerButton}
+              accessibilityRole="button"
+              accessibilityLabel={t(LOCALES.FILTER.A11Y_APPLY_FILTERS)}>
+              <Text style={styles.footerButtonText}>
+                {t(LOCALES.FILTER.BTN_APPLY)}
+              </Text>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      </View>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  filterModalContainer: {flex: 1, backgroundColor: '#fff'},
-  filterModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderColor: '#ccc',
-  },
-  filterModalTitle: {fontSize: 14, fontFamily: FONTS.SEMI_BOLD},
-  filterModalCloseText: {
-    fontSize: 14,
-    fontFamily: FONTS.SEMI_BOLD,
-    color: '#007AFF',
-  },
-  twoColumnContainer: {flex: 1, flexDirection: 'row'},
-  sidebarContainer: {width: '35%', backgroundColor: '#F5F5F6'},
-  sidebarItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderBottomWidth: 0.3,
-    borderBottomColor: '#999',
-  },
-  sidebarItemActive: {backgroundColor: '#fff'},
-  sidebarItemText: {fontSize: 14, fontFamily: FONTS.MEDIUM},
-  sidebarItemTextActive: {fontFamily: FONTS.SEMI_BOLD},
-  rightPane: {flex: 1, paddingHorizontal: 16},
-  dropdownItem: {
-    backgroundColor: '#fff',
-    padding: 10,
-    flexDirection: 'row',
-    gap: 10,
-  },
-  dropdownItemText: {fontFamily: FONTS.MEDIUM},
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderTopWidth: 0.3,
-    borderTopColor: '#e5e5e5',
-  },
-  footerButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 4,
-    backgroundColor: '#1A6DD2',
-  },
-  footerButtonText: {
-    fontSize: 14,
-    color: '#fff',
-    fontFamily: FONTS.MEDIUM,
-  },
-});
 
 export default FilterModal;

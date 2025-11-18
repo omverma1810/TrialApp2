@@ -16,14 +16,12 @@ const languageDetectorPlugin: any = {
         return callback(getLocales()[0].languageCode);
       }
     } catch (error) {
-      console.log('Error while detecting language', error);
     }
   },
   cacheUserLanguage: async (language: string) => {
     try {
       await AsyncStorage.setItem(LANGUAGE_KEY, language);
     } catch (error) {
-      console.log('Error while caching language', error);
     }
   },
 };

@@ -1,7 +1,10 @@
 import React from 'react';
-import {View, Text, Pressable} from 'react-native';
+import {View, Text, Pressable, Dimensions} from 'react-native';
 import {styles} from './styles';
-import {arrowLeft, arrowRight} from '../../../../assets/icons/svgs';
+import {
+  arrowLeft as ArrowLeft,
+  arrowRight as ArrowRight,
+} from '../../../../assets/icons/svgs';
 
 type TraitDisplayProps = {
   traitName: string;
@@ -16,27 +19,44 @@ const TraitDisplay: React.FC<TraitDisplayProps> = ({
   onNext,
   onTraitPress,
 }) => {
+  const {width} = Dimensions.get('window');
+  const horizontalMargin = width < 360 ? 8 : width >= 768 ? 24 : 16;
+
   return (
     <View
       style={[
         styles.container,
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        },
+        {justifyContent: 'center', marginHorizontal: 0},
       ]}>
-      <Pressable onPress={onPrev} style={{marginRight: 50}}>
-        {arrowLeft}
+      <Pressable
+        onPress={onPrev}
+        hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
+        style={[
+          styles.arrowContainer,
+          {position: 'absolute', left: horizontalMargin},
+        ]}>
+        <ArrowLeft />
       </Pressable>
 
       <Pressable onPress={onTraitPress} style={styles.traitBox}>
-        <Text style={styles.traitText}>{traitName}</Text>
+        <Text
+          style={[
+            styles.traitText,
+            width > 500 ? styles.traitTextLarge : null,
+          ]}>
+          {traitName}
+        </Text>
         <View style={styles.underline} />
       </Pressable>
 
-      <Pressable onPress={onNext} style={{marginLeft: 50}}>
-        {arrowRight}
+      <Pressable
+        onPress={onNext}
+        hitSlop={{top: 15, bottom: 15, left: 15, right: 15}}
+        style={[
+          styles.arrowContainer,
+          {position: 'absolute', right: horizontalMargin},
+        ]}>
+        <ArrowRight />
       </Pressable>
     </View>
   );

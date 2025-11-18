@@ -56,9 +56,34 @@ import Tick from './Tick';
 import Adfilter from './Adfilters';
 import arrowLeft from './arrowLeft';
 import arrowRight from './arrowRight';
-import PlotArrowRight from './PlotArrowRight';
 import PlotArrowLeft from './PlotArrowLeft';
-import theLine from './theLine';
+import PlotArrowRight from './PlotArrowRight';
+import GreenTick from './GreenTick';
+import PopupDot from './PopupDot';
+import UploadCam from './UploadCam';
+import DeleteBin from './DeleteBin';
+import ExpQR from './ExpQR';
+import NoInternet from './NoInternet';
+import YesInternet from './YesInternet';
+import AvailableOffline from './AvailableOffline';
+import OrangeNoNetwork from './OrangeNoNetwork';
+import ToggleOff from './ToggleOff';
+import ToggleOn from './ToggleOn';
+import ToggleOval from './ToggleOval';
+import ChevronRight from './ChevronRight';
+import ChevronBWRight from './ChevronBWRight';
+import MapIcon from './MapIcon';
+import Attachment from './Attachment';
+import MatrixNote from './MatrixNote';
+import ImageArrowLeft from './ImageArrowLeft';
+import ImageArrowRight from './ImageArrowRight';
+import ShareIcon from './ShareIcon';
+import Download from './Download';
+import Play from './Play';
+import Pause from './Pause';
+import Stop from './Stop';
+import Microphone from './Microphone';
+import Upload from './Upload';
 
 export {
   Back,
@@ -119,7 +144,32 @@ export {
   Adfilter,
   arrowLeft,
   arrowRight,
-  PlotArrowRight,
   PlotArrowLeft,
-  theLine,
+  PlotArrowRight,
+  GreenTick,
+  PopupDot,
+  UploadCam,
+  DeleteBin,
+  ExpQR,
+  NoInternet,
+  YesInternet,
+  AvailableOffline,
+  OrangeNoNetwork,
+  ToggleOff,
+  ToggleOn,
+  ToggleOval,
+  ChevronBWRight,
+  ChevronRight,
+  MapIcon,
+  Attachment,
+  MatrixNote,
+  ImageArrowLeft,
+  ImageArrowRight,
+  ShareIcon,
+  Download,
+  Play,
+  Pause,
+  Stop,
+  Microphone,
+  Upload,
 };

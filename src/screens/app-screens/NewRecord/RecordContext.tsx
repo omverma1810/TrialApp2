@@ -16,12 +16,13 @@ import {NewRecordScreenProps} from '../../../types/navigation/appTypes';
 import {
   formatDateTime,
   getBase64FromUrl,
-  getCoordinates,
   getNameFromUrl,
 } from '../../../utilities/function';
 import Toast from '../../../utilities/toast';
 import {useRecordApi} from './RecordApiContext';
 import {UpdateRecordDataFunction} from './UnrecordedTraits/UnrecordedTraitsContext';
+import {useExperimentTracker} from '../../../utilities/experimentTracker';
+import {validateLocationForAPI} from '../../../utilities/locationValidation';
 
 type RecordData = {
   [key: string]: {
@@ -53,7 +54,11 @@ interface RecordContextType {
   experimentList: any[];
   fieldList: any[];
   plotList: any[];
-  unRecordedTraitList: any[];
+  unRecordedTraitList: {
+    observationId: number | null;
+    traitId: number;
+    value: any;
+  }[];
   selectedCrop: any;
   selectedProject: any;
   selectedExperiment: any;
@@ -82,12 +87,14 @@ interface RecordContextType {
   onSaveNotes: (notes: string) => void;
   onDeleteImages: (arr: number[]) => void;
   getExperimentTypeColor: (type: string) => string;
+  isExperimentListLoading: boolean;
 }
 
 const RecordContext = createContext<RecordContextType | undefined>(undefined);
 
 export const RecordProvider = ({children}: {children: ReactNode}) => {
   const {t} = useTranslation();
+  const {trackExperimentVisit, trackDataRecording} = useExperimentTracker();
   const {
     experimentListData,
     getFieldList,
@@ -95,6 +102,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     getPlotList,
     plotListData,
     createTraitsRecord,
+    updateTraitsRecord,
     trraitsRecordData,
   } = useRecordApi();
   const navigation = useNavigation<NewRecordScreenProps['navigation']>();
@@ -120,7 +128,9 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const [experimentList, setExperimentList] = useState([]);
   const [fieldList, setFieldList] = useState([]);
   const [plotList, setPlotList] = useState([]);
-  const [unRecordedTraitList, setUnRecordedTraitList] = useState([]);
+  const [unRecordedTraitList, setUnRecordedTraitList] = useState<
+    {observationId: number | null; traitId: number; value: any}[]
+  >([]);
   const [selectedCrop, setSelectedCrop] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedExperiment, setSelectedExperiment] = useState<any>(null);
@@ -148,6 +158,11 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setSelectedExperiment(item);
     setSelectedField(null);
     setSelectedPlot(null);
+
+    // Track experiment visit
+    if (item && selectedCrop) {
+      trackExperimentVisit(item, selectedCrop);
+    }
   };
   const handleFieldSelect = (item: any) => {
     setSelectedField(item);
@@ -167,12 +182,6 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
       return;
     }
     ImagePicker.openCamera({cropping: true}).then(image => {
-      console.log('-/-/-/', {
-        image,
-        selectedPlot,
-        selectedField,
-        selectedExperiment,
-      });
       navigation.navigate('AddImage', {
         imageUrl: image.path,
         screen: 'NewRecord',
@@ -211,24 +220,24 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     }
     const paramsData: any = params;
     const {data} = experimentListData;
-    const cropList = Object.keys(data);
+    const cropList = Object.keys(data || {});
 
     let selectedCrop = null;
     if (paramsData?.QRData) {
       selectedCrop = paramsData.QRData.crop;
     } else {
-      selectedCrop = cropList[0];
+      selectedCrop = cropList[0] || null;
     }
-    const projectList = Object.keys(data[selectedCrop] || {});
+    const projectList = Object.keys(data?.[selectedCrop] || {});
     let selectedProject = null;
 
     if (paramsData?.QRData) {
       selectedProject = paramsData.QRData.project;
     } else {
-      selectedProject = projectList[0];
+      selectedProject = projectList[0] || null;
     }
 
-    const experimentList = data[selectedCrop][selectedProject] || [];
+    const experimentList = data?.[selectedCrop]?.[selectedProject] || [];
 
     setExperimentData(data);
     setCropList(cropList);
@@ -238,9 +247,9 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     setSelectedProject(selectedProject);
     if (paramsData?.QRData) {
       const data = paramsData?.QRData;
-      const experiment = experimentList?.find(
-        (item: any) => item?.id === data?.experiment_id,
-      );
+      const experiment = Array.isArray(experimentList)
+        ? experimentList.find((item: any) => item?.id === data?.experiment_id)
+        : null;
       if (experiment) {
         setSelectedCrop(data?.crop || '');
         setSelectedProject(data?.project || '');
@@ -252,8 +261,9 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const handleCropChange = useCallback(
     (option: string) => {
       setSelectedCrop(option);
-      const newProjectList = Object.keys(experimentData[option] || {});
-      const experimentList = experimentData[option][newProjectList[0]] || [];
+      const newProjectList = Object.keys(experimentData?.[option] || {});
+      const experimentList =
+        experimentData?.[option]?.[newProjectList[0]] || [];
       setProjectList(newProjectList);
       setSelectedProject(newProjectList[0] || '');
       setExperimentList(experimentList);
@@ -264,7 +274,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   const handleProjectChange = useCallback(
     (option: string) => {
       setSelectedProject(option);
-      const experimentList = experimentData[selectedCrop][option] || [];
+      const experimentList = experimentData?.[selectedCrop]?.[option] || [];
       setExperimentList(experimentList);
     },
     [experimentData, selectedCrop],
@@ -286,7 +296,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     }
 
     const {data} = fieldListData;
-    const fieldList = data?.locationList;
+    const fieldList = data?.locationList || [];
     setFieldList(fieldList);
     const paramsData: any = params;
     if (paramsData?.QRData) {
@@ -334,14 +344,20 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     traitId,
     observedValue,
   ) => {
-    setRecordData(prevData => ({
-      ...prevData,
-      [traitId]: {
-        observationId,
-        traitId,
-        observedValue: observedValue,
-      },
+    // 1️⃣ keep recordData up-to-date for payload
+    setRecordData(prev => ({
+      ...prev,
+      [traitId]: {observationId, traitId, observedValue},
     }));
+
+    // 2️⃣ also mirror into unRecordedTraitList.value so your inputs reflect the change
+    setUnRecordedTraitList(prevList =>
+      prevList.map(trait =>
+        trait.traitId === traitId
+          ? {...trait, observationId, value: observedValue}
+          : trait,
+      ),
+    );
   };
 
   useEffect(() => {
@@ -368,32 +384,82 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
 
   const onSaveRecord = async (hasNextPlot: boolean) => {
     setHasNextPlot(hasNextPlot);
+
+    // 1️⃣ build your phenotypes array (new OR edited)
+    const phenotypes = Object.values(recordData)
+      .filter(p => p.observedValue !== '')
+      .map(({observationId, traitId, observedValue}) => ({
+        observationId,
+        traitId,
+        observedValue,
+      }));
+
+    // 2️⃣ detect notes & prior state
+    const hasNotes = notes.trim().length > 0;
+    const hadNotesBefore = Boolean(selectedPlot?.notes?.trim());
+    // your GET should populate recordedTraitData when there are existing obs
+    const hadObsBefore = Boolean(selectedPlot?.recordedTraitData?.length);
+
+    // 3️⃣ common bits
+    const locationData = await validateLocationForAPI(true, true);
+    if (!locationData) {
+      return;
+    }
+
+    const {latitude, longitude} = locationData;
+    const now = formatDateTime(new Date());
     const headers = {'Content-Type': 'application/json'};
-    const imagesNameArr = images.map(item => getNameFromUrl(item.url));
-    const base64Promises = images.map(item => getBase64FromUrl(item.url));
-    const imagesBase64Arr = await Promise.all(base64Promises);
-    const {latitude, longitude} = await getCoordinates();
-    const imageData = images.map((image, index) => {
-      return {
-        url: image.imagePath ? image.url : null,
-        imagePath: image.imagePath,
-        imageName: imagesNameArr[index],
-        base64Data: imagesBase64Arr[index],
+
+    // Track data recording activity before saving
+    if (
+      (phenotypes.length > 0 || hasNotes) &&
+      selectedExperiment &&
+      selectedCrop
+    ) {
+      try {
+        await trackDataRecording(selectedExperiment, selectedCrop);
+      } catch (error) {}
+    }
+
+    // 4️⃣ PUT if overriding existing obs or overriding existing note
+    if (
+      (hadObsBefore && phenotypes.length > 0) ||
+      (hadNotesBefore && hasNotes)
+    ) {
+      const putPayload = {
+        date: now,
+        fieldExperimentId: selectedExperiment.id,
+        experimentType: selectedExperiment.experimentType,
+        phenotypes, // may be []
+        plotId: selectedPlot.id,
+        notes, // override old note
       };
-    });
-    const payload = {
-      plotId: selectedPlot?.id,
-      date: formatDateTime(new Date()),
-      fieldExperimentId: selectedExperiment?.id,
-      experimentType: selectedExperiment?.experimentType,
-      phenotypes: Object.values(recordData),
-      imageData: imageData,
-      notes,
-      applications: null,
-      lat: latitude,
-      long: longitude,
-    };
-    createTraitsRecord({payload, headers});
+      await updateTraitsRecord({payload: putPayload, headers});
+      Toast.success({message: 'Data Uploaded Successfully'});
+
+      // 5️⃣ POST when brand-new obs or brand-new note (and nothing to PUT)
+    } else if (
+      phenotypes.length > 0 || // new trait values
+      (hasNotes && !hadNotesBefore) // new notes
+    ) {
+      const postPayload = {
+        experimentType: selectedExperiment.experimentType,
+        fieldExperimentId: selectedExperiment.id,
+        observations: [
+          {
+            plotId: selectedPlot.id,
+            date: now,
+            lat: latitude,
+            long: longitude,
+            notes,
+            applications: null,
+            phenotypes,
+          },
+        ],
+      };
+      await createTraitsRecord({payload: postPayload, headers});
+      Toast.success({message: 'Data Uploaded Successfully'});
+    }
   };
 
   const onSaveNotes = (notes: string) => {
@@ -402,6 +468,7 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
   };
 
   const onDeleteImages = (arr: number[]) => {
+    if (!Array.isArray(images)) return;
     const newImages = images.filter((_, index) => !arr.includes(index));
     setImages(newImages);
   };
@@ -452,6 +519,8 @@ export const RecordProvider = ({children}: {children: ReactNode}) => {
     onSaveNotes,
     onDeleteImages,
     getExperimentTypeColor,
+    isExperimentListLoading:
+      experimentListData?.status_code === 200 ? false : true, // Add this line
   };
 
   return (

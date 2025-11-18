@@ -11,6 +11,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     height: '100%',
   },
+  contentLayout: {
+    gap: 25,
+    paddingBottom: 24,
+  },
+  sectionStack: {
+    gap: 25,
+  },
+  contentHidden: {
+    display: 'none',
+  },
   rowStyle: {
     display: 'flex',
     flexDirection: 'row',
@@ -19,7 +29,7 @@ const styles = StyleSheet.create({
   },
   takeNotesButton: {
     backgroundColor: 'white',
-    height: 50,
+    height: 68,
     width: '45%',
     borderRadius: 15,
     alignItems: 'center',
@@ -32,12 +42,12 @@ const styles = StyleSheet.create({
   },
   takeNotesText: {
     color: '#1A6DD2',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '500',
   },
   planVisitButton: {
     backgroundColor: '#1A6DD2',
-    height: 50,
+    height: 68,
     width: '45%',
     borderRadius: 15,
     alignItems: 'center',
@@ -47,7 +57,7 @@ const styles = StyleSheet.create({
   },
   planVisitText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '500',
   },
   modalOpen: {

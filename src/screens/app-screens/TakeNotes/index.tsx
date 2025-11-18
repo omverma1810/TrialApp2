@@ -1,18 +1,27 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Back } from '../../../assets/icons/svgs';
-import { Loader, SafeAreaView, StatusBar } from '../../../components';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
+import {
+  FlatList,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {Back, Adfilter} from '../../../assets/icons/svgs';
+import {Loader, SafeAreaView, StatusBar} from '../../../components';
 import Chip from '../../../components/Chip';
-import { URL } from '../../../constants/URLS';
-import { useApi } from '../../../hooks/useApi';
-import { LOCALES } from '../../../localization/constants';
+import {URL} from '../../../constants/URLS';
+import {useApi} from '../../../hooks/useApi';
+import {LOCALES} from '../../../localization/constants';
 import Toast from '../../../utilities/toast';
 // import {NotesScreenProps} from '../../../types/navigation/appTypes';
 import ExperimentCard from './ExperimentCard';
 import Filter from './Filter';
 import TakeNotesStyles from './TakeNotesStyle';
+import FilterCards from '../PlanVisit/Filter/FilterCards';
+import FilterModal from '../PlanVisit/FilterModal';
 interface Chip {
   id: number;
   ExperientName: string;
@@ -23,9 +32,12 @@ interface Chip {
 }
 
 const TakeNotes = ({navigation, route}: any) => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
+  const language = i18n.language;
   const [selectedChips, setSelectedChips] = useState<Chip[]>([]);
-  const [chipTitle, setChipTitle] = useState('Select an Experiment');
+  const [chipTitle, setChipTitle] = useState(
+    t(LOCALES.EXPERIMENT.LBL_SELECT_EXPERIMENT),
+  );
   const [defaultChipTitleField, setDefaultChipTitleField] = useState();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedField, setSelectedField] = useState<any>(null);
@@ -34,18 +46,25 @@ const TakeNotes = ({navigation, route}: any) => {
   const [inputText, setInputText] = useState('');
   const bottomSheetModalRef = useRef(null);
   const secondBottomSheetRef = useRef(null);
-  const {bottom} = useSafeAreaInsets();
+
+  // Ref to track when filters should be applied after state updates
+  const shouldApplyFiltersAfterUpdate = useRef(false);
   const [isEdit, setIsEdit] = useState(false);
   const [noteId, setNoteId] = useState(null);
   const [editNotesData, setEditNotesData] = useState<any>(null);
   const [text, setText] = useState('');
-  const [experimentData, setExperimentData] = useState<any>(null);
-  const [cropList, setCropList] = useState<string[]>([]);
-  const [projectList, setProjectList] = useState<string[]>([]);
-  const [experimentList, setExperimentList] = useState<any[]>([]);
-  const [selectedCrop, setSelectedCrop] = useState('');
-  const [selectedProject, setSelectedProject] = useState('');
-  const [staticSelectedProject, setStaticSelectedProject] = useState('');
+  // ─ New: filter & pagination state ─────────────────────────────────
+  interface CropOption {
+    label: string;
+    value: number;
+  }
+  const [cropOptions, setCropOptions] = useState<CropOption[]>([]);
+  const [cropList, setCropList] = useState<string[]>([]); // already here
+  const [selectedCrop, setSelectedCrop] = useState<CropOption | null>(null);
+  // Flattened experiments - no more project concept
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalExperiments, setTotalExperiments] = useState(0);
+  const [experimentList, setExperimentList] = useState<any[]>([]); // already here
   const [selectedExperiment, setSelectedExperiment] = useState<any>();
   const [selectedExperimentId, setSelectedExperimentId] = useState<any>();
   const [fields, setFields] = useState([]);
@@ -58,51 +77,6 @@ const TakeNotes = ({navigation, route}: any) => {
   const handleSelectedField = (field: any) => {
     setSelectedField(field);
   };
-
-  const handleCropChange = useCallback(
-    (option: string) => {
-      setSelectedCrop(option);
-      const newProjectList = Object.keys(experimentData[option] || {});
-      setProjectList(newProjectList);
-      setSelectedProject(newProjectList[0] || '');
-      setSelectedExperiment(null);
-      setSelectedExperimentId(null);
-      setFields([]);
-      setExperimentList(experimentData[option][newProjectList[0]] || []);
-      setResetExperiment(true);
-    },
-    [experimentData],
-  );
-
-  const handleProjectChange = useCallback(
-    (option: string) => {
-      setSelectedProject(option);
-      setExperimentList(experimentData[selectedCrop][option] || []);
-      setSelectedExperiment(null);
-      setSelectedField(null);
-      setChipTitle('Select an Experiment');
-      setResetExperiment(true);
-    },
-    [experimentData, selectedCrop],
-  );
-  useEffect(() => {
-    console.log('~~~~~~~~~~~~~', {selectedProject, projectList});
-  }, [selectedProject]);
-  useEffect(() => {
-    if (experimentData && Object.keys(experimentData).length > 0) {
-      const firstCrop = Object.keys(experimentData)[0];
-      const newProjectList = Object.keys(experimentData[firstCrop]);
-      if (!isEdit) {
-        setProjectList(newProjectList);
-        setSelectedProject(newProjectList[0] || '');
-        setExperimentList(experimentData[firstCrop][newProjectList[0]] || []);
-      }
-    } else {
-      setProjectList([]);
-      setSelectedProject('');
-      setExperimentList([]);
-    }
-  }, [experimentData, isEdit]);
 
   const handleFirstRightIconClick = () => {
     if (bottomSheetModalRef.current) {
@@ -117,25 +91,13 @@ const TakeNotes = ({navigation, route}: any) => {
   };
 
   const handleThirdRightIconClick = () => {
-    setModalVisible(true);
-  };
-
-  const handleExperimentSelect = (item: Chip) => {
-    setSelectedChips([item]);
-    setChipTitle('Select Field');
-    (bottomSheetModalRef.current as any).dismiss();
-  };
-
-  const handleFieldSelect = (item: Chip) => {
-    setSelectedField(item);
-    setChipTitle('Note Title');
-    setChipVisible(false);
-    setInputVisible(true);
-    (secondBottomSheetRef.current as any).dismiss();
+    if (!isEdit) {
+      setModalVisible(true);
+    }
   };
 
   const handleChipPress = () => {
-    // console.log('Chip pressed');
+    //
     if (selectedChips.length === 0) {
       handleFirstRightIconClick();
     } else if (!selectedField) {
@@ -144,106 +106,236 @@ const TakeNotes = ({navigation, route}: any) => {
       handleThirdRightIconClick();
     }
   };
-  const ListHeaderComponent = useMemo(
-    () => (
-      <View style={TakeNotesStyles.filter}>
-        <Filter
-          title={t(LOCALES.EXPERIMENT.LBL_CROP)}
-          options={cropList}
-          selectedOption={selectedCrop}
-          onPress={!isEdit ? handleCropChange : () => {}}
-        />
-        <Filter
-          title={t(LOCALES.EXPERIMENT.LBL_PROJECT)}
-          options={projectList}
-          selectedOption={selectedProject}
-          onPress={!isEdit ? handleProjectChange : () => {}}
-        />
-      </View>
-    ),
-    [cropList, projectList, selectedCrop, selectedProject],
-  );
 
-  const [
-    getExperimentList,
-    experimentListData,
-    isExperimentListLoading,
-    experimentListError,
-  ] = useApi({
-    url: URL.EXPERIMENT_LIST,
+  useEffect(() => {
+    if (!selectedExperiment) {
+      setChipTitle(t(LOCALES.EXPERIMENT.LBL_SELECT_EXPERIMENT));
+    }
+  }, [language, selectedExperiment, t]);
+
+  // new: fetch crop filters
+  const [getFilters, filtersData, isFiltersLoading] = useApi({
+    url: URL.GET_FILTERS,
     method: 'GET',
   });
 
+  // new: fetch filtered list by crop → returns { projects: { [project]: [exps] }, totalProjects }
+  const [postFiltered, postFilteredData, isPostLoading] = useApi({
+    url: URL.EXPERIMENT_LIST_FILTERED,
+    method: 'POST',
+  });
+
+  /**
+   * When a crop is tapped, fire FILTERED API
+   * to fetch experiments for that crop (flattened approach)
+   */
+  const handleCropSelection = (label: string) => {
+    const crop = cropOptions.find(c => c.label === label);
+    if (!crop) return;
+    // ─── Reset everything below Crop ─────────────────────
+    setExperimentList([]);
+    setSelectedExperiment(null);
+    setSelectedExperimentId(null);
+    setSelectedField(null);
+    setFields([]);
+    setText('');
+    setInputVisible(false);
+    setChipVisible(true);
+    setChipTitle(t(LOCALES.EXPERIMENT.LBL_SELECT_EXPERIMENT));
+    setSelectedCrop(crop);
+    setCurrentPage(1);
+    postFiltered({
+      payload: {
+        cropId: crop.value,
+        page: 1,
+        perPage: 10,
+        filters:
+          selectedFilters.Locations.length > 0
+            ? [
+                {
+                  key: 'locations',
+                  value: selectedFilters.Locations.map(locationLabel => {
+                    const location = experimentFilters.Locations.find(
+                      l => l.label === locationLabel,
+                    );
+                    return location?.value;
+                  }).filter(value => value !== undefined),
+                },
+              ]
+            : [],
+        searchKeyword: '',
+      },
+    });
+  };
+
+  // Process filtered experiments (flattened approach like Experiment screen)
   useEffect(() => {
-    getExperimentList();
-  }, []);
+    if (!postFilteredData?.projects) return;
+
+    // Flatten all experiments from all projects - following Experiment screen approach
+    const uniqueExpMap = new Map<number, any>();
+
+    Object.entries(postFilteredData.projects).forEach(
+      ([projectKey, experiments]) => {
+        if (Array.isArray(experiments)) {
+          experiments.forEach(exp => {
+            // Only add actual experiments (skip project entries)
+            if (
+              (exp.experimentName || exp.fieldExperimentName) &&
+              !uniqueExpMap.has(exp.id)
+            ) {
+              uniqueExpMap.set(exp.id, exp);
+            }
+          });
+        }
+      },
+    );
+
+    const flattenedExperiments = Array.from(uniqueExpMap.values());
+
+    if (currentPage === 1) {
+      // Replace experiments for first page
+      setExperimentList(flattenedExperiments);
+    } else {
+      // Append experiments for subsequent pages
+      setExperimentList(prev => [...prev, ...flattenedExperiments]);
+    }
+
+    setTotalExperiments(
+      postFilteredData.totalExperiments || flattenedExperiments.length,
+    );
+  }, [postFilteredData, currentPage]);
 
   const [getFields, getFieldsResponse] = useApi({
     url: URL.EXPERIMENT_DETAILS,
     method: 'GET',
   });
+
+  // 1) On mount, fetch crops
   useEffect(() => {
-    if (experimentListData?.status_code !== 200 || !experimentListData?.data) {
-      return;
-    }
+    getFilters();
+  }, [getFilters]);
 
-    const {data} = experimentListData;
-    const cropList = Object.keys(data);
-    const selectedCrop = cropList[0];
-    const projectList = Object.keys(data[selectedCrop] || {});
-    const selectedProject = projectList[0];
-    const experimentList = data[selectedCrop][selectedProject] || [];
-    setExperimentData(data);
-
-    setCropList(cropList);
-    console.log('params,', route.params);
-    if (route.params?.data && route.params?.data.id) {
+  // Detect edit mode from route params and seed initial state
+  useEffect(() => {
+    if (route?.params?.data) {
+      const data = route.params.data;
       setIsEdit(true);
-      let data_ = route.params?.data;
-      console.log({data_});
-      setEditNotesData(data_);
-      let {experiment_name} = data_;
-      for (let crops of cropList) {
-        if (crops in data) {
-          let project = data[crops];
-          for (let p in project) {
-            for (let field of project[p]) {
-              if (
-                field?.fieldExperimentName === experiment_name ||
-                (field?.experimentName === experiment_name &&
-                  field?.id === data_.experiment_id)
-              ) {
-                console.log('field', field);
-                console.log('data_', data_);
-                console.log('project', p);
-                setCropList([crops]);
-                setSelectedCrop(crops);
-                setProjectList([p]);
-                setSelectedProject(p);
-                setExperimentList(data[crops][p]);
-                setSelectedChips([experiment_name]);
-                setSelectedExperiment(experiment_name);
-                setSelectedFieldId(data_.field_id);
+      setNoteId(data.id ?? null);
+      setEditNotesData(data);
+      setText(data.content ?? '');
+      // Preseed ids for later selection once lists arrive
+      setSelectedExperimentId(data.experiment_id ?? undefined);
+      setSelectedFieldId(data.location ?? undefined);
+    }
+  }, [route?.params?.data]);
 
-                setSelectedExperimentId(data_?.experiment_id || field.id);
-                setNoteId(data_.id);
-                setText(data_.content);
-              }
-            }
-          }
+  // 2) When filters arrive, populate crop dropdown and set defaults, then trigger API
+  useEffect(() => {
+    if (filtersData?.status_code === 200 && filtersData.filters) {
+      const {Crops, Years, Seasons} = filtersData.filters;
+      setExperimentFilters(filtersData.filters);
+      setCropOptions(Crops.map((c: any) => ({label: c.label, value: c.value})));
+      setCropList(Crops.map((c: any) => c.label));
+
+      if (isEdit && editNotesData) {
+        // Prefill from note for edit mode
+        const cropOption =
+          Crops.find((c: any) => c.label === editNotesData.crop_name) ||
+          Crops[0];
+        const yearOption =
+          Years.find(
+            (y: any) => String(y.label) === String(editNotesData.year),
+          ) || Years[0];
+        const seasonOption =
+          Seasons.find((s: any) => s.label === editNotesData.season) ||
+          Seasons[0];
+
+        setSelectedFilters({
+          Seasons: seasonOption ? [seasonOption.label] : [],
+          Locations: [],
+          Years: yearOption ? [yearOption.label] : [],
+          Crops: cropOption ? [cropOption.label] : [],
+        });
+        if (yearOption) setSelectedYear(yearOption);
+        if (seasonOption) setSelectedSeason(seasonOption);
+        if (cropOption)
+          setSelectedCrop({label: cropOption.label, value: cropOption.value});
+
+        const filters = [] as any[];
+        if (yearOption) filters.push({key: 'years', value: [yearOption.value]});
+        if (seasonOption)
+          filters.push({key: 'seasons', value: [seasonOption.value]});
+
+        if (cropOption) {
+          postFiltered({
+            payload: {
+              cropId: cropOption.value,
+              page: 1,
+              perPage: 10,
+              filters,
+              searchKeyword: '',
+            },
+            headers: {'Content-Type': 'application/json'},
+          });
+        }
+      } else {
+        // Default initial selections for take-notes
+        const defaultSelectedFilters = {
+          Seasons: Seasons.length > 0 ? [Seasons[0].label] : [],
+          Locations: [],
+          Years: Years.length > 0 ? [Years[0].label] : [],
+          Crops: Crops.length > 0 ? [Crops[0].label] : [],
+        };
+        setSelectedFilters(defaultSelectedFilters);
+
+        if (Years.length > 0) setSelectedYear(Years[0]);
+        if (Seasons.length > 0) setSelectedSeason(Seasons[0]);
+        if (Crops.length > 0) setSelectedCrop(Crops[0]);
+
+        const filters = [] as any[];
+        if (Years.length > 0)
+          filters.push({key: 'years', value: [Years[0].value]});
+        if (Seasons.length > 0)
+          filters.push({key: 'seasons', value: [Seasons[0].value]});
+
+        if (Crops.length > 0) {
+          postFiltered({
+            payload: {
+              cropId: Crops[0].value,
+              page: 1,
+              perPage: 10,
+              filters,
+              searchKeyword: '',
+            },
+            headers: {'Content-Type': 'application/json'},
+          });
         }
       }
-    } else {
-      console.log('test');
-      setExperimentList(experimentList);
-      setSelectedCrop(selectedCrop);
-      setSelectedProject(selectedProject);
     }
-  }, [experimentListData]);
+  }, [filtersData, postFiltered, isEdit, editNotesData]);
+
+  // 3) Auto‐select first crop
+  useEffect(() => {
+    if (!isEdit && cropList.length && !selectedCrop) {
+      handleCropSelection(cropList[0]);
+    }
+  }, [cropList, isEdit, selectedCrop]);
+
+  // When experiments are fetched in edit mode, select the target experiment
+  useEffect(() => {
+    if (isEdit && selectedExperimentId && experimentList?.length) {
+      const exp = experimentList.find(exp => exp.id === selectedExperimentId);
+      if (exp) {
+        setSelectedExperiment(exp);
+      }
+    }
+  }, [isEdit, selectedExperimentId, experimentList]);
+
   const ListEmptyComponent = useMemo(
     () => (
       <View style={TakeNotesStyles.emptyContainer}>
-        {isExperimentListLoading ? (
+        {isFiltersLoading || (isPostLoading && currentPage === 1) ? (
           <Loader />
         ) : (
           <Text style={TakeNotesStyles.emptyText}>
@@ -252,7 +344,7 @@ const TakeNotes = ({navigation, route}: any) => {
         )}
       </View>
     ),
-    [isExperimentListLoading],
+    [isFiltersLoading, isPostLoading, currentPage, t],
   );
   const [payload, setPayload] = useState({
     field_id: '',
@@ -266,9 +358,9 @@ const TakeNotes = ({navigation, route}: any) => {
   });
 
   const onTakeNotes = async () => {
-    if (!text) {
+    if (!selectedExperiment || !selectedField || !text.trim()) {
       Toast.error({
-        message: 'Please select all fields before Taking a Note',
+        message: t(LOCALES.TAKE_NOTES.MSG_SELECT_FIELDS),
       });
       return;
     }
@@ -279,11 +371,9 @@ const TakeNotes = ({navigation, route}: any) => {
       content: text,
     };
     await takeNotes({payload: newData});
-    console.log('payload', payload);
   };
 
   useEffect(() => {
-    console.log({takeNotesResponse});
     if (
       takeNotesResponse &&
       (takeNotesResponse.status_code == 201 ||
@@ -291,30 +381,30 @@ const TakeNotes = ({navigation, route}: any) => {
     ) {
       if (isEdit) {
         Toast.success({
-          message: 'Notes Updated Sucessfully',
+          message: t(LOCALES.TAKE_NOTES.MSG_NOTE_UPDATED),
         });
         // route.params?.fetchNotes();
       } else {
         Toast.success({
-          message: 'Notes Created Sucessfully',
+          message: t(LOCALES.TAKE_NOTES.MSG_NOTE_CREATED),
         });
       }
       navigation.navigate('Home', {refresh: true});
     } else {
       if (takeNotesResponse) {
         Toast.error({
-          message: 'Something Went Wrong',
+          message:
+            t(LOCALES.TAKE_NOTES.MSG_ERROR) ||
+            t(LOCALES.COMMON.MSG_GENERIC_ERROR),
         });
       }
     }
-  }, [takeNotesResponse]);
+  }, [takeNotesResponse, t, navigation, isEdit]);
 
   useEffect(() => {
     const experimentId = selectedExperiment?.id || selectedExperimentId;
-    console.log({selectedExperiment});
 
     let experimentType = 'line';
-    console.log(editNotesData?.trial_type);
     if (isEdit && editNotesData?.trial_type) {
       experimentType = editNotesData.trial_type;
     } else if (selectedExperiment?.experimentType) {
@@ -331,49 +421,358 @@ const TakeNotes = ({navigation, route}: any) => {
 
   useEffect(() => {
     if (getFieldsResponse && getFieldsResponse.status_code == 200) {
-      if (isEdit) {
-        let {locationList} = getFieldsResponse.data;
-        console.log(
-          'selectedFieldId',
-          selectedFieldId,
-          'landVillageId',
-          locationList.map((location: any) => location.landVillageId),
-        );
+      const {locationList} = getFieldsResponse.data;
+      // Always set fields list so UI can render options
+      setFields(locationList || []);
 
-        let selectedField =
-          locationList &&
-          locationList.find((location: any) => {
-            if (location.landVillageId === selectedFieldId) {
-              return location;
-            }
+      if (isEdit && locationList?.length) {
+        let selectedField = locationList.find((location: any) => {
+          return String(location?.landVillageId) === String(selectedFieldId);
+        });
+        // Fallback: try to match by field label if id comparison fails
+        if (!selectedField && editNotesData?.fieldLabel) {
+          selectedField = locationList.find((location: any) => {
+            return (
+              String(location?.location?.fieldLabel) ===
+                String(editNotesData?.fieldLabel) ||
+              String(location?.location?.villageName) ===
+                String(editNotesData?.fieldLabel)
+            );
           });
-        console.log(
-          'selectedFieldId',
-          selectedFieldId,
-          'landVillageId',
-          selectedField,
-        );
-        const field_name = selectedField?.location.villageName;
-        console.log('selectedField', field_name);
+        }
+        const field_name = selectedField?.location?.villageName;
         if (selectedField) {
           setDefaultChipTitleField(field_name);
           handleSelectedField(selectedField);
         }
-        setProjectList([selectedProject]);
-        setProjectList([selectedProject]);
-        setSelectedProject(selectedProject);
-      } else {
-        setFields(getFieldsResponse.data.locationList);
       }
     }
-  }, [getFieldsResponse]);
+  }, [getFieldsResponse, selectedFieldId, editNotesData, isEdit]);
 
+  useEffect(() => {}, []);
+
+  // Add PlanVisit-style filter state
+  interface FilterOptionItem {
+    label: string;
+    value: any;
+  }
+  interface FilterOptions {
+    Years: FilterOptionItem[];
+    Crops: FilterOptionItem[];
+    Seasons: FilterOptionItem[];
+    Locations: FilterOptionItem[];
+  }
+  const [experimentFilters, setExperimentFilters] = useState<FilterOptions>({
+    Years: [],
+    Crops: [],
+    Seasons: [],
+    Locations: [],
+  });
+  const [selectedYear, setSelectedYear] = useState<any>(null);
+  const [selectedSeason, setSelectedSeason] = useState<any>(null);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<{
+    Seasons: string[];
+    Locations: string[];
+    Years: string[];
+    Crops: string[];
+  }>({
+    Seasons: [],
+    Locations: [],
+    Years: [],
+    Crops: [],
+  });
+
+  // useEffect to apply filters when flag is set and state has updated
   useEffect(() => {
-    console.log('fields', fields, selectedField);
-  }, []);
+    if (shouldApplyFiltersAfterUpdate.current) {
+      shouldApplyFiltersAfterUpdate.current = false;
+
+      // Build filters payload from selectedFilters
+      const filters = buildFiltersPayload();
+      setCurrentPage(1);
+      setExperimentList([]);
+      setSelectedExperiment(null);
+      setSelectedField(null);
+      setResetExperiment(true);
+
+      // Use the first selected crop for cropId (if any)
+      const cropLabel = selectedFilters.Crops[0];
+      const cropObj = experimentFilters.Crops.find(c => c.label === cropLabel);
+
+      if (cropObj) {
+        postFiltered({
+          payload: {
+            cropId: cropObj.value,
+            page: 1,
+            perPage: 10,
+            filters,
+            searchKeyword: '',
+          },
+          headers: {'Content-Type': 'application/json'},
+        });
+      }
+    }
+  }, [selectedFilters]);
+
+  // --- Handler for FilterModal (batched updates) ---
+  const handleFilterUpdate = (
+    filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
+    values: string[],
+  ) => {
+    // Restrict crop selection to only one
+    if (filterType === 'Crops' && values.length > 1) {
+      Toast.error({message: t(LOCALES.COMMON.MSG_SELECT_SINGLE_CROP)});
+      return;
+    }
+
+    // Update state using functional update
+    setSelectedFilters(prev => {
+      const newFilters = {...prev, [filterType]: values};
+      return newFilters;
+    });
+
+    // DON'T trigger API call here - let FilterModal's Apply button handle it
+  };
+
+  // --- Handler for FilterCards (immediate API call) ---
+  const handleFilterCardsUpdate = (
+    filterType: 'Seasons' | 'Locations' | 'Years' | 'Crops',
+    values: string[],
+  ) => {
+    let appliedValues = values;
+    // Restrict crop selection to only one
+    if (filterType === 'Crops' && values.length > 1) {
+      Toast.error({message: t(LOCALES.COMMON.MSG_SELECT_SINGLE_CROP)});
+      appliedValues = [values[0]];
+    }
+
+    const newFilters = {...selectedFilters, [filterType]: appliedValues};
+
+    // Update state
+    setSelectedFilters(newFilters);
+
+    // Trigger immediate API call
+    setTimeout(() => {
+      const cropLabel = newFilters.Crops[0];
+      const cropObj = experimentFilters.Crops.find(c => c.label === cropLabel);
+
+      if (cropObj) {
+        const filters = [];
+
+        if (newFilters.Years.length > 0) {
+          const yearValues = newFilters.Years.map(yearLabel => {
+            const year = experimentFilters.Years.find(
+              y => y.label === yearLabel,
+            );
+            return year?.value;
+          }).filter(value => value !== undefined);
+          if (yearValues.length > 0) {
+            filters.push({key: 'years', value: yearValues});
+          }
+        }
+
+        if (newFilters.Seasons.length > 0) {
+          const seasonValues = newFilters.Seasons.map(seasonLabel => {
+            const season = experimentFilters.Seasons.find(
+              s => s.label === seasonLabel,
+            );
+            return season?.value;
+          }).filter(value => value !== undefined);
+          if (seasonValues.length > 0) {
+            filters.push({key: 'seasons', value: seasonValues});
+          }
+        }
+
+        if (newFilters.Locations.length > 0) {
+          // Locations are stored as value strings, convert to numbers
+          const locationValues = newFilters.Locations.map(locationValueStr => {
+            return !isNaN(Number(locationValueStr))
+              ? Number(locationValueStr)
+              : locationValueStr;
+          }).filter(value => value !== undefined);
+          if (locationValues.length > 0) {
+            filters.push({key: 'locations', value: locationValues});
+          }
+        }
+
+        setCurrentPage(1);
+        setExperimentList([]);
+        setSelectedExperiment(null);
+        setSelectedField(null);
+        setResetExperiment(true);
+
+        postFiltered({
+          payload: {
+            cropId: cropObj.value,
+            page: 1,
+            perPage: 10,
+            filters,
+            searchKeyword: '',
+          },
+          headers: {'Content-Type': 'application/json'},
+        });
+      }
+    }, 0);
+  };
+
+  const buildFiltersPayload = () => {
+    const fl = [];
+    if (selectedFilters.Years.length) {
+      // Convert year labels to values for API
+      const yearValues = selectedFilters.Years.map(yearLabel => {
+        const year = experimentFilters.Years.find(y => y.label === yearLabel);
+        return year?.value;
+      }).filter(value => value !== undefined);
+      if (yearValues.length > 0) {
+        fl.push({key: 'years', value: yearValues});
+      }
+    }
+    if (selectedFilters.Seasons.length) {
+      // Convert season labels to values for API
+      const seasonValues = selectedFilters.Seasons.map(seasonLabel => {
+        const season = experimentFilters.Seasons.find(
+          s => s.label === seasonLabel,
+        );
+        return season?.value;
+      }).filter(value => value !== undefined);
+      if (seasonValues.length > 0) {
+        fl.push({key: 'seasons', value: seasonValues});
+      }
+    }
+    if (selectedFilters.Locations.length) {
+      // Locations are stored as value strings, convert to numbers
+      const locationValues = selectedFilters.Locations.map(locationValueStr => {
+        return !isNaN(Number(locationValueStr))
+          ? Number(locationValueStr)
+          : locationValueStr;
+      }).filter(value => value !== undefined);
+      if (locationValues.length > 0) {
+        fl.push({key: 'locations', value: locationValues});
+      }
+    }
+    // Note: crops are handled via cropId field, not in filters array
+    return fl;
+  };
+
+  const handleFilterApply = () => {
+    // Set flag to apply filters after state updates complete
+    shouldApplyFiltersAfterUpdate.current = true;
+  };
+
+  const handleFilterClearAll = () => {
+    // Reset to default selections (first index of each)
+    const defaultSelectedFilters = {
+      Seasons:
+        experimentFilters.Seasons.length > 0
+          ? [experimentFilters.Seasons[0].label]
+          : [],
+      Locations: [],
+      Years:
+        experimentFilters.Years.length > 0
+          ? [experimentFilters.Years[0].label]
+          : [],
+      Crops:
+        experimentFilters.Crops.length > 0
+          ? [experimentFilters.Crops[0].label]
+          : [],
+    };
+    setSelectedFilters(defaultSelectedFilters);
+    // Reset individual selected options
+    if (experimentFilters.Years.length > 0) {
+      setSelectedYear(experimentFilters.Years[0]);
+    }
+    if (experimentFilters.Seasons.length > 0) {
+      setSelectedSeason(experimentFilters.Seasons[0]);
+    }
+    if (experimentFilters.Crops.length > 0) {
+      setSelectedCrop(experimentFilters.Crops[0]);
+    }
+    // Clear downstream selections
+    setExperimentList([]);
+    setSelectedExperiment(null);
+    setSelectedField(null);
+    setResetExperiment(true);
+    // Fetch data with default filters
+    if (experimentFilters.Crops.length > 0) {
+      const filters = [];
+      if (experimentFilters.Years.length > 0) {
+        filters.push({key: 'years', value: [experimentFilters.Years[0].value]});
+      }
+      if (experimentFilters.Seasons.length > 0) {
+        filters.push({
+          key: 'seasons',
+          value: [experimentFilters.Seasons[0].value],
+        });
+      }
+      postFiltered({
+        payload: {
+          cropId: experimentFilters.Crops[0].value,
+          page: 1,
+          perPage: 10,
+          filters,
+          searchKeyword: '',
+        },
+        headers: {'Content-Type': 'application/json'},
+      });
+    }
+  };
+
+  // Replace ListHeaderComponent with PlanVisit-style FilterCards
+  const ListHeaderComponent = useMemo(
+    () => (
+      <View style={TakeNotesStyles.filter}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%',
+          }}>
+          <View>
+            <FilterCards
+              yearOptions={experimentFilters.Years.filter(
+                y => !isNaN(Number(y.value)),
+              ).map(y => ({label: Number(y.label), value: Number(y.value)}))}
+              seasonOptions={experimentFilters.Seasons.map(s => ({
+                label: s.label,
+                value: s.value,
+              }))}
+              cropOptions={experimentFilters.Crops.filter(
+                c => !isNaN(Number(c.value)),
+              ).map(c => ({label: c.label, value: Number(c.value)}))}
+              selectedYears={selectedFilters.Years}
+              selectedSeasons={selectedFilters.Seasons}
+              selectedCrops={selectedFilters.Crops}
+              isDisabled={isEdit}
+              disabledMessage={t(LOCALES.TAKE_NOTES.MSG_EDITING_RESTRICTED)}
+              onSelectYear={yearLabels => {
+                if (!isEdit) handleFilterCardsUpdate('Years', yearLabels);
+              }}
+              onSelectSeason={seasonLabels => {
+                if (!isEdit) handleFilterCardsUpdate('Seasons', seasonLabels);
+              }}
+              onSelectCrop={cropLabels => {
+                if (!isEdit) handleFilterCardsUpdate('Crops', cropLabels);
+              }}
+            />
+          </View>
+          <Pressable
+            onPress={() => {
+              if (!isEdit) setIsFilterModalVisible(true);
+            }}>
+            <Adfilter />
+          </Pressable>
+        </View>
+      </View>
+    ),
+    [experimentFilters, selectedFilters, handleFilterCardsUpdate, isEdit, t],
+  );
 
   return (
-    <SafeAreaView edges={['top']}>
+    <SafeAreaView
+      edges={['top']}
+      parentStyle={isFilterModalVisible && TakeNotesStyles.modalOpen}>
       <StatusBar />
       <View
         style={{
@@ -385,7 +784,9 @@ const TakeNotes = ({navigation, route}: any) => {
           <Back width={24} height={24} />
         </TouchableOpacity>
         <Text style={TakeNotesStyles.ScreenTitle}>
-          {isEdit ? 'Edit Notes' : 'Take Notes'}
+          {isEdit
+            ? t(LOCALES.TAKE_NOTES.TITLE_EDIT_NOTES)
+            : t(LOCALES.TAKE_NOTES.TITLE_TAKE_NOTES)}
         </Text>
       </View>
       <View style={TakeNotesStyles.container}>
@@ -396,13 +797,10 @@ const TakeNotes = ({navigation, route}: any) => {
             experimentList?.length === 0
               ? {
                   flexGrow: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
                   height: '100%',
                   width: '100%',
-                  paddingHorizontal: 20,
                 }
-              : {paddingBottom: 10, height: 105}
+              : {}
           }
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderComponent}
@@ -410,7 +808,7 @@ const TakeNotes = ({navigation, route}: any) => {
           keyExtractor={(_, index: any) => index.toString()}
           ListEmptyComponent={ListEmptyComponent}
         />
-        {selectedCrop && selectedProject && (
+        {selectedCrop && (
           <ExperimentCard
             data={experimentList}
             name="experiment"
@@ -421,12 +819,12 @@ const TakeNotes = ({navigation, route}: any) => {
             isEdit={isEdit}
           />
         )}
-        {selectedCrop && selectedProject && selectedExperiment && (
+        {selectedCrop && selectedExperiment && (
           <ExperimentCard
             data={fields}
             name={'field'}
             onExperimentSelect={!isEdit ? handleSelectedExperiment : () => {}}
-            onFieldSelect={handleSelectedField}
+            onFieldSelect={!isEdit ? handleSelectedField : () => {}}
             selectedItem={selectedField}
             isEdit={isEdit}
           />
@@ -438,7 +836,7 @@ const TakeNotes = ({navigation, route}: any) => {
               <TextInput
                 style={TakeNotesStyles.inputText}
                 multiline={true}
-                placeholder="Notes"
+                placeholder={t(LOCALES.TAKE_NOTES.PLACEHOLDER_NOTES)}
                 value={text}
                 onChangeText={setText}
                 placeholderTextColor="#636363"
@@ -448,11 +846,31 @@ const TakeNotes = ({navigation, route}: any) => {
               style={TakeNotesStyles.submitButton}
               onPress={onTakeNotes}>
               <Text style={TakeNotesStyles.submitButtonText}>
-                {isEdit ? 'Update Note' : 'Save Note'}
+                {isEdit
+                  ? t(LOCALES.TAKE_NOTES.BTN_UPDATE_NOTE)
+                  : t(LOCALES.TAKE_NOTES.BTN_SAVE_NOTE)}
               </Text>
             </TouchableOpacity>
           </View>
         )}
+
+        <FilterModal
+          isVisible={isFilterModalVisible && !isEdit}
+          onClose={() => setIsFilterModalVisible(false)}
+          onApply={handleFilterApply}
+          onClearAll={handleFilterClearAll}
+          onFilterSelect={handleFilterUpdate}
+          filterData={{
+            Years: experimentFilters.Years,
+            Seasons: experimentFilters.Seasons,
+            Crops: experimentFilters.Crops,
+            Locations: experimentFilters.Locations,
+          }}
+          selectedFilters={{
+            ...selectedFilters,
+            Years: selectedFilters.Years.map(String),
+          }}
+        />
       </View>
     </SafeAreaView>
   );

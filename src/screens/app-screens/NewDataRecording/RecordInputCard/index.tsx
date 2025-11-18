@@ -1,97 +1,106 @@
 import React from 'react';
-import {View, Text, TextInput, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, Dimensions, PixelRatio} from 'react-native';
+import {NumPad} from '@umit-turk/react-native-num-pad';
 
 interface RecordedInputCardProps {
-  traitName: string;
-  uom: string;
-  value?: string;
-  onValueChange?: (value: string) => void;
-  keyboardType?: 'default' | 'numeric';
+  traitName?: string;
+  value: string;
+  onValueChange: (value: string) => void;
+  keyboardType?: string;
+  uom?: string;
 }
 
-const RecordedInputCard = ({
-  traitName,
-  uom,
-  value = '',
-  onValueChange,
-}: RecordedInputCardProps) => {
+const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
+const pixelDensity = PixelRatio.get(); // e.g., ~3.0 for Galaxy S21
+
+// Responsive scaling utility (similar to scaleFont)
+const scaleSize = (size: number) => {
+  const baseWidth = 375; // iPhone 11 width baseline
+  const scale = screenWidth / baseWidth;
+  return Math.round(PixelRatio.roundToNearestPixel(size * scale));
+};
+
+const RecordedInputCard = ({value, onValueChange}: RecordedInputCardProps) => {
+  const handleKeyPress = (key: string) => {
+    onValueChange(value + key);
+  };
+
+  const handleDelete = () => {
+    onValueChange(value.slice(0, -1));
+  };
+
+  // Dynamically determine key and font size based on screen width + density
+  const keySize = scaleSize(70); // Dynamically scales with screen size
+  const fontSize = scaleSize(20); // Adjusts for readability
+  const spacing = scaleSize(4);
+  const containerPadding = scaleSize(12);
+
+  const maxNumpadHeight = screenHeight * 0.35;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.inputContainer}>
-        <View style={styles.labelContainer}>
-          <Text style={styles.traitName}>{traitName}</Text>
-          <Text style={styles.uom}>{uom}</Text>
-        </View>
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onValueChange}
-          keyboardType="numeric"
-          placeholder="Enter value"
-          placeholderTextColor="#A0A0A0"
+    <View
+      style={[
+        styles.container,
+        {
+          paddingHorizontal: containerPadding,
+          paddingVertical: containerPadding / 2,
+          maxHeight: maxNumpadHeight,
+        },
+      ]}>
+      <View style={styles.numpadWrapper}>
+        <NumPad
+          onPress={(key: string) => {
+            if (key === 'delete' || key === '<' || key === '⌫') {
+              handleDelete();
+            } else {
+              handleKeyPress(key);
+            }
+          }}
+          buttonTextStyle={{...styles.keyText, fontSize}}
+          buttonStyle={{
+            ...styles.key,
+            width: keySize,
+            height: keySize,
+            margin: spacing,
+            borderRadius: keySize * 0.15,
+          }}
         />
       </View>
-      {/* <Text style={styles.helperText}>
-        Use values separated by * to get the average.
-      </Text> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 16,
-    marginVertical: 8,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    top: -12,
+  },
+  numpadWrapper: {
+    width: '100%',
+    maxWidth: 360, // limit max width on tablets
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  key: {
+    backgroundColor: '#EDEDED',
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  labelContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginRight: 12,
-  },
-  traitName: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333333',
-  },
-  uom: {
-    fontSize: 14,
-    color: '#666666',
-    marginLeft: 8,
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    color: '#333333',
-    backgroundColor: '#F8F8F8',
-  },
-  helperText: {
-    fontSize: 12,
-    color: '#888888',
-    marginTop: 4,
+  keyText: {
+    fontWeight: '600',
+    color: '#000',
+    textAlign: 'center',
   },
 });
 

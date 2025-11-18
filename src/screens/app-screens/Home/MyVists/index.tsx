@@ -1,5 +1,6 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {View, Text} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {useApi} from '../../../../hooks/useApi';
 import MyVisitStyles from './MyVistStyles';
 import UpcomingVisits from '../../../../components/Upcomingvisit';
@@ -9,10 +10,22 @@ import Toast from '../../../../utilities/toast';
 import {useIsFocused} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import {LOCALES} from '../../../../localization/constants';
 
 dayjs.extend(isSameOrAfter);
 
-const MyVisits = ({navigation, refresh}: any) => {
+type MyVisitsProps = {
+  navigation: any;
+  refresh: any;
+  onLoadingStateChange?: (isInitialLoading: boolean) => void;
+};
+
+const MyVisits = ({
+  navigation,
+  refresh,
+  onLoadingStateChange,
+}: MyVisitsProps) => {
+  const {t} = useTranslation();
   const [visits, setVisits] = useState<{id: number; date: string}[]>([]);
   const [upcomingVisits, setUpcomingVisits] = useState<
     {id: number; date: string}[]
@@ -20,14 +33,20 @@ const MyVisits = ({navigation, refresh}: any) => {
   const [previousVisits, setPreviousVisits] = useState<
     {id: number; date: string}[]
   >([]);
-  const [fetchVisits, fetchVisitsResponse] = useApi({
+  const [fetchVisits, fetchVisitsResponse, isLoading] = useApi({
     url: URL.VISITS,
     method: 'GET',
   });
   const isFocused = useIsFocused();
+  const initialLoadTriggeredRef = useRef(false);
+
+  // Function to refresh visits data
+  const refreshVisitsData = useCallback(() => {
+    fetchVisits();
+  }, [fetchVisits]);
 
   const categorizeVisits = (visits: any[]) => {
-    const currentDate = dayjs().startOf('day'); // Start of today
+    const currentDate = dayjs().startOf('day');
     const upcoming = visits.filter(visit =>
       dayjs(visit.date).isSameOrAfter(currentDate),
     );
@@ -39,9 +58,13 @@ const MyVisits = ({navigation, refresh}: any) => {
     setPreviousVisits(previous);
   };
 
+  // Refresh only when screen comes into focus
   useEffect(() => {
-    isFocused && fetchVisits();
-  }, [isFocused]);
+    if (isFocused) {
+      initialLoadTriggeredRef.current = true;
+      fetchVisits();
+    }
+  }, [isFocused, fetchVisits]);
 
   useEffect(() => {
     if (fetchVisitsResponse && fetchVisitsResponse.status_code === 200) {
@@ -49,15 +72,19 @@ const MyVisits = ({navigation, refresh}: any) => {
       categorizeVisits(fetchVisitsResponse.data);
     } else if (fetchVisitsResponse) {
       Toast.error({
-        message: 'Failed to fetch visits',
+        message: t(LOCALES.VISITS.MSG_FETCH_FAILED),
       });
     }
-  }, [fetchVisitsResponse]);
+  }, [fetchVisitsResponse, t]);
 
   const handleDeletevisit = (id: any) => {
     const updatedVisits = visits.filter(visit => visit.id !== id);
     setVisits(updatedVisits);
     categorizeVisits(updatedVisits);
+    // Refresh data from server after successful delete
+    setTimeout(() => {
+      refreshVisitsData();
+    }, 500);
   };
 
   useFocusEffect(
@@ -69,20 +96,88 @@ const MyVisits = ({navigation, refresh}: any) => {
     }, [refresh]),
   );
 
+  // Listen for navigation params that indicate a visit operation was completed
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      const {visitAdded, visitUpdated, visitDeleted} =
+        navigation
+          .getState()
+          ?.routes?.find((route: any) => route.name === 'MyVisits')?.params ||
+        {};
+
+      if (visitAdded || visitUpdated || visitDeleted) {
+        refreshVisitsData();
+        // Clear the params to avoid repeated refreshes
+        navigation.setParams({
+          visitAdded: false,
+          visitUpdated: false,
+          visitDeleted: false,
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, refreshVisitsData]);
+
+  // Listen for global events that indicate a visit was updated
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Always refresh when coming back to this screen to ensure latest data
+      refreshVisitsData();
+    });
+
+    return unsubscribe;
+  }, [navigation, refreshVisitsData]);
+
   const handleUpdateVisit = (updatedVisit: any) => {
     const updatedVisits = visits.map(visit =>
       visit.id === updatedVisit.id ? updatedVisit : visit,
     );
     setVisits(updatedVisits);
     categorizeVisits(updatedVisits);
+    // Immediate refresh after update
+    refreshVisitsData();
   };
+
+  // Enhanced refresh function that can be called from child components
+  const forceRefresh = useCallback(() => {
+    refreshVisitsData();
+  }, [refreshVisitsData]);
+
+  useEffect(() => {
+    if (!onLoadingStateChange) {
+      return;
+    }
+
+    if (!initialLoadTriggeredRef.current && !isLoading) {
+      return;
+    }
+
+    const hasAnyVisits =
+      visits.length > 0 ||
+      upcomingVisits.length > 0 ||
+      previousVisits.length > 0;
+
+    if (isLoading && !hasAnyVisits) {
+      onLoadingStateChange(true);
+      return;
+    }
+
+    onLoadingStateChange(false);
+  }, [
+    isLoading,
+    visits.length,
+    upcomingVisits.length,
+    previousVisits.length,
+    onLoadingStateChange,
+  ]);
 
   return (
     <View>
       {upcomingVisits.length > 0 && (
         <View style={MyVisitStyles.upcomingVisitsContainer}>
           <Text style={MyVisitStyles.upcomingVisitsTitle}>
-            My Upcoming Visits
+            {t(LOCALES.VISITS.TITLE_UPCOMING_VISITS)}
           </Text>
           {upcomingVisits.map(visit => (
             <UpcomingVisits
@@ -91,7 +186,7 @@ const MyVisits = ({navigation, refresh}: any) => {
               onDelete={handleDeletevisit}
               onUpdateVisit={handleUpdateVisit}
               navigation={navigation}
-              refreshVisits={fetchVisits}
+              refreshVisits={forceRefresh}
             />
           ))}
         </View>
@@ -100,7 +195,7 @@ const MyVisits = ({navigation, refresh}: any) => {
       {previousVisits.length > 0 && (
         <View style={MyVisitStyles.upcomingVisitsContainer}>
           <Text style={MyVisitStyles.upcomingVisitsTitle}>
-            My Previous Visits
+            {t(LOCALES.VISITS.TITLE_PREVIOUS_VISITS)}
           </Text>
           {previousVisits.map(visit => (
             <UpcomingVisits
@@ -109,7 +204,7 @@ const MyVisits = ({navigation, refresh}: any) => {
               onDelete={handleDeletevisit}
               onUpdateVisit={handleUpdateVisit}
               navigation={navigation}
-              refreshVisits={fetchVisits}
+              refreshVisits={forceRefresh}
             />
           ))}
         </View>

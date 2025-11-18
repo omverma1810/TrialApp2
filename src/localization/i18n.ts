@@ -3,11 +3,13 @@ import {initReactI18next} from 'react-i18next';
 
 import en from './translation/en';
 import gu from './translation/gu';
+import hi from './translation/hi';
 import {languageDetectorPlugin} from '../utilities/languageDetectorPlugin';
 
 const LANGUAGES = {
   en,
   gu,
+  hi,
 };
 
 i18n

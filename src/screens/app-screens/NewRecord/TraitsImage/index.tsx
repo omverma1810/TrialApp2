@@ -49,7 +49,6 @@ const TraitsImage = ({
           }
         });
       } else {
-        console.log({selectedImage_: image});
         setIsImagePreviewVisible(true);
         setSelectedImageUrl(image);
       }
@@ -79,7 +78,7 @@ const TraitsImage = ({
               {images.map((image, index) => (
                 <Pressable
                   key={index}
-                  onPress={() => handleImagePress(index, image)}
+                  onPress={() => handleImagePress(index, image.url)}
                   onLongPress={() => handleLongPressImage(index)}>
                   <ImageWithLoader uri={image.url} style={styles.image} />
                   {selectedImageList?.find(i => i?.id === index) && (

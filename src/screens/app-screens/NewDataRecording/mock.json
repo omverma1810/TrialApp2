@@ -1,113 +1,41 @@
 {
-  "status_code": 200,
-  "message": "Data sent successfully",
-  "data": {
-    "fieldExperimentId": 363,
-    "fieldExperimentName": "PB-OS-2025.30-04.1.2",
-    "cropId": 6,
-    "cropName": "Rice",
-    "trialLocationId": 890,
-    "name": "8129",
-    "villageName": "Hyderabad ",
-    "maxNoOfImages": 2,
-    "noOfRows": 4,
-    "noOfColumn": 5,
-    "plotSize": 2,
-    "season": null,
-    "gapBlocks": null,
-    "plotWidth": null,
-    "rowLength": null,
-    "blockWidth": null,
-    "designType": "RCBD",
-    "yearOfTrial": null,
-    "plotData": [
-      {
-        "id": 18319,
-        "plotNumber": "2025K-614",
-        "plotCode": "U3nWXDrLkmm0BK6G",
-        "replication": "R1",
-        "accessionId": "0160141",
-        "entryNo": "1",
-        "row": null,
-        "column": null,
-        "notes": null,
-        "imageUrls": null,
-        "recordedTraitData": [
-          {
-            "traitId": 289,
-            "traitName": "Plant height (cm)",
-            "traitUom": "cm",
-            "dataType": "float",
-            "userDefiend": "PHL",
-            "preDefiendList": [
-              {
-                "maximumValue": "",
-                "minimumValue": ""
-              }
-            ],
-            "observationStatus": true,
-            "observationId": 10738,
-            "value": "2",
-            "lat": null,
-            "long": null,
-            "locationName": null,
-            "lastUpdatedAt": "2025-04-04"
-          },
-          {
-            "traitId": 288,
-            "traitName": "Grain yield (kg/ha)",
-            "traitUom": "kg",
-            "dataType": "float",
-            "userDefiend": "YLD",
-            "preDefiendList": null,
-            "observationStatus": true,
-            "observationId": 10739,
-            "value": "12",
-            "lat": null,
-            "long": null,
-            "locationName": null,
-            "lastUpdatedAt": "2025-04-04"
-          },
-          {
-            "traitId": 48,
-            "traitName": "Basal Leaf Sheath colour",
-            "traitUom": "Colour",
-            "dataType": "fixed",
-            "userDefiend": "BLSC",
-            "preDefiendList": [
-              {
-                "name": "Green",
-                "maximumValue": "",
-                "minimumValue": ""
-              },
-              {
-                "name": "Light Purple",
-                "maximumValue": "",
-                "minimumValue": ""
-              },
-              {
-                "name": "Purple lines",
-                "maximumValue": "",
-                "minimumValue": ""
-              },
-              {
-                "name": "Uniform Purple",
-                "maximumValue": "",
-                "minimumValue": ""
-              }
-            ],
-            "observationStatus": true,
-            "observationId": 10737,
-            "value": "Green",
-            "lat": null,
-            "long": null,
-            "locationName": null,
-            "lastUpdatedAt": "2025-04-04"
-          }
-        ],
-        "unrecordedTraitData": [],
-        "lastUpdatedAt": "2025-04-04"
-      }
-    ]
-  }
+  "experimentType": "trials",
+  "fieldExperimentId": 363,
+  "observations": [
+    {
+      "plotId": 19428,
+      "date": "2025-04-25 16:07:08.181",
+      "lat": 37.4220936,
+      "long": -122.083922,
+      "notes": "",
+      "applications": null,
+      "phenotypes": [
+        {
+          "observationId": 11830,
+          "observedValue": "3",
+          "traitId": 289
+        },
+        {
+          "observationId": null,
+          "observedValue": "4",
+          "traitId": 288
+        },
+        {
+          "observationId": null,
+          "observedValue": "Green",
+          "traitId": 48
+        },
+        {
+          "observationId": null,
+          "observedValue": "8",
+          "traitId": 389
+        },
+        {
+          "observationId": null,
+          "observedValue": "2025-04-25T18:30:00.000Z",
+          "traitId": 427
+        }
+      ]
+    }
+  ]
 }

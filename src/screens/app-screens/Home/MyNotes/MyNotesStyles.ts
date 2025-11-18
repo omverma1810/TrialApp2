@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import {FONTS} from '../../../../theme/fonts';
 
 const MynoteStyles = StyleSheet.create({
   notesContainer: {
@@ -7,7 +8,7 @@ const MynoteStyles = StyleSheet.create({
   notesTitle: {
     fontSize: 15,
     color: '#161616',
-    fontWeight: '500',
+    fontFamily: FONTS.MEDIUM,
   },
 });
 

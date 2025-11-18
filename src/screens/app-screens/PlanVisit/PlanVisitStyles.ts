@@ -1,10 +1,11 @@
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 import {FONTS} from '../../../theme/fonts';
 
 const PlanVisitStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
-    gap:10
+    gap: 10,
+    width: '100%',
   },
   chipContainer: {
     gap: 15,
@@ -31,16 +32,16 @@ const PlanVisitStyles = StyleSheet.create({
   },
   chipCropText: {
     paddingHorizontal: 10,
-    alignItems:'center',
+    alignItems: 'center',
     width: 58,
-    justifyContent:'center',
+    justifyContent: 'center',
     paddingVertical: 5,
     borderRadius: 6,
     backgroundColor: '#EAF4E7',
-    display:'flex',
-    color: 'black'
+    display: 'flex',
+    color: 'black',
   },
-  chipCropText1:{
+  chipCropText1: {
     color: 'black',
   },
 
@@ -58,7 +59,7 @@ const PlanVisitStyles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: '#161616',
-    fontFamily:FONTS.SEMI_BOLD
+    fontFamily: FONTS.SEMI_BOLD,
   },
   chip: {
     backgroundColor: 'white',
@@ -140,15 +141,15 @@ const PlanVisitStyles = StyleSheet.create({
     gap: 16,
     paddingVertical: 16,
   },
-  ScreenTitle : {
-    marginHorizontal:20,
-    marginVertical:10,
+  ScreenTitle: {
+    marginHorizontal: 20,
+    marginVertical: 10,
     fontFamily: FONTS.MEDIUM,
-    fontSize:20,
-    color:'#000',
-    backgroundColor:"white",
-    display:'flex' ,
-  }
+    fontSize: 20,
+    color: '#000',
+    backgroundColor: 'white',
+    display: 'flex',
+  },
 });
 
 export default PlanVisitStyles;

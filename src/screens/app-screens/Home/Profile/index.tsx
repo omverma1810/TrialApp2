@@ -11,7 +11,7 @@ import {
 import ImagePicker from 'react-native-image-crop-picker';
 import * as Keychain from 'react-native-keychain';
 import {Back, ProfileImg} from '../../../../assets/icons/svgs';
-import {DEFAULT_ENV, URL} from '../../../../constants/URLS';
+import {URL} from '../../../../constants/URLS';
 import {useApi} from '../../../../hooks/useApi';
 import useCleanUp from '../../../../hooks/useCleanUp';
 import {useAppDispatch} from '../../../../store';
@@ -24,7 +24,8 @@ import ProfileStyles from './ProfileStyles';
 import {ProfileScreenProps} from '../../../../types/navigation/appTypes';
 import DeviceInfo from 'react-native-device-info';
 import Toast from '../../../../utilities/toast';
-import {Loader, SafeAreaView} from '../../../../components';
+import {SafeAreaView} from '../../../../components';
+import ProfileSkeleton from './ProfileSkeleton';
 
 const USER_DETAILS_STORAGE_KEY = 'USER_DETAILS';
 
@@ -40,7 +41,6 @@ const Profile = ({navigation}: ProfileScreenProps) => {
   const [imageSource, setImageSource] = useState<any | null>(null);
   const [isDefaultImage, setIsDefaultImage] = useState<boolean>(true);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [logoutUser] = useCleanUp();
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
   const [isEditingPhoneNumber, setIsEditingPhoneNumber] =
@@ -49,7 +49,7 @@ const Profile = ({navigation}: ProfileScreenProps) => {
   const dispatch = useAppDispatch();
 
   // fetching profile details
-  const [fetchProfile, profileDataResponse] = useApi({
+  const [fetchProfile, profileDataResponse, profileLoading] = useApi({
     url: URL.PROFILE,
     method: 'GET',
     isSecureEntry: true,
@@ -57,12 +57,15 @@ const Profile = ({navigation}: ProfileScreenProps) => {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [fetchProfile]);
   useEffect(() => {
     if (profileDataResponse && profileDataResponse.status_code === 200) {
       const fetchedUser = profileDataResponse.data.user;
       dispatch(setUserDetails(fetchedUser));
-      const roleName = fetchedUser.role && fetchedUser.role.length > 0 ? fetchedUser.role[0].role_name : 'N/A';
+      const roleName =
+        fetchedUser.role && fetchedUser.role.length > 0
+          ? fetchedUser.role[0].role_name
+          : 'N/A';
       setProfileData({
         name: `${fetchedUser.first_name} ${fetchedUser.last_name}`,
         location: fetchedUser.location?.name || 'N/A',
@@ -70,10 +73,8 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         email: fetchedUser.email,
         role: roleName,
       });
-      setIsLoading(false);
     } else {
       if (profileDataResponse) {
-        setIsLoading(false);
         Toast.error({
           message: 'Error Fetching Profile',
         });
@@ -93,14 +94,11 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         if (logoutResponse && logoutResponse.status_code === 200) {
           dispatch(setIsUserSignedIn(false));
           dispatch(setClearAuthData(false));
-          await AsyncStorage.clear();
-          await Keychain.resetGenericPassword();
+          // Use the proper logout function that preserves biometric settings
+          await logoutUser();
         } else {
-          console.log('Logout failed');
         }
-      } catch (error) {
-        console.log('Error while logging out:', error);
-      }
+      } catch (error) {}
     };
     handleLogout();
   }, [logoutResponse]);
@@ -135,7 +133,6 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         message: 'Profile updated successfully',
       });
       const user = updateProfileResponse.data.user;
-      console.log(user);
       dispatch(setUserDetails(user));
       await AsyncStorage.setItem(
         USER_DETAILS_STORAGE_KEY,
@@ -257,11 +254,8 @@ const Profile = ({navigation}: ProfileScreenProps) => {
       .then(image => {
         setImageSource(image);
         setIsDefaultImage(false);
-        console.log(image);
       })
-      .catch(error => {
-        console.log('ImagePicker Error: ', error);
-      });
+      .catch(error => {});
   };
 
   const deleteImage = () => {
@@ -276,9 +270,10 @@ const Profile = ({navigation}: ProfileScreenProps) => {
       deleteImage();
     }
   };
-  if (isLoading) {
-    <Loader />;
-  }
+  const hasProfileData = Boolean(
+    profileDataResponse && profileDataResponse.status_code === 200,
+  );
+  const isSkeletonVisible = profileLoading && !hasProfileData;
 
   return (
     <ScrollView style={{flex: 1, backgroundColor: '#fff'}}>
@@ -296,128 +291,138 @@ const Profile = ({navigation}: ProfileScreenProps) => {
         </View>
       </SafeAreaView>
 
-      <View style={ProfileStyles.container}>
-        <Pressable
-          style={ProfileStyles.profileContainer}
-          onPress={toggleImageAction}>
-          {isDefaultImage ? (
-            <View>
-              <ProfileImg width={80} height={81} />
+      {isSkeletonVisible ? (
+        <ProfileSkeleton />
+      ) : (
+        <View style={ProfileStyles.container}>
+          <Pressable
+            style={ProfileStyles.profileContainer}
+            onPress={toggleImageAction}>
+            {isDefaultImage ? (
+              <View>
+                <ProfileImg width={80} height={81} />
+              </View>
+            ) : (
+              <View
+                style={{
+                  position: 'relative',
+                  width: 80,
+                  height: 80,
+                  borderRadius: 100,
+                }}>
+                <Image
+                  style={{width: 80, height: 80, borderRadius: 100}}
+                  source={{uri: imageSource.path ?? undefined}}
+                />
+              </View>
+            )}
+          </Pressable>
+          <View style={ProfileStyles.infoContainer}>
+            <View style={ProfileStyles.infoItem}>
+              <Text style={ProfileStyles.infoText}>Name</Text>
+              <Text style={ProfileStyles.infoTextBold}>{profileData.name}</Text>
             </View>
-          ) : (
+            <View style={ProfileStyles.infoItem}>
+              <Text style={ProfileStyles.infoText}>Location</Text>
+              <Text style={ProfileStyles.infoTextBold}>
+                {profileData.location}
+              </Text>
+            </View>
+            <View style={ProfileStyles.infoItem}>
+              <Text style={ProfileStyles.infoText}>Role Name</Text>
+              <Text style={ProfileStyles.infoTextBold}>{profileData.role}</Text>
+            </View>
             <View
-              style={{
-                position: 'relative',
-                width: 80,
-                height: 80,
-                borderRadius: 100,
-              }}>
-              <Image
-                style={{width: 80, height: 80, borderRadius: 100}}
-                source={{uri: imageSource.path ?? undefined}}
-              />
+              style={[
+                ProfileStyles.infoItem,
+                ProfileStyles.editButtonContainer,
+              ]}>
+              <View style={{gap: 8, width: '80%'}}>
+                <Text style={ProfileStyles.infoText}>Phone Number</Text>
+                {isEditingPhoneNumber ? (
+                  <TextInput
+                    style={ProfileStyles.infoTextBold}
+                    value={profileData.phoneNumber}
+                    onChangeText={text =>
+                      setProfileData({...profileData, phoneNumber: text})
+                    }
+                    keyboardType="number-pad"
+                  />
+                ) : (
+                  <Text style={ProfileStyles.infoTextBold}>
+                    {profileData.phoneNumber}
+                  </Text>
+                )}
+              </View>
+              <Pressable
+                onPress={() => {
+                  if (isEditingPhoneNumber) {
+                    onUpdatePhoneNumber();
+                  } else {
+                    setIsEditingPhoneNumber(true);
+                  }
+                }}>
+                <Text style={ProfileStyles.editButton}>
+                  {isEditingPhoneNumber ? 'Save' : 'Edit'}
+                </Text>
+              </Pressable>
             </View>
-          )}
-        </Pressable>
-        <View style={ProfileStyles.infoContainer}>
-          <View style={ProfileStyles.infoItem}>
-            <Text style={ProfileStyles.infoText}>Name</Text>
-            <Text style={ProfileStyles.infoTextBold}>{profileData.name}</Text>
+            <View
+              style={[
+                ProfileStyles.infoItem,
+                ProfileStyles.editButtonContainer,
+              ]}>
+              <View style={{gap: 8, width: '80%'}}>
+                <Text style={ProfileStyles.infoText}>Email Id</Text>
+                {isEditingEmail ? (
+                  <TextInput
+                    style={ProfileStyles.infoTextBold}
+                    value={profileData.email}
+                    onChangeText={text =>
+                      setProfileData({...profileData, email: text})
+                    }
+                  />
+                ) : (
+                  <Text style={ProfileStyles.infoTextBold}>
+                    {profileData.email}
+                  </Text>
+                )}
+              </View>
+              <Pressable
+                onPress={() => {
+                  if (isEditingEmail) {
+                    onUpdateEmail();
+                  } else {
+                    setIsEditingEmail(true);
+                  }
+                }}>
+                <Text style={ProfileStyles.editButton}>
+                  {isEditingEmail ? 'Save' : 'Edit'}
+                </Text>
+              </Pressable>
+            </View>
           </View>
-          <View style={ProfileStyles.infoItem}>
-            <Text style={ProfileStyles.infoText}>Location</Text>
-            <Text style={ProfileStyles.infoTextBold}>
-              {profileData.location}
+          <Pressable
+            onPress={() => navigation.navigate('ChangePassword')}
+            style={ProfileStyles.logoutButton}>
+            <Text style={ProfileStyles.editButton}>Change Password</Text>
+          </Pressable>
+          <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
+            <Text style={ProfileStyles.editButton}>Logout</Text>
+          </Pressable>
+          <View style={ProfileStyles.footerContainer}>
+            <Text style={ProfileStyles.footer}>Piatrika Biosystems © 2025</Text>
+            <Text style={ProfileStyles.footer}>
+              {'App Version:'} {DeviceInfo.getVersion()}
+              {`(${DeviceInfo.getBuildNumber()})`}
             </Text>
-          </View>
-          <View style={ProfileStyles.infoItem}>
-            <Text style={ProfileStyles.infoText}>Role Name</Text>
-            <Text style={ProfileStyles.infoTextBold}>{profileData.role}</Text>
-          </View>
-          <View
-            style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-            <View style={{gap: 8,width:'80%'}}>
-              <Text style={ProfileStyles.infoText}>Phone Number</Text>
-              {isEditingPhoneNumber ? (
-                <TextInput
-                  style={ProfileStyles.infoTextBold}
-                  value={profileData.phoneNumber}
-                  onChangeText={text =>
-                    setProfileData({...profileData, phoneNumber: text})
-                  }
-                  keyboardType="number-pad"
-                />
-              ) : (
-                <Text style={ProfileStyles.infoTextBold}>
-                  {profileData.phoneNumber}
-                </Text>
-              )}
-            </View>
-            <Pressable
-              onPress={() => {
-                if (isEditingPhoneNumber) {
-                  onUpdatePhoneNumber();
-                } else {
-                  setIsEditingPhoneNumber(true);
-                }
-              }}>
-              <Text style={ProfileStyles.editButton}>
-                {isEditingPhoneNumber ? 'Save' : 'Edit'}
-              </Text>
-            </Pressable>
-          </View>
-          <View
-            style={[ProfileStyles.infoItem, ProfileStyles.editButtonContainer]}>
-            <View style={{gap: 8,width:'80%'}}>
-              <Text style={ProfileStyles.infoText}>Email Id</Text>
-              {isEditingEmail ? (
-                <TextInput
-                  style={ProfileStyles.infoTextBold}
-                  value={profileData.email}
-                  onChangeText={text =>
-                    setProfileData({...profileData, email: text})
-                  }
-                />
-              ) : (
-                <Text style={ProfileStyles.infoTextBold}>
-                  {profileData.email}
-                </Text>
-              )}
-            </View>
-            <Pressable
-              onPress={() => {
-                if (isEditingEmail) {
-                  onUpdateEmail();
-                } else {
-                  setIsEditingEmail(true);
-                }
-              }}>
-              <Text style={ProfileStyles.editButton}>
-                {isEditingEmail ? 'Save' : 'Edit'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-        <Pressable
-          onPress={() => navigation.navigate('ChangePassword')}
-          style={ProfileStyles.logoutButton}>
-          <Text style={ProfileStyles.editButton}>Change Password</Text>
-        </Pressable>
-        <Pressable onPress={onLogout} style={ProfileStyles.logoutButton}>
-          <Text style={ProfileStyles.editButton}>Logout</Text>
-        </Pressable>
-        <View style={ProfileStyles.footerContainer}>
-          <Text style={ProfileStyles.footer}>Piatrika Biosystems © 2024</Text>
-          <Text style={ProfileStyles.footer}>
-            {'App Version:'} {DeviceInfo.getVersion()}
-            {`(${DeviceInfo.getBuildNumber()})`}
-          </Text>
-          {/* <Text style={ProfileStyles.footer}>
+            {/* <Text style={ProfileStyles.footer}>
             {'App Environment:'}{' '}
             <Text style={{textTransform: 'capitalize'}}>{DEFAULT_ENV}</Text>
           </Text> */}
+          </View>
         </View>
-      </View>
+      )}
     </ScrollView>
   );
 };

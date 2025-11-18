@@ -20,12 +20,6 @@ const UnrecordedTraits = () => {
   } = useRecord();
 
   const {recordedTraitData} = selectedPlot;
-  console.log({
-    recordedTraitData,
-    selectedPlot,
-    selectedExperiment,
-    selectedField,
-  });
 
   return (
     <>

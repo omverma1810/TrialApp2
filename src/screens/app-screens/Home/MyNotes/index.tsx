@@ -1,5 +1,6 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {View, Text, Alert, TouchableOpacity} from 'react-native';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {View, Text, TouchableOpacity} from 'react-native';
+import {useTranslation} from 'react-i18next';
 import {useApi} from '../../../../hooks/useApi';
 import {URL} from '../../../../constants/URLS';
 import MyNoteStyles from './MyNotesStyles';
@@ -7,6 +8,7 @@ import Notes from '../../../../components/Notes';
 import {useFocusEffect, useIsFocused} from '@react-navigation/native';
 import Toast from '../../../../utilities/toast';
 import Svg, {Path} from 'react-native-svg';
+import {LOCALES} from '../../../../localization/constants';
 
 type NoteType = {
   id: number;
@@ -18,10 +20,24 @@ type NoteType = {
   created_on: string;
 };
 
-const MyNote = ({navigation, refresh}: any) => {
+type MyNoteProps = {
+  navigation: any;
+  refresh: any;
+  onLoadingStateChange?: (isInitialLoading: boolean) => void;
+};
+
+const MyNote = ({navigation, refresh, onLoadingStateChange}: MyNoteProps) => {
   const isFocused = useIsFocused();
+  const {t} = useTranslation();
 
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const initialLoadTriggeredRef = useRef(false);
+
+  const [notes, setNotes] = useState<NoteType[]>([]);
+  const [fetchNotes, fetchNotesResponse, isNotesLoading] = useApi({
+    url: URL.NOTES,
+    method: 'GET',
+  });
 
   const toggleSortOrder = () => {
     setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'));
@@ -31,40 +47,50 @@ const MyNote = ({navigation, refresh}: any) => {
     useCallback(() => {
       if (refresh) {
         fetchNotes();
-        console.log('Refreshing Home screen');
         navigation.setParams({refresh: false});
       }
-    }, [refresh]),
+    }, [refresh, fetchNotes]),
   );
-
-  const [notes, setNotes] = useState<NoteType[]>([]);
-  const [fetchNotes, fetchNotesResponse] = useApi({
-    url: URL.NOTES,
-    method: 'GET',
-  });
 
   useEffect(() => {
     if (isFocused) {
+      initialLoadTriggeredRef.current = true;
       fetchNotes();
     }
-  }, [isFocused]);
+  }, [isFocused, fetchNotes]);
 
   useEffect(() => {
     if (fetchNotesResponse && fetchNotesResponse.status_code === 200) {
       setNotes(fetchNotesResponse.data);
     } else if (fetchNotesResponse) {
       Toast.error({
-        message: 'Failed to fetch notes',
+        message: t(LOCALES.NOTES.MSG_FETCH_FAILED),
       });
     }
-  }, [fetchNotesResponse]);
+  }, [fetchNotesResponse, t]);
+
+  useEffect(() => {
+    if (!onLoadingStateChange) {
+      return;
+    }
+
+    if (!initialLoadTriggeredRef.current && !isNotesLoading) {
+      return;
+    }
+
+    if (isNotesLoading && notes.length === 0) {
+      onLoadingStateChange(true);
+      return;
+    }
+
+    onLoadingStateChange(false);
+  }, [isNotesLoading, notes.length, onLoadingStateChange]);
 
   const handleDeleteNote = (id: number) => {
     setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
   };
 
   const handleEditNote = (note: NoteType | unknown) => {
-    console.log(note);
     navigation.navigate('TakeNotes', {data: note});
   };
 
@@ -86,7 +112,9 @@ const MyNote = ({navigation, refresh}: any) => {
               alignItems: 'center',
               justifyContent: 'space-between',
             }}>
-            <Text style={MyNoteStyles.notesTitle}>My Notes</Text>
+            <Text style={MyNoteStyles.notesTitle}>
+              {t(LOCALES.NOTES.TITLE_MY_NOTES)}
+            </Text>
             <TouchableOpacity
               onPress={toggleSortOrder}
               style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -116,7 +144,9 @@ const MyNote = ({navigation, refresh}: any) => {
                 </Svg>
               )}
               <Text style={{color: '#1A6DD2', marginLeft: 4}}>
-                {sortOrder === 'asc' ? 'Sort by Oldest' : 'Sort by Newest'}
+                {sortOrder === 'asc'
+                  ? t(LOCALES.NOTES.LBL_SORT_BY_OLDEST)
+                  : t(LOCALES.NOTES.LBL_SORT_BY_NEWEST)}
               </Text>
             </TouchableOpacity>
           </View>

@@ -1,12 +1,5 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  LayoutChangeEvent,
-} from 'react-native';
+import React, {useRef, useState, useEffect} from 'react';
+import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {FONTS} from '../../../../theme/fonts';
 
 type FilterType = {
@@ -14,6 +7,7 @@ type FilterType = {
   options: string[];
   selectedOption: string;
   onPress: (option: string) => void;
+  onScroll?: (event: any) => void;
 };
 
 const Filter = ({
@@ -21,70 +15,64 @@ const Filter = ({
   options = [],
   selectedOption = '',
   onPress = () => {},
+  onScroll,
 }: FilterType) => {
-  // Reference for the horizontal ScrollView.
   const scrollViewRef = useRef<ScrollView>(null);
-  // Record the layout (x offset and width) of each option.
-  const optionLayouts = useRef<{[key: string]: {x: number; width: number}}>({});
-  // Store the width of the ScrollView container.
+  const [itemLayouts, setItemLayouts] = useState<{
+    [key: string]: {x: number; width: number};
+  }>({});
   const [scrollViewWidth, setScrollViewWidth] = useState(0);
 
-  // Trigger scrolling to the selected option whenever it changes.
   useEffect(() => {
     if (
-      !selectedOption ||
-      !scrollViewRef.current ||
-      !optionLayouts.current[selectedOption]
-    )
-      return;
-
-    const {x, width} = optionLayouts.current[selectedOption];
-    // Calculate target scroll offset; here we try to center the selected item.
-    const targetScrollX = Math.max(x - scrollViewWidth / 2 + width / 2, 0);
-    scrollViewRef.current.scrollTo({x: targetScrollX, animated: true});
-  }, [selectedOption, scrollViewWidth]);
-
-  // Handler to capture layout info for each option.
-  const handleOptionLayout = (option: string, event: LayoutChangeEvent) => {
-    const {x, width} = event.nativeEvent.layout;
-    optionLayouts.current[option] = {x, width};
-  };
-
-  // Handler to capture the overall width of the ScrollView.
-  const handleScrollViewLayout = (event: LayoutChangeEvent) => {
-    setScrollViewWidth(event.nativeEvent.layout.width);
-  };
+      selectedOption &&
+      scrollViewRef.current &&
+      itemLayouts[selectedOption] &&
+      scrollViewWidth > 0
+    ) {
+      const {x, width} = itemLayouts[selectedOption];
+      const offset = x + width / 2 - scrollViewWidth / 2;
+      scrollViewRef.current.scrollTo({x: offset, animated: true});
+    }
+  }, [selectedOption, itemLayouts, scrollViewWidth]);
 
   if (options.length === 0) return null;
 
   return (
-    <View style={[styles.row, styles.filter]}>
-      <Text style={styles.filterTitle}>{title}</Text>
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollView}
-        onLayout={handleScrollViewLayout}>
-        {options.map((option, index) => (
-          <Pressable
-            onPress={() => onPress(option)}
-            style={[
-              styles.filterOptions,
-              option === selectedOption && styles.selectedOptions,
-            ]}
-            key={index}
-            onLayout={event => handleOptionLayout(option, event)}>
-            <Text
+    <View style={styles.filter}>
+      <View style={styles.row}>
+        <Text style={styles.filterTitle}>{title}</Text>
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollView}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          onLayout={e => setScrollViewWidth(e.nativeEvent.layout.width)}>
+          {options.map((option, index) => (
+            <Pressable
+              key={index}
+              onPress={() => onPress(option)}
               style={[
-                styles.filterOptionsText,
-                option === selectedOption && styles.selectedOptionsText,
-              ]}>
-              {option}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+                styles.filterChip,
+                option === selectedOption && styles.selectedChip,
+              ]}
+              onLayout={e => {
+                const layout = e.nativeEvent.layout;
+                setItemLayouts(prev => ({...prev, [option]: layout}));
+              }}>
+              <Text
+                style={[
+                  styles.chipText,
+                  option === selectedOption && styles.selectedChipText,
+                ]}>
+                {option}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 };
@@ -92,33 +80,36 @@ const Filter = ({
 export default React.memo(Filter);
 
 const styles = StyleSheet.create({
-  filter: {},
+  filter: {
+    marginVertical: -2,
+  },
   filterTitle: {
     fontFamily: FONTS.MEDIUM,
-    fontSize: 12,
+    fontSize: 14,
     color: '#949494',
     paddingHorizontal: 8,
+    marginBottom: 6,
   },
-  scrollView: {flexGrow: 0},
-  filterOptions: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    marginHorizontal: 8,
+  scrollView: {
+    flexGrow: 0,
+  },
+  filterChip: {
+    paddingVertical: 8, // Reduced height
+    paddingHorizontal: 24, // Slimmer width
+    marginHorizontal: 6, // Slightly tighter spacing
     backgroundColor: '#E8F0FB',
-    borderRadius: 6,
+    borderRadius: 16, // Rounded chip shape
   },
-  selectedOptions: {
+  selectedChip: {
     backgroundColor: '#0E3C74',
   },
-  selectedOptionsText: {
-    color: '#FFFFFF',
-  },
-  filterOptionsText: {
+  chipText: {
     fontFamily: FONTS.MEDIUM,
-    fontSize: 12,
+    fontSize: 14, // Slightly increased font for clarity
     color: '#0E3C74',
+  },
+  selectedChipText: {
+    color: '#FFFFFF',
   },
   row: {
     flexDirection: 'row',

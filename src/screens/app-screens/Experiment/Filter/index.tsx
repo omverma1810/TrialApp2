@@ -17,8 +17,6 @@ const Filter = ({
   onPress = () => {},
   onScroll,
 }: FilterType) => {
-  if (options.length === 0) return null;
-
   const scrollViewRef = useRef<ScrollView>(null);
   const [itemLayouts, setItemLayouts] = useState<{
     [key: string]: {x: number; width: number};
@@ -33,45 +31,48 @@ const Filter = ({
       scrollViewWidth > 0
     ) {
       const {x, width} = itemLayouts[selectedOption];
-      // Calculate offset to roughly center the selected item
       const offset = x + width / 2 - scrollViewWidth / 2;
       scrollViewRef.current.scrollTo({x: offset, animated: true});
     }
   }, [selectedOption, itemLayouts, scrollViewWidth]);
 
+  if (options.length === 0) return null;
+
   return (
-    <View style={[styles.row, styles.filter]}>
-      <Text style={styles.filterTitle}>{title}</Text>
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scrollView}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        onLayout={e => setScrollViewWidth(e.nativeEvent.layout.width)}>
-        {options.map((option, index) => (
-          <Pressable
-            key={index}
-            onPress={() => onPress(option)}
-            style={[
-              styles.filterOptions,
-              option === selectedOption && styles.selectedOptions,
-            ]}
-            onLayout={e => {
-              const layout = e.nativeEvent.layout;
-              setItemLayouts(prev => ({...prev, [option]: layout}));
-            }}>
-            <Text
+    <View style={styles.filter}>
+      <View style={styles.row}>
+        <Text style={styles.filterTitle}>{title}</Text>
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.scrollView}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          onLayout={e => setScrollViewWidth(e.nativeEvent.layout.width)}>
+          {options.map((option, index) => (
+            <Pressable
+              key={index}
+              onPress={() => onPress(option)}
               style={[
-                styles.filterOptionsText,
-                option === selectedOption && styles.selectedOptionsText,
-              ]}>
-              {option}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
+                styles.filterChip,
+                option === selectedOption && styles.selectedChip,
+              ]}
+              onLayout={e => {
+                const layout = e.nativeEvent.layout;
+                setItemLayouts(prev => ({...prev, [option]: layout}));
+              }}>
+              <Text
+                style={[
+                  styles.chipText,
+                  option === selectedOption && styles.selectedChipText,
+                ]}>
+                {option}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </View>
     </View>
   );
 };
@@ -79,35 +80,36 @@ const Filter = ({
 export default React.memo(Filter);
 
 const styles = StyleSheet.create({
-  filter: {},
+  filter: {
+    marginVertical: -2,
+  },
   filterTitle: {
     fontFamily: FONTS.MEDIUM,
-    fontSize: 12,
+    fontSize: 14,
     color: '#949494',
     paddingHorizontal: 8,
+    marginBottom: 6,
   },
   scrollView: {
     flexGrow: 0,
   },
-  filterOptions: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    marginHorizontal: 8,
+  filterChip: {
+    paddingVertical: 8, // Reduced height
+    paddingHorizontal: 24, // Slimmer width
+    marginHorizontal: 6, // Slightly tighter spacing
     backgroundColor: '#E8F0FB',
-    borderRadius: 6,
+    borderRadius: 16, // Rounded chip shape
   },
-  selectedOptions: {
+  selectedChip: {
     backgroundColor: '#0E3C74',
   },
-  selectedOptionsText: {
-    color: '#FFFFFF',
-  },
-  filterOptionsText: {
+  chipText: {
     fontFamily: FONTS.MEDIUM,
-    fontSize: 12,
+    fontSize: 14, // Slightly increased font for clarity
     color: '#0E3C74',
+  },
+  selectedChipText: {
+    color: '#FFFFFF',
   },
   row: {
     flexDirection: 'row',

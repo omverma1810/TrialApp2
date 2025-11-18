@@ -9,6 +9,15 @@ export const store = configureStore({
     theme: themeReducer,
     auth: authReducer,
   },
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types or paths if needed
+        ignoredActions: ['your/action/type'],
+        // Increase the warning threshold to 128ms (default is 32ms)
+        warnAfter: 128,
+      },
+    }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

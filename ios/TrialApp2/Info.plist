@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Trial Genie</string>
+	<string>Field Genie</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -62,6 +62,14 @@
 	<string>$(App_Name) uses device location services to obtain the location of user and listing location to the server.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>$(App_Name) uses the camera to capture and upload user profile image and listing image to the server.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>$(App_Name) needs permission to save images to your photo library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Field Genie needs microphone access to record voice notes for plots.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Use Face ID to authenticate and securely login to Field Genie</string>
+	<key>GMSApiKey</key>
+	<string>AIzaSyD-Cyf3MUpJsLeirt2lECjKsxuoiE_Aecw</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Inter-Bold.ttf</string>
@@ -74,7 +82,7 @@
 		<string>Montserrat-SemiBold.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
+	<string></string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

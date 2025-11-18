@@ -3,7 +3,6 @@ import {FONTS} from '../../../../theme/fonts';
 
 export const styles = StyleSheet.create({
   container: {
-    // marginBottom: 24,
     borderWidth: 1,
     borderColor: '#EAF4E7',
     borderBottomWidth: 0,

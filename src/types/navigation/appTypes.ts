@@ -24,14 +24,35 @@ export type HomeStackParamList = {
 };
 
 export type ExperimentStackParamList = {
-  Experiment: undefined;
-  ExperimentDetails: {id: string; type: string; data: experimentData};
+  Experiment:
+    | undefined
+    | {
+        prefilledExperiment?: {
+          experimentId: string;
+          experimentName?: string;
+          fieldExperimentName?: string;
+          cropName?: string;
+          season?: string;
+          year?: string;
+          experimentType?: string;
+          projectKey?: string;
+        };
+      };
+  ExperimentDetails: {
+    id: string;
+    type: string;
+    data: experimentData;
+    fromNewRecord?: boolean;
+  };
   Plots: {
     id: string;
     type: string;
     data: experimentData;
     imageUrl?: string;
     plotId?: string;
+    experimentID?: string;
+    locationID?: string;
+    fromNewRecord?: boolean; // ✅ Add flag to indicate navigation from NewRecord flow
   };
   NewRecord:
     | undefined
@@ -52,7 +73,7 @@ export type ExperimentStackParamList = {
   };
   QRScanner: undefined;
   Profile: undefined;
-  ChangePassword: undefined;
+  ChangePassword: undefined; // Already defined here as well
 };
 
 export type RecordStackParamList = {
@@ -67,6 +88,13 @@ type experimentData = {
   projectId: string;
   designType: string;
   season: string;
+  year?: string;
+  cropName?: string;
+  experimentName?: string;
+  fieldExperimentName?: string;
+  projectKey?: string;
+  experimentId?: number | string;
+  experimentType?: string;
 };
 
 // Define props for each screen

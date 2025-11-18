@@ -60,7 +60,6 @@ const RootNavigator = () => {
           throw new Error('Missing credentials or user details');
         }
       } catch (error) {
-        console.log('Error during initialization:', error);
         logoutUser();
         if (organizationURL) {
           dispatch(setOrganizationURL(organizationURL));

@@ -1,3 +1,4 @@
+import NetInfo from '@react-native-community/netinfo';
 import {useIsFocused} from '@react-navigation/native';
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {useTranslation} from 'react-i18next';
@@ -17,6 +18,7 @@ import {LOCALES} from '../../../localization/constants';
 import {ExperimentDetailsScreenProps} from '../../../types/navigation/appTypes';
 import FieldCard from './FieldCard';
 import {styles} from './styles';
+import {isLineExperiment} from '../../../utilities/experimentTypeUtils';
 
 const ExperimentDetails = ({
   navigation,
@@ -24,9 +26,10 @@ const ExperimentDetails = ({
 }: ExperimentDetailsScreenProps) => {
   const {t} = useTranslation();
   const isFocused = useIsFocused();
-  const {id, type, data} = route?.params;
+  const {id, type, data, fromNewRecord} = route?.params;
   const [experimentDetails, setExperimentDetails] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [
     getExperimentDetails,
     experimentDetailsResponse,
@@ -35,15 +38,57 @@ const ExperimentDetails = ({
   ] = useApi({
     url: URL.EXPERIMENT_DETAILS,
     method: 'GET',
+    isConnected,
   });
 
   useEffect(() => {
-    isFocused &&
+    // when screen comes into focus…
+    if (isFocused) {
+      // Clear previous experiment details to avoid showing stale data when navigating between experiments
+      setExperimentDetails(null);
+      setSearchQuery('');
+      // if (isConnected) {
       getExperimentDetails({
         pathParams: id,
         queryParams: `experimentType=${type}`,
       });
+      // }
+      // else {
+      //   // offline: read from local Experiment_Details
+      //   (async () => {
+      //     try {
+      //       const db = await SQLite.openDatabase({
+      //         name: 'PiatrikaOffline.db',
+      //         location: 'default',
+      //       });
+      //       db.transaction(tx => {
+      //         tx.executeSql(
+      //           'SELECT * FROM Experiment_Details WHERE field_experiment_id = ?;',
+      //           [id],
+      //           (_, {rows}) => {
+      //             if (rows.length > 0) {
+      //               setExperimentDetails(rows.item(0));
+      //             }
+      //           },
+      //           (_, err) => {
+      //
+      //             return true;
+      //           },
+      //         );
+      //       });
+      //     } catch (err) {
+      //
+      //     }
+      //   })();
+      // }
+    }
   }, [isFocused]);
+
+  // track connectivity
+  useEffect(() => {
+    const unsub = NetInfo.addEventListener(s => setIsConnected(s.isConnected));
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     if (
@@ -78,7 +123,7 @@ const ExperimentDetails = ({
       return locationList;
     }
     return locationList.filter((location: any) =>
-      location?.location?.villageName
+      location?.location?.fieldLabel
         .toLowerCase()
         .includes(searchQuery.toLowerCase()),
     );
@@ -88,12 +133,31 @@ const ExperimentDetails = ({
     ({item, index}: any) => (
       <FieldCard
         fieldData={item}
-        expData={{id, type, filteredLocationList}}
+        expData={{
+          id,
+          type,
+          name: experimentDetails?.name,
+          cropName: experimentDetails?.cropName,
+          projectKey: experimentDetails?.projectId,
+          season: experimentDetails?.season,
+          year: experimentDetails?.year,
+        }}
         isFirstIndex={index === 0}
         isLastIndex={index === filteredLocationList.length - 1}
+        fromNewRecord={fromNewRecord} // ✅ Pass the fromNewRecord flag
       />
     ),
-    [filteredLocationList.length],
+    [
+      experimentDetails?.cropName,
+      experimentDetails?.name,
+      experimentDetails?.projectId,
+      experimentDetails?.season,
+      experimentDetails?.year,
+      filteredLocationList.length,
+      fromNewRecord,
+      id,
+      type,
+    ],
   );
 
   const renderContent = () => {
@@ -109,7 +173,7 @@ const ExperimentDetails = ({
       return ListEmptyComponent;
     }
 
-    const {name, cropName} = experimentDetails;
+    const {name, cropName, projectId} = experimentDetails;
 
     return (
       <View style={styles.container}>
@@ -127,7 +191,7 @@ const ExperimentDetails = ({
                   styles.cropTitleContainer,
                   {backgroundColor: '#e8f0fb'},
                 ]}>
-                <Text style={styles.cropTitle}>{data.projectId}</Text>
+                <Text style={styles.cropTitle}>{projectId || 'N/A'}</Text>
               </View>
               <View
                 style={[
@@ -136,13 +200,15 @@ const ExperimentDetails = ({
                 ]}>
                 <Text style={styles.cropTitle}>{data.season}</Text>
               </View>
-              <View
-                style={[
-                  styles.cropTitleContainer,
-                  {backgroundColor: '#fcebea'},
-                ]}>
-                <Text style={styles.cropTitle}>{data.designType}</Text>
-              </View>
+              {data?.designType && !isLineExperiment(type) && (
+                <View
+                  style={[
+                    styles.cropTitleContainer,
+                    {backgroundColor: '#fcebea'},
+                  ]}>
+                  <Text style={styles.cropTitle}>{data?.designType}</Text>
+                </View>
+              )}
             </View>
           </ScrollView>
         </View>

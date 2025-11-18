@@ -17,7 +17,8 @@ import {
 } from '../../assets/icons/svgs';
 import {URL} from '../../constants/URLS';
 import {useApi} from '../../hooks/useApi';
-import TraitsImage from '../../screens/app-screens/NewRecord/TraitsImage';
+import ImageWithLoader from '../ImageLoader';
+import ImageCarouselModal from '../ImageCarouselModal';
 import OptionsModal from '../../screens/app-screens/Record/OptionsModal';
 import ValueInputCard from '../../screens/app-screens/Record/ValueInputCard';
 import {FONTS} from '../../theme/fonts';
@@ -66,10 +67,10 @@ const RecordDropDown = ({
             <ProjectContainer
               key={field}
               title={field}
-              heading={`${field} - ${
+              heading={
                 fields.find((f: any) => String(f.id) === String(field))
-                  ?.location?.villageName || 'Unknown'
-              }`}
+                  ?.location?.fieldLabel || 'Unknown'
+              }
               data={projectData && projectData[0]?.plotData}
               projectData={projectData}
               dropdownStates={dropdownStates}
@@ -151,8 +152,33 @@ const ItemComponent = ({
   const [currentEntry, setCurrentEntry] = useState<any>(null);
   const [observedValue, setObservedValue] = useState('');
   const optionsModalRef = useRef<any>(null);
-  const recordedTraitData = plotData.recordedTraitData;
-  const unrecordedTraitData = plotData.unrecordedTraitData;
+  // split out only traits with real values into “Recorded”
+  const allRecorded = plotData.recordedTraitData || [];
+  const allUnrecorded = plotData.unrecordedTraitData || [];
+  const recordedTraitData: Array<{
+    traitName: string;
+    value: string | null;
+    observationId: string;
+    traitId: string;
+    [key: string]: any;
+  }> = allRecorded.filter(
+    (entry: {value: string | null}) =>
+      entry?.value != null && entry?.value !== '',
+  );
+  // everything else (including blanks) goes under “Unrecorded”
+  const unrecordedTraitData: Array<{
+    traitName: string;
+    value: string | null;
+    observationId: string;
+    traitId: string;
+    [key: string]: any;
+  }> = [
+    ...allUnrecorded,
+    ...allRecorded.filter(
+      (entry: {value: string | null}) =>
+        entry?.value == null || entry?.value === '',
+    ),
+  ];
   const [dropdownHeight] = useState(new Animated.Value(0));
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [changedValue, setChangedValue] = useState<any>(null);
@@ -236,12 +262,33 @@ const ItemComponent = ({
     optionsModalRef.current?.close();
   }, [updateValueResponse]);
 
+  // Format image data for the ImageCarouselModal and manage carousel visibility
+  const [isCarouselVisible, setIsCarouselVisible] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [carouselImages, setCarouselImages] = useState<any[]>([]);
+
   useEffect(() => {
-    console.log({
-      imageUrls: imageUrls && imageUrls.length ? imageUrls[0] : '-',
-      heading,
-      plotData,
-    });
+    const formatted = Array.isArray(imageUrls)
+      ? imageUrls
+          .map((image: any, idx: number) => {
+            let imageUrl = '';
+            if (typeof image === 'string') {
+              imageUrl = image;
+            } else if (image && typeof image === 'object') {
+              imageUrl = image.url || image.uri || image.imagePath || '';
+            }
+            if (!imageUrl) return null;
+            return {
+              url: imageUrl,
+              uploadedOn: image?.uploadedOn || new Date().toISOString(),
+              imagePath: image?.imagePath,
+              id: image?.id || `${plotData?.plotNumber || 'plot'}_${idx}`,
+              location: image?.locationName || image?.location || heading, // Use locationName from API, fallback to heading
+            };
+          })
+          .filter(Boolean)
+      : [];
+    setCarouselImages(formatted as any[]);
   }, [imageUrls, heading, plotData]);
   return (
     <ScrollView style={styles.itemContainer}>
@@ -272,12 +319,46 @@ const ItemComponent = ({
                       </View>
                     </View>
                   )}
-                  {imageUrls && imageUrls.length && (
-                    <TraitsImage
-                      images={imageUrls}
-                      onDeleteImages={() => {}}
-                      metadata={{field: heading.split('-')[1]}}
-                    />
+                  {carouselImages.length > 0 && (
+                    <View style={styles.imageViewContainer}>
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{flexGrow: 1}}>
+                        <View style={styles.imageContainer}>
+                          {carouselImages.map((img: any, idx: number) => (
+                            <TouchableOpacity
+                              key={img.id || idx}
+                              onPress={() => {
+                                setCarouselIndex(idx);
+                                setIsCarouselVisible(true);
+                              }}>
+                              <ImageWithLoader
+                                uri={img.url}
+                                style={styles.thumbnail}
+                              />
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </ScrollView>
+
+                      <ImageCarouselModal
+                        isVisible={isCarouselVisible}
+                        images={carouselImages}
+                        initialIndex={carouselIndex}
+                        plotNumber={plotData?.plotNumber?.toString?.() || title}
+                        fieldName={heading}
+                        plotId={plotId}
+                        experimentType={experimentType}
+                        onClose={() => setIsCarouselVisible(false)}
+                        onImageDeleted={(deletedIndex: number) => {
+                          // remove deleted image locally for immediate visual feedback
+                          setCarouselImages(prev =>
+                            prev.filter((_, i) => i !== deletedIndex),
+                          );
+                        }}
+                      />
+                    </View>
                   )}
                   {recordedTraitData.map((entry: any, index: number) => (
                     <View style={styles.entryContainer} key={index}>
@@ -428,6 +509,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     flexDirection: 'row',
     gap: 10,
+  },
+  imageViewContainer: {
+    gap: 12,
+  },
+  thumbnail: {
+    width: 90,
+    height: 90,
+    borderRadius: 6,
+    marginRight: 8,
   },
   headerText: {
     color: '#161616',

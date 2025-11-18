@@ -1,46 +1,47 @@
-import {useEffect, useState} from 'react';
-import {Keyboard, KeyboardEvent} from 'react-native';
+import {useEffect, useState, useRef} from 'react';
+import {Keyboard, KeyboardEvent, Platform} from 'react-native';
 
 export const useKeyboard = () => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const isKeyboardOpenRef = useRef(false);
 
   useEffect(() => {
-    const keyboardWillShow = Keyboard.addListener(
-      'keyboardWillShow',
-      _keyboardDidShow,
-    );
-    const keyboardDidShow = Keyboard.addListener(
-      'keyboardDidShow',
-      _keyboardDidShow,
-    );
-    const keyboardDidHide = Keyboard.addListener(
-      'keyboardDidHide',
-      _keyboardDidHide,
-    );
-    const keyboardWillHide = Keyboard.addListener(
-      'keyboardWillHide',
-      _keyboardDidHide,
-    );
+    const handleKeyboardShow = (event: KeyboardEvent) => {
+      if (!isKeyboardOpenRef.current) {
+        isKeyboardOpenRef.current = true;
+        setIsKeyboardOpen(true);
+        setKeyboardHeight(event?.endCoordinates?.height ?? 0);
+      }
+    };
 
-    // cleanup function
+    const handleKeyboardHide = () => {
+      if (isKeyboardOpenRef.current) {
+        isKeyboardOpenRef.current = false;
+        setIsKeyboardOpen(false);
+        setKeyboardHeight(0);
+      }
+    };
+
+    const subscriptions = [
+      Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+        handleKeyboardShow,
+      ),
+      Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+        handleKeyboardHide,
+      ),
+    ];
+
     return () => {
-      keyboardWillShow.remove();
-      keyboardDidShow.remove();
-      keyboardDidHide.remove();
-      keyboardWillHide.remove();
+      subscriptions.forEach(subscription => {
+        if (subscription && typeof subscription.remove === 'function') {
+          subscription.remove();
+        }
+      });
     };
   }, []);
-
-  const _keyboardDidShow = (event: KeyboardEvent) => {
-    setIsKeyboardOpen(true);
-    setKeyboardHeight(event.endCoordinates.height);
-  };
-
-  const _keyboardDidHide = () => {
-    setIsKeyboardOpen(false);
-    setKeyboardHeight(0);
-  };
 
   return {
     isKeyboardOpen,

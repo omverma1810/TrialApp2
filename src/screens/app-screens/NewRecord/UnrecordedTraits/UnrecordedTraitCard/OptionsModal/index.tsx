@@ -30,7 +30,6 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
   const {t} = useTranslation();
   const {item, onSubmit} = useUnrecordedTraits();
   const data: OptionType[] = item?.preDefiendList || [];
-  console.log({item});
 
   const [inputValue, setInputValue] = useState('');
   const [selectedOption, setSelectedOption] = useState('');
@@ -78,7 +77,6 @@ const OptionsModal = ({bottomSheetModalRef}: ModalTypes) => {
       saveValue = `${selectedOption}`;
     }
     if (saveValue) {
-      console.log({saveValue});
       onSubmit(saveValue);
     }
     bottomSheetModalRef?.current?.close();

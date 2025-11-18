@@ -7,16 +7,28 @@ import {Text} from '..';
 import useTheme from '../../theme/hooks/useTheme';
 import eventEmitter from '../../utilities/eventEmitter';
 import {TOAST_EVENT_TYPES, toastOptions} from '../../types/components/Toast';
+import {useKeyboard} from '../../hooks/useKeaboard';
 
 const SPACE = 10;
 
 const Toast = () => {
   const {bottom} = useSafeAreaInsets();
   const {COLORS, FONTS} = useTheme();
+  const {isKeyboardOpen, keyboardHeight} = useKeyboard();
   const timeOutRef = useRef<any>(0);
   const [showToast, setShowToast] = useState(false);
   const [options, setOptions] = useState<toastOptions | null>(null);
   const [timeOut, setTimeout] = useState(3000);
+
+  // Calculate bottom position considering keyboard
+  const bottomPosition = useMemo(() => {
+    if (isKeyboardOpen) {
+      // Position toast above keyboard with some spacing
+      return keyboardHeight + SPACE;
+    }
+    // Default position at bottom with safe area
+    return bottom + SPACE;
+  }, [isKeyboardOpen, keyboardHeight, bottom]);
 
   useEffect(() => {
     const subscription = eventEmitter.addListener(
@@ -88,7 +100,7 @@ const Toast = () => {
       <Portal name="Toast">
         <TouchableWithoutFeedback onPress={closeToast} style={styles.container}>
           <View style={styles.backdropContainer}>
-            <View style={[styles.toastContainer, {bottom: bottom + SPACE}]}>
+            <View style={[styles.toastContainer, {bottom: bottomPosition}]}>
               <View
                 style={[
                   styles.messageContainer,

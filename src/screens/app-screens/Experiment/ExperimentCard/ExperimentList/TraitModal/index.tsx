@@ -1,12 +1,12 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Dimensions, Pressable, Text, View } from 'react-native';
+import React, {useCallback} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Dimensions, Pressable, Text, View} from 'react-native';
 
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { BottomSheetModal } from '../../../../../../components';
-import { LOCALES } from '../../../../../../localization/constants';
-import { BottomSheetModalTypes } from '../../../../../../types/components/BottomSheetModal';
-import { styles } from '../../../../AddImage/styles';
+import {BottomSheetScrollView} from '@gorhom/bottom-sheet';
+import {BottomSheetModal} from '../../../../../../components';
+import {LOCALES} from '../../../../../../localization/constants';
+import {BottomSheetModalTypes} from '../../../../../../types/components/BottomSheetModal';
+import {styles} from '../../../../AddImage/styles';
 
 type ModalTypes = {
   bottomSheetModalRef: BottomSheetModalTypes['bottomSheetModalRef'];
@@ -19,7 +19,6 @@ const TraitModal = ({
   data = [],
 }: ModalTypes) => {
   const {t} = useTranslation();
-  console.log({data: data.length});
   const maxHeight = useCallback(
     () => ({
       maxHeight: Dimensions.get('window').height * 0.9,
@@ -34,13 +33,15 @@ const TraitModal = ({
             {t(LOCALES.EXPERIMENT.LBL_ASSOCIATE_TRAIT)}
           </Text>
         </View>
-        <BottomSheetScrollView style={maxHeight}>
+        <BottomSheetScrollView style={maxHeight()}>
           {data.map(item => (
             <Pressable
               style={styles.traitTitleContainer}
               key={item?.id}
               onPress={onSelect}>
-              <Text style={styles.traitTitle}>{item?.traitName}</Text>
+              <Text style={styles.traitTitle}>
+                {item?.traitName} - {item?.userDefinedTerminology}
+              </Text>
             </Pressable>
           ))}
         </BottomSheetScrollView>

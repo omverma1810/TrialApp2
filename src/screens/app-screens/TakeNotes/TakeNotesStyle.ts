@@ -1,9 +1,9 @@
-import { StyleSheet } from 'react-native';
-import { FONTS } from '../../../theme/fonts';
+import {StyleSheet} from 'react-native';
+import {FONTS} from '../../../theme/fonts';
 const TakeNotesStyles = StyleSheet.create({
   container: {
     paddingHorizontal: 20,
-    gap:10
+    gap: 10,
   },
   chipContainer: {
     gap: 15,
@@ -30,16 +30,16 @@ const TakeNotesStyles = StyleSheet.create({
   },
   chipCropText: {
     paddingHorizontal: 10,
-    alignItems:'center',
+    alignItems: 'center',
     width: 60,
-    justifyContent:'center',
+    justifyContent: 'center',
     paddingVertical: 5,
     borderRadius: 6,
     backgroundColor: '#EAF4E7',
-    display:'flex',
-    color: 'black'
+    display: 'flex',
+    color: 'black',
   },
-  chipCropText1:{
+  chipCropText1: {
     color: 'black',
   },
   fieldText: {
@@ -129,17 +129,20 @@ const TakeNotesStyles = StyleSheet.create({
   },
   filter: {
     gap: 16,
-    paddingVertical: 16,
+    paddingVertical: 10,
   },
-  ScreenTitle : {
-    marginHorizontal:20,
-    marginVertical:10,
+  ScreenTitle: {
+    marginHorizontal: 20,
+    marginVertical: 10,
     fontFamily: FONTS.MEDIUM,
-    fontSize:20,
-    color:'#000',
-    backgroundColor:"white",
-    display:'flex' ,
-  }
+    fontSize: 22,
+    color: '#000',
+    backgroundColor: 'white',
+    display: 'flex',
+  },
+  modalOpen: {
+    opacity: 0.2,
+  },
 });
 
 export default TakeNotesStyles;

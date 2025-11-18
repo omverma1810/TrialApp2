@@ -33,7 +33,6 @@ const PreviewImageModal = ({
 }: ModalTypes) => {
   const {top} = useSafeAreaInsets();
 
-  console.log({selectedImage, metadata});
 
   const downloadImage = async () => {
     try {
@@ -85,7 +84,6 @@ const PreviewImageModal = ({
         }
       }
     } catch (error) {
-      console.error('Download Error:', error);
       Alert.alert('Error', 'Unable to download image. Try again later.');
     }
   };
@@ -98,11 +96,9 @@ const PreviewImageModal = ({
         message: 'Check out this image!',
       });
     } catch (error) {
-      console.error('Error sharing image:', error);
     }
   };
   useEffect(() => {
-    console.log({selectedImage});
   }, [selectedImage]);
   return (
     <Modal isModalVisible={isModalVisible}>

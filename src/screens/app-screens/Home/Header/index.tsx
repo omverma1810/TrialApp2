@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({navigation}) => {
   return (
     <View style={HeaderStyles.main}>
       <View style={HeaderStyles.container}>
-        <Logo />
+        <Logo width={150} height={70} />
         <Pressable onPress={goToProfile}>
           <View>
             <ProfileImg width={50} height={50} />

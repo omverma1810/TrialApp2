@@ -15,12 +15,8 @@ import {URL} from '../../../../constants/URLS';
 import {useApi} from '../../../../hooks/useApi';
 import {LOCALES} from '../../../../localization/constants';
 import {PlotsScreenProps} from '../../../../types/navigation/appTypes';
-import {
-  formatDateTime,
-  getBase64FromUrl,
-  getCoordinates,
-  getNameFromUrl,
-} from '../../../../utilities/function';
+import {formatDateTime} from '../../../../utilities/function';
+import {validateLocationForAPI} from '../../../../utilities/locationValidation';
 import Toast from '../../../../utilities/toast';
 import Notes from '../../NewRecord/Notes';
 import NotesModal from '../../NewRecord/NotesModal';
@@ -41,20 +37,7 @@ const PlotCard = ({
   const navigation = useNavigation<PlotsScreenProps['navigation']>();
   const {id, type, imageUrl, plotId, data} =
     useRoute<PlotsScreenProps['route']>().params;
-  const userInteractionOptions = [
-    {
-      id: 0,
-      name: t(LOCALES.EXPERIMENT.LBL_ADD_NOTES),
-      icon: <NotesIcon />,
-      onPress: () => setIsNotesModalVisible(true),
-    },
-    {
-      id: 1,
-      name: t(LOCALES.EXPERIMENT.LBL_ADD_IMAGE),
-      icon: <ImagePlus />,
-      onPress: () => pickImageFromCamera(plotId, type),
-    },
-  ];
+
   const [notes, setNotes] = useState(plotData?.notes || '');
   const [images, setImages] = useState<TraitsImageTypes[]>(
     plotData?.imageUrls || [],
@@ -70,18 +53,25 @@ const PlotCard = ({
   const [unrecordedTrait, setUnrecordedTrait] = useState(
     plotData?.unrecordedTraitData || [],
   );
+
   const onViewMoreDetailsClick = () => {
     setIsViewMoreDetails(state => !state);
   };
+
   const closeNotesModal = () => {
     setIsNotesModalVisible(false);
   };
+
   const onSaveNotes = (notes: string) => {
     setNotes(notes.trim());
     setIsNotesModalVisible(false);
     setIsMediaSaveVisible(true);
   };
-  const pickImageFromCamera = (plotId: any = {}, type: String = null) => {
+
+  const pickImageFromCamera = (
+    plotId: any = {},
+    type: string | null = null,
+  ) => {
     if (images.length >= details?.maxNoOfImages) {
       Toast.info({
         message: `Maximum number (${details?.maxNoOfImages}) of trait image uploads exceeded.`,
@@ -97,26 +87,24 @@ const PlotCard = ({
       });
     });
   };
+
   useEffect(() => {
     if (imageUrl && plotData?.id === plotId) {
       setImages([
-        {url: imageUrl, imagePath: null, base64Data: null, imageName: null},
+        {
+          url: imageUrl,
+          imagePath: null,
+          base64Data: null,
+          imageName: null,
+          uploadedOn: null,
+        },
         ...images,
       ]);
-      setIsMediaSaveVisible(true);
+      // Removed media upload trigger
     }
   }, [imageUrl, plotId, plotData?.id]);
+
   const rowColInfo = [
-    // {
-    //   id: 0,
-    //   name: t(LOCALES.EXPERIMENT.LBL_ROW),
-    //   key: 'row',
-    // },
-    // {
-    //   id: 1,
-    //   name: t(LOCALES.EXPERIMENT.LBL_COL),
-    //   key: 'column',
-    // },
     {
       id: 2,
       name: t(LOCALES.EXPERIMENT.LBL_ACC_ID),
@@ -146,7 +134,6 @@ const PlotCard = ({
           !i?.validationStatus,
       );
 
-      console.log({invalid});
       if (invalid && invalid.length) {
         invalid?.forEach((item: {observedValue: string}) => {
           Toast.warning({message: `${item.observedValue} is invalid value`});
@@ -155,6 +142,7 @@ const PlotCard = ({
         setRecordableData({});
         return;
       }
+
       updateTraitsRecord(recordableData);
     }
   }, [validateTraitsResponse]);
@@ -170,28 +158,23 @@ const PlotCard = ({
 
   const onSave = async () => {
     const headers = {'Content-Type': 'application/json'};
-    const imagesNameArr = images.map(item => getNameFromUrl(item.url));
-    const base64Promises = images.map(item => getBase64FromUrl(item.url));
-    const imagesBase64Arr = await Promise.all(base64Promises);
-    const {latitude, longitude} = await getCoordinates();
-    const imageData = images.map((image, index) => {
-      return {
-        url: image.imagePath ? image.url : null,
-        imagePath: image.imagePath,
-        imageName: imagesNameArr[index],
-        base64Data: imagesBase64Arr[index],
-      };
-    });
+    const locationData = await validateLocationForAPI(true, true);
+    if (!locationData) {
+      return;
+    }
+
+    const {latitude, longitude} = locationData;
+
     const payload = {
       plotId: plotData?.id,
       date: formatDateTime(new Date()),
       fieldExperimentId: details?.fieldExperimentId,
       experimentType: type,
-      phenotypes: Object.values({}),
+      phenotypes: Object.values({}), // Empty for now
       applications: null,
       lat: latitude,
       long: longitude,
-      imageData: imageData,
+      imageData: [], // Explicitly empty
       notes,
     };
 
@@ -212,6 +195,21 @@ const PlotCard = ({
       setShouldCallOnSave(false);
     }
   }, [shouldCallOnSave, images]);
+
+  const userInteractionOptions = [
+    {
+      id: 0,
+      name: t(LOCALES.EXPERIMENT.LBL_ADD_NOTES),
+      icon: <NotesIcon />,
+      onPress: () => setIsNotesModalVisible(true),
+    },
+    {
+      id: 1,
+      name: t(LOCALES.EXPERIMENT.LBL_ADD_IMAGE),
+      icon: <ImagePlus />,
+      onPress: () => pickImageFromCamera(plotId, type),
+    },
+  ];
 
   return (
     <View
@@ -234,6 +232,7 @@ const PlotCard = ({
         </View>
         {isViewMoreDetails ? <CardArrowUp /> : <CardArrowDown />}
       </Pressable>
+
       {isViewMoreDetails && (
         <View style={styles.plotDetailsContainer}>
           <View style={styles.userInteractionContainer}>
@@ -247,9 +246,14 @@ const PlotCard = ({
               </Pressable>
             ))}
           </View>
+
           {notes && <Notes notes={notes} />}
           {images && images.length > 0 && (
-            <TraitsImage images={images} onDeleteImages={onDeleteImages} />
+            <TraitsImage
+              images={images}
+              metadata={{field: details?.villageName}}
+              onDeleteImages={onDeleteImages}
+            />
           )}
           {isMediaSaveVisible && (
             <Button
@@ -274,6 +278,7 @@ const PlotCard = ({
           />
         </View>
       )}
+
       <NotesModal
         preNotes={notes}
         isModalVisible={isNotesModalVisible}

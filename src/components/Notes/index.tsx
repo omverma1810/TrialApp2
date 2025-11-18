@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {View, Text, Pressable, StyleSheet, Alert} from 'react-native';
+import {View, Text, Pressable, StyleSheet} from 'react-native';
 import BottomModal from '../BottomSheetModal';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {Dots, Trash, DbEdit} from '../../assets/icons/svgs';
@@ -22,50 +22,73 @@ const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
     deleteNote({pathParams: note.id});
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (deleteNoteResponse) {
       if (deleteNoteResponse.status_code === 204) {
-        Toast.success({
-          message: 'Note deleted successfully',
-        });
+        Toast.success({message: 'Note deleted successfully'});
         onDelete(note.id);
         bottomSheetModalRef.current?.close();
       } else {
-        Toast.error({
-          message: 'Failed to delete note',
-        });
+        Toast.error({message: 'Failed to delete note'});
       }
     }
   }, [deleteNoteResponse]);
 
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
+  const toggleExpanded = () => setIsExpanded(e => !e);
 
   return (
     <View style={styles.container}>
       <Pressable onPress={toggleExpanded}>
         <View style={styles.noteContainer}>
-          <View style={styles.noteContent}>
-            <Text
-              style={styles.noteText}
-              numberOfLines={isExpanded ? undefined : 2}
-              ellipsizeMode="tail">
-              {note.content}
-            </Text>
-            <Text style={styles.noteInfo}>
-              {note.experiment_name} - [{note.villageName}] On{' '}
-              {dayjs(note.created_on).format('DD-MM-YYYY hh:mm A')}
-            </Text>
+          {/* —— Left column: badges + text —— */}
+          <View style={styles.leftColumn}>
+            {/* Badge row */}
+            <View style={styles.tagContainer}>
+              <View style={[styles.tag, {backgroundColor: '#E6F7E8'}]}>
+                <Text style={[styles.tagText, {color: '#097C34'}]}>
+                  {note.crop_name}
+                </Text>
+              </View>
+              <View style={[styles.tag, {backgroundColor: '#FFF6E0'}]}>
+                <Text style={[styles.tagText, {color: '#B98F00'}]}>
+                  {`${note.season} (${note.year})`}
+                </Text>
+              </View>
+              {note.trial_type && (
+                <View style={[styles.tag, {backgroundColor: '#FFEAEA'}]}>
+                  <Text style={[styles.tagText, {color: '#C53030'}]}>
+                    {note.trial_type}
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {/* Note content */}
+            <View style={styles.noteContent}>
+              <Text style={styles.noteHeading}>
+                {note.fieldLabel} - {note.experiment_name}
+              </Text>
+              <Text
+                style={styles.noteText}
+                numberOfLines={isExpanded ? undefined : 2}
+                ellipsizeMode="tail">
+                {note.content}
+              </Text>
+              <Text style={styles.noteTimestamp}>
+                {dayjs(note.created_on).format('DD-MM-YYYY hh:mm A')}
+              </Text>
+            </View>
           </View>
+
+          {/* —— Right column: dots menu —— */}
           <Pressable onPress={() => bottomSheetModalRef.current?.present()}>
             <Dots />
           </Pressable>
         </View>
       </Pressable>
 
+      {/* —— Bottom sheet: Delete / Edit —— */}
       <BottomModal
         bottomSheetModalRef={bottomSheetModalRef}
         type="CONTENT_HEIGHT"
@@ -76,7 +99,7 @@ const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
         <View style={styles.modalContent}>
           <Pressable onPress={onDeleteNote} style={styles.modalButton}>
             <Trash />
-            <Text style={styles.modalButtonText}> Delete</Text>
+            <Text style={styles.modalButtonText}>Delete</Text>
           </Pressable>
           <Pressable
             style={styles.modalButton}
@@ -95,6 +118,8 @@ const Notes = ({note, onDelete, navigation, refreshNotes, onEdit}: any) => {
 
 const styles = StyleSheet.create({
   container: {},
+
+  // card UI
   noteContainer: {
     backgroundColor: 'white',
     paddingVertical: 15,
@@ -104,23 +129,61 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#F7F7F7',
+    marginBottom: 10,
   },
+
+  // left side of card: badges + text
+  leftColumn: {
+    width: '90%',
+  },
+
+  // badge row
+  tagContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  tag: {
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginRight: 6,
+  },
+  tagText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+
+  // note text
   noteContent: {
     justifyContent: 'space-between',
-    width: '90%',
     gap: 5,
   },
-  noteText: {
+  noteHeading: {
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
     fontFamily: FONTS.MEDIUM,
     color: '#161616',
+  },
+  noteTimestamp: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#949494',
+    marginBottom: 4,
+  },
+  noteText: {
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: FONTS.REGULAR,
+    color: '#949494',
   },
   noteInfo: {
     fontSize: 13,
     fontWeight: '400',
     color: '#949494',
   },
+
+  // bottom sheet
+  bottomModalContainer: {},
   modalContent: {
     paddingHorizontal: 20,
     gap: 20,
@@ -132,18 +195,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalButtonText: {
-    color: '#161616',
     fontSize: 15,
+    color: '#161616',
     fontWeight: '400',
   },
   editOptionText: {
-    marginLeft: 10,
     fontSize: 15,
     color: '#161616',
     fontWeight: '400',
-    marginHorizontal: 20,
+    marginLeft: 10,
   },
-  bottomModalContainer: {},
 });
 
 export default Notes;

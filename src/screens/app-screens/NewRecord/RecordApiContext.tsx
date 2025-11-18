@@ -24,6 +24,13 @@ interface RecordApiContextType {
   preSignedUrlData: any;
   uploadImage: any;
   uploadImageData: any;
+  getFilters: () => void;
+  filtersData: any;
+  isFiltersLoading: boolean;
+  postFilteredExperiments: (opts: {payload: any; headers?: any}) => void;
+  filteredExperimentsData: any;
+  isFilteredLoading: boolean;
+  filteredError: any;
 }
 
 const RecordApiContext = createContext<RecordApiContextType | undefined>(
@@ -61,6 +68,20 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
   const [updateTraitsRecord, updatedTraitsRecordData] = useApi({
     url: URL.RECORD_TRAITS,
     method: 'PUT',
+  });
+
+  const [getFilters, filtersData, isFiltersLoading] = useApi({
+    url: URL.GET_FILTERS,
+    method: 'GET',
+  });
+  const [
+    postFilteredExperiments,
+    filteredExperimentsData,
+    isFilteredLoading,
+    filteredError,
+  ] = useApi({
+    url: URL.EXPERIMENT_LIST_FILTERED,
+    method: 'POST',
   });
 
   const [
@@ -103,6 +124,13 @@ export const RecordApiProvider = ({children}: {children: ReactNode}) => {
     preSignedUrlData,
     uploadImage,
     uploadImageData,
+    getFilters,
+    filtersData,
+    isFiltersLoading,
+    postFilteredExperiments,
+    filteredExperimentsData,
+    isFilteredLoading,
+    filteredError,
   };
 
   return (

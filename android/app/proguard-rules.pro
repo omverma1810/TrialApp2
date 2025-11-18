@@ -8,3 +8,15 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+# 16KB page size support configurations
+-keep class com.facebook.react.** { *; }
+-keep class com.facebook.hermes.** { *; }
+-dontwarn com.facebook.jni.**
+
+# Keep React Native classes for 16KB compatibility
+-keep class com.facebook.react.bridge.** { *; }
+-keep class com.facebook.react.uimanager.** { *; }
+
+# Memory alignment optimizations for 16KB pages
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
