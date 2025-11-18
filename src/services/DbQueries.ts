@@ -382,36 +382,7 @@ export function getOfflineLocationStates(
   });
 }
 
-export function getAllOfflineLocationStates(): Promise<
-  Array<{
-    id: number;
-    experiment_id: string;
-    location_id: string;
-    is_offline: number;
-    created_at: string;
-  }>
-> {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM offline_locations WHERE is_offline = 1',
-        [],
-        (_, {rows}) => {
-          const result = [];
-          for (let i = 0; i < rows.length; i++) {
-            result.push(rows.item(i));
-          }
-          resolve(result);
-        },
-        (_, err) => {
-          reject(err);
-          return false;
-        },
-      );
-    });
-  });
-}
-
+// ✅ Get all offline location IDs with correct camelCase column names
 export function getAllOfflineLocationIds(): Promise<
   {
     experimentId: number;
@@ -692,109 +663,7 @@ export function debugExperimentDetails(experimentId: number): Promise<void> {
   });
 }
 
-// Functions for offline data retrieval
-export function getFiltersData(): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM FILTERS ORDER BY id DESC LIMIT 1',
-        [],
-        (_, {rows}) => {
-          try {
-            if (rows.length > 0) {
-              const filterData = JSON.parse(rows.item(0).raw_data);
-              resolve(filterData);
-            } else {
-              resolve([]);
-            }
-          } catch (err) {
-            reject(err);
-          }
-        },
-        err => {
-          reject(err);
-        },
-      );
-    });
-  });
-}
-
-export function getExperimentListData(): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM EXPERIMENT_LIST ORDER BY id DESC LIMIT 1',
-        [],
-        (_, {rows}) => {
-          try {
-            if (rows.length > 0) {
-              const experimentData = JSON.parse(rows.item(0).raw_data);
-              resolve(experimentData);
-            } else {
-              resolve([]);
-            }
-          } catch (err) {
-            reject(err);
-          }
-        },
-        err => {
-          reject(err);
-        },
-      );
-    });
-  });
-}
-
-export function getExperimentDetailsData(experimentId: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM EXPERIMENT_DETAILS WHERE trial_location_id = ? ORDER BY id DESC LIMIT 1',
-        [experimentId],
-        (_, {rows}) => {
-          try {
-            if (rows.length > 0) {
-              const detailsData = JSON.parse(rows.item(0).raw_data);
-              resolve(detailsData);
-            } else {
-              resolve(null);
-            }
-          } catch (err) {
-            reject(err);
-          }
-        },
-        err => {
-          reject(err);
-        },
-      );
-    });
-  });
-}
-
-export function getPlotListData(experimentId: string): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM PLOT_LIST WHERE trial_location_id = ? ORDER BY id DESC LIMIT 1',
-        [experimentId],
-        (_, {rows}) => {
-          try {
-            if (rows.length > 0) {
-              const plotData = JSON.parse(rows.item(0).raw_data);
-              // Extract plotData array if it exists, otherwise use the data directly
-              const plots = plotData?.plotData || plotData || [];
-              resolve(plots);
-            } else {
-              resolve([]);
-            }
-          } catch (err) {
-            reject(err);
-          }
-        },
-        err => {
-          reject(err);
-        },
-      );
-    });
-  });
-}
+// ❌ REMOVED: Broken offline data retrieval functions (getFiltersData, getExperimentListData, etc.)
+// These functions used incorrect table/column names and have been replaced with the working
+// fetchOffline* functions above (fetchOfflineFilters, fetchOfflineExperimentList, etc.)
+// The offlineDataRetrieval.ts hook now uses the correct functions.

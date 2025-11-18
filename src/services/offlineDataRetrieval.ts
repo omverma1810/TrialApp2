@@ -1,34 +1,36 @@
 import {useEffect, useState, useCallback} from 'react';
 import NetInfo from '@react-native-community/netinfo';
 import {
-  getAllOfflineLocationStates,
-  getExperimentListData,
-  getExperimentDetailsData,
-  getPlotListData,
-  getFiltersData,
+  getAllOfflineLocationIds,
+  fetchOfflineExperimentList,
+  fetchOfflineExperimentDetails,
+  fetchOfflinePlotList,
+  fetchOfflineFilters,
 } from './DbQueries';
 
 // Type definitions for offline data
 interface OfflineExperimentData {
-  filters: any[];
-  experimentList: any[];
+  filters: any; // Object with Years, Crops, Seasons, Locations arrays
+  experimentList: any; // Object with projects and totalProjects
   experimentDetails: {[experimentId: string]: any};
-  plotData: {[experimentId: string]: any[]};
+  plotData: {[locationId: string]: any}; // Keyed by locationId, not experimentId
 }
 
 interface LocationOfflineState {
   id: number;
-  experiment_id: string;
-  location_id: string;
-  is_offline: number;
-  created_at: string;
+  experimentId: number;
+  locationId: number;
+  experimentType: string;
+  cropId: number;
+  isOffline: number;
+  lastCachedAt: number;
 }
 
 export const useOfflineDataRetrieval = () => {
   const [isConnected, setIsConnected] = useState<boolean>(true);
   const [offlineData, setOfflineData] = useState<OfflineExperimentData>({
-    filters: [],
-    experimentList: [],
+    filters: {filters: {Years: [], Crops: [], Seasons: [], Locations: []}},
+    experimentList: {projects: {}, totalProjects: 0},
     experimentDetails: {},
     plotData: {},
   });
@@ -67,57 +69,123 @@ export const useOfflineDataRetrieval = () => {
     setIsLoadingOfflineData(true);
 
     try {
-      // Get all offline location states
+      console.log('🔍 [OfflineDataRetrieval] Starting to load offline data...');
+
+      // Get all offline location states (uses correct camelCase columns)
       const offlineLocations: LocationOfflineState[] =
-        await getAllOfflineLocationStates();
+        await getAllOfflineLocationIds();
+
+      console.log(
+        `🔍 [OfflineDataRetrieval] Found ${offlineLocations.length} offline locations`,
+      );
 
       if (offlineLocations.length === 0) {
+        console.log(
+          '⚠️ [OfflineDataRetrieval] No offline locations found, skipping data load',
+        );
         setIsLoadingOfflineData(false);
         return;
       }
 
-      // Load filters data
-      const filters = await getFiltersData();
+      // ✅ Load filters data using CORRECT function
+      const filters = await fetchOfflineFilters();
+      console.log(
+        '✅ [OfflineDataRetrieval] Filters loaded:',
+        filters?.filters
+          ? `Years: ${filters.filters.Years?.length}, Crops: ${filters.filters.Crops?.length}, Seasons: ${filters.filters.Seasons?.length}, Locations: ${filters.filters.Locations?.length}`
+          : 'No filters',
+      );
 
-      // Load experiment list data
-      const experimentList = await getExperimentListData();
+      // ✅ Load experiment list data using CORRECT function
+      const experimentList = await fetchOfflineExperimentList('');
+      console.log(
+        `✅ [OfflineDataRetrieval] Experiment list loaded: ${experimentList?.totalProjects || 0} experiments`,
+      );
 
-      // Get unique experiment IDs from offline locations
+      // Get unique experiment IDs from offline locations (use correct camelCase property)
       const experimentIds = [
-        ...new Set(offlineLocations.map(loc => loc.experiment_id)),
+        ...new Set(offlineLocations.map(loc => loc.experimentId)),
       ];
+      console.log(
+        `🔍 [OfflineDataRetrieval] Processing ${experimentIds.length} unique experiments`,
+      );
 
-      // Load experiment details for each experiment
+      // Load experiment details and plot data for each experiment
       const experimentDetails: {[key: string]: any} = {};
-      const plotData: {[key: string]: any[]} = {};
+      const plotData: {[key: string]: any} = {};
 
       for (const experimentId of experimentIds) {
         try {
-          // Load experiment details
-          const details = await getExperimentDetailsData(experimentId);
-          if (details) {
-            experimentDetails[experimentId] = details;
-          }
+          console.log(
+            `🔍 [OfflineDataRetrieval] Loading details for experiment ${experimentId}`,
+          );
 
-          // Load plot data
-          const plots = await getPlotListData(experimentId);
-          if (plots && plots.length > 0) {
-            plotData[experimentId] = plots;
+          // ✅ Load experiment details using CORRECT function
+          const details = await fetchOfflineExperimentDetails(
+            experimentId.toString(),
+          );
+          if (details && details.data) {
+            experimentDetails[experimentId] = details.data;
+            console.log(
+              `✅ [OfflineDataRetrieval] Experiment ${experimentId} details loaded, locations: ${details.data.locationList?.length || 0}`,
+            );
+
+            // 🔑 CRITICAL FIX: Extract location IDs from experiment details
+            // Plot data is keyed by LOCATION ID, not experiment ID!
+            const locationList = details.data.locationList || [];
+            for (const location of locationList) {
+              const locationId = location.id;
+              console.log(
+                `🔍 [OfflineDataRetrieval] Loading plots for location ${locationId}`,
+              );
+
+              // ✅ Load plot data using CORRECT function with LOCATION ID
+              const plots = await fetchOfflinePlotList(locationId.toString());
+              if (plots && plots.data) {
+                plotData[locationId] = plots.data;
+                console.log(
+                  `✅ [OfflineDataRetrieval] Location ${locationId} plots loaded: ${plots.data.plotData?.length || 0} plots`,
+                );
+              } else {
+                console.log(
+                  `⚠️ [OfflineDataRetrieval] No plot data found for location ${locationId}`,
+                );
+              }
+            }
+          } else {
+            console.log(
+              `⚠️ [OfflineDataRetrieval] No details found for experiment ${experimentId}`,
+            );
           }
         } catch (error) {
+          console.error(
+            `❌ [OfflineDataRetrieval] Error loading data for experiment ${experimentId}:`,
+            error,
+          );
         }
       }
 
-      // Update offline data state
+      // Update offline data state with correct structure
       const newOfflineData: OfflineExperimentData = {
-        filters: filters || [],
-        experimentList: experimentList || [],
+        filters: filters || {filters: {Years: [], Crops: [], Seasons: [], Locations: []}},
+        experimentList: experimentList || {projects: {}, totalProjects: 0},
         experimentDetails,
         plotData,
       };
 
+      console.log('✅ [OfflineDataRetrieval] Offline data fully loaded:', {
+        filtersCount: newOfflineData.filters?.filters?.Years?.length || 0,
+        experimentsCount: newOfflineData.experimentList?.totalProjects || 0,
+        experimentDetailsCount: Object.keys(experimentDetails).length,
+        plotDataCount: Object.keys(plotData).length,
+      });
+
       setOfflineData(newOfflineData);
     } catch (error) {
+      console.error(
+        '❌ [OfflineDataRetrieval] Error in loadOfflineData:',
+        error,
+      );
     } finally {
       setIsLoadingOfflineData(false);
     }
@@ -130,13 +198,36 @@ export const useOfflineDataRetrieval = () => {
         return null; // Use online data when connected
       }
 
+      console.log(
+        '🔍 [OfflineDataRetrieval] getFilteredExperimentList called',
+        {filtersPayload, cropId},
+      );
 
-      // Get the stored experiment list from offline data
-      let experiments = offlineData.experimentList;
+      // Get the stored experiment list from offline data (now an object with projects)
+      const storedData = offlineData.experimentList;
 
-      if (!experiments || experiments.length === 0) {
+      if (
+        !storedData ||
+        !storedData.projects ||
+        storedData.totalProjects === 0
+      ) {
+        console.log(
+          '⚠️ [OfflineDataRetrieval] No experiments in offline data',
+        );
         return {projects: {}, totalProjects: 0};
       }
+
+      // Flatten the projects object into an array of experiments
+      let experiments: any[] = [];
+      Object.values(storedData.projects).forEach((projectExperiments: any) => {
+        if (Array.isArray(projectExperiments)) {
+          experiments = experiments.concat(projectExperiments);
+        }
+      });
+
+      console.log(
+        `🔍 [OfflineDataRetrieval] Found ${experiments.length} total experiments before filtering`,
+      );
 
 
       // Apply filters (same logic as online API would do)
@@ -215,6 +306,9 @@ export const useOfflineDataRetrieval = () => {
         totalProjects: filteredExperiments.length,
       };
 
+      console.log(
+        `✅ [OfflineDataRetrieval] Returning ${result.totalProjects} filtered experiments in ${Object.keys(groupedProjects).length} projects`,
+      );
 
       return result;
     },
@@ -251,17 +345,30 @@ export const useOfflineDataRetrieval = () => {
       return null; // Use online data when connected
     }
 
+    console.log('🔍 [OfflineDataRetrieval] getFilters called');
 
-    const filters = offlineData.filters;
-    if (!filters || filters.length === 0) {
+    const filtersData = offlineData.filters;
+    if (
+      !filtersData ||
+      !filtersData.filters ||
+      Object.keys(filtersData.filters).length === 0
+    ) {
+      console.log('⚠️ [OfflineDataRetrieval] No filters in offline data');
       return null;
     }
 
     // Return in the same format as online API
     const filtersResponse = {
       status_code: 200,
-      filters: filters[0], // Assuming first item contains the filters structure
+      filters: filtersData.filters, // Object with Years, Crops, Seasons, Locations
     };
+
+    console.log('✅ [OfflineDataRetrieval] Returning filters:', {
+      Years: filtersResponse.filters.Years?.length || 0,
+      Crops: filtersResponse.filters.Crops?.length || 0,
+      Seasons: filtersResponse.filters.Seasons?.length || 0,
+      Locations: filtersResponse.filters.Locations?.length || 0,
+    });
 
     return filtersResponse;
   }, [isConnected, offlineData.filters]);
