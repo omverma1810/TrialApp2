@@ -37,35 +37,8 @@ export const useOfflineDataRetrieval = () => {
   const [isLoadingOfflineData, setIsLoadingOfflineData] =
     useState<boolean>(false);
 
-  // Monitor network connectivity and load initial data
-  useEffect(() => {
-    const initializeData = async () => {
-      // Get initial network state
-      const state = await NetInfo.fetch();
-      const connected = state.isConnected ?? false;
-      setIsConnected(connected);
-
-      // Always try to load offline data on startup regardless of network state
-      // This ensures data is available immediately when app starts
-      await loadOfflineData();
-    };
-
-    initializeData();
-
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const connected = state.isConnected ?? false;
-      setIsConnected(connected);
-
-      // Load offline data when going offline
-      if (!connected) {
-        loadOfflineData();
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const loadOfflineData = async () => {
+  // Define loadOfflineData with useCallback so it's stable
+  const loadOfflineData = useCallback(async () => {
     setIsLoadingOfflineData(true);
 
     try {
@@ -77,6 +50,11 @@ export const useOfflineDataRetrieval = () => {
 
       console.log(
         `🔍 [OfflineDataRetrieval] Found ${offlineLocations.length} offline locations`,
+        offlineLocations.map(l => ({
+          experimentId: l.experimentId,
+          locationId: l.locationId,
+          experimentType: l.experimentType,
+        })),
       );
 
       if (offlineLocations.length === 0) {
@@ -99,7 +77,9 @@ export const useOfflineDataRetrieval = () => {
       // ✅ Load experiment list data using CORRECT function
       const experimentList = await fetchOfflineExperimentList('');
       console.log(
-        `✅ [OfflineDataRetrieval] Experiment list loaded: ${experimentList?.totalProjects || 0} experiments`,
+        `✅ [OfflineDataRetrieval] Experiment list loaded: ${
+          experimentList?.totalProjects || 0
+        } experiments`,
       );
 
       // Get unique experiment IDs from offline locations (use correct camelCase property)
@@ -127,7 +107,9 @@ export const useOfflineDataRetrieval = () => {
           if (details && details.data) {
             experimentDetails[experimentId] = details.data;
             console.log(
-              `✅ [OfflineDataRetrieval] Experiment ${experimentId} details loaded, locations: ${details.data.locationList?.length || 0}`,
+              `✅ [OfflineDataRetrieval] Experiment ${experimentId} details loaded, locations: ${
+                details.data.locationList?.length || 0
+              }`,
             );
 
             // 🔑 CRITICAL FIX: Extract location IDs from experiment details
@@ -144,7 +126,9 @@ export const useOfflineDataRetrieval = () => {
               if (plots && plots.data) {
                 plotData[locationId] = plots.data;
                 console.log(
-                  `✅ [OfflineDataRetrieval] Location ${locationId} plots loaded: ${plots.data.plotData?.length || 0} plots`,
+                  `✅ [OfflineDataRetrieval] Location ${locationId} plots loaded: ${
+                    plots.data.plotData?.length || 0
+                  } plots`,
                 );
               } else {
                 console.log(
@@ -167,7 +151,9 @@ export const useOfflineDataRetrieval = () => {
 
       // Update offline data state with correct structure
       const newOfflineData: OfflineExperimentData = {
-        filters: filters || {filters: {Years: [], Crops: [], Seasons: [], Locations: []}},
+        filters: filters || {
+          filters: {Years: [], Crops: [], Seasons: [], Locations: []},
+        },
         experimentList: experimentList || {projects: {}, totalProjects: 0},
         experimentDetails,
         plotData,
@@ -189,7 +175,35 @@ export const useOfflineDataRetrieval = () => {
     } finally {
       setIsLoadingOfflineData(false);
     }
-  };
+  }, []); // Empty deps - uses getAllOfflineLocationIds, fetchOffline* functions
+
+  // Monitor network connectivity and load initial data
+  useEffect(() => {
+    const initializeData = async () => {
+      // Get initial network state
+      const state = await NetInfo.fetch();
+      const connected = state.isConnected ?? false;
+      setIsConnected(connected);
+
+      // Always try to load offline data on startup regardless of network state
+      // This ensures data is available immediately when app starts
+      await loadOfflineData();
+    };
+
+    initializeData();
+
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const connected = state.isConnected ?? false;
+      setIsConnected(connected);
+
+      // Load offline data when going offline
+      if (!connected) {
+        loadOfflineData();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [loadOfflineData]);
 
   // Get experiment list with offline filtering - mimics EXPERIMENT_LIST_FILTERED API
   const getFilteredExperimentList = useCallback(
@@ -211,9 +225,7 @@ export const useOfflineDataRetrieval = () => {
         !storedData.projects ||
         storedData.totalProjects === 0
       ) {
-        console.log(
-          '⚠️ [OfflineDataRetrieval] No experiments in offline data',
-        );
+        console.log('⚠️ [OfflineDataRetrieval] No experiments in offline data');
         return {projects: {}, totalProjects: 0};
       }
 
@@ -228,7 +240,6 @@ export const useOfflineDataRetrieval = () => {
       console.log(
         `🔍 [OfflineDataRetrieval] Found ${experiments.length} total experiments before filtering`,
       );
-
 
       // Apply filters (same logic as online API would do)
       let filteredExperiments = experiments;
@@ -307,7 +318,11 @@ export const useOfflineDataRetrieval = () => {
       };
 
       console.log(
-        `✅ [OfflineDataRetrieval] Returning ${result.totalProjects} filtered experiments in ${Object.keys(groupedProjects).length} projects`,
+        `✅ [OfflineDataRetrieval] Returning ${
+          result.totalProjects
+        } filtered experiments in ${
+          Object.keys(groupedProjects).length
+        } projects`,
       );
 
       return result;

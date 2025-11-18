@@ -183,6 +183,13 @@ export function useOfflineCache() {
       const filterPayload = filtersResponse?.filters;
       filtersDataRef.current = filterPayload;
 
+      console.log('📦 Filter data received:', {
+        Years: filterPayload?.Years?.length || 0,
+        Crops: filterPayload?.Crops?.length || 0,
+        Seasons: filterPayload?.Seasons?.length || 0,
+        Locations: filterPayload?.Locations?.length || 0,
+      });
+
       if (filterPayload) {
         const {
           Years = [],
@@ -190,7 +197,6 @@ export function useOfflineCache() {
           Seasons = [],
           Locations = [],
         } = filterPayload;
-
 
         // Save filters to database
         const filterQueries = [
@@ -218,9 +224,15 @@ export function useOfflineCache() {
 
         executeDbTransaction(filterQueries)
           .then(() => {
+            console.log(
+              `✅ Saved filters to database: ${
+                filterQueries.length - 4
+              } filter items`,
+            );
             setCurrentStep(CacheStep.FETCHING_EXPERIMENT_LIST);
           })
           .catch(error => {
+            console.error('❌ Failed to save filters:', error);
             handleCacheError(`Failed to save filters: ${error.message}`);
           });
       } else {
@@ -252,6 +264,11 @@ export function useOfflineCache() {
       if (listResponse && listResponse.projects) {
         const projects = listResponse.projects;
 
+        console.log('📦 Experiment list received:', {
+          projectCount: Object.keys(projects).length,
+          totalExperiments: listResponse.totalProjects,
+        });
+
         // Save experiment list to database
         const listQueries = [
           {sql: 'DELETE FROM experiment_list;'},
@@ -265,9 +282,13 @@ export function useOfflineCache() {
 
         executeDbTransaction(listQueries)
           .then(() => {
+            console.log(
+              `✅ Saved ${listQueries.length - 1} experiments to database`,
+            );
             setCurrentStep(CacheStep.FETCHING_EXPERIMENT_DETAILS);
           })
           .catch(error => {
+            console.error('❌ Failed to save experiment list:', error);
             handleCacheError(
               `Failed to save experiment list: ${error.message}`,
             );
@@ -302,6 +323,14 @@ export function useOfflineCache() {
         const detailsData = detailsResponse.data;
         locationListRef.current = detailsData.locationList || [];
 
+        console.log('📋 Experiment details received:', {
+          experimentId: detailsData.id,
+          locationListLength: locationListRef.current.length,
+          locations: locationListRef.current.map((l: any) => ({
+            id: l.id,
+            name: l.name,
+          })),
+        });
 
         // Save experiment details
         executeDbTransaction([
@@ -363,7 +392,6 @@ export function useOfflineCache() {
           },
         ])
           .then(() => {
-
             // Move to next location or complete
             currentLocationIndexRef.current++;
             if (
@@ -461,7 +489,11 @@ export function useOfflineCache() {
         break;
 
       case CacheStep.COMPLETED:
-        handleCacheSuccess();
+        console.log('🎯 CacheStep.COMPLETED - calling handleCacheSuccess');
+        handleCacheSuccess().catch(err => {
+          console.error('❌ handleCacheSuccess failed:', err);
+          handleCacheError('Failed to save offline state');
+        });
         break;
 
       case CacheStep.ERROR:
@@ -483,49 +515,77 @@ export function useOfflineCache() {
 
   const handleCacheSuccess = async () => {
     const experiment = currentExperimentRef.current;
+    console.log('🔧 handleCacheSuccess called', {
+      experimentId: experiment?.id,
+      locationsCount: locationListRef.current?.length || 0,
+    });
+
     if (!experiment) {
+      console.error('❌ No experiment in currentExperimentRef');
       return;
     }
 
     // ✅ CRITICAL FIX: Save offline location states to database
     // This is what offlineDataRetrieval.ts looks for on app restart!
     const locations = locationListRef.current || [];
+    console.log(
+      `📍 Saving ${locations.length} locations to offline_locations table`,
+      locations.map(l => ({id: l.id, name: l.name})),
+    );
 
     try {
       // Save each location to offline_locations table
       for (const location of locations) {
+        console.log(`💾 Saving location ${location.id} to offline_locations`);
         await saveOfflineLocationState(
-          experiment.id,           // experimentId
-          location.id,             // locationId
+          experiment.id, // experimentId
+          location.id, // locationId
           experiment.experimentType,
           experiment.cropId,
-          true                     // isOffline = true
+          true, // isOffline = true
         );
+        console.log(`✅ Saved location ${location.id} successfully`);
       }
 
-      console.log(`✅ Saved ${locations.length} locations to offline_locations table`);
+      console.log(
+        `✅ Successfully saved ${locations.length} locations to offline_locations table`,
+      );
+
+      // Update offline IDs AFTER successful database writes
+      setOfflineIds(ids =>
+        ids.includes(experiment.id) ? ids : [...ids, experiment.id],
+      );
+
+      setCurrentStep(CacheStep.IDLE);
+      setIsCaching(false);
+
+      eventEmitter.emit(TOAST_EVENT_TYPES.SHOW_TOAST, {
+        type: 'success',
+        message: `Experiment ${experiment.id} cached successfully for offline use`,
+      });
+
+      // Emit custom event for cache completion AFTER database writes succeed
+      console.log('🔔 Emitting OFFLINE_CACHE_COMPLETED event', {
+        experimentId: experiment.id,
+        locationCount: locations.length,
+      });
+
+      eventEmitter.emit('OFFLINE_CACHE_COMPLETED', {
+        experimentId: experiment.id,
+        locationCount: locations.length,
+      });
+
+      console.log('✅ OFFLINE_CACHE_COMPLETED event emitted successfully');
     } catch (error) {
       console.error('❌ Failed to save offline location states:', error);
+      throw error; // Re-throw to be caught by the caller
+    } finally {
+      // Clear refs
+      currentExperimentRef.current = null;
+      filtersDataRef.current = null;
+      locationListRef.current = [];
+      currentLocationIndexRef.current = 0;
     }
-
-    // Update offline IDs
-    setOfflineIds(ids =>
-      ids.includes(experiment.id) ? ids : [...ids, experiment.id],
-    );
-
-    setCurrentStep(CacheStep.IDLE);
-    setIsCaching(false);
-
-    eventEmitter.emit(TOAST_EVENT_TYPES.SHOW_TOAST, {
-      type: 'success',
-      message: `Experiment ${experiment.id} cached successfully for offline use`,
-    });
-
-    // Clear refs
-    currentExperimentRef.current = null;
-    filtersDataRef.current = null;
-    locationListRef.current = [];
-    currentLocationIndexRef.current = 0;
   };
 
   // Delete offline data function (unchanged)
@@ -567,8 +627,7 @@ export function useOfflineCache() {
               locationIds.push(l.id);
             }
           });
-        } catch (parseError) {
-        }
+        } catch (parseError) {}
       });
 
       // Delete all related data
@@ -592,7 +651,6 @@ export function useOfflineCache() {
 
       // Update offline IDs
       setOfflineIds(ids => ids.filter(id => id !== exp.id));
-
     } catch (error) {
       throw error;
     }
@@ -604,7 +662,6 @@ export function useOfflineCache() {
       if (isCaching) {
         return;
       }
-
 
       // Set up caching state
       currentExperimentRef.current = experiment;

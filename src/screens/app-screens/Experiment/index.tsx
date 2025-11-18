@@ -41,6 +41,7 @@ import {FONTS} from '../../../theme/fonts';
 import {ExperimentScreenProps} from '../../../types/navigation/appTypes';
 import Toast from '../../../utilities/toast';
 import {useExperimentTracker} from '../../../utilities/experimentTracker';
+import eventEmitter from '../../../utilities/eventEmitter';
 import Header from '../Home/Header';
 import ExperimentCard from './ExperimentCard';
 import FilterModal from './FilterModal';
@@ -131,6 +132,7 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation, route}) => {
     getFilteredExperimentList,
     getFilters: getOfflineFilters,
     hasOfflineData,
+    refreshOfflineData,
   } = useOfflineDataRetrieval();
 
   // ─── State ─────────────────────────────────────────────
@@ -304,8 +306,14 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation, route}) => {
 
   // Handle offline data loading
   useEffect(() => {
+    console.log('🌐 [Experiment Screen] Network state changed:', networkIsConnected);
+    
     if (networkIsConnected === false) {
+      console.log('📴 [Experiment Screen] Going offline - loading offline data...');
+      
       const offlineFiltersResponse = getOfflineFilters();
+      console.log('📴 [Experiment Screen] Offline filters response:', offlineFiltersResponse);
+      
       if (
         offlineFiltersResponse &&
         offlineFiltersResponse.status_code === 200 &&
@@ -349,10 +357,13 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation, route}) => {
             : '';
 
         // Use the new API-mimicking function
+        console.log('📴 [Experiment Screen] Calling getFilteredExperimentList with filters:', defaultSelectedFilters);
         const offlineExperimentData = getFilteredExperimentList(
           defaultSelectedFilters,
           selectedCropId,
         );
+        console.log('📴 [Experiment Screen] Offline experiment data:', offlineExperimentData);
+        
         if (offlineExperimentData && offlineExperimentData.projects) {
           // Process exactly like online API response
           const newProjectsData: {[key: string]: Experiment[]} =
@@ -371,12 +382,102 @@ const Experiment: React.FC<ExperimentScreenProps> = ({navigation, route}) => {
           ) {
             setSelectedCrop(offlineFilters.Crops[0]);
           }
+          
+          console.log('✅ [Experiment Screen] Offline data loaded successfully - projects:', keys);
         } else {
+          console.log('⚠️ [Experiment Screen] No offline experiment data available');
         }
       } else {
+        console.log('⚠️ [Experiment Screen] No offline filters available or invalid response');
       }
+    } else {
+      console.log('🌐 [Experiment Screen] Online mode - skipping offline data load');
     }
-  }, [networkIsConnected, getOfflineFilters, getFilteredExperimentList]); // ─── When filtersApiData arrives ────────────────────────
+    }
+  }, [networkIsConnected, getOfflineFilters, getFilteredExperimentList]);
+
+  // ─── Listen for offline cache completion to refresh data ───────────
+  useEffect(() => {
+    const handleCacheComplete = async (data: any) => {
+      console.log('🔔 [Experiment Screen] Cache completion event received:', data);
+      console.log('🔔 [Experiment Screen] Current network state:', networkIsConnected);
+      console.log('🔔 [Experiment Screen] Starting data refresh...');
+
+      try {
+        // Reload offline data
+        console.log('🔔 [Experiment Screen] Calling refreshOfflineData...');
+        await refreshOfflineData();
+        console.log('🔔 [Experiment Screen] refreshOfflineData completed');
+
+        // Refresh the experiment list display
+        console.log('🔔 [Experiment Screen] Calling getOfflineFilters...');
+        const offlineFiltersResponse = getOfflineFilters();
+        console.log('🔔 [Experiment Screen] getOfflineFilters result:', offlineFiltersResponse);
+        
+        if (offlineFiltersResponse && offlineFiltersResponse.filters) {
+          const offlineFilters = offlineFiltersResponse.filters;
+
+          // Update filters
+          setExperimentFilters(offlineFilters as unknown as ExperimentFilters);
+
+          if (Array.isArray(offlineFilters.Crops)) {
+            setCropOptions(offlineFilters.Crops);
+            setCropList(offlineFilters.Crops.map((c: CropOption) => c.label));
+          }
+
+          // Get first crop ID
+          const selectedCropId =
+            Array.isArray(offlineFilters.Crops) && offlineFilters.Crops.length > 0
+              ? offlineFilters.Crops[0].value
+              : '';
+
+          // Load experiments
+          console.log('🔔 [Experiment Screen] Calling getFilteredExperimentList...');
+          const offlineExperimentData = getFilteredExperimentList(
+            undefined,
+            selectedCropId,
+          );
+          console.log('🔔 [Experiment Screen] getFilteredExperimentList result:', offlineExperimentData);
+
+          if (offlineExperimentData && offlineExperimentData.projects) {
+            const newProjectsData: {[key: string]: Experiment[]} =
+              offlineExperimentData.projects;
+            const keys = Object.keys(newProjectsData);
+
+            setTotalProjects(offlineExperimentData.totalProjects || 0);
+            setFilteredExperiments(newProjectsData);
+            setProjectList(keys);
+            setSelectedProject(keys[0] || '');
+
+            if (
+              Array.isArray(offlineFilters.Crops) &&
+              offlineFilters.Crops.length > 0
+            ) {
+              setSelectedCrop(offlineFilters.Crops[0]);
+            }
+
+            console.log('✅ [Experiment Screen] Screen refreshed with offline data - projects:', keys);
+          } else {
+            console.log('⚠️ [Experiment Screen] No offline experiment data available');
+          }
+        } else {
+          console.log('⚠️ [Experiment Screen] No offline filters available');
+        }
+      } catch (error) {
+        console.error('❌ [Experiment Screen] Error refreshing offline data:', error);
+      }
+    };
+
+    console.log('🔔 [Experiment Screen] Setting up OFFLINE_CACHE_COMPLETED listener');
+    eventEmitter.on('OFFLINE_CACHE_COMPLETED', handleCacheComplete);
+
+    return () => {
+      console.log('🔔 [Experiment Screen] Removing OFFLINE_CACHE_COMPLETED listener');
+      eventEmitter.off('OFFLINE_CACHE_COMPLETED', handleCacheComplete);
+    };
+  }, [refreshOfflineData, getOfflineFilters, getFilteredExperimentList]);
+
+  // ─── When filtersApiData arrives ────────────────────────
   useEffect(() => {
     if (filtersApiData?.status_code === 200 && filtersApiData.filters) {
       const {Crops, Years, Seasons, Locations} = filtersApiData.filters;
