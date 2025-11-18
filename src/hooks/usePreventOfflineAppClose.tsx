@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {Alert, BackHandler, Platform} from 'react-native';
+import {BackHandler, Platform} from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import {navigationRef} from '../navigation';
@@ -71,7 +71,11 @@ export const usePreventOfflineAppClose = () => {
 
   useEffect(() => {
     if (isOffline && !hasShownOfflineAlertRef.current) {
-      Alert.alert('Offline Mode Active', OFFLINE_EXIT_MESSAGE);
+      // Use non-blocking Toast instead of blocking Alert
+      Toast.warning({
+        message: 'Offline mode active. Your data will sync when online.',
+        duration: 4000,
+      });
       hasShownOfflineAlertRef.current = true;
     }
 
